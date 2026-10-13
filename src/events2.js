@@ -2,7 +2,7 @@
 // ev(id,{k,t,x,ch:[[rótulo,efeito],...], min,max,w,cd,when,jail,once,prep,v:[min,max]})
 // efeito: texto | {t:'texto'|[variantes], h,hl,sm,lk,k,f,$, add:{}, tal:{}, bond, dis, c, fn:(m,d)=>texto, p:chance|fn, y:{...}, n:{...}}
 const tp=(s,d)=>s==null?'':fill(String(s).replace(/\{(\w+)\}/g,(m0,k)=>k==='o'?oa():k==='a'?(S.me.gender==='F'?'a':''):k==='v'?fmt(d.v):k==='v2'?fmt(d.v2)
-  :k==='on'||k==='on2'?(d[k==='on'?'nG':'n2G']==='F'?'a':'o'):k==='eln'||k==='eln2'?(d[k==='eln'?'nG':'n2G']==='F'?'ela':'ele'):d[k]!=null?d[k]:(S.scen&&typeof scVar==='function'&&scVar(k)!=null?scVar(k):m0)));
+  :k==='on'||k==='on2'?(d[k==='on'?'nG':'n2G']==='F'?'a':'o'):k==='eln'||k==='eln2'?(d[k==='eln'?'nG':'n2G']==='F'?'ela':'ele'):d[k]!=null?d[k]:typeof extVar==='function'&&extVar(k)!=null?extVar(k):(S.scen&&typeof scVar==='function'&&scVar(k)!=null?scVar(k):m0)));
 // Desconhecidos dos eventos: {n} e {n2} têm nome, sobrenome e gênero coerentes ({on}/{on2} = o|a, {eln} = ele|ela).
 // date: gênero conforme a preferência do personagem · same: mesmo gênero do personagem (ex.: cela da prisão)
 const loveGender=m=>m.pref==='A'?(R.chance(.5)?'M':'F'):(m.pref||(m.gender==='M'?'F':'M'));

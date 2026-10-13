@@ -182,7 +182,7 @@ function heroYear(){ const sc=S.scen, m=S.me, d=SM(); hEnsure(sc);
   const ye=yearEvents, pend=S.pending; yearEvents=function(){}; S.pending=[]; try{ if(AGE0) AGE0(); } finally{ yearEvents=ye; S.pending=pend.concat(S.pending); }
   if(!m.alive||!S.scen) return;
   Object.assign(sc.log[sc.log.length-1],{age:m.age,yr:S.year});
-  scStat('san',-2); scStat('hl',rnd(12,22));
+  scStat('san',rnd(4,10)); scStat('hl',rnd(25,40));
   crew().forEach(c=>{ c.age++; if(c.bebe&&c.age>=16){ c.bebe=0; c.race=c.race&&/filh/i.test(c.race)?c.race:c.race; c.role=R.pick(Object.keys(d.roles)); } });
   d.upkeep(sc); if(!S.scen) return;
   sc.log[sc.log.length-1].pl=sc.loc.n;
@@ -191,7 +191,7 @@ function heroYear(){ const sc=S.scen, m=S.me, d=SM(); hEnsure(sc);
 scNextDay=(o=>function(){ const sc=S.scen; if(sc&&sc.id==='heroi'&&sc.v===SC_V) return heroYear(); return o.apply(this,arguments); })(scNextDay);
 // cair em combate não acaba a vida de herói: vai para o hospital (e a saúde de verdade sente)
 scCheck=(o=>function(){ const sc=S.scen, m=S.me; if(!sc||sc.id!=='heroi'||sc.winNow) return o.apply(this,arguments);
-  if(sc.hl<=0){ sc.hl=35; st('health',-rnd(10,22)); scStat('san',-8); scLog('Apaguei no meio da luta. Acordei na UTI, com tubos no braço e a máscara no bolso de alguém da equipe.','bad'); if(m.health<=0){ S.scen=null; die(`em combate como ${sc.codinome}`); UI.close(); return; } }
+  if(sc.hl<=0){ sc.hl=45; st('health',-rnd(3,8)); scStat('san',-8); scLog('Apaguei no meio da luta. Acordei na UTI, com tubos no braço e a máscara no bolso de alguém da equipe.','bad'); if(m.health<=0){ S.scen=null; die(`em combate como ${sc.codinome}`); UI.close(); return; } }
   if(sc.san<=0){ sc.san=30; st('happy',-15); scLog('Desabei. Passei semanas sem conseguir vestir o uniforme. Terapia, remédio e muito sono.','bad'); } })(scCheck);
 EVENTS.heroi_final={scen:'heroi',show:()=>({k:'Superpoderes',t:'O último confronto',x:`${S.scen?S.scen.inimigo:'O vilão'} está de joelhos, sem poderes, cercado pela polícia. A cidade inteira assiste ao vivo.`,ch:[['Entregar à justiça','j'],['Oferecer uma segunda chance','c'],['Acabar com isso de vez','m'],['Entregar e pendurar a capa','a']]}),
   pick:k=>{ const sc=S.scen, m=S.me; if(!sc) return ''; const old=sc.inimigo; m.fame=clamp(m.fame+8); scStat('rep',15);
@@ -203,7 +203,8 @@ EVENTS.heroi_final={scen:'heroi',show:()=>({k:'Superpoderes',t:'O último confro
     return `${t} Mas a paz durou pouco: um vilão novo apareceu nos jornais. ${sc.inimigo}.`; }};
 // prisão para super-humanos: os anos passam lá dentro, e a vida de herói continua quando sair
 function hPrisao(sc){ const m=S.me, n=rnd(1,3); let t=hFire(sc,'');
-  for(let i=0;i<n&&m.alive;i++){ sc.dia++; sc.log.push({d:sc.dia,pl:'Prisão de Contenção',lines:[],age:m.age+1,yr:S.year+1}); const ye=yearEvents, pend=S.pending; yearEvents=function(){}; S.pending=[]; try{ if(AGE0) AGE0(); } finally{ yearEvents=ye; S.pending=pend.concat(S.pending); } scLog('Mais um ano numa cela com algemas que anulam o poder.','bad'); crew().forEach(c=>c.age++); }
+  for(let i=0;i<n&&m.alive;i++){ sc.dia++; sc.log.push({d:sc.dia,pl:'Prisão de Contenção',lines:[],age:m.age+1,yr:S.year+1}); const ye=yearEvents, pend=S.pending; yearEvents=function(){}; S.pending=[]; try{ if(AGE0) AGE0(); } finally{ yearEvents=ye; S.pending=pend.concat(S.pending); } if(!S.scen||!m.alive) return 'Não saí viv'+oa()+' da Prisão de Contenção.'; scLog('Mais um ano numa cela com algemas que anulam o poder.','bad'); crew().forEach(c=>c.age++); }
+  if(!S.scen||!m.alive) return '';
   m.rec.conv++; m.c.prisonYrs=(m.c.prisonYrs||0)+n; sc.reg='sim'; sc.proc=0; sc.rep=Math.max(0,sc.rep-15); scStat('san',-15); famAll().forEach(p=>p.bond=clamp(p.bond-8));
   return `Fui condenad${oa()} a ${n} ano${n>1?'s':''} na Prisão de Contenção para Super-Humanos. Saí registrad${oa()} à força, com o nome na ficha. ${t}`.trim(); }
 // morrer de verdade (velhice, doença) encerra o modo junto com a vida

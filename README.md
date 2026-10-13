@@ -83,10 +83,36 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - O que você rouba vai para os **Bens**: o item furtado da loja, a TV da casa invadida, o carro roubado, as joias. Vender coisa roubada paga menos e pode dar cadeia.
 - Prisão com rotina, grupo, motim, brigas e **fuga em minijogo de labirinto**.
 
+### 🚓 Polícia e investigação
+- **Concurso para a polícia** (18 a 40 anos, ensino médio, ficha limpa) e carreira de policial a delegado.
+- **Investigue crimes** num minijogo de dedução: assassinato na mansão, roubo de joias, envenenamento, sequestro… Interrogue suspeitos, reviste casas, chame a perícia, cheque câmeras e acuse. Acertar dá promoção; errar põe um inocente na cadeia.
+
+### 🛐 Seita ou grupo religioso
+- Funde uma igreja, uma seita apocalíptica, um culto à natureza ou um movimento espiritual, com o nome que quiser.
+- Fiéis, devoção, caixa do grupo, fama e **suspeita da polícia**. Pregue, faça cultos, peça o dízimo, construa templos, compre horário na TV… ou desvie o dinheiro, faça rituais secretos e profetize o fim do mundo (e aguente o dia seguinte).
+
+### ✊ Derrubar o governo
+- Movimento clandestino com apoio do povo, armas, generais subornados e a polícia política no seu encalço.
+- **Golpe de Estado**: se der certo, você vira líder supremo do país (e tem que sobreviver aos contragolpes); se der errado, é prisão, exílio ou fuzilamento.
+
+### 👻 Paranormal
+- Investigue cemitérios, castelos, florestas na lua cheia e hospitais abandonados, junte provas e lance um documentário (ou vire meme).
+- **Vampiros e lobisomens** podem matar você, ou morder. Aí é para sempre, na vida normal: o rosto muda, a sede de sangue ou a lua cheia aparecem todo ano, a família corre perigo e caçadores batem na porta. Existe uma cura, cara e difícil.
+
+### 🏳️ Desistir dói
+- Antes de desistir de uma vida, você vê como cada pessoa próxima vai receber a notícia, de acordo com o quanto ela te ama.
+
+<p align="center">
+  <img src="docs/img/caso.png" width="200" alt="Investigação de crime">
+  <img src="docs/img/seita.png" width="200" alt="Seita">
+  <img src="docs/img/paranormal.png" width="200" alt="Paranormal">
+  <img src="docs/img/desistir.png" width="200" alt="Desistir desta vida">
+</p>
+
 ### 🌍 E mais
 - **Autoescola** com prova de placas (22 placas desenhadas), passaporte (inclusive falsificado) e emigração.
 - **80 doenças**, com tratamentos, doenças crônicas e câncer.
-- **Mais de 2.900 eventos**: 640 na vida normal, coerentes com idade, carreira e situação, e mais de 2.300 nos modos fictícios.
+- **Mais de 3.000 eventos**: quase 700 na vida normal, coerentes com idade, carreira e situação, e mais de 2.300 nos modos fictícios.
 - Selos, cemitério, desafios, dificuldade, herdeiros (continue a vida com um filho).
 - **Sons e música** sintetizados (sem arquivos de áudio), tema claro e escuro, efeito de dano.
 - Segredos para quem zerar o jogo. 😉
@@ -227,6 +253,11 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   prison.js       vida na prisão
   social.js       relações, autoescola, passaporte, facção, assassino de aluguel
   scen.js         modos fictícios: motor das aventuras (dias, energia, grupo, itens, locais)
+  seita.js        seita ou grupo religioso (e os ganchos de eventos da vida normal)
+  policia.js      concurso da polícia e investigação de crimes
+  golpe.js        movimento clandestino e golpe de Estado
+  paranormal.js   fantasmas, vampiros e lobisomens
+  desistir.js     reações de quem fica ao desistir da vida
   romance.js      romance nos modos fictícios: namoro, casamento, filhos e volta para a vida real
   heroi.js        superpoderes: equipes como emprego, Lei de Registro, identidade, família e anos
   zumbi.js        pesadelo zumbi: atributos, base, oficina, facções, estações e hordas

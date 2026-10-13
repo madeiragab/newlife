@@ -128,12 +128,12 @@ function faceSVG(p,size=44,over){
   if(p.rel==='pet'||p.species){ const sp=g(p.species||'','M'); const em=(typeof BREED_EMOJI!=='undefined'&&p.breed&&BREED_EMOJI[p.breed])||(typeof SPECIES_EMOJI!=='undefined'&&SPECIES_EMOJI[sp])||p.icon||(typeof petDef==='function'&&petDef(p).ic)||PET_EMOJI[sp]||'🐾'; return `<svg class="face" viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="hsl(${hashS(sp+(p.breed||''))%360} 70% 86%)"/><text x="50" y="69" font-size="56" text-anchor="middle">${em}</text></svg>`; }
   const L=Object.assign({},ensureLook(p),over||{}), ge=p.genes, age=p.age??30, dead=p.alive===false;
   if(p.prison&&!(over&&over.top)) L.top='uniforme';
-  const skin0=SKINS[ge.skin??2], skin=p===S?.me&&S.scen&&S.scen.inf?mixHex(skin0,'#86A86A',.45):skin0, dark=mixHex(skin,'#5A2A18',.38), skinEdge=mixHex(skin,'#3A1A10',.4), neck=mixHex(skin,'#5A2A18',.1);
+  const crV=p.criatura==='vampiro', crL=p.criatura==='lobisomem', skin0=crV?mixHex(SKINS[ge.skin??2],'#ECE8F2',.55):SKINS[ge.skin??2], skin=p===S?.me&&S.scen&&S.scen.inf?mixHex(skin0,'#86A86A',.45):skin0, dark=mixHex(skin,'#5A2A18',.38), skinEdge=mixHex(skin,'#3A1A10',.4), neck=mixHex(skin,'#5A2A18',.1);
   // cabelo grisalho aos poucos: começa nas têmporas por volta dos 42 e fica branco depois dos 70
   const hc0=L.dye||HAIR_HEX[ge.hair]||'#4A2E1E'; const gray=L.dye?0:age>=75?.9:age>=65?.72:age>=56?.5:age>=48?.26:age>=42?.1:0;
   let hc=gray?mixHex(hc0,'#E6E6E6',gray):hc0;
   const hs=mixHex(hc,'#000000',.4), hairEdge=mixHex(hc,'#000000',.5);
-  const ec=EYE_HEX[ge.eyes]||'#6a4a2a';
+  const ec=crV?'#C21E2E':crL?'#E3A21A':EYE_HEX[ge.eyes]||'#6a4a2a';
   const mood=p===S?.me?p.happy:(p.bond??60);
   const id='f'+(++FACE_UID), uid=p.id||7;
   // fases da vida: proporções bem diferentes
@@ -232,6 +232,8 @@ function faceSVG(p,size=44,over){
   else if(mood>=50) hd.push(`<path d="M43.6,${my} Q50,${my+5.4} 56.4,${my}" stroke="${lipD}" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M46.6,${my+3.6} Q50,${my+5} 53.4,${my+3.6}" stroke="${lipN}" stroke-width="1.3" fill="none" opacity=".6" stroke-linecap="round"/>`);
   else if(mood>=28) hd.push(`<path d="M44.6,${my+1.2} Q50,${my+2.2} 55.4,${my+1.2}" stroke="${lipD}" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M46.6,${my+3.6} Q50,${my+4.6} 53.4,${my+3.6}" stroke="${lipN}" stroke-width="1.2" fill="none" opacity=".5" stroke-linecap="round"/>`);
   else hd.push(`<path d="M44,${my+3.6} Q50,${my-1.2} 56,${my+3.6}" stroke="${lipD}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`);
+  if(crV&&!dead&&!baby) hd.push(`<path d="M46.3,${my+.6} l1,2.6 l1,-2.6Z M51.7,${my+.6} l1,2.6 l1,-2.6Z" fill="#fff" stroke="#9AA0AA" stroke-width=".4"/>`);
+  if(crL&&!baby) hd.push(`<path d="M25.5,47 Q23.5,58 29,66 M74.5,47 Q76.5,58 71,66" stroke="${hc}" stroke-width="3.4" fill="none" stroke-linecap="round" opacity=".85"/>`);
   if(L.pierce==='labio'&&adult) hd.push(`<circle cx="54" cy="${my+3.6}" r="1.4" fill="none" stroke="#B9BFCB" stroke-width="1"/>`);
   // acessórios do rosto ficam por baixo do cabelo da frente (as hastes somem atrás do cabelo)
   if(!baby) hd.push((GLASSES.find(x=>x.id===L.glasses)||GLASSES[0]).d());

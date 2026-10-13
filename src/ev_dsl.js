@@ -18,6 +18,7 @@ const WHO={
 function dslChance(tok){
   const mm=tok.match(/^\?([a-z]+(?:\.[a-z]+)?|\d+)([+-]\d+)?$/i); if(!mm) return .5;
   const m=S.me, key=mm[1], mod=+(mm[2]||0);
+  if(typeof extChance==='function'){ const xv=extChance(key); if(xv!=null) return Math.max(.03,Math.min(.97,(xv+mod)/100)); }
   if(S.scen&&typeof scChance==='function'){ const sv=scChance(key); if(sv!=null) return Math.max(.03,Math.min(.97,(sv+mod)/100)); }
   let v= /^\d+$/.test(key)?+key : key==='sm'?m.smarts : key==='lk'?m.looks : key==='hl'?m.health : key==='h'?m.happy : key==='k'?m.karma : key==='fight'?m.fight
     : key==='perf'?(m.job?m.job.perf:50) : key==='grade'?(m.edu.cur?m.edu.cur.grade:50) : key==='appr'?(m.office?m.office.appr:50) : key==='pop'?(m.royal?m.royal.pop:50)
@@ -29,6 +30,7 @@ function dslApply(s,d){
   for(const tok of String(s||'').trim().split(/\s+/).filter(Boolean)){
     let mm;
     if(S.scen&&typeof scTok==='function'&&scTok(tok,d,out)) continue;
+    if(typeof extTok==='function'&&extTok(tok,d,out)) continue;
     if(mm=tok.match(/^(h|hl|sm|lk|k|f|perf|grade|bond|appr|pop|behav|biz|raise|jail|follow)([+-]\d+)$/)){ const n=+mm[2];
       switch(mm[1]){
         case 'h': st('happy',n); break; case 'hl': st('health',n); break; case 'sm': st('smarts',n); break; case 'lk': st('looks',n); break;
