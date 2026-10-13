@@ -1,0 +1,31 @@
+# Executáveis gerados (vão para as Releases)
+*.exe
+*.apk
+build.log
+
+# Páginas geradas pelo build.ps1
+/outra-vida.html
+/desktop/outra-vida.html
+/android/assets/
+
+# Chave de assinatura do APK: nunca publicar
+*.keystore
+*.jks
+android/keystore-senha.txt
+
+# Scripts de uso único (mudanças pontuais já aplicadas no código)
+tools/patch_*.py
+tools/extra_choices*.py
+tools/wikidata_names.py
+
+# Notas locais
+LEIA-ME.txt
+
+# Python / sistema
+__pycache__/
+*.pyc
+.venv/
+env/
+Thumbs.db
+desktop.ini
+.DS_Store

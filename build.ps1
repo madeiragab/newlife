@@ -1,0 +1,27 @@
+$ErrorActionPreference = 'Stop'
+$root = $PSScriptRoot
+$src = Join-Path $root 'src'
+$enc = New-Object System.Text.UTF8Encoding $false
+function ReadSrc($f) { [IO.File]::ReadAllText((Join-Path $src $f), $enc) }
+$css = ReadSrc 'style.css'
+$js = (@('data.js','names_data.js','names_more.js','names.js','catalog.js','carsvg.js','icons.js','core.js','events.js','events2.js','events3.js','ev_dsl.js','ev_jobs.js','ev_life.js','ev_world.js','ev_more.js','ev_pets.js','quiz.js','systems.js','shop.js','modes.js','faces.js','ui.js','ui_extra.js','life.js','fight.js','prison.js','careers.js','social.js','scen.js','sound.js','minigames.js','brand.js','test.js') | ForEach-Object { ReadSrc $_ }) -join "`n"
+$body = ReadSrc 'body.html'
+$fonts = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">'
+$inner = "<title>NewLife</title>`n$fonts`n<style>`n$css`n</style>`n$body`n<script>`n$js`nstartApp();`n</script>`n"
+[IO.File]::WriteAllText((Join-Path $root 'artifact.html'), $inner, $enc)
+$full = "<!doctype html>`n<html lang=`"pt-BR`">`n<head>`n<meta charset=`"utf-8`">`n<meta name=`"viewport`" content=`"width=device-width,initial-scale=1,viewport-fit=cover`">`n<meta name=`"theme-color`" content=`"#22305E`">`n<title>NewLife</title>`n$fonts`n<style>`n$css`n</style>`n</head>`n<body>`n$body`n<script>`n$js`nstartApp();`n</script>`n</body>`n</html>`n"
+[IO.File]::WriteAllText((Join-Path $root 'outra-vida.html'), $full, $enc)
+$fontsInline = ReadSrc 'fonts-inline.css'
+$desk = "<!doctype html>`n<html lang=`"pt-BR`">`n<head>`n<meta charset=`"utf-8`">`n<meta name=`"viewport`" content=`"width=device-width,initial-scale=1`">`n<title>NewLife</title>`n<script>window.DESKTOP=1</script>`n<style>`n$fontsInline`n$css`n</style>`n</head>`n<body>`n$body`n<script>`n$js`nstartApp();`n</script>`n</body>`n</html>`n"
+New-Item -ItemType Directory -Force (Join-Path $root 'desktop') | Out-Null
+[IO.File]::WriteAllText((Join-Path $root 'desktop\outra-vida.html'), $desk, $enc)
+"ok: " + (Get-Item (Join-Path $root 'outra-vida.html')).Length + " bytes"
+
+
+
+
+
+
+
+
+
