@@ -2419,6 +2419,7 @@ function dslApply(s,d){
     else if(mm=tok.match(/^meet(2)?(?::(\w+))?$/)){ meetP(d,mm[2]||'amigo',mm[1]?'n2':'n'); }
     else if(mm=tok.match(/^sc\.(\w+)([+-]\d+)$/)){ if(S.scen){ const k=mm[1]; S.scen[k]=Math.max(0,(S.scen[k]||0)+ +mm[2]); if(['sup','def','cure','comida','agua','abrigo','sos','o2','moral','pw','sec'].includes(k)) S.scen[k]=Math.min(100,S.scen[k]); if(k==='xp'&&typeof lvlUp==='function') lvlUp(); } }
     else if(tok==='kill'){ cnt('kills'); }
+    else if(mm=tok.match(/^item:([^:]+):(\d+)$/)){ const n=mm[1]==='coisa'&&d.coisa?d.coisa.replace(/^(um|uma|uns|umas) /,''):mm[1].replace(/_/g,' '); m.assets.push({id:newId(),k:'item',n:n[0].toUpperCase()+n.slice(1),value:+mm[2],buy:0,cond:100}); }
     else if(tok==='petdie'||tok==='petgone'){ const p=d.pid&&P(d.pid); if(p&&p.alive){ p.alive=false; st('happy',tok==='petdie'?-10:-5); } }
     else if(tok==='pet'){ const p=addPet(R.pick(['Cachorro','Cachorro','Gato','Gato','Coelho','Calopsita'])); out.push(`Chama-se ${p.first}.`); }
     else if(mm=tok.match(/^dis:(\w+)$/)) addDisease(mm[1]);
@@ -2552,7 +2553,7 @@ pack({k:'Embaixada',when:jobIn('dipl')},[
  ['Jantar de gala','Fui convidad{o} para um jantar com o presidente de outro país.',['Ir e conversar com todo mundo|perf+6 h+4|Fiz contatos valiosos.','Ficar no canto|perf-1|Comi muito bem.']],
 ]);
 pack({k:'Trabalho',min:14,max:18,when:m=>m.job&&!m.job.spc&&JOBS.find(x=>x.id===m.job.id).pt},[
- ['Primeiro salário','Recebi meu primeiro pagamento: {v}.',['Gastar tudo com besteira|h+6|Comprei {coisa}. Valeu cada centavo.','Guardar|sm+1|Abri minha primeira poupança.','Dar uma parte para os meus pais|k+4|Minha mãe chorou.'],{v:[200,800]}],
+ ['Primeiro salário','Recebi meu primeiro pagamento: {v}.',['Gastar tudo com besteira|h+6 item:coisa:800|Comprei {coisa}. Valeu cada centavo.','Guardar|sm+1|Abri minha primeira poupança.','Dar uma parte para os meus pais|k+4|Minha mãe chorou.'],{v:[200,800]}],
  ['Escola e trabalho','Está difícil conciliar trabalho e estudos.',['Largar o trabalho|fire h+3|Larguei. A escola agradece.','Continuar|hl-2 grade-4|Estou cansad{o}, mas firme.']],
 ]);
 
@@ -2941,8 +2942,8 @@ pack({k:'Infância',min:8,max:12},[
  ['Mesada','Meus pais propuseram uma mesada em troca de tarefas de casa.',['Aceitar|$+100 k+1|Lavo a louça e ganho meu dinheirinho.','Negociar mais|?50 $+150|Fechamos em um valor melhor.|h-2|Eles disseram "então nada".']],
  ['Clube do livro mirim','A biblioteca da escola abriu um clube de leitura.',['Entrar|sm+3 h+2|Li sete livros este ano.','Não entrar|h+1|Prefiro desenho.','Entrar e fingir que li|k-1 h+2|Contei o final errado e todo mundo descobriu.']],
  ['Truque de mágica','Ganhei um kit de mágica e quero fazer um show.',['Apresentar para a família|?tal.acting h+5 tal.acting+2|Todo mundo ficou impressionado.|h-2|O coelho de pelúcia caiu da manga.','Fazer o truque com o celular do meu pai|?40 h+6|Funcionou!|h-5 bond-4|O celular caiu na privada.','Desistir de apresentar|h-1|Fiquei com vergonha.']],
- ['Bicicleta roubada','Roubaram minha bicicleta na frente da escola.',['Contar aos meus pais|h-4|Ganhei uma nova no Natal.','Procurar pelo bairro|?30 h+6|Achei com um menino da outra rua!|h-4|Nunca mais vi a bicicleta.']],
- ['Primeiro celular','Todos da sala têm celular, menos eu.',['Pedir aos meus pais|?50 h+8|Ganhei um celular usado!|h-4|"Só aos 14 anos."','Juntar dinheiro|sm+1|Comecei a guardar moedas.']],
+ ['Bicicleta roubada','Roubaram minha bicicleta na frente da escola.',['Contar aos meus pais|h-4 item:Bicicleta:900|Ganhei uma nova no Natal.','Procurar pelo bairro|?30 h+6|Achei com um menino da outra rua!|h-4|Nunca mais vi a bicicleta.']],
+ ['Primeiro celular','Todos da sala têm celular, menos eu.',['Pedir aos meus pais|?50 h+8 item:Celular_usado:700|Ganhei um celular usado!|h-4|"Só aos 14 anos."','Juntar dinheiro|sm+1|Comecei a guardar moedas.']],
  ['Acampamento de férias','Meus pais querem me mandar para um acampamento de férias.',['Ir|h+8 tal.athletic+2|Fiz amigos para a vida toda.','Ficar em casa|h-1|Férias no sofá.']],
 ]);
 pack({k:'Adolescência',min:13,max:17},[
@@ -3056,12 +3057,12 @@ pack({k:'Bicho',who:'dog'},[
  ['Carteiro','{p} late furiosamente para o carteiro todo dia.',['Contratar um adestrador|$-1200 bond+4|{p} agora só abana o rabo para o carteiro.','Deixar assim|h-1|O carteiro joga as cartas por cima do muro.']],
  ['Concurso de cães','Vai ter um concurso de cães na cidade.',['Inscrever {p}|?45 $1000 f+1 h+8|{p} ganhou o primeiro lugar!|h+2|{p} tentou morder o jurado.','Desistir|h+0|{p} não precisa de troféu.','Pintar o pelo de {p} para ficar diferente|?35 $1000 f+2 h+6|O júri amou o visual!|bond-4 h-3|Fomos desclassificados e {p} ficou irritad{o2}.']],
  ['Cachorro na cama','{p} decidiu que agora dorme na minha cama.',['Deixar|bond+6 h+3|Durmo espremid{o}, mas feliz.','Colocar limites|bond-2|{p} chorou na porta a noite inteira.']],
- ['Fuga pelo portão','O portão ficou aberto e {p} saiu correndo pela rua.',['Correr atrás|?70 bond+4|Peguei {p} no quarteirão de baixo.|h-10|{p} sumiu.','Chamar pelo nome|?55 bond+3|{p} voltou abanando o rabo.|h-10|{p} não voltou.']],
+ ['Fuga pelo portão','O portão ficou aberto e {p} saiu correndo pela rua.',['Correr atrás|?70 bond+4|Peguei {p} no quarteirão de baixo.|h-10|{p} sumiu.','Chamar pelo nome|?55 bond+3|{p} voltou abanando o rabo.|h-10 petgone|{p} não voltou.']],
 ]);
 pack({k:'Bicho',who:'cat'},[
  ['Presente felino','{p} deixou um passarinho morto no meu travesseiro.',['Agradecer o presente|bond+5|É amor, à maneira dos gatos.','Dar bronca|bond-4|{p} me ignorou por três dias.']],
  ['Sofá destruído','{p} transformou o sofá novo em arranhador.',['Comprar um arranhador de verdade|$-300 bond+3|O sofá foi salvo. Mais ou menos.','Aceitar o destino do sofá|h-3|O sofá agora é dele.']],
- ['Sumiu por três dias','{p} sumiu e não volta há três dias.',['Procurar pelo bairro|?65 bond+6|{p} estava preso numa garagem.|h-10|Nunca mais vi {p}.','Esperar|?55 bond+2|{p} voltou como se nada tivesse acontecido.|h-10|{p} não voltou.']],
+ ['Sumiu por três dias','{p} sumiu e não volta há três dias.',['Procurar pelo bairro|?65 bond+6|{p} estava preso numa garagem.|h-10|Nunca mais vi {p}.','Esperar|?55 bond+2|{p} voltou como se nada tivesse acontecido.|h-10 petgone|{p} não voltou.']],
  ['Copo na mesa','{p} está olhando fixamente para um copo cheio na beira da mesa.',['Tirar o copo dali|h+1|Desafio evitado.','Pagar para ver|h-1|O copo caiu. {p} nem piscou.']],
 ]);
 pack({k:'Bicho',who:'bird'},[
@@ -3517,7 +3518,7 @@ function buy(kind,l,financed){
   log(`Comprei: ${l.n.toLowerCase()} por ${fmt(l.v)}.`,'good');
   return `Comprei ${l.n.toLowerCase()}!`;
 }
-function sellAsset(a){ const m=S.me; const v=Math.round(a.value*(a.k==='casa'?(.75+a.cond/400):(.5+a.cond/220))); m.money+=v-(a.loan||0); m.assets=m.assets.filter(x=>x!==a); log(`Vendi ${a.n.toLowerCase()} por ${fmt(v)}.`); return `Vendi por ${fmt(v)}${a.loan?` (quitei ${fmt(a.loan)} de financiamento)`:''}.`; }
+function sellAsset(a){ const m=S.me; if(a.stolen&&R.chance(.12)){ m.assets=m.assets.filter(x=>x!==a); arrest('receptação de produto roubado',0,2); return `O comprador era policial disfarçado. Perdi ${a.n.toLowerCase()} e fui pres${oa()}.`; } const v=Math.round(a.value*(a.stolen?.45:1)*(a.k==='casa'?(.75+a.cond/400):(.5+a.cond/220))); m.money+=v-(a.loan||0); m.assets=m.assets.filter(x=>x!==a); log(`Vendi ${a.n.toLowerCase()} por ${fmt(v)}.`); return `Vendi por ${fmt(v)}${a.loan?` (quitei ${fmt(a.loan)} de financiamento)`:''}.`; }
 function fixAsset(a){ const m=S.me; const c=Math.round(a.value*(100-a.cond)/100*(a.k==='casa'?.25:.4)); if(!canPay(c)) return `A reforma custa ${fmt(c)} e eu não tenho.`; m.money-=c; a.cond=100; a.value=Math.round(a.value*1.04); return `${a.k==='casa'?'Reformei':'Consertei'} por ${fmt(c)}.`; }
 function invest(k,v){ const m=S.me; if(v>0&&!canPay(v)) return 'Não tenho esse dinheiro.'; if(v<0&&m.inv[k]<-v) v=-m.inv[k]; m.money-=v; m.inv[k]+=v; return v>0?`Investi ${fmt(v)}.`:`Resgatei ${fmt(-v)}.`; }
 
@@ -3646,11 +3647,19 @@ function murder(p){
 }
 
 // ---------- crimes ----------
+// o que é roubado vira bem do personagem (vender coisa roubada paga menos e tem risco)
+function stolenLoot(c,v,flavor){ const m=S.me, add=(k,n,val,cond)=>{ m.assets.push({id:newId(),k,n,value:Math.max(50,Math.round(val)),buy:0,cond:cond??100,stolen:1}); };
+  if(c.id==='loja'){ const n=flavor.replace(/^(um|uma) /,''); add('item',n[0].toUpperCase()+n.slice(1)+' (furtado)',v); return `Saí da loja com ${flavor} escondido na roupa. Agora está nos meus bens.`; }
+  if(c.id==='casa'&&R.chance(.6)){ const it=R.pick([['Televisão de 65 polegadas',4000],['Notebook',3500],['Caixa de joias',9000],['Console de videogame',2800],['Coleção de relógios',12000]]); add('item',it[0]+' (roubado)',it[1]*(.6+R.f()*.8)); m.money+=Math.round(v/3); return `Saí da casa com ${it[0].toLowerCase()} e ${fmt(Math.round(v/3))} em dinheiro. Guardei tudo nos meus bens.`; }
+  if(c.id==='carro'){ const car=R.pick(CARS.filter(x=>x.v>=9000&&x.v<=300000)); add('carro',car.t+' (roubado)',car.v*(.7+R.f()*.3),R.int(55,95)); return `Fiz ligação direta num ${car.t.toLowerCase()} e saí acelerando. O carro agora é meu, pelo menos até a polícia descobrir.`; }
+  if(c.id==='joalheria'){ add('item','Joias roubadas',v); return `Esvaziei as vitrines. As joias, avaliadas em ${fmt(v)}, estão escondidas nos meus bens.`; }
+  return null; }
 function crime(c){
   const m=S.me; cnt('crimes'); cnt('actions'); m.rec.crimes++; m.karma=clamp(m.karma-c.k);
   const p=c.p+(m.smarts-50)/400+(m.fight/500)+(m.job&&m.job.spc==='crime'?.1:0);
   const flavor={loja:R.pick(['um batom','um fone de ouvido','um chocolate','uma garrafa de vinho','um tênis','uma camiseta']),carteira:R.pick(['de um turista','de um executivo','de uma senhora no ônibus','de um homem distraído no celular']),casa:R.pick(['de um médico','de um casal em viagem','de um vizinho rico','de uma mansão na serra']),carro:R.pick(CARS.slice(3)).t.toLowerCase(),golpe:R.pick(['um falso site de vendas','um perfil falso de namoro','um boleto falso','uma falsa central do banco'])}[c.id]||'';
-  if(R.chance(p)){ const v=R.int(...c.cash); m.money+=v; st('happy',R.int(1,5));
+  if(R.chance(p)){ const v=R.int(...c.cash); st('happy',R.int(1,5));
+    const loot=stolenLoot(c,v,flavor); if(loot) return loot; m.money+=v;
     if(c.id==='pichar') return `Pichei ${R.pick(['meu apelido','uma caveira','o nome da minha banda','um coração'])} no muro da escola.`;
     return `${c.n} deu certo${flavor?' ('+flavor+')':''}. Lucro: ${fmt(v)}.`; }
   if(R.chance(.3)&&c.id!=='banco'&&c.id!=='joalheria') return `${c.n} deu errado, mas consegui fugir.`;
@@ -4359,7 +4368,7 @@ V.assets=()=>{
   const m=S.me,it=[];
   const debts=m.loans.reduce((s,l)=>s+l.bal,0)+m.assets.reduce((s,a)=>s+(a.loan||0),0);
   it.push({html:`<div class="card">${kv('Dinheiro',fmt(m.money))}${kv('Investimentos',fmt(m.inv.poup+m.inv.acoes+m.inv.cripto))}${kv('Dívidas',fmt(debts))}${kv('Patrimônio líquido',fmt(netWorth()))}</div>`});
-  if(m.assets.length){ it.push({sec:'Meus bens'}); m.assets.forEach(a=>it.push({ic:assetIc(a),l:a.n,s:`${({casa:'Imóvel',carro:'Veículo',item:'Item'})[a.k]}${a.k!=='item'?' · conservação '+a.cond+'%':''}${a.loan?' · financiado':''}`,r:fmt(a.value),on:()=>UI.push(()=>V.asset(a))})); }
+  if(m.assets.length){ it.push({sec:'Meus bens'}); m.assets.forEach(a=>it.push({ic:assetIc(a),l:a.n,s:`${({casa:'Imóvel',carro:'Veículo',item:'Item'})[a.k]}${a.k!=='item'?' · conservação '+a.cond+'%':''}${a.loan?' · financiado':''}${a.stolen?' · roubado':''}`,r:fmt(a.value),on:()=>UI.push(()=>V.asset(a))})); }
   if(m.loans.length){ it.push({sec:'Empréstimos'}); m.loans.forEach(l=>it.push({l:l.n,s:`Parcela ${fmt(l.pay)}/ano`,r:fmt(l.bal),tone:'bad'})); }
   if(!m.prison){
     it.push({sec:'Comprar'});
@@ -4731,7 +4740,7 @@ function boot(){
   if(location.hash==='#teste'){ selfTest(); return; } if(location.hash.startsWith('#qualidade')){ try{ qualityReport(); }catch(e){ const o=document.createElement('pre'); o.id='out'; o.textContent='ERRO '+e.message+' '+e.stack; document.body.appendChild(o); } return; }
   if(location.hash==='#autoano'){ const sv=loadKey(SAVE_KEY); if(sv&&sv.me) S=sv; else newLife({}); for(let i=0;i<3&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[0][1],e.d); log(sh.t+' → '+sh.ch[0][0]+(r?'. '+r:'.'),'choice'); } } save(); render.jump=true; render(); return; }
   if(location.hash.startsWith('#demo')){ const hs=location.hash; newLife({}); setTimeout(()=>{ if(hs.includes('rel')) UI.open(V.relations); if(hs.includes('style')) UI.open(V.style); if(hs.includes('hair')){ UI.open(V.style); UI.push(V.styleHair); } if(hs.includes('act')) UI.open(V.activities); if(hs.includes('person')){ UI.open(V.relations); UI.push(()=>V.person(people('mae')[0]||people()[0])); } if(hs.includes('ev')){ queue('carteira',EVENTS.carteira.prep()); pump(); } if(hs.includes('death')){ die('de teste'); showDeath(); } if(hs.includes('start')) showStart(); if(hs.includes('cars')){ UI.open(V.assets); UI.push(V.cars); } if(hs.includes('pets')){ UI.open(V.activities); UI.push(V.pets); } if(hs.includes('shop')){ UI.open(V.assets); UI.push(V.shop); } if(hs.includes('vis')){ UI.open(V.style); } if(hs.includes('icone')){ document.documentElement.style.background='transparent'; document.body.style.cssText='margin:0;background:transparent'; document.body.innerHTML=appIconSVG(512); return; } if(hs.includes('cenarios')){ S.me.alive=true; S.me.prison=null; UI.open(V.scenPick); }
-    else if(/zumbi|isekai|sc-\w+/.test(hs)){ const m=S.me; m.prison=null; while(m.age<20){ m.alive=true; m.health=Math.max(m.health,60); S.pending=[]; ageUp(); } S.pending=[]; m.alive=true; const id=(hs.match(/sc-(\w+)/)||[])[1]||(hs.includes('isekai')?'isekai':'zumbi'); scStart(id); if(id==='isekai'){ UI.close(); S.scen.cls='guerreiro'; } for(let i=0;i<3;i++){ S.pending=[]; scNextDay(); } S.pending=[]; MQ.length=0; render.jump=true; render(); const pane=(hs.match(/-(local|grupo|itens|acoes|vila|magia|ficha)$/)||[])[1]; if(id==='isekai'&&pane&&['vila','magia','ficha'].includes(pane)){ const sc=S.scen; sc.ouro=4200; sc.lvl=9; sc.cls='mago'; iskEnsure(sc); learnSpell(sc,true); learnSpell(sc,true); sc.pts=3; if(pane==='vila'){ vilaFound('Nova Aurora'); const v=sc.vila; v.pop=27; Object.assign(v.b,{casa:4,fazenda:3,tecelagem:2,serraria:2,mercado:1,escola:1,taverna:1,muralha:1}); v.tech=['agricultura','escrita','tear']; v.tier=2; v.res='moeda'; v.pqT=24; v.com=120; v.rou=34; v.man=41; v.fel=78; } } if(pane) UI.open({local:V.scLocal,grupo:V.scCrew,itens:V.scItems,acoes:V.scActs,vila:V.iskVila,magia:V.iskMagic,ficha:V.iskMe}[pane]); }
+    else if(/zumbi|isekai|sc-\w+/.test(hs)){ const m=S.me; m.prison=null; while(m.age<20){ m.alive=true; m.health=Math.max(m.health,60); S.pending=[]; ageUp(); } S.pending=[]; m.alive=true; const id=(hs.match(/sc-(\w+)/)||[])[1]||(hs.includes('isekai')?'isekai':'zumbi'); scStart(id); if(id==='isekai'){ UI.close(); S.scen.cls='guerreiro'; } for(let i=0;i<3;i++){ S.pending=[]; scNextDay(); } S.pending=[]; MQ.length=0; render.jump=true; render(); const pane=(hs.match(/-(local|grupo|itens|acoes|vila|magia|ficha|base|oficina|faccoes|procurar)$/)||[])[1]; if(id==='zumbi'&&pane){ const sc=S.scen; zEnsure(sc); sc.zmat=46; sc.zlv=4; sc.zpts=2; sc.dia=38; sc.rec=38; sc.nextHorde=45; Object.assign(sc.zat,{for:9,mir:7,fur:8,med:6,mec:10,lid:7}); if(['base','acoes','oficina','faccoes','procurar'].includes(pane)){ zFoundBase('Último Refúgio'); const b=sc.zb; b.pop=14; b.moral=72; b.com=36; b.agua=28; Object.assign(b.b,{muro:3,horta:2,poco:2,enfermaria:1,oficina:2,alojamento:3,torre:1,armadilhas:1}); sc.zf.merc.rep=42; sc.zf.corvos.rep=-38; sc.zf.guarda.rep=12; sc.zf.igreja.rep=-6; addItem('corda',90,true); addItem('pilha',90,true); addItem('taco',80,true); } UI.open({base:V.zBase,acoes:V.scActs,oficina:V.zCraft,faccoes:V.zFac,procurar:V.zScav,ficha:V.zMe,local:V.scLocal,grupo:V.scCrew,itens:V.scItems}[pane]); } if(id==='isekai'&&pane&&['vila','magia','ficha'].includes(pane)){ const sc=S.scen; sc.ouro=4200; sc.lvl=9; sc.cls='mago'; iskEnsure(sc); learnSpell(sc,true); learnSpell(sc,true); sc.pts=3; if(pane==='vila'){ vilaFound('Nova Aurora'); const v=sc.vila; v.pop=27; Object.assign(v.b,{casa:4,fazenda:3,tecelagem:2,serraria:2,mercado:1,escola:1,taverna:1,muralha:1}); v.tech=['agricultura','escrita','tear']; v.tier=2; v.res='moeda'; v.pqT=24; v.com=120; v.rou=34; v.man=41; v.fel=78; } } if(pane&&id!=='zumbi') UI.open({local:V.scLocal,grupo:V.scCrew,itens:V.scItems,acoes:V.scActs,vila:V.iskVila,magia:V.iskMagic,ficha:V.iskMe}[pane]); }
     else if(hs.includes('doencas')){ const L=[['catapora',8,'F'],['marcas',25,'F'],['cancer_mama',40,'F'],['leucemia',12,'M'],['volta',45,'M'],['vitiligo',30,'M'],['conjuntivite',22,'F'],['sarampo',6,'M'],['catarata',72,'F'],['psoriase',35,'M'],['acne',16,'M'],['verruga',50,'F']];
       document.body.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#fff">'+L.map(([d,a,gd],i)=>{ const q=mkPerson({rel:'tmp',gender:gd,age:a,bond:70}); q.id=i+3; ensureLook(q); q.look.hair=gd==='F'?'longo':'curto'; q.dis=d==='marcas'||d==='volta'?[]:[{id:d,y:0}]; if(d==='marcas') q.genes.pox=1; if(d==='vitiligo') q.genes.vitiligo=1; if(d==='volta') q.hairBack=S.year+2; return '<div style="text-align:center;font:10px sans-serif">'+faceSVG(q,110)+'<br>'+d+'</div>'; }).join('')+'</div>'; }
     else if(hs.includes('faccao')){ const m=S.me; m.prison=null; m.job={spc:'crime',lvl:2,perf:64,yrs:1,lvlYrs:1,co:'Facção',heat:45}; UI.open(V.faccao); }
@@ -5068,7 +5077,7 @@ V.martialStyle=id=>{ const m=S.me,s=STYLES[id],ma=martialOf(id),max=s.belts.leng
 const GANG_NAMES=['Irmandade do Pátio','Comando da Ala B','Os Esquecidos','Família do Corredor','Bonde do Refeitório','Liga da Lavanderia','Os Sem Visita','Tropa da Cela 13'];
 const GANG_RANK=['membro','braço direito','líder'];
 // detentos com nome, do mesmo gênero (a ala é separada)
-function inmates(){ const m=S.me; if(!m.yr.inmates) m.yr.inmates=[0,1,2,3].map(()=>{ const p=stranger({gender:m.gender}); return {n:p.first+' '+R.pick(['"'+R.pick(['Tatu','Marreta','Cicatriz','Pitbull','Baixinho','Professor','Navalha','Tanque','Fantasma','Gordo'])+'"','',''])+'',fight:R.int(25,90),gang:R.chance(.5)?R.pick(GANG_NAMES):null}; }); return m.yr.inmates; }
+function inmates(){ const m=S.me; if(!m.yr.inmates) m.yr.inmates=[]; while(m.yr.inmates.length<4) m.yr.inmates.push((()=>{ const p=stranger({gender:m.gender}); return {n:p.first+' '+R.pick(['"'+R.pick(['Tatu','Marreta','Cicatriz','Pitbull','Baixinho','Professor','Navalha','Tanque','Fantasma','Gordo'])+'"','',''])+'',fight:R.int(25,90),gang:R.chance(.5)?R.pick(GANG_NAMES):null}; })()); return m.yr.inmates; }
 const prisonFoe=i=>{ const x=inmates()[i]; return {name:x.n.trim(),power:x.fight,gender:S.me.gender}; };
 function prisonDo(k){
   const m=S.me,pr=m.prison; if(!pr) return 'Não estou pres'+oa()+'.';
@@ -5392,7 +5401,7 @@ function mkCrew(o={}){ const sc=S.scen, f=SM().names; let p;
   const roles=SM().roles; const c={id:++sc.cid,first:p.first,last:p.last,gender:p.gender,age:p.age,genes:p.genes,look:p.look,hp:100,lv:o.lv||rnd(55,75),arma:o.arma||null,role:o.role||R.pick(Object.keys(roles))};
   if(SM().names) c.race=R.pick(RACES[c.gender]);
   sc.crew.push(c); return c; }
-const roleName=c=>{ const r=SM().roles[c.role]; if(!r) return ''; if(r[2]===false) return r[0]; if(typeof r[2]==='string') return c.gender==='F'?r[2]:r[0]; return r[0]+oaG(c.gender); };
+const roleName=c=>{ if(c.bebe) return c.age<3?'Bebê':'Criança'; if(c.bicho) return 'Companheiro'; const r=SM().roles[c.role]; if(!r) return ''; if(r[2]===false) return r[0]; if(typeof r[2]==='string') return c.gender==='F'?r[2]:r[0]; return r[0]+oaG(c.gender); };
 const hasRole=k=>crew().some(c=>c.role===k);
 function addCrewFromEvent(d,key){ if(!d||!d[key]) return null; if(d['crew_'+key]) return null; const c=mkCrew({first:d[key],last:d[key+'l'],gender:d[key+'G'],age:d.nAge}); d['crew_'+key]=c.id; return c; }
 function crewLeave(c,why,dead){ const sc=S.scen; sc.crew=sc.crew.filter(x=>x!==c); if(c.arma&&!dead) {} else if(c.arma&&dead&&R.chance(.6)) addItem(c.arma.id,c.arma.hp,true); if(why) scLog(why,dead?'bad':'warn'); }
@@ -5406,7 +5415,7 @@ const countCat=cat=>S.scen.inv.filter(x=>itCat(x.id)===cat).length;
 function lootText(ids){ const got=[]; ids.forEach(id=>{ if(addItem(id)) got.push(itIc(id)+' '+itN(id)); }); return got.length?' Peguei: '+got.join(', ')+'.':''; }
 const myDmg=()=>S.scen.arma?itV(S.scen.arma.id)*(S.scen.arma.hp>0?1:.3):4;
 function scPow(){ const sc=S.scen, m=S.me; if(!sc) return 50; if(SM().pow) return Math.round(Math.max(5,Math.min(95,SM().pow(sc,m))));
-  const cr=crew().reduce((s,c)=>s+4+(c.arma?itV(c.arma.id)*.45:1.5)*(c.hp/100),0);
+  const cr=crew().filter(c=>!c.bebe).reduce((s,c)=>s+(c.bicho?8:4)+(c.arma?itV(c.arma.id)*.45:1.5)*(c.hp/100),0);
   return Math.round(Math.max(5,Math.min(95,12+m.fight*.3+myDmg()*.9+cr+(hasRole('ati')?8:0)))); }
 function wearWeapon(){ const sc=S.scen; if(sc.arma){ sc.arma.hp-=rnd(4,10); if(sc.arma.hp<=0){ scLog(`Meu ${itN(sc.arma.id).toLowerCase()} quebrou.`,'warn'); sc.arma=null; } } }
 function scHurt(n){ scStat('hl',-n); }
@@ -5414,7 +5423,7 @@ function scHurt(n){ scStat('hl',-n); }
 function scFight(thr,what){ const p=scPow(), need=10+thr*17; const ok=pct(.5+(p-need)/90); wearWeapon();
   if(ok){ sc_kill(rnd(1,3)*(thr+1)); return {ok:true,t:''}; }
   const dmg=rnd(6,12)*(1+Math.min(thr,4)*.4); scHurt(Math.round(dmg)); let t=`${what||'A briga'} me deixou ferid${oa()}.`;
-  const cs=crew(); if(cs.length&&R.chance(.12+thr*.06)){ const c=R.pick(cs); c.hp-=rnd(20,45); if(c.hp<=0){ crewLeave(c,`${c.first} não sobreviveu.`,true); t+=` Perdemos ${c.first}.`; } else t+=` ${c.first} se machucou.`; }
+  const cs=crew().filter(c=>!c.bebe); if(cs.length&&R.chance(.12+thr*.06)){ const c=R.pick(cs); c.hp-=rnd(20,45); if(c.hp<=0){ crewLeave(c,`${c.first} não sobreviveu.`,true); t+=` Perdemos ${c.first}.`; } else t+=` ${c.first} se machucou.`; }
   if(S.scen.id==='zumbi'&&R.chance(.05+thr*.04)) t+=' '+bite();
   return {ok:false,t}; }
 function sc_kill(n){ const sc=S.scen; sc.kills=(sc.kills||0)+n; }
@@ -5534,7 +5543,7 @@ const SCEN={
     },
     win:'Fui resgatad{o} da ilha',lose:'Acordei de um sonho na ilha deserta',reward:(m,sc)=>{ m.money+=40000; m.fame=clamp(m.fame+10); st('happy',10); },
   },
-  isekai:{n:'Isekai',ic:'⚔️',d:'Um caminhão, uma luz branca, e você acorda em Eldoria. Suba de nível, monte um grupo e atravesse o reino até o Castelo do Rei Demônio.',
+  isekai:{n:'Isekai',ic:'⚔️',d:'Um caminhão, uma luz branca, e você acorda em Eldoria. Suba de nível, monte um grupo e atravesse o reino até o Castelo do Rei Demônio. Atenção: em Eldoria não se acorda. Se morrer lá, morre de verdade. A única volta é o portal.',
     intro:'Um caminhão desgovernado. Uma luz branca. Quando você abriu os olhos, estava num campo com dois sóis no céu. Uma janela flutuante apareceu: "Bem-vind{o} a Eldoria".',
     day:'Dia',bag:22,names:true,cap:{xp:1e9},tabs:['Local','Inventário','Próximo dia','Grupo','Ações'],tabIc:['🗺️','🎒','🌅','🧝','✨'],
     stats:[['hl','Vida','❤️'],['mana','Mana','🔮'],['fome','Fome','🍖',1],['san','Ânimo','🌟']],
@@ -5629,9 +5638,9 @@ function zUpkeep(sc){ const m=S.me;
   else { sc.loc.pois.forEach(p=>{ if(R.chance(.35)) p.done=0; }); if(R.chance(.4)) sc.loc.thr=Math.min(4,sc.loc.thr+1); }
   sc.stay=0;
   // capacidade: pessoas e carga
-  const ppl=crew().length+1, st0=seats(); if(sc.veh.length&&ppl>st0) queue('z_lotado',{}); else if(sc.inv.length>bagCap()) queue('z_lotado',{});
+  const ppl=crew().length+1, st0=seats(); if(!sc.zb&&sc.veh.length&&ppl>st0) queue('z_lotado',{}); else if(sc.inv.length>bagCap()) queue('z_lotado',{});
   // ataque de madrugada
-  if(R.chance(.08+sc.loc.thr*.05-(sc.vig?.08:0))){ const f=scFight(sc.loc.thr,'O ataque de madrugada'); scLog(f.ok?'Zumbis atacaram de madrugada. A vigia segurou.':f.t,f.ok?'warn':'bad'); }
+  if(!sc.zb&&R.chance(.08+sc.loc.thr*.05-(sc.vig?.08:0))){ const f=scFight(sc.loc.thr,'O ataque de madrugada'); scLog(f.ok?'Zumbis atacaram de madrugada. A vigia segurou.':f.t,f.ok?'warn':'bad'); }
   sc.vig=0;
   if(sc.inf){ sc.inf++; if(sc.inf>=5){ scenEnd(false,'A febre da mordida venceu. A última coisa que vi foi o grupo se afastando de mim, devagar.'); return; } scLog('A mordida está queimando.','bad'); }
   if(sc.etapa>=20&&!sc.fim) { sc.fim=1; queue('z_final',{}); } }
@@ -5718,7 +5727,7 @@ function scNextDay(){ const sc=S.scen, d=SM(), m=S.me; if(!sc) return;
   if(sc.fome>=100){ scHurt(12); scLog('Fome de verdade. Minhas mãos tremem.','bad'); }
   if(sc.fome>=75){ const f=takeItem('@comida'); if(f){ scStat('fome',-Math.round(itV(f.id)*f.hp/100)); scLog(`Comi ${itN(f.id).toLowerCase()} antes de desmaiar de fome.`); } }
   if(sc.id==='ilha'&&sc.sede>=75){ const a=takeItem('@agua'); if(a){ scStat('sede',-Math.round(itV(a.id)*a.hp/100)); scLog(`Bebi ${itN(a.id).toLowerCase()}.`); } }
-  if((!hasF||sc.fome<60)&&!(sc.id==='ilha'&&sc.sede>=70)) scStat('hl',sc.id==='isekai'?5:3);
+  if((!hasF||sc.fome<60)&&!(sc.sede!=null&&sc.sede>=70)) scStat('hl',sc.id==='isekai'?5:3);
   d.upkeep(sc); if(!S.scen) return;
   sc.log[sc.log.length-1].pl=sc.loc.n; scLog(`${sc.loc.ic} ${sc.loc.n}${sc.id==='zumbi'?` · ameaça zumbi: ${THREAT[sc.loc.thr].toLowerCase()}`:''}`);
   if(sc.dia>=(d.maxDays||60)&&S.scen) { const w=d.capWin?d.capWin(sc):true; scenEnd(w,w?'Os dias viraram semanas, as semanas viraram rotina. Um dia, simplesmente acabou.':'O tempo passou e a missão ficou pela metade. Acordei com a sensação de que faltou alguma coisa.'); return; }
@@ -5792,7 +5801,7 @@ V.scMember=c=>{ const sc=S.scen; if(!crew().includes(c)) return null; const it=[
   it.push({ic:'💬',l:'Conversar',s:'Lealdade',dis:once('c'),why:'Já conversamos hoje.',on:()=>scAct(()=>{ sc.done['m'+c.id+'c']=1; c.lv=Math.min(100,c.lv+rnd(5,10)); scStat('san',2); return R.pick([`${c.first} contou que era ${R.pick(['dentista','tatuador'+(c.gender==='F'?'a':''),'motorista de aplicativo','professor'+(c.gender==='F'?'a':''),'confeiteir'+oaG(c.gender),'influencer de academia'])} antes de tudo isso.`,`${c.first} riu de uma piada minha. Primeira vez em dias.`,`${c.first} disse que confia em mim. Pesou.`]); },c.first)});
   it.push({ic:'🍞',l:'Dar comida',s:'Saúde e lealdade',dis:!sc.inv.some(x=>itCat(x.id)==='comida'),why:'Não tenho comida.',on:()=>scAct(()=>{ const f=takeItem('@comida'); c.hp=Math.min(100,c.hp+10); c.lv=Math.min(100,c.lv+8); return `Dei ${itN(f.id).toLowerCase()} para ${c.first}.`; },c.first)});
   it.push({ic:'🩹',l:'Cuidar dos ferimentos',s:'Usa um remédio',dis:c.hp>=100||!sc.inv.some(x=>itCat(x.id)==='remedio'),why:c.hp>=100?`${c.first} está bem.`:'Não tenho remédio.',on:()=>scAct(()=>{ const r=takeItem('@remedio'); c.hp=Math.min(100,c.hp+itV(r.id)); c.lv=Math.min(100,c.lv+5); return `Cuidei de ${c.first} com ${itN(r.id).toLowerCase()}.`; },c.first)});
-  sc.inv.filter(x=>itCat(x.id)==='arma').forEach(x=>it.push({ic:itIc(x.id),l:`Entregar ${itN(x.id).toLowerCase()}`,s:`Estado ${x.hp}%`,on:()=>scAct(()=>{ sc.inv=sc.inv.filter(y=>y!==x); if(c.arma) addItem(c.arma.id,c.arma.hp,true); c.arma=x; c.lv=Math.min(100,c.lv+4); return `${c.first} agora carrega ${itN(x.id).toLowerCase()}.`; },c.first)}));
+  if(!c.bebe&&!c.bicho) sc.inv.filter(x=>itCat(x.id)==='arma').forEach(x=>it.push({ic:itIc(x.id),l:`Entregar ${itN(x.id).toLowerCase()}`,s:`Estado ${x.hp}%`,on:()=>scAct(()=>{ sc.inv=sc.inv.filter(y=>y!==x); if(c.arma) addItem(c.arma.id,c.arma.hp,true); c.arma=x; c.lv=Math.min(100,c.lv+4); return `${c.first} agora carrega ${itN(x.id).toLowerCase()}.`; },c.first)}));
   if(c.arma) it.push({ic:'✋',l:`Pegar a arma de ${c.first}`,s:`${itN(c.arma.id)} · lealdade cai`,on:()=>scAct(()=>{ if(sc.arma) addItem(sc.arma.id,sc.arma.hp,true); sc.arma=c.arma; c.arma=null; c.lv-=15; return `Peguei ${itN(sc.arma.id).toLowerCase()} de ${c.first}. ${c.gender==='F'?'Ela':'Ele'} sorriu sem mostrar os dentes.`; },c.first)});
   it.push({ic:'🚪',l:'Deixar para trás',tone:'bad',on:()=>confirmBox('Deixar para trás?',`${c.first} vai ficar sozinh${oaG(c.gender)}.`,'Deixar',()=>{ crewLeave(c,`Deixei ${c.first} para trás.`); scStat('san',-6); crew().forEach(x=>x.lv-=6); UI.back(); after(); })});
   return {title:c.first,items:it}; };
@@ -5808,7 +5817,7 @@ V.scItems=()=>{ const sc=S.scen, d=SM(), it=[];
     it.push({ic:itIc(x.id),l:itN(x.id),s:`Estado ${x.hp}%${c==='comida'?' · mata a fome':c==='agua'?' · mata a sede':c==='remedio'?' · cura':c==='arma'?' · dano '+itV(x.id):''}`,bars:[['',x.hp,x.hp>=60?'#3BB273':x.hp>=30?'#F2A93B':'#E5484D']],
       on:()=>modal({t:itN(x.id),x:`Estado ${x.hp}%`,ch:[...(usable?[{l:c==='comida'?'Comer':c==='agua'?'Beber':'Usar',fn:()=>{ const r=scUse(x); scLog(r); MQ.unshift({t:itN(x.id),x:r}); }}]:[]),...(c==='arma'?[{l:'Equipar',fn:()=>{ sc.inv=sc.inv.filter(y=>y!==x); if(sc.arma) addItem(sc.arma.id,sc.arma.hp,true); sc.arma=x; }}]:[]),{l:'Descartar',cls:'danger',fn:()=>{ sc.inv=sc.inv.filter(y=>y!==x); }},{l:'Voltar',cls:'alt'}]})}); });
   return {title:d.tabs[1],items:it}; };
-V.scenPick=()=>({title:'Modos fictícios',items:[{html:'<div class="card"><p>Uma aventura contada em dias, fora da vida normal. Enquanto durar, a vida real fica pausada e não envelhece. Se der errado, você só acorda. Se der certo, volta com recompensas.</p></div>'}]
+V.scenPick=()=>({title:'Modos fictícios',items:[{html:'<div class="card"><p>Uma aventura contada em dias, fora da vida normal. Enquanto durar, a vida real fica pausada e não envelhece. Se der errado, você só acorda, menos no isekai: quem morre em Eldoria morre de verdade. Se der certo, volta com recompensas.</p></div>'}]
   .concat(Object.entries(SCEN).map(([id,d])=>({ic:d.ic,l:d.n,s:fill(d.d.replace(/\{o\}/g,oa())),on:()=>confirmBox(d.n,'Começar a aventura agora?','Começar',()=>{ UI.close(); scStart(id); render.jump=true; after(); })})))});
 V.scenClass=()=>({title:'Escolha sua classe',items:Object.entries(CLASSES).map(([k,c])=>({ic:c.ic,l:clsName(k),s:c.sk.join(' · '),on:()=>{ if(S.scen&&S.scen.id==='isekai'){ S.scen.cls=k; scLog(`Escolhi ser ${clsName(k).toLowerCase()} em Eldoria.`,'good'); if(k==='mago') addItem('cajado',90,true); if(k==='arqueiro') addItem('arco',90,true); if(k==='ladino') addItem('adaga',90,true); } UI.close(); after(); }}))});
 // ---------- tela principal durante a aventura ----------
@@ -5833,7 +5842,7 @@ V.career=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scLocal():orig())(V.career);
 V.activities=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scActs():orig())(V.activities);
 V.relations=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scCrew():orig())(V.relations);
 V.assets=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scItems():orig())(V.assets);
-V.menu=(orig=>()=>{ const r=orig(); if(S&&S.scen&&S.scen.v===SC_V&&S.me.alive) r.items.unshift({ic:'⏰',l:'Acordar',s:'Encerra a aventura e volta para a vida real',tone:'bad',on:()=>confirmBox('Acordar?','A aventura termina aqui.','Acordar',()=>{ scenEnd(false,'Belisquei o próprio braço com força. Funcionou.'); after(); })}); return r; })(V.menu);
+V.menu=(orig=>()=>{ const r=orig(); if(S&&S.scen&&S.scen.v===SC_V&&S.me.alive&&S.scen.id!=='isekai') r.items.unshift({ic:'⏰',l:'Acordar',s:'Encerra a aventura e volta para a vida real',tone:'bad',on:()=>confirmBox('Acordar?','A aventura termina aqui.','Acordar',()=>{ scenEnd(false,'Belisquei o próprio braço com força. Funcionou.'); after(); })}); return r; })(V.menu);
 occupation=(orig=>()=>S.scen&&S.scen.v===SC_V?SCEN[S.scen.id].n:orig())(occupation);
 function scenYear(){} function startScen(id){ scStart(id); }
 // ---------- eventos especiais ----------
@@ -5895,6 +5904,9 @@ function scTok(tok,d,out){ const sc=S.scen; if(!sc||sc.v!==SC_V) return false; l
   if(tok==='bite'){ out.push(bite()); return true; }
   if(tok==='kills'){ sc_kill(rnd(2,6)); return true; }
   if(tok==='stay'){ sc.stay=1; return true; }
+  if(tok==='bebe'||tok==='crianca'){ if(sc.zb){ sc.zb.pop++; out.push(tok==='bebe'?`O bebê agora mora em ${sc.zb.nome}.`:'A criança agora mora na base.'); return true; } if(sc.vila){ sc.vila.pop++; return true; }
+    const c=mkCrew({age:tok==='bebe'?1:rnd(6,11)}); c.bebe=1; c.lv=95; c.arma=null; out.push(tok==='bebe'?`O bebê se chama ${c.first}.`:`${c.first}, de ${c.age} anos, agora viaja com a gente.`); return true; }
+  if(mm=tok.match(/^bicho:(\w+)$/)){ const c=mkCrew({first:R.pick(['Pena','Trovão','Faísca','Garra','Nuvem','Brasa'])}); c.bicho=mm[1]; c.race=mm[1]; c.lv=90; out.push(`${c.first} agora faz parte do grupo.`); return true; }
   if(tok==='win'){ sc.winNow=1; return true; }
   return false; }
 function scVar(k){ const sc=S.scen, m=S.me; if(!sc||sc.v!==SC_V) return null;
@@ -5959,7 +5971,14 @@ function castSpell(id){ const sc=S.scen, sp=SPELLS[id], m=S.me; iskEnsure(sc); c
     case 'reviver': { const f=(sc.fallen||[]).pop(); if(!f) return `${sp[1]} Não há ninguém para trazer de volta. Que bom.`; f.hp=60; sc.crew.push(f); return `${sp[1]} ${f.first} abriu os olhos de novo. Chorou. Eu também.`+up; }
   } return ''; }
 // ---------- integração ----------
-SCEN.isekai.maxDays=150; SCEN.isekai.capWin=sc=>!!sc.hero||!!(sc.vila&&sc.vila.tier>=3);
+SCEN.isekai.maxDays=Infinity;
+// em Eldoria não existe acordar: quem morre lá, morre de verdade. A única volta é o portal, depois de derrotar o Rei Demônio
+scCheck=(o=>function(){ const sc=S.scen; if(!sc||sc.id!=='isekai') return o();
+  if(sc.san<=0){ sc.san=25; scHurt(30); scLog('A mente desabou de exaustão. Desmaiei por um dia inteiro e acordei ferid'+oa()+'.','bad'); }
+  if(sc.hl>0) return o();
+  const d=SCEN.isekai; scLog('Tudo ficou escuro. Desta vez, não houve luz branca nem deusa. Só silêncio.','bad');
+  const days=sc.dia, lv=sc.lvl, cls=sc.cls?clsName(sc.cls).toLowerCase():'aventureir'+oa(); S.scen=null; S.pending=S.pending.filter(e=>!(EVENTS[e.id]&&EVENTS[e.id].scen));
+  log(`⚔️ Vivi ${days} dias em Eldoria como ${cls} de nível ${lv}.`,'warn'); die(`em Eldoria, longe do próprio mundo, como ${cls} de nível ${lv}`); UI.close(); })(scCheck);
 SCEN.isekai.init=(i0=>m=>Object.assign(i0(m),{at:{for:5,mag:5,agi:5,vit:5},pts:0,sp:[],mu:{},buff:{},vila:null,fallen:[]}))(SCEN.isekai.init);
 SCEN.isekai.pow=(sc,m)=>{ const a=iskAt(sc); return 6+sc.lvl*2.2+a.for*1.1+a.agi*.6+myDmg()*.7+sc.arm*5+crew().reduce((s,c)=>s+5+(c.arma?itV(c.arma.id)*.3:0),0)+m.fight*.08+(sc.buff&&sc.buff.atq||0)+vB(sc,'ferraria')*3; };
 SCEN.isekai.upkeep=(u0=>sc=>{ iskEnsure(sc); sc.buff={}; u0(sc); vilaDay(sc); scStat('mana',Math.round(iskAt(sc).mag/2)); })(SCEN.isekai.upkeep);
@@ -6130,6 +6149,675 @@ V.iskVila=()=>{ const sc=S.scen; iskEnsure(sc); const v=sc.vila, it=[];
       dis:lockT||l>=max||sc.ouro<c||v.man<5+l*3||once('b_'+k),why:lockT?`Só quando ${v.nome} virar ${VILA_TIERS[tmin][0].toLowerCase()}.`:l>=max?'A vila precisa crescer para isso subir mais.':once('b_'+k)?'Os construtores precisam de um dia.':`Preciso de ${c} moedas e ${5+l*3} mantimentos.`,
       on:()=>scAct(()=>{ sc.done['v_b_'+k]=1; sc.ouro-=c; v.man-=5+l*3; v.b[k]++; v.fel=Math.min(100,v.fel+3); let t=`${ic} ${n} ${l?'melhorada para o nível '+v.b[k]:'construída'} em ${v.nome}!`; if(k==='torre'){ const s=learnSpell(sc,true); if(s) t+=' '+s; } if(k==='guilda'&&v.grupo&&crew().length<6&&R.chance(.6)){ const c2=mkCrew(); t+=` ${c2.first}, ${c2.race}, se alistou no meu grupo.`; } return t; },n)}); });
   return {title:v.nome,items:it}; };
+
+// ===== Pesadelo zumbi completo: o apocalipse não tem fim, é sobreviver até morrer =====
+// Sistemas: atributos do sobrevivente, sede, munição e barulho, estações do ano, hordas que crescem com o tempo,
+// expedições, base com construções e moradores, oficina com receitas, facções com reputação, trocas e roubos.
+const ZAT={for:['Força','💪','Luta corpo a corpo'],mir:['Pontaria','🎯','Armas de fogo'],fur:['Furtividade','🥷','Saquear sem ser visto'],
+  med:['Medicina','🩺','Curar você e o grupo'],mec:['Mecânica','🔧','Construir, consertar e fabricar'],lid:['Liderança','📣','Moral, recrutamento e trocas']};
+Object.assign(SCI,{muni:['Munição','🔹','muni',0],tacop:['Taco com pregos','🏏','arma',24],lancaf:['Lança de ferro','🔱','arma',21],molotov:['Coquetel molotov','🔥','bomba',30],
+  curativo:['Curativo improvisado','🩹','remedio',15],roupa:['Roupas de frio','🧥','roupa',0],trap:['Armadilha de urso','🪤','trap',0],colete:['Colete à prova de balas','🦺','colete',0],
+  sucata:['Sucata','🔩','mat',0],pilha:['Pilhas','🔋','util',0]});
+SCI.agua[2]='agua'; SCI.cantil[2]='agua';
+const FIREARMS=['pistola','espingarda','rifle'];
+const ZSEASON=[['Verão','☀️'],['Outono','🍂'],['Inverno','❄️'],['Primavera','🌸']];
+const zSeason=sc=>Math.floor((sc.dia-1)/20)%4;
+const ZB={ // nome, ícone, sucata base, efeito, nível máximo
+  muro:['Muros e barricadas','🧱',8,'+12 de defesa por nível',5],torre:['Torre de vigia','🗼',10,'Avisa hordas e +5 de defesa',3],armadilhas:['Armadilhas','🪤',6,'Matam zumbis toda noite, +8 de defesa',4],
+  horta:['Horta','🥕',8,'+5 de comida por dia',5],poco:['Poço e cisterna','💧',10,'+6 de água por dia',4],cozinha:['Cozinha comunitária','🍳',10,'Comida rende mais e moral sobe',3],
+  alojamento:['Alojamentos','🛏️',10,'+5 vagas de moradores',5],deposito:['Depósito','📦',8,'+10 de espaço para itens',4],enfermaria:['Enfermaria','🏥',12,'Cura você, o grupo e os moradores',3],
+  oficina:['Oficina','🔧',12,'Libera receitas avançadas',3],garagem:['Garagem','🚗',12,'Carros não estragam parados',2],radio:['Estação de rádio','📻',14,'Atrai sobreviventes e facções',2],
+  gerador:['Gerador','⚡',16,'Luz: moral sobe, mas faz barulho',2],laboratorio:['Laboratório','🧪',20,'Pesquisa da cura e vacinas',3]};
+const ZFAC={merc:['Mercadores do Viaduto','🛒','Vendem e compram de tudo. Odeiam confusão.',35],corvos:['Os Corvos','🐦‍⬛','Saqueadores. Atacam quem parece fraco.',45],
+  guarda:['Guarda Nacional','🎖️','Restos do exército: ordem, quarentena e armas.',60],igreja:['Igreja da Última Hora','⛪','Um culto que vê os mortos como o juízo final.',30]};
+const ZTRADE={ // [dar, quantidade, receber, quantidade]
+  merc:[['@comida',2,'muni',3],['@remedio',1,'gas',2],['gas',2,'kit',1],['@arma',1,'@comida',3],['sucata',4,'reparo',1],['@comida',3,'roupa',1],['muni',4,'pistola',1],['@agua',2,'lata',2],['@remedio',2,'espingarda',1],['@comida',1,'pilha',2]],
+  guarda:[['@remedio',2,'muni',6],['@comida',3,'racao',2],['gas',2,'colete',1],['@remedio',1,'kit',1],['@comida',4,'rifle',1],['sucata',5,'muni',3]],
+  igreja:[['@comida',2,'calm',1],['@comida',2,'livro',1],['@agua',2,'ervas',2],['@arma',1,'kit',1],['@comida',3,'vacina',1]],
+  corvos:[['@remedio',2,'gas',3],['muni',3,'@comida',3],['@comida',4,'machado',1],['gas',2,'muni',4]]};
+const ZEXP={ // nome, ícone, itens, perigo, especial
+  mercado:['Supermercado','🛒',['lata','arroz','miojo','biscoito','agua','agua','sardinha','pessego','doce'],2],farmacia:['Farmácia e hospital','💊',['analg','antib','kit','calm','estim','vacina','curativo'],2],
+  posto:['Postos de gasolina','⛽',['gas','gas','gas','barra','agua','salgadinho'],1],quartel:['Delegacia e quartel','🎖️',['pistola','espingarda','muni','muni','muni','colete','racao'],3],
+  ferragens:['Loja de ferragens','🔨',['sucata','sucata','chave','facao','machado','corda','reparo','pilha'],1],bairro:['Bairro residencial','🏘️',['lata','agua','analg','roupa','faca','foto','livro','sucata'],1,'surv'],
+  ferrovelho:['Ferro-velho','🚘',['sucata','sucata','sucata','reparo','gas'],1,'veh'],shopping:['Shopping','🏬',['roupa','roupa','lanterna','baralho','biscoito','doce','violao','pilha'],2,'surv']};
+const ZRECIPES=[ // id, nome, ícone, sucata, itens, oficina mínima, resultado
+  ['tacop','Taco com pregos','🏏',2,['taco'],0,'it:tacop'],['lancaf','Lança de ferro','🔱',3,[],0,'it:lancaf'],['curativo','Curativo improvisado','🩹',2,[],0,'it:curativo'],
+  ['roupa','Roupas de frio','🧥',3,[],0,'it:roupa'],['aguaf','Filtrar água suja','🫗',1,[],0,'it:agua*2'],['trap','Armadilha de urso','🪤',3,[],0,'it:trap'],
+  ['arco','Arco e flechas','🏹',3,['corda'],0,'it:arco'],['molotov','Coquetel molotov','🔥',0,['gas','agua'],0,'it:molotov'],['kit','Kit médico','🩹',1,['analg','agua'],0,'it:kit'],
+  ['reparo','Kit de reparo','🧰',4,[],1,'it:reparo'],['besta','Besta','🏹',5,['corda'],1,'it:besta'],['armadura','Armadura de pneu e couro','🛡️',6,[],1,'zarm'],
+  ['radio','Rádio de pilha','📻',3,['pilha'],1,'it:radio'],['muni','Recarregar munição','🔹',4,[],2,'it:muni*4'],['silenc','Silenciador','🔇',5,[],2,'silenc'],['vacina','Vacina caseira','🧬',6,['antib'],3,'it:vacina']];
+// ---------- ajudantes ----------
+const zAt=sc=>sc.zat||(sc.zat={for:5,mir:5,fur:5,med:5,mec:5,lid:5});
+function zEnsure(sc){ if(!sc||sc.id!=='zumbi') return; zAt(sc); sc.zlv=sc.zlv||1; sc.zxp=sc.zxp||0; sc.zpts=sc.zpts||0; sc.zmat=sc.zmat||0; sc.ruido=sc.ruido||0; sc.zarm=sc.zarm||0;
+  if(sc.sede==null) sc.sede=20; if(!sc.zf) sc.zf={merc:{rep:5},corvos:{rep:-15},guarda:{rep:0},igreja:{rep:0}}; if(!sc.nextHorde) sc.nextHorde=sc.dia+rnd(16,24); sc.rec=sc.rec||0; }
+function zXP(n){ const sc=S.scen; if(!sc||sc.id!=='zumbi') return ''; zEnsure(sc); sc.zxp+=n; let t=''; while(sc.zxp>=sc.zlv*60){ sc.zxp-=sc.zlv*60; sc.zlv++; sc.zpts+=2; scStat('hl',6); t=` Subi para o nível ${sc.zlv} de sobrevivente (+2 pontos).`; } if(t) scLog(t.trim(),'good'); return t; }
+const zIsGun=x=>x&&FIREARMS.includes(x.id);
+const zRep=(sc,f)=>sc.zf&&sc.zf[f]?sc.zf[f].rep:0;
+const zRepTxt=r=>r>=60?'Aliado':r>=20?'Amigável':r>-20?'Neutro':r>-60?'Hostil':'Inimigo';
+function zNoise(n){ const sc=S.scen; sc.ruido=Math.max(0,Math.min(100,(sc.ruido||0)+n)); }
+const zBaseLv=(sc,k)=>sc.zb&&sc.zb.b[k]||0;
+function zDef(sc){ const b=sc.zb; if(!b) return 0; return 5+b.b.muro*12+b.b.torre*5+b.b.armadilhas*8+b.pop+crew().filter(c=>c.arma).length*3+(sc.vig?10:0)+(b.extra||0); }
+function zCap(sc){ return 4+zBaseLv(sc,'alojamento')*5; }
+// ---------- integração com o motor ----------
+SCEN.zumbi.d='O mundo acabou e não tem volta. Lidere um grupo de sobreviventes, junte recursos, monte uma base, negocie com as facções e aguente o máximo de dias que conseguir. Não há final feliz: só o seu recorde.';
+SCEN.zumbi.intro='O alarme não tocou. O que tocou foi a sirene da cidade inteira. Em uma semana, o mundo acabou. Agora você lidera um pequeno grupo. Não existe resgate. Existe o dia de hoje.';
+SCEN.zumbi.maxDays=Infinity;
+SCEN.zumbi.tabs=['Local','Bens','Próximo dia','Grupo','Ações']; SCEN.zumbi.tabIc=['📍','🎒','🌅','👥','⚡'];
+SCEN.zumbi.stats=[['hl','Saúde','❤️'],['san','Sanidade','🧠'],['fome','Fome','🍗',1],['sede','Sede','💧',1],['moral','Moral do grupo','🤝']];
+SCEN.zumbi.hdr=sc=>[`${ZSEASON[zSeason(sc)][1]} ${sc.dia}`,`dias · recorde ${Math.max(sc.rec||0,(META.zrec||0))}`];
+SCEN.zumbi.goal=sc=>['Sobreviver',`${sc.dia} dias · ${ZSEASON[zSeason(sc)][0]} · nível ${sc.zlv||1}${sc.zb?' · base '+sc.zb.nome:''}`,Math.min(100,Math.round(sc.dia/((META.zrec||30)+1)*100))];
+SCEN.zumbi.init=(i0=>m=>Object.assign(i0(m),{sede:20,zat:{for:5,mir:5,fur:5,med:5,mec:5,lid:5},zlv:1,zxp:0,zpts:0,zmat:4,ruido:10,zarm:0,zb:null,nextHorde:20}))(SCEN.zumbi.init);
+SCEN.zumbi.start=(s0=>sc=>{ s0(sc); addItem('muni',null,true); addItem('muni',null,true); addItem('agua',null,true); addItem('roupa',null,true); zEnsure(sc); })(SCEN.zumbi.start);
+SCEN.zumbi.pow=(sc,m)=>{ zEnsure(sc); const a=zAt(sc), w=sc.arma, ammo=countCat('muni');
+  const mine=!w?4:zIsGun(w)?(ammo?itV(w.id)*(1+a.mir/30):5):itV(w.id)*(.7+a.for/35);
+  const cr=crew().filter(c=>!c.bebe).reduce((s,c)=>s+(c.bicho?8:4)+(c.arma?(zIsGun(c.arma)&&!ammo?3:itV(c.arma.id)*.45):1.5)*(c.hp/100),0);
+  return 8+a.for*.8+m.fight*.15+mine+cr+sc.zarm*5+(hasRole('ati')?6:0)+(sc.zbuff||0); };
+SCEN.zumbi.onEnd=(m,sc)=>{ const d=sc.dia; META.zrec=Math.max(META.zrec||0,d); m.fight=clamp(m.fight+Math.min(10,Math.floor(d/8))); st('happy',Math.min(10,Math.floor(d/10))); cnt('zdias',d); };
+// a briga gasta munição e faz barulho
+scFight=(o=>function(thr,what){ const sc=S.scen; if(sc&&sc.id==='zumbi'){ zEnsure(sc); const gun=zIsGun(sc.arma)&&countCat('muni')>0; if(gun){ takeItem('muni'); zNoise(sc.silenc?3:8); } else zNoise(2);
+    const mol=sc.inv.find(x=>itCat(x.id)==='bomba'); if(mol&&thr>=3){ sc.inv=sc.inv.filter(x=>x!==mol); sc.zbuff=(sc.zbuff||0)+30; scLog('Joguei um coquetel molotov no meio deles.','warn'); }
+    thr=Math.min(5,thr+Math.floor(sc.dia/30)); const r=o(thr,what); sc.zbuff=0; if(r.ok) zXP(4+thr*2); return r; } return o(thr,what); })(scFight);
+scHurt=(o=>function(n){ const sc=S.scen; if(sc&&sc.id==='zumbi') n=Math.round(n*(1-Math.min(.4,(sc.zarm||0)*.08))); return o(n); })(scHurt);
+bagCap=(o=>function(){ const sc=S.scen; if(sc&&sc.id==='zumbi'&&sc.zb) return 25+zBaseLv(sc,'deposito')*10+sc.veh.reduce((s,v)=>s+VEH[v.k][3],0); return o(); })(bagCap);
+addItem=(o=>function(id,hp,quiet){ const sc=S.scen; if(sc&&sc.id==='zumbi'&&id==='sucata'){ sc.zmat=(sc.zmat||0)+rnd(2,4); return true; } return o(id,hp,quiet); })(addItem);
+lootText=(o=>function(ids){ const sc=S.scen; if(sc&&sc.id==='zumbi'){ const n=ids.filter(i=>i==='sucata').length; const t=o(ids.filter(i=>i!=='sucata')); return n?(t?t.replace(/\.$/,'')+`, ${n} punhado(s) de sucata.`:` Peguei ${n} punhado(s) de sucata.`):t; } return o(ids); })(lootText);
+scUse=(o=>function(x){ const sc=S.scen, c=itCat(x.id);
+  if(c==='agua'&&!SM().stats.some(s=>s[0]==='sede')){ sc.inv=sc.inv.filter(y=>y!==x); scStat('fome',-Math.round(itV(x.id)/2)); scStat('san',1); return `Bebi ${itN(x.id).toLowerCase()}.`; }
+  if(c==='roupa'){ return 'Guardei as roupas de frio. No inverno, elas fazem diferença sozinhas.'; }
+  if(c==='colete'){ sc.inv=sc.inv.filter(y=>y!==x); sc.zarm=Math.min(4,(sc.zarm||0)+1); return 'Vesti o colete. Proteção extra.'; }
+  if(c==='trap'){ sc.inv=sc.inv.filter(y=>y!==x); sc.trapT=1; return 'Armei a armadilha perto do acampamento. Esta noite, ela trabalha por mim.'; }
+  if(c==='bomba') return 'Vou guardar para a próxima briga feia. Ele é usado sozinho quando a coisa aperta.';
+  return o(x); })(scUse);
+scTok=(o=>function(tok,d,out){ const sc=S.scen; let mm; if(!sc||sc.id!=='zumbi') return o(tok,d,out); zEnsure(sc);
+  if(mm=tok.match(/^z(com|agua|mat|pop|moral|def)([+-]\d+)$/)){ const n=+mm[2]; if(mm[1]==='mat'){ sc.zmat=Math.max(0,sc.zmat+n); return true; } const b=sc.zb; if(!b) return true;
+    if(mm[1]==='moral') b.moral=Math.max(0,Math.min(100,b.moral+n)); else if(mm[1]==='pop') b.pop=Math.max(0,b.pop+n); else if(mm[1]==='def') b.extra=Math.max(0,(b.extra||0)+n); else b[mm[1]]=Math.max(0,b[mm[1]]+n); return true; }
+  if(mm=tok.match(/^ruido([+-]\d+)$/)){ zNoise(+mm[1]); return true; }
+  if(mm=tok.match(/^zxp\+(\d+)$/)){ const t=zXP(+mm[1]); if(t) out.push(t.trim()); return true; }
+  if(mm=tok.match(/^zat\.(for|mir|fur|med|mec|lid)\+(\d+)$/)){ zAt(sc)[mm[1]]+= +mm[2]; return true; }
+  if(mm=tok.match(/^f(merc|corvos|guarda|igreja)([+-]\d+)$/)){ const f=sc.zf[mm[1]]; f.rep=Math.max(-100,Math.min(100,f.rep+ +mm[2])); return true; }
+  if(tok==='zb-'){ const b=sc.zb; if(b){ const ks=Object.keys(b.b).filter(k=>b.b[k]>0); if(ks.length){ const k=R.pick(ks); b.b[k]--; out.push(`${ZB[k][0]} foi danificad${ZB[k][0].endsWith('s')?'os':'a'}.`); } } return true; }
+  if(tok==='zarm+'){ sc.zarm=Math.min(4,sc.zarm+1); return true; }
+  return o(tok,d,out); })(scTok);
+scChance=(o=>function(key){ const sc=S.scen; if(sc&&sc.id==='zumbi'){ zEnsure(sc); if(ZAT[key]) return 25+zAt(sc)[key]*2.5; if(key==='zmoral') return sc.zb?sc.zb.moral:50; if(key==='zdef') return Math.min(95,zDef(sc)); const f=key.match(/^f(merc|corvos|guarda|igreja)$/); if(f) return 50+zRep(sc,f[1])/2; } return o(key); })(scChance);
+scVar=(o=>function(k){ const sc=S.scen; if(sc&&sc.id==='zumbi'){ if(k==='base') return sc.zb?sc.zb.nome:'o acampamento'; if(k==='estacao') return ZSEASON[zSeason(sc)][0].toLowerCase(); } return o(k); })(scVar);
+// ---------- o dia a dia ----------
+function zFoundBase(nome){ const sc=S.scen, l=sc.loc; const bonus=/Fazenda/.test(l.n)?{horta:1,poco:1}:/militar/.test(l.n)?{muro:2}:/Delegacia/.test(l.n)?{muro:1}:/Hospital/.test(l.n)?{enfermaria:1}:/Shopping|Supermercado/.test(l.n)?{deposito:1}:/Escola/.test(l.n)?{alojamento:1}:{};
+  sc.zb={nome,lugar:l.n,ic:l.ic,pop:0,moral:60,com:10,agua:10,racao:1,portas:1,b:Object.assign(Object.fromEntries(Object.keys(ZB).map(k=>[k,0])),bonus),dia:sc.dia}; sc.stay=1;
+  scLog(`Montamos a base "${nome}" em ${l.n.toLowerCase()}.`,'good'); cnt('zbase'); }
+function zSurroundings(sc){ const keys=Object.keys(Z_POI); const thr=Math.min(4,R.wpick([[0,2],[1,4],[2,3],[3,2],[4,1]])+Math.floor(sc.ruido/45));
+  return {n:`Arredores de ${sc.zb.nome}`,ic:'🏚️',thr,pois:R.shuffle(keys).slice(0,3).map(k=>({k,done:0}))}; }
+SCEN.zumbi.upkeep=(u0=>sc=>{ zEnsure(sc); const se=zSeason(sc), b=sc.zb;
+  if(b) sc.stay=1; u0(sc); if(!S.scen) return; if(b){ sc.loc=zSurroundings(sc); sc.veh.forEach(v=>{ if(zBaseLv(sc,'garagem')) v.hp=Math.min(100,v.hp+2); }); }
+  // sede e estação
+  scStat('sede',(se===0?14:10)); if(sc.sede>=100){ scHurt(12); scLog('Sede de verdade. A boca racha.','bad'); }
+  if(sc.sede>=75){ const a=takeItem('@agua'); if(a){ scStat('sede',-itV(a.id)); scLog(`Bebi ${itN(a.id).toLowerCase()}.`); } else if(b&&b.agua>0){ b.agua--; scStat('sede',-30); } }
+  if(b&&sc.fome>=50&&b.com>0){ b.com--; scStat('fome',-30); }
+  crew().slice().forEach(c=>{ if(!R.chance(.4)) return; if(!takeItem('@agua')&&!(b&&b.agua>0&&b.agua--)) c.lv-=4; });
+  if(se===2&&!sc.inv.some(x=>x.id==='roupa')&&!(b&&b.b.alojamento)){ scHurt(4); scStat('san',-2); if(R.chance(.4)) scLog('O frio do inverno corta até os ossos. Preciso de roupas de frio.','warn'); }
+  if(se===0&&R.chance(.15)) scLog('Calor brutal. A água some rápido.','warn');
+  if(se===3&&b) b.com+=b.b.horta*2;
+  // a base produz e consome
+  if(b){ const ppl=b.pop+crew().length, rac=[.6,1,1.3][b.racao];
+    b.com+=Math.round(b.b.horta*5*(1+b.b.cozinha*.15)); b.agua+=b.b.poco*6+(R.chance(.25)?rnd(3,8):0); sc.zmat+=Math.floor(b.pop/3);
+    b.com-=Math.ceil(b.pop*rac*.6); b.agua-=Math.ceil(b.pop*.6);
+    let mo=[-4,0,3][b.racao]+b.b.cozinha+(b.b.gerador?2:0)-(b.pop>zCap(sc)?4:0);
+    if(b.com<0){ b.com=0; mo-=10; if(b.pop>0&&R.chance(.5)){ b.pop--; scLog(`Faltou comida em ${b.nome}. Um morador foi embora.`,'bad'); } }
+    if(b.agua<0){ b.agua=0; mo-=10; if(b.pop>0&&R.chance(.5)){ b.pop--; scLog(`Faltou água em ${b.nome}. Um morador foi embora.`,'bad'); } }
+    b.moral=Math.max(0,Math.min(100,b.moral+mo)); if(b.moral<20&&b.pop>0&&R.chance(.35)){ b.pop--; scLog('Um morador desistiu de nós.','warn'); }
+    if(b.portas<2&&b.moral>=45&&b.pop<zCap(sc)&&R.chance([.3,.15][b.portas]+b.b.radio*.08)){ b.pop++; scLog(`Uma pessoa chegou pedindo para morar em ${b.nome}.`); }
+    if(sc.fome<60&&sc.sede<70) scStat('hl',3);
+    if(b.moral>=50) scStat('san',2+b.b.cozinha); else if(b.moral>=30) scStat('san',1);
+    if(b.b.enfermaria){ scStat('hl',b.b.enfermaria*3); crew().forEach(c=>c.hp=Math.min(100,c.hp+b.b.enfermaria*5)); }
+    if(b.b.armadilhas) sc_kill(b.b.armadilhas*rnd(0,2)); if(b.b.gerador) zNoise(4*b.b.gerador);
+    if(b.b.laboratorio) sc.cure=Math.min(100,(sc.cure||0)+b.b.laboratorio*.5+zAt(sc).med*.05);
+    b.extra=Math.max(0,(b.extra||0)-3);
+    if(R.chance(.12+sc.ruido/300)&&sc.dia!==sc.nextHorde){ const atk=rnd(5,22)+sc.dia*.4+sc.ruido/5, d=zDef(sc);
+      if(d>=atk){ sc_kill(rnd(3,10)); b.moral=Math.min(100,b.moral+3); scLog(`Zumbis bateram nos muros de ${b.nome} de madrugada. Aguentamos.`,'warn'); }
+      else { const lost=Math.min(b.pop,rnd(0,2)); b.pop-=lost; scHurt(rnd(5,12)); b.moral=Math.max(0,b.moral-10); if(R.chance(.4)){ const ks=Object.keys(b.b).filter(k=>b.b[k]>0); if(ks.length){ const k=R.pick(ks); b.b[k]--; } } scLog(`Zumbis invadiram parte de ${b.nome}.${lost?` Perdemos ${lost} morador(es).`:''}`,'bad'); } } }
+  // a grande horda: cada vez maior
+  if(sc.dia===sc.nextHorde-1&&(zBaseLv(sc,'torre')||sc.inv.some(x=>x.id==='radio'))) scLog('A torre avistou: uma grande horda chega amanhã.','bad');
+  if(sc.dia>=sc.nextHorde){ sc.nextHorde=sc.dia+rnd(16,24); queue('z_horda',{}); }
+  if(sc.trapT){ sc.trapT=0; sc_kill(rnd(1,3)); }
+  // facções
+  const f=sc.zf; if(zRep(sc,'corvos')<=-30&&R.chance(.08)) queue('z_corvos',{}); Object.values(f).forEach(x=>{ x.rep+=x.rep>0?-.3:x.rep<0?.3:0; });
+  if(zRep(sc,'merc')>=60&&R.chance(.15)){ addItem(R.pick(['lata','agua','muni','kit'])); scLog('Os Mercadores mandaram um presente de aliado.','good'); }
+  if(zRep(sc,'guarda')>=60&&b) b.extra=(b.extra||0)+10;
+  zNoise(-8); sc.rec=Math.max(sc.rec||0,sc.dia); zXP(3); })(SCEN.zumbi.upkeep);
+// o Porto Seguro deixa de ser um final: é um lugar para morar
+EVENTS.z_final={scen:'zumbi',show:()=>({k:'Pesadelo zumbi',t:'O Porto Seguro',x:'A ponte para a ilha está na sua frente. Lá dentro existe uma comunidade de verdade, com muros, horta e enfermaria. Os soldados aceitam vocês, se aceitarem as regras deles.',ch:[['Entrar e fazer do Porto Seguro a sua base','m'],['Trocar suprimentos e seguir na estrada','t'],['Seguir em frente sem parar','s']]}),
+  pick:k=>{ const sc=S.scen; if(!sc) return ''; zEnsure(sc);
+    if(k==='m'){ if(sc.zb) return 'Já temos uma base. Mas agora sabemos que o Porto Seguro existe.'; zFoundBase('Porto Seguro'); Object.assign(sc.zb.b,{muro:3,horta:2,poco:2,enfermaria:1,alojamento:3}); sc.zb.pop=12; sc.zb.com=40; sc.zb.agua=40; sc.zf.guarda.rep+=30; return 'O Porto Seguro virou nossa casa. Ainda é o fim do mundo, mas agora com muros.'; }
+    if(k==='t'){ addItem('racao'); addItem('kit'); addItem('muni'); sc.zf.guarda.rep+=10; return 'Trocamos o que dava e voltamos para a estrada. Liberdade custa caro.'; }
+    return 'Passamos reto. Ninguém do grupo quis explicar por quê.'; }};
+EVENTS.z_horda={scen:'zumbi',show:()=>{ const sc=S.scen; return {k:'Pesadelo zumbi',t:'A grande horda',x:`Milhares de mortos andando como uma maré. ${sc&&sc.zb?`Vão passar por ${sc.zb.nome}.`:'Vão passar exatamente por onde vocês estão.'}`,ch:sc&&sc.zb?[['Defender a base','d'],['Fugir com o que der','f'],['Esconder todo mundo em silêncio','s']]:[['Lutar','d'],['Fugir de carro','f'],['Esconder em silêncio','s']]}; },
+  pick:k=>{ const sc=S.scen; if(!sc) return ''; zEnsure(sc); const str=40+sc.dia*1.1+sc.ruido/3, b=sc.zb;
+    if(k==='d'){ const d=b?zDef(sc)+scPow()/2:scPow(); if(R.chance(Math.max(.08,Math.min(.92,.5+(d-str)/80)))){ sc_kill(rnd(20,60)); zXP(30); if(b) b.moral=Math.min(100,b.moral+15); return 'Foi a noite mais longa da minha vida. Quando o sol nasceu, os mortos estavam empilhados nos muros. Ainda estamos aqui.'; }
+      scHurt(rnd(20,35)); if(b){ b.pop=Math.max(0,b.pop-rnd(2,5)); b.moral=Math.max(0,b.moral-20); ['muro','torre','horta'].forEach(x=>{ if(b.b[x]&&R.chance(.6)) b.b[x]--; }); } if(crew().length&&R.chance(.5)){ const c=R.pick(crew()); crewLeave(c,'',true); return `A horda rompeu as defesas. Perdemos ${c.first} e muito mais.`; } return 'A horda rompeu as defesas. Sobrevivemos, mas o preço foi alto.'; }
+    if(k==='f'){ if(b&&R.chance(.5)){ const lost=Math.ceil(b.pop/2); b.pop-=lost; b.moral=Math.max(0,b.moral-15); return `Fugimos e voltamos dois dias depois. ${lost} moradores não voltaram.`; } if(!b&&sc.veh.length) return 'Pisamos fundo e deixamos a horda para trás.'; scHurt(rnd(10,20)); return 'Corremos sem olhar para trás. Nem todos os itens vieram junto.'; }
+    if(R.chance(.35+zAt(sc).fur*.02-sc.ruido/250)){ zXP(15); return 'Ninguém respirou alto por seis horas. A horda passou ao lado, como um rio. Nem nos viram.'; }
+    scHurt(rnd(15,25)); return 'Alguém tossiu. A horda virou na nossa direção.'; }};
+EVENTS.z_corvos={scen:'zumbi',show:()=>({k:'Pesadelo zumbi',t:'Os Corvos atacam',x:'Os saqueadores chegaram atirando. Querem tudo o que vocês têm.',ch:[['Revidar','r'],['Entregar parte dos suprimentos','e'],['Negociar uma trégua','n']]}),
+  pick:k=>{ const sc=S.scen; if(!sc) return ''; zEnsure(sc);
+    if(k==='r'){ const f=scFight(4,'O tiroteio'); if(f.ok){ sc.zf.corvos.rep-=10; addItem('muni'); addItem('gas'); return 'Os Corvos recuaram deixando munição e gasolina para trás.'; } return f.t; }
+    if(k==='e'){ for(let i=0;i<3;i++) takeItem('@comida'); takeItem('gas'); sc.zf.corvos.rep+=15; return 'Levaram comida e gasolina. Pelo menos foram embora.'; }
+    if(R.chance(.3+zAt(sc).lid*.02)){ sc.zf.corvos.rep+=25; return 'Conversei com o líder deles. Acordo de não agressão, por enquanto.'; } scHurt(12); return 'A conversa acabou num soco na minha cara.'; }};
+// ---------- ações ----------
+function zScav(kind){ const sc=S.scen; zEnsure(sc); const a=zAt(sc), thr=sc.loc.thr;
+  const T={comida:['comida',['lata','miojo','biscoito','sardinha','arroz','pessego','barra']],agua:['água',['agua','agua','cantil']],remedio:['remédios',['analg','curativo','antib','kit']],
+    gas:['combustível',['gas','gas']],armas:['armas e munição',['muni','muni','faca','taco','facao','pistola']],mat:['materiais',['sucata','sucata','sucata','corda','pilha']]}[kind];
+  if(R.chance(.05+thr*.05-a.fur*.006)){ const f=scFight(thr,'Um bando de zumbis'); if(!f.ok) return `Procurando ${T[0]}, fui cercad${oa()}. ${f.t}`; }
+  const n=rnd(1,2)+(a.fur>=12?1:0)+(R.chance(.3)?1:0), got=[]; for(let i=0;i<n;i++) if(R.chance(.7)) got.push(R.pick(T[1])); zNoise(1); zXP(5);
+  return got.length?`Procurei ${T[0]} pela vizinhança.`+lootText(got):`Procurei ${T[0]} o dia todo. Já tinham levado tudo.`; }
+function zExpedition(k){ const sc=S.scen; zEnsure(sc); const e=ZEXP[k], a=zAt(sc), car=sc.veh.length&&countCat('gas')>0; if(car) takeItem('gas');
+  const thr=Math.min(5,e[3]+Math.floor(sc.dia/35)); let t=`${e[1]} Expedição: ${e[0].toLowerCase()}. `;
+  if(R.chance(.15+thr*.1-a.fur*.008)){ const f=scFight(thr,'A expedição'); if(!f.ok) return t+f.t; t+='Teve briga, mas voltamos inteiros. '; }
+  const n=rnd(3,5)+(car?2:0)+(a.fur>=12?1:0), got=[]; for(let i=0;i<n;i++) got.push(R.pick(e[2]));
+  if(e[4]==='surv'&&R.chance(.25)){ if(sc.zb&&R.chance(.6)){ sc.zb.pop++; t+='Uma família escondida veio morar na base. '; } else { const c=mkCrew(); t+=`${c.first} se juntou ao grupo. `; } }
+  if(e[4]==='veh'&&R.chance(.25)){ const kk=R.pick(['sedan','van','picape','kombi','jipe']); sc.veh.push({k:kk,hp:rnd(30,70)}); t+=`Consertamos ${VEH[kk][0].toLowerCase()} no ferro-velho! `; }
+  zNoise(car?6:2); zXP(12); return t+lootText(got).trim(); }
+function zCraft(r){ const sc=S.scen; zEnsure(sc); const [id,n,ic,mat,items,ofc,res]=r; sc.zmat-=mat; items.forEach(i=>takeItem(i)); zXP(6);
+  let mm; if(mm=res.match(/^it:(\w+)(?:\*(\d+))?$/)){ for(let i=0;i<+(mm[2]||1);i++) addItem(mm[1],rnd(70,100),true); }
+  else if(res==='zarm') sc.zarm=Math.min(4,sc.zarm+1); else if(res==='silenc') sc.silenc=1;
+  const bonus=zAt(sc).mec>=15&&R.chance(.3)?' Ficou tão bom que sobrou material.':''; if(bonus) sc.zmat+=Math.ceil(mat/2);
+  return `${ic} Fabriquei: ${n.toLowerCase()}.${bonus}`; }
+const ZACTS={
+  procurar:{ic:'🔎',l:'Procurar recursos',s:'Comida, água, remédios, combustível, armas, materiais',ap:0,menu:true},
+  expedicao:{ic:'🗺️',l:'Expedição',s:'Ir longe atrás de muito saque · 2 de energia',ap:0,menu:true},
+  oficina:{ic:'🔧',l:'Oficina',s:'Fabricar armas, munição, remédios e armaduras',ap:0,menu:true},
+  faccoes:{ic:'📻',l:'Facções e trocas',s:'Mercadores, Corvos, Guarda Nacional, Igreja',ap:0,menu:true},
+  base:{ic:'🏚️',l:'Base',s:'Construções, moradores e estoque',ap:0,menu:true},
+  ficha:{ic:'🧍',l:'Ficha do sobrevivente',s:'Nível e atributos',ap:0,menu:true},
+  cacaranim:{ic:'🦌',l:'Caçar animais',s:'Carne fresca · pontaria ou força',fn:sc=>{ const a=zAt(sc); if(pct(.35+(a.mir+a.for)/80)){ addItem('lata'); addItem('lata'); zXP(6); zNoise(zIsGun(sc.arma)?5:1); return 'Abati um veado. Carne para dois dias, salgada e guardada.'; } return 'Os bichos sentiram meu cheiro antes de eu sentir o deles.'; }},
+  pescar:{ic:'🎣',l:'Pescar no rio',s:'Comida silenciosa',fn:sc=>{ if(pct(.45+zAt(sc).fur/60)){ addItem('sardinha'); if(R.chance(.5)) addItem('sardinha'); zXP(4); return 'Peixe de rio, assado na brasa. Silêncio total.'; } return 'Nenhum peixe. Só um tênis velho.'; }},
+  chuva:{ic:'🌧️',l:'Coletar e filtrar água',s:'Água limpa',fn:sc=>{ const n=zSeason(sc)===0?1:2; for(let i=0;i<n;i++) addItem('agua',90,true); if(sc.zb) sc.zb.agua+=3; return `Juntei água da chuva e filtrei com carvão e pano: ${n} garrafa(s)${sc.zb?' e mais um pouco para a cisterna':''}.`; }},
+  patrulha:{ic:'🚶',l:'Patrulhar a área',s:'Diminui a ameaça e o barulho',fn:sc=>{ const f=scFight(Math.max(0,sc.loc.thr-1),'A patrulha'); if(f.ok){ sc.loc.thr=Math.max(0,sc.loc.thr-1); zNoise(-10); return `Patrulhei os quarteirões em volta. Ameaça agora: ${THREAT[sc.loc.thr].toLowerCase()}.`; } return f.t; }},
+  armadilha:{ic:'🪤',l:'Montar armadilhas',s:'Menos ataques esta noite · mecânica',fn:sc=>{ sc.trapT=1; sc.vig=1; zXP(4); if(sc.zb) sc.zb.extra=(sc.zb.extra||0)+5; return 'Arame, latas e estacas. Se algo chegar perto, vamos saber.'; }},
+  esconder:{ic:'🍃',l:'Apagar rastros e fazer silêncio',s:'Barulho cai bastante',fn:sc=>{ zNoise(-25); zXP(3); return 'Apagamos o fogo, cobrimos as janelas e falamos só por gestos. O mundo lá fora esqueceu da gente.'; }},
+  tratar:{ic:'🩺',l:'Tratar os feridos',s:'Medicina cura o grupo',fn:sc=>{ const a=zAt(sc), v=6+a.med; crew().forEach(c=>c.hp=Math.min(100,c.hp+v)); scStat('hl',Math.round(v/2)); zXP(4); return `Limpei feridas, troquei curativos e costurei o que dava: +${v} de saúde para o grupo.`; }},
+  consertar:{ic:'🔧',l:'Consertar os veículos',s:'Mecânica · usa sucata',min:sc=>sc.veh.some(v=>v.hp<100)&&sc.zmat>=2,why:'Nada para consertar, ou falta sucata.',fn:sc=>{ sc.zmat-=2; const v=10+zAt(sc).mec*2; sc.veh.forEach(x=>x.hp=Math.min(100,x.hp+v)); zXP(4); return `Graxa até o cotovelo: +${v}% em todos os carros.`; }},
+  ensinar:{ic:'📣',l:'Treinar o grupo',s:'Liderança · lealdade de todos',min:sc=>crew().length>0,why:'Não tenho grupo.',fn:sc=>{ const v=3+Math.round(zAt(sc).lid/3); crew().forEach(c=>c.lv=Math.min(100,c.lv+v)); if(sc.zb) sc.zb.moral=Math.min(100,sc.zb.moral+v); zXP(4); return 'Treinamos rotas de fuga, sinais e tiro. O grupo sai daqui mais unido.'; }},
+  ler:{ic:'📖',l:'Ler e escrever no diário',s:'Sanidade',fn:sc=>{ scStat('san',rnd(6,10)); return R.pick(['Escrevi sobre o dia em que tudo começou. Doeu menos do que eu esperava.','Li um livro velho de receitas. Sonhei com lasanha.','Desenhei o mapa da região de memória.']); }},
+  pesquisa:{ic:'🧪',l:'Pesquisar a cura',s:'Laboratório na base · medicina',min:sc=>zBaseLv(sc,'laboratorio')>0,why:'Preciso de um laboratório na base.',fn:sc=>{ const v=rnd(3,6)+Math.round(zAt(sc).med/4)+zBaseLv(sc,'laboratorio')*2; sc.cure=Math.min(100,(sc.cure||0)+v); zXP(8); if(sc.cure>=100&&!sc.curaOk){ sc.curaOk=1; addItem('vacina'); addItem('vacina'); return 'CONSEGUIMOS. Uma vacina que funciona! Os mortos continuam lá fora, mas mordida deixou de ser sentença de morte.'; } return `Microscópio, amostras e muita paciência: pesquisa da cura em ${Math.round(sc.cure)}%.`; }},
+};
+Object.entries(ZACTS).forEach(([k,a])=>{ if(!a.menu) SCEN.zumbi.acts[k]=a; });
+// ---------- telas ----------
+V.zMe=()=>{ const sc=S.scen, m=S.me; zEnsure(sc); const a=zAt(sc), need=sc.zlv*60;
+  const it=[{html:`<div class="card" style="display:flex;gap:12px;align-items:center">${faceSVG(m,64)}<div style="flex:1"><p><b>${esc(m.first)}</b> · sobrevivente nível ${sc.zlv}</p>${bar('Experiência',Math.round(sc.zxp/need*100))}<p style="color:var(--muted);font-size:12.5px">${sc.dia} dias vivo · recorde ${Math.max(sc.rec||0,META.zrec||0)} · ${sc.kills||0} zumbis abatidos · força de combate ${scPow()}</p></div></div>`},
+    {sec:sc.zpts?`Atributos · ${sc.zpts} ponto(s) para distribuir`:'Atributos'}];
+  Object.entries(ZAT).forEach(([k,[n,ic,d]])=>it.push({ic,l:`${n}: ${a[k]}`,s:d,r:sc.zpts?'＋':'',dis:!sc.zpts,why:'Ganhe experiência sobrevivendo, lutando e saqueando.',on:()=>{ sc.zpts--; a[k]++; UI.refresh(); render(); }}));
+  it.push({sec:'Equipamento'},{ic:'⚔️',l:'Trocar de arma',s:sc.arma?`${itN(sc.arma.id)} (${sc.arma.hp}%)${zIsGun(sc.arma)?' · '+countCat('muni')+' de munição':''}`:'Nenhuma',on:()=>UI.push(V.scMe)},
+    {ic:'🛡️',l:'Proteção',s:['Nenhuma','Improvisada','Reforçada','Pesada','Blindada'][sc.zarm||0]+(sc.silenc?' · arma com silenciador':''),dis:true,why:'Fabrique armaduras na oficina ou troque por coletes.'});
+  return {title:'Ficha do sobrevivente',items:it}; };
+V.zScav=()=>{ const sc=S.scen; zEnsure(sc); const it=[{html:`<div class="card"><p style="color:var(--muted);font-size:13px">Perto daqui, 1 de energia cada, uma vez por dia. Furtividade (${zAt(sc).fur}) ajuda a não ser vist${oa()} e a achar mais.</p>${kv('Ameaça agora',THREAT[sc.loc.thr])}</div>`}];
+  [['comida','🥫','Procurar comida'],['agua','💧','Procurar água'],['remedio','💊','Procurar remédios'],['gas','⛽','Procurar combustível'],['armas','🔫','Procurar armas e munição'],['mat','🔩','Procurar materiais']].forEach(([k,ic,l])=>{ const done=sc.done['zs_'+k];
+    it.push({ic,l,r:done?'✓':'⚡',dis:done||sc.ap<1,why:done?'Já procurei isso hoje.':'Sem energia hoje.',on:()=>scAct(()=>{ sc.ap--; sc.done['zs_'+k]=1; return zScav(k); },l)}); });
+  return {title:'Procurar recursos',items:it}; };
+V.zExp=()=>{ const sc=S.scen; zEnsure(sc); const done=!!sc.done.zexp, car=sc.veh.length&&countCat('gas')>0;
+  const it=[{html:`<div class="card"><p style="color:var(--muted);font-size:13px">Uma expedição por dia, 2 de energia. ${car?'Com carro (gasta 1 galão): mais carga.':'A pé: menos carga.'} Quanto mais dias passam, mais perigoso fica.</p></div>`}];
+  Object.entries(ZEXP).forEach(([k,e])=>it.push({ic:e[1],l:e[0],s:`Perigo ${'★'.repeat(Math.min(5,e[3]+Math.floor(sc.dia/35)))}`,r:done?'✓':'⚡⚡',dis:done||sc.ap<2,why:done?'Já fizemos uma expedição hoje.':'Preciso de 2 de energia.',on:()=>scAct(()=>{ sc.ap-=2; sc.done.zexp=1; return zExpedition(k); },e[0])}));
+  return {title:'Expedição',items:it}; };
+V.zCraft=()=>{ const sc=S.scen; zEnsure(sc); const ofc=zBaseLv(sc,'oficina'), have=id=>sc.inv.some(x=>x.id===id);
+  const it=[{html:`<div class="card">${kv('Sucata',sc.zmat)}${kv('Oficina',ofc?'nível '+ofc:'improvisada (sem base)')}<p style="color:var(--muted);font-size:12.5px">Fabricar não gasta energia, mas cada receita só uma vez por dia. Mecânica alta pode sobrar material.</p></div>`},{sec:'Receitas'}];
+  ZRECIPES.forEach(r=>{ const [id,n,ic,mat,items,lv]=r, miss=items.filter(i=>!have(i)), lock=ofc<lv, done=sc.done['zc_'+id];
+    it.push({ic:lock?'🔒':ic,l:n,s:`${mat} de sucata${items.length?' + '+items.map(itN).join(' + ').toLowerCase():''}${lv?` · oficina ${lv}`:''}`,r:done?'✓':'',dis:lock||done||sc.zmat<mat||miss.length>0,
+      why:lock?`Precisa de oficina nível ${lv} na base.`:done?'Já fabriquei isso hoje.':sc.zmat<mat?'Falta sucata.':`Falta: ${miss.map(itN).join(', ').toLowerCase()}.`,on:()=>scAct(()=>{ sc.done['zc_'+id]=1; return zCraft(r); },n)}); });
+  return {title:'Oficina',items:it}; };
+V.zFac=()=>{ const sc=S.scen; zEnsure(sc); const it=[{html:'<div class="card"><p style="color:var(--muted);font-size:13px">Cada facção lembra do que você fez. Reputação alta abre trocas melhores e alianças; baixa traz ataques.</p></div>'}];
+  Object.entries(ZFAC).forEach(([k,f])=>{ const r=Math.round(zRep(sc,k)); it.push({ic:f[1],l:f[0],s:`${zRepTxt(r)} (${r}) · ${f[2]}`,bars:[['🤝',Math.round((r+100)/2),r>=20?'#3BB273':r>-20?'#F2A93B':'#E5484D']],on:()=>UI.push(()=>V.zFacOne(k))}); });
+  return {title:'Facções',items:it}; };
+V.zFacOne=k=>{ const sc=S.scen, f=ZFAC[k], fr=sc.zf[k], r=fr.rep, a=zAt(sc); const once=x=>!!sc.done['zf_'+k+x], al=fr.ally;
+  const it=[{html:`<div class="card"><p><b>${f[1]} ${f[0]}</b></p>${bar('Reputação',Math.round((r+100)/2))}<p style="color:var(--muted);font-size:13px">${zRepTxt(Math.round(r))}${al?' · aliados':''} · ${f[2]}</p></div>`},{sec:'Trocas de hoje'}];
+  if(r<=-20) it.push({html:'<div class="card"><p style="color:var(--muted)">Eles não negociam com você.</p></div>'});
+  else { const pool=ZTRADE[k], seed=sc.dia; const offers=pool.filter((x,i)=>((i*7+seed*3)%pool.length)<4);
+    offers.forEach((o,i)=>{ const [g,gn,t,tn]=o, has=g[0]==='@'?sc.inv.filter(x=>itCat(x.id)===g.slice(1)).length:g==='sucata'?sc.zmat:sc.inv.filter(x=>x.id===g).length, gl=g[0]==='@'?{'@comida':'comida','@remedio':'remédio','@arma':'arma','@agua':'água'}[g]:g==='sucata'?'sucata':itN(g).toLowerCase(), tl=t[0]==='@'?{'@comida':'comida variada'}[t]:itN(t).toLowerCase(), done=once('t'+i);
+      it.push({ic:t[0]==='@'?'🥫':itIc(t),l:`Receber ${tn}× ${tl}`,s:`Dar ${gn}× ${gl}${r>=60?' · desconto de aliado':''}`,r:done?'✓':'',dis:done||has<(r>=60?Math.max(1,gn-1):gn),why:done?'Já fizemos essa troca hoje.':`Preciso de ${gn}× ${gl}.`,
+        on:()=>scAct(()=>{ sc.done['zf_'+k+'t'+i]=1; const n=r>=60?Math.max(1,gn-1):gn; for(let j=0;j<n;j++){ if(g==='sucata') sc.zmat--; else takeItem(g); } for(let j=0;j<tn;j++) addItem(t==='@comida'?R.pick(['lata','arroz','miojo']):t,rnd(70,100),true); fr.rep=Math.min(100,fr.rep+2); zXP(3); return `Troca feita com ${f[0]}: recebi ${tn}× ${tl}.`; },f[0])}); }); }
+  it.push({sec:'Ações'});
+  it.push({ic:'🤝',l:'Fazer uma missão para eles',s:'Reputação e recompensa · 1 de energia',dis:r<=-20||once('m')||sc.ap<1,why:r<=-20?'Não confiam em você.':once('m')?'Já fiz uma missão hoje.':'Sem energia.',on:()=>scAct(()=>{ sc.done['zf_'+k+'m']=1; sc.ap--; const fi=scFight(2,'A missão'); if(!fi.ok) return fi.t; fr.rep=Math.min(100,fr.rep+rnd(8,15)); const rew={merc:['muni','gas','kit'],guarda:['muni','muni','racao'],igreja:['calm','kit','agua'],corvos:['gas','muni','facao']}[k]; rew.forEach(x=>addItem(x,null,true)); zXP(15); return `${R.pick(['Escoltei uma carga','Limpei um prédio para eles','Recuperei um rádio perdido','Busquei remédios num hospital'])}. ${f[0]} pagou com ${rew.map(itN).join(', ').toLowerCase()}.`; },f[0])});
+  it.push({ic:'🙏',l:'Pedir ajuda',s:'Só com boa reputação',dis:r<40||once('p'),why:r<40?'Ainda não somos tão próximos.':'Já pedi hoje.',on:()=>scAct(()=>{ sc.done['zf_'+k+'p']=1; fr.rep-=5; ['lata','agua','kit'].forEach(x=>addItem(x,null,true)); return `${f[0]} mandou comida, água e um kit. "Não se acostume."`; },f[0])});
+  it.push({ic:'🥷',l:'Roubar o acampamento deles',s:`Furtividade ${a.fur} · reputação despenca se descobrirem`,tone:'bad',dis:once('r')||sc.ap<1,why:once('r')?'Já tentei hoje.':'Sem energia.',on:()=>scAct(()=>{ sc.done['zf_'+k+'r']=1; sc.ap--; S.me.karma=clamp(S.me.karma-4);
+    if(pct(.3+a.fur/40-f[3]/200)){ const loot=R.shuffle(['muni','muni','gas','kit','lata','arroz','pistola','reparo','antib']).slice(0,rnd(3,5)); fr.rep-=R.chance(.4)?25:5; zXP(10); return `Entrei de madrugada e saí sem ninguém ver.`+lootText(loot); }
+    fr.rep-=35; const fi=scFight(3,'Os guardas deles'); return 'Me pegaram no meio do roubo. '+(fi.ok?'Saí na porrada, de mãos vazias.':fi.t); },f[0])});
+  it.push({ic:'💥',l:'Atacar o acampamento',s:'Guerra aberta · muito saque se vencer',tone:'bad',dis:once('a')||sc.ap<2,why:once('a')?'Já atacamos hoje.':'Preciso de 2 de energia.',on:()=>confirmBox('Atacar?',`Declarar guerra contra ${f[0]}?`,'Atacar',()=>scAct(()=>{ sc.done['zf_'+k+'a']=1; sc.ap-=2; fr.rep=-80; fr.ally=0;
+    if(pct(.2+(scPow()-f[3])/90)){ ['muni','muni','muni','gas','gas','kit','racao','espingarda'].forEach(x=>addItem(x,null,true)); sc.zmat+=10; zXP(30); Object.keys(sc.zf).filter(x=>x!==k).forEach(x=>sc.zf[x].rep+=k==='corvos'?10:-10); return `Tomamos o acampamento de ${f[0]}. Armas, gasolina, comida: tudo nosso.`; }
+    scHurt(rnd(20,35)); if(crew().length&&R.chance(.4)){ const c=R.pick(crew()); crewLeave(c,'',true); return `O ataque fracassou. Perdemos ${c.first}.`; } return 'O ataque fracassou. Voltamos sangrando.'; },f[0]))});
+  it.push({ic:'🕊️',l:al?'Aliança firmada':'Propor aliança',s:al?'Presentes, ajuda na defesa e trocas com desconto':'Precisa de reputação 60+',dis:al||r<60||once('al'),why:al?'Já somos aliados.':'Reputação baixa demais.',on:()=>scAct(()=>{ sc.done['zf_'+k+'al']=1; if(pct(.4+a.lid/40)){ fr.ally=1; fr.rep=Math.min(100,fr.rep+10); return `${f[0]} aceitou a aliança. Pela primeira vez, alguém lá fora está do nosso lado.`; } return 'Disseram que vão pensar.'; },f[0])});
+  return {title:f[0],items:it}; };
+V.zBase=()=>{ const sc=S.scen; zEnsure(sc); const b=sc.zb, it=[];
+  if(!b){ it.push({html:`<div class="card"><p>Ainda vivemos na estrada. Com uma base, o grupo para de viajar: dá para plantar, juntar água, receber moradores e construir defesas. Mas hordas e saqueadores vão saber onde vocês estão.</p>${kv('Aqui',sc.loc.n)}</div>`});
+    it.push({ic:'🏚️',l:'Montar a base aqui',s:'Vira nosso lar fixo · você escolhe o nome',on:()=>vilaNamePromptZ()}); return {title:'Base',items:it}; }
+  const once=k=>!!sc.done['zb_'+k], sg=n=>(n>=0?'+':'')+n, ppl=b.pop+crew().length;
+  it.push({html:`<div class="card"><p><b>${b.ic} ${esc(b.nome)}</b> · ${esc(b.lugar)}</p>${kv('Moradores',`${b.pop} de ${zCap(sc)} (mais ${crew().length} no grupo)`)}${bar('Moral da base',Math.round(b.moral))}${kv('🥫 Comida',`${b.com} (${sg(b.b.horta*5-Math.ceil(b.pop*[.6,1,1.3][b.racao]*.6))}/dia)`)}${kv('💧 Água',`${b.agua} (${sg(b.b.poco*6-Math.ceil(b.pop*.6))}/dia)`)}${kv('🔩 Sucata',sc.zmat)}${kv('🛡️ Defesa',zDef(sc))}${kv('🔊 Barulho',Math.round(sc.ruido)+'%')}${kv('🧪 Cura',Math.round(sc.cure||0)+'%')}${kv('Próxima grande horda',zBaseLv(sc,'torre')?(sc.nextHorde-sc.dia<=0?'chegando':`em ${sc.nextHorde-sc.dia} dia(s)`):'desconhecida (construa uma torre)')}</div>`});
+  it.push({sec:'Regras da base'});
+  it.push({ic:'🍲',l:`Ração: ${['pouca','normal','farta'][b.racao]}`,s:'Farta anima, mas gasta mais · toque para mudar',on:()=>{ b.racao=(b.racao+1)%3; UI.refresh(); }});
+  it.push({ic:'🚪',l:`Portões: ${['abertos a todos','com seleção','fechados'][b.portas]}`,s:'Quem pode entrar para morar · toque para mudar',on:()=>{ b.portas=(b.portas+1)%3; UI.refresh(); }});
+  it.push({ic:'✏️',l:'Renomear a base',s:b.nome,on:()=>vilaNamePromptZ(true)});
+  it.push({sec:'Estoque'});
+  it.push({ic:'📥',l:'Guardar comida e água da mochila no estoque',s:'Tudo que não for comer agora',dis:!sc.inv.some(x=>['comida','agua'].includes(itCat(x.id))),why:'Nada para guardar.',on:()=>scAct(()=>{ let c=0,w=0; sc.inv.slice().forEach(x=>{ const k=itCat(x.id); if(k==='comida'){ sc.inv=sc.inv.filter(y=>y!==x); b.com+=Math.max(1,Math.round(itV(x.id)/10)); c++; } else if(k==='agua'){ sc.inv=sc.inv.filter(y=>y!==x); b.agua+=2; w++; } }); return `Guardei ${c} comida(s) e ${w} água(s) no estoque de ${b.nome}.`; },b.nome)});
+  it.push({ic:'📤',l:'Pegar mantimentos para a estrada',s:'2 comidas e 2 águas do estoque',dis:b.com<4||b.agua<4,why:'Estoque baixo demais.',on:()=>scAct(()=>{ b.com-=4; b.agua-=4; addItem('lata',90,true); addItem('lata',90,true); addItem('agua',90,true); addItem('agua',90,true); return 'Enchi a mochila com o estoque da base.'; },b.nome)});
+  it.push({sec:'Construções'});
+  Object.entries(ZB).forEach(([k,[n,ic,base,d,max]])=>{ const l=b.b[k], c=base*(l+1), mx=l>=max;
+    it.push({ic,l:`${n}${l?' · nível '+l:''}`,s:mx?`${d} · máximo`:`${d} · ${l?'melhorar':'construir'}: ${c} de sucata · 1 de energia`,r:mx?'★':'',dis:mx||sc.zmat<c||once(k)||sc.ap<1,why:mx?'Já está no máximo.':once(k)?'Os construtores precisam de um dia.':sc.ap<1?'Sem energia hoje.':`Preciso de ${c} de sucata.`,
+      on:()=>scAct(()=>{ sc.done['zb_'+k]=1; sc.ap--; sc.zmat-=c; b.b[k]++; b.moral=Math.min(100,b.moral+3); zXP(8); zNoise(5); if(k==='garagem'&&b.b[k]===1&&!sc.veh.length){ sc.veh.push({k:'picape',hp:50}); return `${ic} Garagem construída, e ainda sobrou uma picape velha no fundo!`; } return `${ic} ${n} ${l?'melhorad'+(n.endsWith('s')?'os':'a')+' para o nível '+b.b[k]:'construíd'+(n.endsWith('s')?'os':'a')} em ${b.nome}.`; },n)}); });
+  it.push({sec:'Estrada'},{ic:'🚙',l:'Abandonar a base e voltar para a estrada',s:'Perde as construções e os moradores',tone:'bad',on:()=>confirmBox('Abandonar?',`Deixar ${b.nome} para trás?`,'Abandonar',()=>{ scLog(`Abandonamos ${b.nome}. Os moradores ficaram para trás.`,'bad'); sc.zb=null; sc.stay=0; scStat('san',-10); UI.back(); after(); })});
+  return {title:b.nome,items:it}; };
+function vilaNamePromptZ(rename){ const ns=R.pick(['Último Refúgio','Fortaleza do Rio','Abrigo Esperança','Forte Amanhã','Ninho dos Sobreviventes','Morro Seguro','Casa dos Vivos']);
+  modal({t:rename?'Novo nome da base':'Nome da base',x:'Digite o nome:',html:`<input id="vnome" maxlength="28" value="${esc(rename&&S.scen.zb?S.scen.zb.nome:ns)}" style="width:100%;margin-top:8px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit">`,
+    ch:[{l:'Confirmar',fn:()=>{ const el=document.getElementById('vnome'); const n=(el&&el.value||'').trim().replace(/\s+/g,' ').slice(0,28)||ns; if(rename&&S.scen.zb) S.scen.zb.nome=n; else { zFoundBase(n); MQ.unshift({t:'Base montada',x:`${n} é nosso lar agora. Construa muros, uma horta e um poço antes que a próxima horda chegue.`}); } UI.close(); }},{l:'Cancelar',cls:'alt'}]});
+  setTimeout(()=>{ const el=document.getElementById('vnome'); if(el){ el.focus(); el.select(); } },60); }
+V.scActs=(o=>()=>{ const r=o(), sc=S.scen; if(!sc||sc.id!=='zumbi') return r; zEnsure(sc);
+  const b=sc.zb; r.items.splice(1,0,{sec:'Sobrevivência'},
+    {ic:'🧍',l:'Ficha do sobrevivente',s:`Nível ${sc.zlv}${sc.zpts?` · ${sc.zpts} ponto(s) para distribuir!`:''}`,tone:sc.zpts?'good':'',on:()=>UI.push(V.zMe)},
+    {ic:'🔎',l:'Procurar recursos',s:'Comida, água, remédios, combustível, armas, materiais',on:()=>UI.push(V.zScav)},
+    {ic:'🗺️',l:'Expedição',s:sc.done.zexp?'Já fizemos uma hoje':'Ir longe atrás de muito saque · 2 de energia',on:()=>UI.push(V.zExp)},
+    {ic:'🔧',l:'Oficina',s:`${sc.zmat} de sucata · fabricar armas, munição e armaduras`,on:()=>UI.push(V.zCraft)},
+    {ic:'📻',l:'Facções e trocas',s:Object.entries(ZFAC).map(([k,f])=>f[1]+zRepTxt(Math.round(zRep(sc,k)))).join(' · '),on:()=>UI.push(V.zFac)},
+    {ic:'🏚️',l:b?`Base: ${b.nome}`:'Montar uma base',s:b?`${b.pop} moradores · moral ${Math.round(b.moral)}% · defesa ${zDef(sc)}`:'Parar de viajar e construir um lar',on:()=>UI.push(V.zBase)});
+  return r; })(V.scActs);
+V.scLocal=(o=>()=>{ const r=o(), sc=S.scen; if(!sc||sc.id!=='zumbi') return r; zEnsure(sc);
+  r.items.splice(1,0,{html:`<div class="card">${kv('Estação',ZSEASON[zSeason(sc)].join(' '))}${kv('Barulho',Math.round(sc.ruido)+'% '+(sc.ruido>=60?'· atraindo hordas':''))}${kv('Dia',sc.dia+' · recorde '+Math.max(sc.rec||0,META.zrec||0))}</div>`});
+  if(sc.zb){ const i=r.items.findIndex(x=>x&&x.sec==='Viagem'); if(i>=0) r.items.splice(i,2,{sec:'Base'},{ic:'🏚️',l:sc.zb.nome,s:'Construções, moradores e estoque',on:()=>UI.push(V.zBase)}); }
+  else r.items.push({sec:'Base'},{ic:'🏚️',l:'Montar a base aqui',s:'Parar de viajar e construir um lar',on:()=>UI.push(V.zBase)});
+  return r; })(V.scLocal);
+V.scItems=(o=>()=>{ const r=o(), sc=S.scen; if(!sc||sc.id!=='zumbi') return r; zEnsure(sc); r.title='Bens';
+  r.items.splice(1,0,{html:`<div class="card">${kv('🔹 Munição',countCat('muni'))}${kv('🔩 Sucata',sc.zmat)}${kv('🛡️ Proteção',['nenhuma','improvisada','reforçada','pesada','blindada'][sc.zarm||0])}${sc.zb?kv('🏚️ Estoque da base',`${sc.zb.com} comida · ${sc.zb.agua} água`):''}</div>`}); return r; })(V.scItems);
+V.scCrew=(o=>()=>{ const r=o(), sc=S.scen; if(sc&&sc.id==='zumbi'&&r.items[0]){ r.items[0].on=()=>UI.push(V.zMe); if(sc.zb) r.items.push({html:`<div class="card"><p style="color:var(--muted);font-size:13px">Além do grupo, ${sc.zb.pop} morador(es) vivem em ${esc(sc.zb.nome)}.</p></div>`}); } return r; })(V.scCrew);
+// no fim do pesadelo, guarda o recorde
+scenEnd=(o=>function(win,txt){ const sc=S.scen; if(sc&&sc.id==='zumbi'){ zEnsure(sc); const d=SCEN.zumbi; d.onEnd(S.me,sc); const rec=META.zrec; txt+=`\n\nVocê sobreviveu ${sc.dia} dias. Recorde: ${rec} dias.`; } return o(win,txt); })(scenEnd);
+
+// ===== Pesadelo zumbi · eventos da base e da comunidade =====
+const ZBB=ZW(sc=>sc.id==='zumbi'&&!!sc.zb), ZNM=ZW(sc=>sc.id==='zumbi'&&!sc.zb), ZSE=k=>ZW(sc=>sc.id==='zumbi'&&zSeason(sc)===k);
+const ZRP=(f,a,b)=>ZW(sc=>sc.id==='zumbi'&&zRep(sc,f)>=a&&zRep(sc,f)<=b);
+const ZBL=(k,n)=>ZW(sc=>sc.id==='zumbi'&&!!sc.zb&&sc.zb.b[k]>=n);
+pack({k:'Pesadelo zumbi',w:1.6,cd:40,scen:'zumbi',when:ZBB},[
+  ['Primeira noite na base','A primeira noite em {base}. Ninguém dorme direito, mas pela primeira vez em semanas há paredes em volta.',['Fazer um discurso|?lid zmoral+10 moral+6|Falei que aqui vamos recomeçar. Alguns choraram.|zmoral+3|Gaguejei, mas a intenção valeu.','Montar a escala de vigia|zdef+8 zxp+5|Turnos de duas horas. Ninguém dorme sem alguém acordado.']],
+  ['Família na porta','Uma família com duas crianças bate no portão de {base}, pedindo para entrar.',['Deixar entrar|zpop+3 zcom-4 k+6 zmoral+4|As crianças correram pelo pátio. Fazia tempo que ninguém ria aqui.','Dar comida e mandar seguir|zcom-2 k+2|Eles agradeceram e sumiram na estrada.','Recusar|k-6 zmoral-4|O portão fechou. O silêncio pesou o resto do dia.']],
+  ['Infiltrado','Um morador novo de {base} está mexendo no estoque à noite.',['Expulsar|zpop-1 zmoral+4|Foi embora xingando. O estoque está seguro.','Conversar|?lid zmoral+6 k+3|Ele estava guardando comida para a irmã doente lá fora. Mandamos buscar a irmã.|zcom-6|Ele fugiu levando metade do que pegou.','Prender no porão|zmoral-4 k-3|Ninguém gostou de ver uma cela em {base}.']],
+  ['Assembleia','Os moradores querem uma assembleia para decidir as regras de {base}.',['Aceitar|?lid zmoral+12 k+4|Votamos tudo: turnos, ração e quem cuida da horta.|zmoral+4|Discussão até de madrugada, mas saiu acordo.','Recusar e decidir tudo sozinh{o}|zmoral-8|Alguns cochicharam que viramos uma ditadura.']],
+  ['Horta atacada','Coelhos e ratos atacaram a horta de {base}.',['Montar armadilhas|zcom+4 zxp+4|Agora tem guisado de coelho.','Proteger com tela|zmat-2 zcom+2|Horta protegida.'],{when:ZBL('horta',1)}],
+  ['Colheita farta','A horta de {base} deu mais do que o esperado.',['Guardar tudo|zcom+15|Estoque cheio pela primeira vez.','Fazer uma festa|zcom+6 zmoral+12 h+6|Sopa de legumes e música no violão. Por uma noite, fomos gente normal.'],{when:ZBL('horta',1)}],
+  ['Poço contaminado','A água do poço de {base} está com gosto estranho.',['Ferver tudo antes de beber|zagua-6 zmoral-2|Trabalhoso, mas seguro.','Investigar|?med zagua+4|Era um rato morto no fundo. Limpamos o poço.|hl-8|Bebi antes de descobrir.'],{when:ZBL('poco',1)}],
+  ['Criança doente','Uma criança de {base} está com febre alta.',['Dar remédio do estoque|-it:@remedio k+6 zmoral+6|A febre baixou em dois dias.','Cuidar com o que tem|?med k+4 zmoral+4|Compressas, água e paciência. Ela melhorou.|zpop-1 zmoral-10|Não conseguimos salvá-la.']],
+  ['Muro rachado','O muro principal de {base} está rachando.',['Consertar já|zmat-4 zdef+6|Muro reforçado.','Escorar e consertar depois|zdef-4|Vai aguentar. Espero.'],{when:ZBL('muro',1)}],
+  ['Dia de lavar roupa','Os moradores pedem um dia de folga para lavar roupa e descansar.',['Dar o dia|zmoral+10 zcom-2|Varais por todo lado. Cheiro de sabão no fim do mundo.','Negar|zmoral-6|Reclamaram, mas trabalharam.']],
+  ['Casamento na base','Dois moradores de {base} querem se casar.',['Celebrar|zmoral+15 zcom-4 h+8|Teve bolo de fubá e aliança de arame.','Dizer que não é hora|zmoral-6|Casaram escondidos.']],
+  ['Nasceu um bebê','Nasceu o primeiro bebê de {base}.',['Fazer uma festa|zmoral+15 zpop+1 h+10|Um bebê nascido no apocalipse. Chamaram de Esperança.','Reforçar a segurança|zdef+5 zpop+1|Agora temos mais um motivo para defender esse lugar.']],
+  ['Briga por tarefas','Moradores brigam porque alguns trabalham e outros não.',['Criar uma escala de trabalho|?lid zmoral+8 zmat+3|Todo mundo trabalha, todo mundo come.|zmoral-4|A escala causou mais briga.','Expulsar o mais preguiçoso|zpop-1 zmoral+2|Exemplo dado.']],
+  ['Gerador barulhento','O gerador de {base} faz barulho demais e atrai zumbis.',['Desligar à noite|ruido-15 zmoral-4|Escuro e silêncio.','Fazer uma caixa de isolamento|zmat-4 ruido-20|Agora ele ronrona baixinho.'],{when:ZBL('gerador',1)}],
+  ['Luz elétrica','Com o gerador, {base} tem luz elétrica à noite.',['Fazer uma sessão de cinema|zmoral+12 ruido+10|Um filme velho num projetor. Todo mundo chorou de rir.','Economizar combustível|-it:gas zmoral+2|Luz só na enfermaria.'],{when:ZBL('gerador',1)}],
+  ['Rádio da base','A estação de rádio de {base} capta outro grupo de sobreviventes.',['Convidar para morar aqui|zpop+3 zcom-3|Chegaram três dias depois, magros e gratos.','Trocar informações|zxp+10 fmerc+5|Contaram onde ainda tem combustível.'],{when:ZBL('radio',1)}],
+  ['Professora na base','Uma professora aposentada quer dar aulas às crianças de {base}.',['Apoiar|zmoral+8 k+4|Aulas de matemática ao lado da horta.','Pedir que ajude na horta|zcom+5|Ela ensina enquanto planta.'],{gn:'F'}],
+  ['O velho mecânico','Um mecânico idoso chega a {base} e oferece trabalho em troca de abrigo.',['Aceitar|zpop+1 zmat+5 vhp+20|Os carros nunca estiveram tão bons.','Recusar|h+0|Ele seguiu a pé.'],{gn:'M'}],
+  ['Roubo no estoque','Sumiu comida do estoque de {base}.',['Investigar|?fur zmoral+6|Era um morador novo. Pediu desculpas e devolveu.|zcom-6 zmoral-4|Ninguém confessou.','Trancar o estoque|zmoral-3|Desconfiança no ar.']],
+  ['Ataque noturno','Zumbis forçam o portão de {base} no meio da noite.',['Acordar todos e lutar|?zdef kills zmoral+6 zxp+10|O portão aguentou e os mortos ficaram empilhados.|hl-12 zpop-1 zb-|Romperam uma parte das defesas.','Apagar as luzes e esperar|?fur ruido-10|Passaram. Ninguém respirou alto.|zb- zmoral-6|Arrombaram o celeiro.']],
+  ['Infecção na base','Um morador escondeu uma mordida e virou de madrugada.',['Conter a ameaça|?for zpop-1 zmoral-6|Rápido e doloroso. Ninguém mais foi mordido.|zpop-2 hl-10 zmoral-12|Foi um caos.','Isolar a ala inteira|zpop-1 zmoral-10|Perdemos a ala por dois dias.']],
+  ['Torre avista fumaça','Da torre de {base}, alguém vê fumaça a alguns quilômetros.',['Mandar um grupo|?pwr zpop+2 it:lata*2|Era um acampamento pequeno. Vieram morar com a gente.|hl-8|Era uma armadilha dos Corvos.','Ignorar|ruido-5|Melhor não chamar atenção.'],{when:ZBL('torre',1)}],
+  ['Plantação de inverno','O frio está matando a horta de {base}.',['Fazer uma estufa de plástico|zmat-4 zcom+8|Alface no inverno!','Colher tudo antes de congelar|zcom+6|Pelo menos não se perdeu.'],{when:ZW(sc=>sc.id==='zumbi'&&!!sc.zb&&sc.zb.b.horta>0&&zSeason(sc)===2)}],
+  ['Comemoração de um mês','Hoje faz um mês que {base} existe.',['Discursar|?lid zmoral+12|Lembrei de todos que perdemos e de todos que chegaram.|zmoral+5|Emocionou mesmo gaguejando.','Dobrar a ração por um dia|zcom-8 zmoral+15|Barriga cheia, coração leve.'],{when:ZW(sc=>sc.id==='zumbi'&&!!sc.zb&&sc.dia-sc.zb.dia>=25)}],
+  ['Moradora médica','Uma moradora conta que era médica antes de tudo.',['Colocá-la na enfermaria|zmoral+6 hl+10|Agora temos uma médica de verdade.','Pedir que ensine os outros|zat.med+1 zxp+5|Aprendi a suturar.'],{gn:'F'}],
+  ['O pastor','Um pastor quer fazer cultos em {base}.',['Permitir|zmoral+8 figreja+5|Cantoria aos domingos.','Proibir|zmoral-4|Alguns moradores ficaram chateados.']],
+  ['Conflito de gerações','Os mais velhos querem fechar os portões; os jovens querem expandir {base}.',['Apoiar os velhos|zdef+6 zmoral-2|Mais seguro, mais parado.','Apoiar os jovens|zpop+2 zmoral+4|Mais gente, mais vida.']],
+  ['Sapateiro','Os sapatos de todos estão destruídos.',['Montar uma oficina de sapatos|zmat-3 zmoral+8|Sandálias de pneu para todo mundo.','Procurar numa loja|?fur it:roupa zmoral+4|Achei botas e casacos.|hl-6|A loja tinha moradores mortos.']],
+  ['Inspeção da Guarda','Um destacamento da Guarda Nacional quer inspecionar {base}.',['Deixar entrar|fguarda+10 zcom-4 it:muni*3|Inspecionaram tudo e deixaram munição de presente.','Recusar|fguarda-15|Foram embora prometendo voltar.','Oferecer comida|zcom-6 fguarda+15 it:muni*3|Saíram amigos.']],
+  ['Visita dos Mercadores','Uma caravana dos Mercadores do Viaduto para em {base}.',['Fazer uma feira|fmerc+10 it:gas it:muni|Feira no pátio. Trocamos de tudo.','Cobrar pedágio|fmerc-10 zcom+6|Pagaram, mas não gostaram.']],
+  ['Ameaça dos Corvos','Um bilhete pregado no portão: "Pagamento até sexta ou a gente entra."',['Pagar|zcom-10 -it:gas fcorvos+10|Pagamos. Por enquanto.','Reforçar as defesas|zmat-6 zdef+15|Que venham.','Atacar primeiro|?pwr fcorvos-30 it:muni*3 zxp+20|Esvaziamos o esconderijo deles.|hl-15 zpop-1|O contra-ataque doeu.']],
+  ['Vizinhos do outro lado do rio','Outro grupo montou base do outro lado do rio.',['Propor uma aliança|?lid zpop+2 zcom+5|Viramos vizinhos que se ajudam.|h+0|Nos ignoraram.','Vigiar|zdef+4|Melhor saber o que fazem.']],
+  ['Lugar para os mortos','{base} precisa de um cemitério.',['Fazer um cemitério bonito|zmoral+6 k+3|Cruzes de madeira com o nome de cada um.','Queimar os corpos|zmoral-4 hl+2|Mais seguro, mais triste.']],
+  ['Biblioteca da base','Os moradores juntam livros para uma biblioteca.',['Doar seus livros|-it:livro zmoral+6 san+4|Uma estante cheia de histórias.','Apoiar|zmoral+4|Leitura no fim da tarde.']],
+  ['Cachorro da base','Um cachorro adotou {base} e late quando zumbis chegam perto.',['Adotar oficialmente|zdef+6 zmoral+8|Agora ele se chama Sentinela.','Deixar livre|zmoral+3|Ele aparece quando quer.']],
+  ['Ração reduzida','O estoque está baixo e os moradores reclamam de fome.',['Reduzir a ração|zcom+5 zmoral-8|Sobreviveremos.','Organizar uma expedição urgente|?pwr zcom+15|Voltamos com caixas de enlatados.|hl-10|Voltamos de mãos vazias.']],
+  ['Sabotagem','Alguém sabotou o portão de {base}.',['Investigar|?fur zmoral+6 fcorvos-5|Era um espião dos Corvos. Expulso.|zdef-8|Não descobrimos quem.','Consertar e reforçar|zmat-3 zdef+6|Portão novo.']],
+  ['Hospital improvisado','Com tantos feridos, a enfermaria de {base} está lotada.',['Ampliar com macas extras|zmat-4 zmoral+4|Mais leitos.','Pedir remédios aos Mercadores|fmerc-5 it:kit*2|Mandaram kits.'],{when:ZBL('enfermaria',1)}],
+  ['Garotos querem lutar','Jovens de {base} querem aprender a lutar.',['Treinar|zdef+8 zxp+8|Agora temos uma milícia de verdade.','Recusar|zmoral-3|Ficaram frustrados.']],
+  ['A grande reforma','Os moradores propõem reformar {base} toda num mutirão.',['Aceitar|zmat-6 zdef+10 zmoral+8|Pintura, muros, telhado. Parecia uma vila.','Adiar|h+0|Agora não.']],
+  ['Inundação','Uma chuva forte alagou o porão de {base}.',['Salvar o estoque|zcom-4 zagua+8|Perdemos um pouco de comida, ganhamos água.','Cavar valas|hl-4 zdef+2|Água escoando.']],
+  ['Ladrões de carros','Alguém tentou roubar um carro da garagem de {base}.',['Perseguir|?pwr it:muni*2|Pegamos o ladrão e a munição dele.|veh-|Levaram o carro.','Reforçar a garagem|zmat-3|Agora tem cadeado de verdade.'],{when:ZW(sc=>sc.id==='zumbi'&&!!sc.zb&&sc.veh.length>0)}],
+  ['Primeira vacina','O laboratório de {base} produziu uma vacina experimental.',['Testar em você|?50 it:vacina zxp+20|Funcionou. Febre por um dia, e agora tenho uma reserva.|hl-15|Passei mal três dias.','Guardar para emergências|it:vacina|Uma ampola no cofre.'],{when:ZBL('laboratorio',1)}],
+  ['Cientista','Um cientista chega dizendo que pode ajudar na pesquisa da cura.',['Aceitar|zpop+1 zxp+10|O laboratório ganhou um cérebro.','Desconfiar|h+0|Seguiu viagem.'],{gn:'M'}],
+  ['Morador desesperado','Um morador de {base} ameaça abrir o portão para os zumbis.',['Conversar|?lid zmoral+6 k+5|Ele chorou e entregou a chave.|zdef-10 zpop-1|Ele abriu o portão antes.','Prender|zmoral-4|Contido.']],
+  ['Torneio de futebol','Os moradores improvisam uma bola e querem jogar.',['Jogar|zmoral+10 h+8 hl-2|Perdi feio. Foi incrível.','Ser o juiz|zmoral+8|Ninguém concordou com minhas marcações.']],
+  ['Velho rádio amador','Um morador de {base} sabe montar um rádio amador.',['Apoiar|zmat-3 it:radio|Agora temos rádio.','Recusar|h+0|Não temos peças.']],
+  ['Visita surpresa','Um sobrevivente ferido aparece no portão de {base} carregando uma criança.',['Abrir o portão|zpop+2 k+8 zmoral+4|Os dois estão a salvo.','Exigir que mostre se foi mordido|?50 zpop+2|Não tinha mordida. Entraram.|zpop+1 zmoral-8|Ele estava mordido. A criança entrou sozinha.']],
+  ['Fábrica de sabão','Uma moradora sabe fazer sabão com gordura e cinza.',['Apoiar|zmoral+6 hl+4|{base} cheira melhor. Menos doença.','Ignorar|h+0|Sabão é luxo.'],{gn:'F'}],
+  ['Construção de torre','Os moradores querem uma torre mais alta para vigiar.',['Construir|zmat-5 zdef+8|Dá para ver a estrada inteira.','Esperar|h+0|Sem sucata agora.']],
+  ['Moral em baixa','Os moradores andam calados, cansados, sem esperança.',['Fazer uma festa|zcom-5 zmoral+15|Música e dança. Lembramos que estamos vivos.','Contar histórias de antes|zmoral+8|Rimos e choramos juntos.'],{when:ZW(sc=>sc.id==='zumbi'&&!!sc.zb&&sc.zb.moral<40)}],
+  ['Moral nas alturas','{base} vive seu melhor momento.',['Aproveitar para expandir|zpop+2 zmat+3|Mais gente quer vir.','Guardar para os tempos ruins|zcom+5 zagua+5|Estoque reforçado.'],{when:ZW(sc=>sc.id==='zumbi'&&!!sc.zb&&sc.zb.moral>=75)}],
+  ['O conselho','Os mais velhos de {base} querem um conselho para ajudar você.',['Aceitar|zmoral+8 zat.lid+1|Decisões mais justas.','Recusar|zmoral-4|Eles ficaram magoados.']],
+  ['Cozinha comunitária','A cozinheira de {base} faz milagre com pouco.',['Elogiar|zmoral+6 fome-10|Sopa de pedra, só que com comida de verdade.','Pedir que ensine|zat.med+0 zcom+4|Agora todo mundo sabe aproveitar casca e raiz.'],{when:ZBL('cozinha',1)}],
+  ['Vigia dormiu','O vigia dormiu e zumbis chegaram até o pátio.',['Lutar|?pwr kills zxp+8|Resolvido. O vigia levou uma bronca histórica.|hl-10 zpop-1|Perdemos alguém.','Repreender o vigia|zmoral-4 zdef+4|Nunca mais vai dormir.']],
+  ['Cerca elétrica','Um morador sugere eletrificar a cerca com o gerador.',['Fazer|zmat-5 zdef+12 ruido+5|Zumbi frito na cerca toda noite.','Recusar|h+0|Perigoso para as crianças.'],{when:ZBL('gerador',1)}],
+  ['Lagoa de peixes','Alguém propõe criar peixes num tanque de {base}.',['Apoiar|zmat-3 zcom+10|Tilápia no apocalipse.','Recusar|h+0|Trabalho demais.']],
+  ['Velha lendária','Uma senhora de 90 anos sobreviveu sozinha meses e chega a {base}.',['Acolher|zpop+1 zmoral+10 zxp+5|Ela ensinou a fazer conservas que duram anos.','Recusar|k-6|Não temos espaço.'],{gn:'F'}],
+  ['Assembleia sobre os portões','Os moradores discutem se os portões devem ficar abertos a novos sobreviventes.',['Abrir|zpop+2 zmoral+2|Mais gente chegando.','Fechar|zdef+5 zmoral-2|Mais seguros.']],
+  ['Peste na base','Uma gripe forte se espalha entre os moradores.',['Isolar os doentes|zmoral-4 hl+2|Contida.','Usar remédios|-it:@remedio*2 zmoral+6|Todos melhoraram.','Ignorar|zpop-2 zmoral-10 hl-8|Erro grave.']],
+  ['Muralha completa','Os muros de {base} finalmente cercam tudo.',['Comemorar|zmoral+12|Primeira noite sem medo em meses.','Continuar reforçando|zdef+6|Nunca é demais.'],{when:ZBL('muro',3)}],
+  ['Plantão médico','Você passa a noite cuidando de feridos na enfermaria.',['Cuidar de todos|zat.med+1 zmoral+6 hl-3|Ninguém morreu esta noite.','Dormir um pouco|hl+6|Eu também precisava.'],{when:ZBL('enfermaria',1)}],
+  ['Reserva de munição','O depósito de armas de {base} está quase vazio.',['Fazer munição na oficina|zmat-4 it:muni*3|Balas recarregadas.','Ir buscar na delegacia|?pwr it:muni*5 it:pistola|Achei um arsenal.|hl-12|Emboscada.']],
+  ['Aniversário de {base}','{base} completa dois meses.',['Festa|zcom-8 zmoral+15 h+8|Bolo de mandioca e fogos feitos com pólvora de cartucho.','Homenagem aos mortos|zmoral+8 k+3|Lemos o nome de cada um.'],{when:ZW(sc=>sc.id==='zumbi'&&!!sc.zb&&sc.dia-sc.zb.dia>=55)}],
+  ['Desertor','Um morador quer ir embora levando suprimentos.',['Deixar ir com um pouco|zpop-1 zcom-3 k+4|Despedida tranquila.','Deixar ir sem nada|zpop-1 zmoral-2|Saiu emburrado.','Convencer a ficar|?lid zmoral+4|Ficou.|zpop-1|Foi embora mesmo assim.']],
+  ['Uma luz no prédio vizinho','Há uma luz acesa num prédio perto de {base}.',['Investigar|?fur zpop+1 it:lata*2|Um homem sozinho com estoque de enlatados. Agora mora aqui.|hl-10|Era uma armadilha.','Ignorar|h+0|Cada um no seu canto.']],
+  ['Criação de galinhas','Alguém achou galinhas vivas numa fazenda.',['Criar em {base}|zcom+8 zmoral+4|Ovos todo dia.','Comer tudo|zcom+12|Banquete.']],
+  ['Ponte levadiça','Um morador engenheiro propõe uma ponte levadiça na entrada.',['Construir|zmat-6 zdef+15|Como um castelo.','Recusar|h+0|Exagero.']],
+  ['Os gêmeos fujões','Dois adolescentes fugiram de {base} para ver o mundo.',['Ir atrás|?pwr zmoral+8|Achei os dois numa loja, com medo. Voltaram.|hl-10|Achei só um.','Deixar|zpop-2 zmoral-6|Os pais estão inconsoláveis.']],
+  ['Grande limpeza','Os moradores fazem uma limpeza geral de {base}.',['Ajudar|zmoral+6 hl+3|Base limpa, cabeça limpa.','Supervisionar|zat.lid+1|Organizei tudo.']],
+  ['A primeira árvore','Os moradores plantam uma árvore no pátio de {base}.',['Plantar junto|zmoral+8 h+6|Daqui a vinte anos vai dar sombra. Alguém vai estar aqui.','Assistir|h+4|Bonito.']],
+  ['Ninho na caixa d’água','Pássaros fizeram ninho na caixa d’água.',['Limpar|zagua-4 zmoral+2|Água limpa.','Deixar|zagua+0 zmoral+4|Os pássaros cantam toda manhã.']],
+  ['Sistema de alarmes','Um morador monta um sistema de alarme com latas e sinos.',['Aprovar|zmat-2 zdef+8|Qualquer zumbi faz barulho ao chegar.','Recusar|h+0|Barulho de lata a noite inteira? Não.']],
+  ['Escola de sobrevivência','Os moradores mais velhos querem ensinar os jovens a sobreviver.',['Apoiar|zdef+5 zmoral+6 zxp+5|Aulas de nós, primeiros socorros e silêncio.','Ensinar você mesm{o}|zat.lid+1 zmoral+6|Virei professor{a} do fim do mundo.']],
+  ['Disputa por quartos','Moradores brigam pelos melhores quartos de {base}.',['Sortear|zmoral+4|Justo.','Dar prioridade às famílias|zmoral+6 k+3|Ninguém reclamou alto.']],
+  ['Estoque dobrado','Uma expedição de moradores voltou com o carro cheio.',['Comemorar|zcom+12 zagua+8 zmoral+8|Estoque cheio!','Guardar em segredo parte para emergências|zcom+15|Prudência.']],
+  ['Expansão','{base} cresceu demais para os muros atuais.',['Expandir os muros|zmat-8 zdef+6 zmoral+4|Mais espaço.','Limitar a entrada de gente|zmoral-2|Crescimento controlado.'],{when:ZW(sc=>sc.id==='zumbi'&&!!sc.zb&&sc.zb.pop>=10)}],
+  ['Cidade de sobreviventes','{base} já tem gente demais para chamar de acampamento.',['Dar um nome oficial e um hino|zmoral+12 f+2|Virou praticamente uma cidade.','Continuar humilde|zmoral+4|Sem pompa.'],{when:ZW(sc=>sc.id==='zumbi'&&!!sc.zb&&sc.zb.pop>=20)}],
+  ['O traidor','Um morador passava informações de {base} para os Corvos.',['Expulsar|zpop-1 fcorvos-10 zmoral+6|Rua.','Usar como agente duplo|?lid fcorvos+10 zxp+10|Agora ele mente para os Corvos.|zdef-8|Ele contou tudo.']],
+  ['Visita da Igreja','Missionários da Igreja da Última Hora pregam no portão de {base}.',['Deixar pregar|figreja+10 zmoral-2|Alguns moradores ficaram tocados.','Expulsar|figreja-10|Saíram rogando pragas.','Trocar comida por remédio|zcom-3 it:calm figreja+5|Negócio feito.']],
+  ['Mutirão de água','O verão secou a cisterna de {base}.',['Buscar água no rio|?pwr zagua+15|Galões e galões.|hl-8 zagua+6|Zumbis no rio.','Racionar|zagua+4 zmoral-6|Sede controlada.'],{when:ZSE(0)}],
+  ['Neve na base','A neve cobriu {base}.',['Fazer guerra de bola de neve|zmoral+10 hl-2|Crianças e adultos rindo.','Juntar neve para água|zagua+10|Água garantida.'],{when:ZSE(2)}],
+  ['Flores na primavera','A primavera trouxe flores para o pátio de {base}.',['Plantar mais|zcom+5 zmoral+6|Horta e jardim.','Fazer um piquenique|zmoral+10|Primavera no fim do mundo.'],{when:ZSE(3)}],
+  ['Chuva de outono','Chove sem parar há uma semana.',['Coletar a água|zagua+12|Cisterna cheia.','Consertar goteiras|zmat-2 zmoral+4|Telhado seco.'],{when:ZSE(1)}],
+  ['Moradores querem armas','Os moradores querem armas para se defender.',['Distribuir|-it:@arma zdef+10|Todos armados.','Recusar|zmoral-4|Ficaram com medo.']],
+  ['Velho soldado','Um ex-soldado chega a {base}.',['Colocá-lo no comando da defesa|zpop+1 zdef+12|Disciplina militar.','Pedir que ensine tiro|zat.mir+1 zxp+8|Minha pontaria melhorou.'],{gn:'M'}],
+  ['Grafite no muro','As crianças pintaram o muro de {base} com desenhos.',['Elogiar|zmoral+8|Muro colorido, esperança pintada.','Mandar apagar|zmoral-6|Muro cinza de novo.']],
+  ['Celeiro pegou fogo','Uma vela esquecida incendiou o celeiro.',['Apagar|?pwr zcom-4|Salvamos a maior parte.|zcom-15 hl-6|Perdemos quase tudo.','Salvar as pessoas primeiro|zcom-12 k+4 zmoral+2|Ninguém se feriu.']],
+  ['Mapa da região','Um morador desenhou um mapa detalhado da região.',['Usar para expedições|zxp+10 it:mapa|Agora sabemos onde ficam os mercados intactos.','Pendurar na parede|zmoral+4|Bonito e útil.']],
+  ['Pedido de casamento','{c} pede um morador de {base} em casamento.',['Apoiar|clv+10 zmoral+10|Festa simples e linda.','Achar cedo demais|clv-6|{c} ficou chatead{co}.'],{crew:1,when:ZBB}],
+  ['A oficina','A oficina de {base} está cheia de projetos.',['Construir algo útil|zmat-3 it:reparo|Kit de reparo novinho.','Ensinar os jovens|zat.mec+1 zxp+5|Aprendi ensinando.'],{when:ZBL('oficina',1)}],
+  ['Gato da base','Um gato caça os ratos do estoque de {base}.',['Adotar|zcom+4 zmoral+4|Herói do celeiro.','Deixar|h+0|Ele ficou mesmo assim.']],
+  ['A grande votação','Os moradores votam se você deve continuar como líder de {base}.',['Fazer campanha|?lid zmoral+10 zat.lid+1|Reeleit{o} com folga.|zmoral-6|Ganhei por pouco.','Abrir mão|zmoral-4 h+6|Alívio. Mas o conselho me chamou de volta no dia seguinte.']],
+]);
+
+// ===== Pesadelo zumbi · eventos das facções: Mercadores, Corvos, Guarda Nacional e Igreja =====
+const ZZ=ZW(sc=>sc.id==='zumbi');
+pack({k:'Mercadores do Viaduto',w:1.4,cd:40,scen:'zumbi',when:ZZ},[
+  ['Caravana dos Mercadores','Uma caravana dos Mercadores do Viaduto passa pela estrada com carroças cheias.',['Negociar|?lid fmerc+8 it:muni*2 -it:@comida|Trocamos comida por munição. Bom negócio.|fmerc+3 -it:@comida|Pagaram pouco, mas pagaram.','Escoltar a caravana|?pwr fmerc+15 it:gas*2|Escoltamos até o viaduto. Ganhamos gasolina e respeito.|hl-12|Emboscada no caminho.','Deixar passar|h+0|Cada um no seu caminho.']],
+  ['O Viaduto','Você chega ao Viaduto, a feira dos Mercadores, construída entre carros empilhados.',['Passear pela feira|h+8 fmerc+4|Barracas de tudo: pilhas, sementes, até sorvete feito com gelo de geladeira a gás.','Vender sucata|zmat-5 it:lata*3 fmerc+4|Sucata vira comida aqui.','Comprar informação|-it:@comida zxp+10|Contaram onde fica um depósito intacto.']],
+  ['Calote','Um mercador te deu munição falsa, de festim.',['Cobrar na feira|?lid fmerc+5 it:muni*3|O chefe dos Mercadores devolveu em dobro e expulsou o trapaceiro.|fmerc-5|Ninguém acreditou em mim.','Deixar para lá|-it:muni|Prejuízo.']],
+  ['Mercador ferido','Um mercador está caído na estrada, mordido na perna.',['Ajudar|-it:@remedio fmerc+15 k+6|Ele sobreviveu e espalhou que você é gente boa.','Pegar a carga dele|k-10 fmerc-20 it:gas*2 it:muni*2|Ninguém viu. Eu acho.','Dar um fim ao sofrimento|k+2 fmerc+3|Contei aos Mercadores. Agradeceram.']],
+  ['Rota nova','Os Mercadores querem abrir uma rota passando perto de você.',['Apoiar a rota|fmerc+10 ruido+5|Mais comércio, mais movimento, mais barulho.','Cobrar pedágio|fmerc-10 it:lata*2|Pagaram de cara feia.']],
+  ['Leilão','Os Mercadores fazem um leilão de uma espingarda.',['Dar lance com remédios|-it:@remedio*2 it:espingarda fmerc+4|A espingarda é minha.','Dar lance com combustível|-it:gas*2 it:espingarda|Arrematada.','Só assistir|h+4|Saiu por três galões e um gato.']],
+  ['Dívida','Os Mercadores lembram que você deve um favor.',['Pagar com trabalho|hl-4 fmerc+10|Carreguei caixas o dia todo.','Pagar com munição|-it:muni*3 fmerc+8|Dívida quitada.','Dar calote|fmerc-25|Agora sou mal visto no Viaduto.']],
+  ['Concorrência','Os Mercadores pedem ajuda contra outro grupo que está vendendo mais barato.',['Ajudar|?pwr fmerc+15 it:muni*2|O concorrente fechou a barraca.|hl-10|Briga feia.','Recusar|fmerc-5|Não gostaram.']],
+  ['Feira de primavera','Os Mercadores fazem uma feira de sementes.',['Comprar sementes|-it:@comida zcom+8|Sementes para a horta.','Trocar livros por sementes|-it:livro zcom+6|Leitura vira comida.'],{when:ZW(sc=>sc.id==='zumbi'&&zSeason(sc)===3)}],
+  ['O chefe dos Mercadores','O chefe dos Mercadores quer conhecer você pessoalmente.',['Ir ao encontro|?lid fmerc+15 zxp+10|Ele ofereceu preços melhores para sempre.|fmerc+5|Conversa fria, mas educada.','Mandar alguém|fmerc-2|Ele ficou ofendido.']],
+  ['Contrabando','Os Mercadores pedem para você guardar uma carga misteriosa.',['Aceitar|?50 fmerc+15 it:muni*4|Era munição. Ganhei parte como pagamento.|fguarda-15|Era carga roubada da Guarda.','Recusar|h+0|Melhor não saber.']],
+  ['Cliente fiel','Os Mercadores te dão um presente por ser cliente fiel.',['Aceitar|it:kit it:barra*2 fmerc+3|Kit e chocolate.','Retribuir|-it:@comida fmerc+8|Amizade sólida.'],{when:ZRP('merc',30,100)}],
+  ['Mercadores irritados','Os Mercadores ouviram que você roubou de alguém.',['Explicar|?lid fmerc+5|Acreditaram.|fmerc-10|Não acreditaram.','Pagar uma multa|-it:@comida*2 fmerc+5|Perdoado.'],{when:ZRP('merc',-100,0)}],
+  ['Mapa à venda','Um mercador vende um mapa de depósitos militares.',['Comprar|-it:muni*2 zxp+15|Agora sei onde procurar armas.','Recusar|h+0|Pode ser falso.']],
+  ['Golpe na feira','Alguém tentou te vender água de esgoto como mineral.',['Denunciar|fmerc+5|O golpista foi expulso.','Comprar mesmo assim|-it:@comida hl-6|Passei mal.']],
+  ['Pedido de escolta','Os Mercadores precisam de alguém para levar remédios até outra cidade.',['Aceitar|?pwr fmerc+15 it:kit*2 zxp+15|Entrega feita.|hl-15|Fomos atacados.','Recusar|h+0|Longe demais.']],
+  ['Aliados no Viaduto','Como aliado, os Mercadores oferecem um lugar seguro para dormir.',['Aceitar|hl+15 san+10|Uma noite sem medo.','Pedir munição em vez disso|it:muni*3|Presente de aliado.'],{when:ZRP('merc',60,100)}],
+  ['Mercador apaixonado','Um mercador quer se juntar ao seu grupo por amor a alguém do grupo.',['Aceitar|crew fmerc+5|{n} chegou com uma mochila cheia de produtos.','Recusar|h+0|Ele chorou.'],{gn:'M'}],
+  ['Inflação','Os preços no Viaduto dobraram depois de um ataque dos Corvos.',['Ajudar a defender o Viaduto|?pwr fmerc+15 fcorvos-10|Preços voltaram ao normal.|hl-12|Os Corvos eram muitos.','Esperar|h+0|Vai passar.']],
+  ['Moeda nova','Os Mercadores criaram uma moeda: tampinhas de garrafa.',['Aderir|fmerc+5 h+4|Agora tenho uma pochete de tampinhas.','Rir|h+6|Dinheiro de novo? No fim do mundo?']],
+  ['Pacote misterioso','Os Mercadores vendem pacotes fechados: pode vir qualquer coisa.',['Comprar|-it:@comida ?50 it:pistola it:muni*2|Veio uma pistola!|it:pao|Veio um pão mofado.','Recusar|h+0|Loteria do apocalipse.']],
+]);
+pack({k:'Os Corvos',w:1.4,cd:40,scen:'zumbi',when:ZZ},[
+  ['Bloqueio dos Corvos','Os Corvos fecharam a estrada com carros queimados e pedem pedágio.',['Pagar|-it:@comida*2 fcorvos+5|Passamos humilhados, mas inteiros.','Furar o bloqueio|?pwr fcorvos-15 zxp+10|Passamos atirando.|hl-15 vhp-15|Furaram nossos pneus.','Negociar|?lid fcorvos+10|O líder riu e deixou passar.|-it:@comida*3|Cobraram o triplo.']],
+  ['Prisioneiro dos Corvos','Você encontra um homem amarrado num poste com uma placa: "Ladrão dos Corvos".',['Soltar|crew fcorvos-15 k+6|{n} jurou lealdade.','Deixar|k-4|Não é problema meu.'],{gn:'M'}],
+  ['Corvo arrependido','Um membro dos Corvos quer largar o bando.',['Aceitar no grupo|crew fcorvos-10 zxp+5|{n} contou onde fica o esconderijo deles.','Entregar aos Corvos|fcorvos+15 k-8|Os Corvos agradeceram do jeito deles.','Mandar embora|h+0|Seguiu sozinho.'],{gn:'M'}],
+  ['Ataque dos Corvos','Os Corvos atacam de surpresa.',['Revidar|?pwr fcorvos-10 it:muni*3 zxp+15|Recuaram deixando armas.|hl-18 rdie|Perdemos alguém.','Fugir|-it:@comida*2 -it:gas|Escapamos, mas largamos carga.']],
+  ['O líder dos Corvos','O líder dos Corvos, o Bico, quer conversar com você.',['Ir|?lid fcorvos+20|Ele propôs uma trégua.|hl-10|Era só para me dar um soco.','Mandar recado|fcorvos-5|Ele não gostou do recado.']],
+  ['Mercado negro dos Corvos','Os Corvos vendem armas roubadas da Guarda.',['Comprar|-it:@remedio*2 it:rifle fcorvos+8 fguarda-10|Rifle novo, consciência pesada.','Denunciar à Guarda|fguarda+15 fcorvos-20|A Guarda fez uma batida.','Ignorar|h+0|Melhor não.']],
+  ['Recrutamento','Os Corvos querem que você entre para o bando.',['Aceitar a parceria|fcorvos+30 k-10 it:muni*4|Agora tenho proteção dos Corvos. E menos amigos.','Recusar|fcorvos-10|Ficaram ofendidos.']],
+  ['Corvos em guerra','Os Corvos e a Guarda Nacional estão em guerra aberta.',['Ajudar a Guarda|?pwr fguarda+20 fcorvos-20|Vitória da Guarda.|hl-15|Fomos pegos no fogo cruzado.','Ajudar os Corvos|?pwr fcorvos+20 fguarda-20|Vitória dos Corvos.|hl-15|Fomos pegos no fogo cruzado.','Ficar fora|h+0|Que se matem.']],
+  ['Saque compartilhado','Os Corvos oferecem dividir o saque de um mercado.',['Aceitar|fcorvos+10 it:lata*3 k-3|Saque dividido sem briga.','Recusar|h+0|Não confio neles.'],{when:ZRP('corvos',0,100)}],
+  ['Vingança dos Corvos','Os Corvos querem vingança pelo que você fez.',['Enfrentar|?pwr fcorvos-10 zxp+20|Vencemos de novo.|hl-20 zb-|Destruíram parte do que construímos.','Pagar indenização|-it:@comida*3 -it:muni*2 fcorvos+20|Paz comprada.'],{when:ZRP('corvos',-100,-40)}],
+  ['Bilhete ameaçador','Um bilhete com o desenho de um corvo foi deixado no seu caminho.',['Ignorar|san-4|Arrepio.','Mudar a rota|-it:gas|Desvio caro, mas seguro.']],
+  ['Prisioneira','Os Corvos mantêm uma mulher presa numa gaiola.',['Libertar à noite|?fur crew fcorvos-15 k+8|{n} está livre e agradecida.|hl-12 fcorvos-25|Os Corvos me viram.','Comprar a liberdade dela|-it:@comida*3 crew fcorvos+5|Pagamos e ela veio conosco.'],{gn:'F'}],
+  ['Corvos famintos','Os Corvos estão passando fome e pedem comida.',['Dar comida|-it:@comida*2 fcorvos+20 k+5|Até os Corvos agradecem.','Recusar|fcorvos-5|Se lembraram disso.']],
+  ['A fortaleza dos Corvos','Você descobre o esconderijo dos Corvos: um shopping fortificado.',['Espionar|?fur zxp+15 fcorvos-3|Vi tudo: armas, comida e o ponto fraco.|hl-10|Me viram.','Ir embora|h+0|Melhor não saber mais.']],
+  ['Disputa interna','Os Corvos estão rachados entre dois líderes.',['Apoiar o mais calmo|?lid fcorvos+15|Ele venceu e nos deve um favor.|fcorvos-10|O outro venceu.','Aproveitar para roubar|?fur fcorvos-15 it:muni*3 it:gas*2|Esvaziamos o depósito na confusão.|hl-12|Ambos os lados nos atacaram.']],
+  ['Corvo ferido','Um membro dos Corvos está ferido e sozinho.',['Ajudar|-it:@remedio fcorvos+15 k+6|Ele contou para os outros.','Interrogar|zxp+10 k-3|Ele contou o próximo alvo dos Corvos.','Deixar|h+0|Não é problema meu.']],
+  ['Trégua','Os Corvos propõem uma trégua de um mês.',['Aceitar|fcorvos+20 zmoral+5|Um mês sem tiros.','Recusar|fcorvos-10|Guerra continua.'],{when:ZRP('corvos',-60,20)}],
+  ['Emboscada falhada','Os Corvos tentam uma emboscada, mas você percebe a tempo.',['Contra-atacar|?pwr fcorvos-10 it:muni*2 zxp+15|Viraram presa.|hl-10|Escaparam.','Desviar|h+2|Perdemos tempo, mas ninguém se feriu.']],
+  ['Corvos querem sua base','Os Corvos querem tomar {base}.',['Defender|?zdef fcorvos-20 zxp+25 zmoral+10|Recuaram com o rabo entre as pernas.|zpop-2 zb- hl-15|Invadiram parte da base.','Negociar|?lid fcorvos+10 zcom-8|Aceitaram um tributo.|zcom-15|Levaram o dobro.'],{when:ZW(sc=>sc.id==='zumbi'&&!!sc.zb&&zRep(sc,'corvos')<0)}],
+  ['Aliados improváveis','Os Corvos agora te tratam como amigo.',['Pedir ajuda numa expedição|it:muni*3 it:gas*2 fcorvos-3|Eles conhecem cada esconderijo.','Pedir que deixem os Mercadores em paz|fcorvos-5 fmerc+15|Atenderam.'],{when:ZRP('corvos',50,100)}],
+]);
+pack({k:'Guarda Nacional',w:1.4,cd:40,scen:'zumbi',when:ZZ},[
+  ['Patrulha da Guarda','Um jipe da Guarda Nacional para ao lado de vocês.',['Mostrar que não estão infectados|fguarda+8|Revistaram todo mundo e deixaram seguir.','Fugir|fguarda-10|Atiraram para o alto.','Pedir ajuda|?lid fguarda+5 it:racao|Deram uma ração e um conselho: "Evitem as cidades."|h+0|"Não somos assistência social."']],
+  ['Quarentena','A Guarda montou um posto de quarentena na estrada.',['Passar pela quarentena|stay hl+10 fguarda+10|Dois dias presos, mas com comida e banho.','Contornar pelo mato|?fur h+2|Passamos sem sermos vistos.|fguarda-10 hl-6|Fomos pegos.']],
+  ['Recrutamento militar','A Guarda está recrutando sobreviventes com experiência.',['Mandar um voluntário do grupo|cbye fguarda+20 it:muni*5|{c} foi embora de farda. Mandou munição de presente.','Recusar|h+0|Precisamos de todos aqui.'],{crew:1,when:ZZ}],
+  ['Armas da Guarda','A Guarda oferece armas em troca de remédios.',['Trocar|-it:@remedio*2 it:espingarda fguarda+5|Espingarda militar.','Recusar|h+0|Remédio é mais raro.']],
+  ['Lei marcial','A Guarda declarou lei marcial: toque de recolher e confisco de armas.',['Obedecer|-it:@arma fguarda+15|Perdemos uma arma, ganhamos proteção.','Esconder as armas|?fur fguarda+0|Não acharam nada.|fguarda-20 -it:@arma*2|Acharam e levaram tudo.','Resistir|?pwr fguarda-30 zxp+10|Recuaram.|hl-15|Erro.']],
+  ['Base da Guarda','Você encontra a base principal da Guarda Nacional, num estádio.',['Pedir para entrar|?lid fguarda+10 hl+10|Banho quente e comida de quartel.|fguarda-5|Negado.','Observar de longe|zxp+8|Organizados, armados e com medo.']],
+  ['Soldado desertor','Um soldado desertou da Guarda e pede abrigo.',['Abrigar|crew fguarda-15 it:rifle|{n} veio com o rifle e muita culpa.','Entregar à Guarda|fguarda+15 k-4|Levaram ele algemado.'],{gn:'M'}],
+  ['Helicóptero da Guarda','Um helicóptero da Guarda joga suprimentos na sua região.',['Correr para pegar|?pwr it:racao*2 it:kit fguarda+3|Pegamos antes de todo mundo.|hl-10|Brigamos com outro grupo pela caixa.','Deixar para outros|k+4|Tem gente pior que a gente.']],
+  ['Missão secreta','A Guarda pede para você buscar documentos num laboratório.',['Aceitar|?pwr fguarda+20 it:vacina zxp+20|Documentos entregues. Ganhei uma vacina.|hl-18|O laboratório estava tomado.','Recusar|fguarda-5|Ficaram decepcionados.']],
+  ['A Guarda pede tributo','A Guarda exige parte da comida para "proteção".',['Pagar|-it:@comida*2 fguarda+10|Protegidos.','Recusar|fguarda-15|Saíram anotando nossos nomes.'],{when:ZW(sc=>sc.id==='zumbi'&&!!sc.zb)}],
+  ['Médico militar','Um médico militar oferece atendimento.',['Aceitar|hl+20 fguarda+5|Pontos e antibiótico.','Pedir que atenda o grupo|fguarda+5 moral+6|Todos atendidos.']],
+  ['Bombardeio','A Guarda bombardeia uma horda perto de vocês.',['Se proteger|hl-4 kills|Explosões a um quilômetro. Muitos zumbis a menos.','Aproveitar e saquear a área depois|?50 it:muni*3 it:racao|Restos de equipamento militar.|hl-10|Zumbis sobreviventes.']],
+  ['General louco','O general da Guarda quer usar civis como isca para hordas.',['Denunciar aos soldados|?lid fguarda+10 k+10|Os soldados prenderam o general.|fguarda-20|Fui chamado de traidor.','Fugir da região|-it:gas|Longe dele.']],
+  ['Treinamento militar','A Guarda oferece treinar seu grupo.',['Aceitar|zat.mir+1 zat.for+1 fguarda+5|Treino pesado e útil.','Recusar|h+0|Não confio em quem manda.'],{when:ZRP('guarda',20,100)}],
+  ['Aliados de farda','Como aliado, a Guarda manda uma patrulha para proteger você.',['Aceitar|zdef+15 fguarda+5|Soldados na porta.','Pedir munição|it:muni*5|Caixa de balas.'],{when:ZRP('guarda',60,100)}],
+  ['Guarda hostil','Uma patrulha da Guarda te reconhece como inimigo.',['Fugir|?fur h+2|Escapamos.|hl-15|Tiros nas costas.','Render-se|fguarda+10 -it:@arma*2|Levaram as armas, mas nos soltaram.'],{when:ZRP('guarda',-100,-30)}],
+  ['Comboio militar','Um comboio militar quebrou na estrada.',['Ajudar a consertar|?mec fguarda+15 it:gas*2|Gratidão em galões.|hl-6|Choque elétrico.','Saquear enquanto estão distraídos|?fur fguarda-25 it:muni*4 it:racao*2|Saímos carregados.|hl-15|Pegos no flagra.']],
+  ['Rádio militar','No rádio da Guarda, notícias de outras cidades.',['Ouvir|zxp+10 san+4|Ainda há gente lutando no mundo todo.','Pedir uma rota segura|fguarda+3 it:mapa|Mandaram coordenadas.']],
+  ['Vacinação','A Guarda faz uma campanha de vacinação experimental.',['Tomar|?50 it:vacina|Funcionou e ainda deram uma dose extra.|hl-10|Reação forte.','Recusar|h+0|Não sou cobaia.']],
+  ['O fim da Guarda','Corre o boato de que a Guarda está desmoronando por falta de comida.',['Doar comida|-it:@comida*3 fguarda+25 k+6|Soldados agradecidos.','Recrutar desertores|crew fguarda-10|{n} largou a farda e veio com a gente.','Ignorar|h+0|Cada um por si.']],
+]);
+pack({k:'Igreja da Última Hora',w:1.4,cd:40,scen:'zumbi',when:ZZ},[
+  ['Os pregadores','Pregadores da Igreja da Última Hora dizem que os mortos são o castigo divino.',['Ouvir com educação|figreja+5 san-2|Sermão longo e assustador.','Discutir|?lid figreja+3 san+2|Discussão respeitosa.|figreja-10|Saíram ofendidos.','Ignorar|h+0|Seguimos.']],
+  ['Sopa da Igreja','A Igreja distribui sopa aos famintos.',['Aceitar|fome-25 figreja+5|Sopa rala, mas quente.','Ajudar a servir|figreja+15 k+5|Servi trezentas tigelas.']],
+  ['Ritual estranho','Você vê a Igreja amarrando zumbis numa cruz.',['Investigar|?fur zxp+10 figreja-5|Eles acreditam que os mortos vão ressuscitar como anjos.|san-8|Vi coisas que não queria.','Fugir|san-4|Arrepio.']],
+  ['Sacrifício','A Igreja quer sacrificar uma pessoa para "acalmar os mortos".',['Salvar a pessoa|?pwr crew figreja-30 k+12|{n} foi resgatad{on}.|hl-15|Os fiéis eram muitos.','Ficar fora|k-8|Vou me lembrar disso.']],
+  ['Hospital da Igreja','A Igreja mantém um hospital com freiras médicas.',['Pedir tratamento|hl+25 figreja+5|Cuidado de verdade.','Doar remédios|-it:@remedio figreja+15 k+6|Agradeceram de joelhos.']],
+  ['Converter-se?','A Igreja oferece proteção a quem se converter.',['Aceitar|figreja+25 san+6 zmoral-4|Agora rezo antes de dormir.','Recusar|figreja-5|Me olharam com pena.']],
+  ['Profeta','O profeta da Igreja diz ter tido uma visão sobre você.',['Ouvir|figreja+5 san-4|Disse que vou viver até o último inverno.','Rir|figreja-8|Ele ficou furioso.']],
+  ['Crianças da Igreja','Crianças fogem da Igreja e pedem ajuda.',['Acolher|zpop+2 figreja-20 k+8|Estão seguras.','Devolver à Igreja|figreja+10 k-10|Elas choraram.']],
+  ['Missionários perdidos','Missionários da Igreja se perderam na estrada.',['Guiar até a Igreja|figreja+15 hl-4|Ganhamos aliados de batina.','Pegar as provisões deles|figreja-20 it:lata*2 k-6|Pecado.']],
+  ['Igreja sitiada','Uma horda cerca a igreja da Última Hora.',['Ajudar|?pwr figreja+25 zxp+20|Abrimos caminho. Os fiéis nos chamam de anjos.|hl-20|Por pouco.','Ignorar|figreja-10 k-4|Sobreviveram sem a gente.']],
+  ['Ervas da Igreja','As freiras conhecem ervas medicinais.',['Aprender|zat.med+1 it:ervas*2|Aprendi muito.','Trocar|-it:@comida it:kit|Kit de ervas.']],
+  ['Fanáticos','Fanáticos da Igreja querem destruir seus remédios, chamados de "pecado".',['Proteger os remédios|?pwr figreja-15|Expulsos.|-it:@remedio*2 hl-8|Destruíram parte.','Esconder os remédios|?fur figreja+0|Não acharam.|-it:@remedio|Acharam um.']],
+  ['Coral da Igreja','O coral da Igreja canta na estrada.',['Parar para ouvir|san+10 figreja+3|Bonito mesmo no fim do mundo.','Seguir|h+0|Música atrai zumbis.']],
+  ['Casamento coletivo','A Igreja faz um casamento coletivo e convida seu grupo.',['Ir|moral+10 figreja+10|Festa com vinho de missa.','Recusar|figreja-3|Sem festa.']],
+  ['Seita rival','Uma seita rival ataca a Igreja da Última Hora.',['Defender a Igreja|?pwr figreja+20 zxp+15|A seita fugiu.|hl-15|Batalha feia.','Ficar fora|h+0|Religião não é comigo.']],
+  ['Bênção','O padre da Igreja abençoa seu grupo antes de uma expedição.',['Aceitar|san+8 moral+4 figreja+5|O grupo se sentiu mais forte.','Recusar educadamente|h+0|Ele entendeu.'],{when:ZRP('igreja',0,100)}],
+  ['Igreja hostil','A Igreja declarou você "servo dos mortos".',['Tentar fazer as pazes|?lid figreja+20|Aceitaram uma doação como penitência.|figreja-5|Não quiseram ouvir.','Ignorar|san-3|Sermões contra mim em todo canto.'],{when:ZRP('igreja',-100,-30)}],
+  ['A biblioteca da Igreja','A Igreja guarda livros de medicina antigos.',['Pedir para ler|?lid zat.med+1 zxp+10|Aprendi tratamentos que não conhecia.|h+0|Negado.','Roubar um livro|?fur zat.med+1 figreja-15|Livro roubado.|figreja-25|Pego no flagra.']],
+  ['Freira guerreira','Uma freira que luta com bastão quer viajar com você.',['Aceitar|crew figreja+5|{n} reza e bate com a mesma força.','Recusar|h+0|Ela seguiu sozinha.'],{gn:'F'}],
+  ['Últimos dias','A Igreja anuncia que o fim do mundo será daqui a três dias.',['Rir|h+6|Já é o fim do mundo.','Preparar-se mesmo assim|zxp+5 zcom+3|Melhor prevenir.']],
+]);
+
+// ===== Pesadelo zumbi · eventos do mundo: estações, hordas, saques, barulho e a longa sobrevivência =====
+const ZRU=n=>ZW(sc=>sc.id==='zumbi'&&(sc.ruido||0)>=n), ZDIA=n=>ZW(sc=>sc.id==='zumbi'&&sc.dia>=n);
+pack({k:'Pesadelo zumbi',w:1.5,cd:40,scen:'zumbi',when:ZW(sc=>sc.id==='zumbi')},[
+  ['Onda de calor','O verão está brutal. A água evapora antes de chegar à boca.',['Viajar só à noite|stay sede-10|Dormimos de dia na sombra.','Buscar um rio|?pwr it:agua*3|Achamos um córrego limpo.|hl-8 sede+10|O rio estava cheio de corpos.'],{when:ZSE(0)}],
+  ['Tempestade de verão','Raios e chuva torrencial no meio da tarde.',['Juntar água em tudo|it:agua*3 sede-10|Garrafas cheias.','Procurar abrigo|h+2|Seco e seguro.'],{when:ZSE(0)}],
+  ['Mosquitos','Nuvens de mosquitos no calor do verão.',['Fazer fumaça|ruido+5 h+2|Funcionou, mas a fumaça é vista de longe.','Aguentar|hl-8|Fiquei com febre por dois dias.'],{when:ZSE(0)}],
+  ['Folhas secas','No outono, cada passo faz barulho nas folhas secas.',['Andar devagar|?fur h+2|Ninguém ouviu.|ruido+15|Uma horda pequena veio atrás.','Ficar parado hoje|stay h+0|Esperamos chover.'],{when:ZSE(1)}],
+  ['Colheita selvagem','No outono, as árvores frutíferas estão carregadas.',['Colher|it:fruta*3 fome-10|Goiaba, caqui e laranja.','Fazer conservas|it:pessego*2|Doce para o inverno.'],{when:ZSE(1)}],
+  ['Neblina de outono','Uma neblina grossa cobre tudo de manhã.',['Usar a neblina para saquear|?fur it:lata*2 it:muni|Saqueamos sem sermos vistos.|hl-10|Esbarramos em zumbis na neblina.','Esperar|stay h+0|Melhor não arriscar.'],{when:ZSE(1)}],
+  ['Primeira neve','Começou a nevar. Os zumbis ficam lentos no frio.',['Aproveitar para limpar a área|?pwr kills zxp+15|Zumbis congelados são alvos fáceis.|hl-8|Escorreguei no gelo.','Procurar roupas quentes|?fur it:roupa*2|Achamos casacos numa loja.|hl-6|Frio demais.'],{when:ZSE(2)}],
+  ['Zumbis congelados','Zumbis presos no gelo de um lago.',['Passar longe|h+2|Ainda se mexem, devagar.','Acabar com eles|kills zxp+10|Fácil e sombrio.'],{when:ZSE(2)}],
+  ['Hipotermia','{c} está tremendo de frio e com os lábios roxos.',['Dar suas roupas de frio|-it:roupa chp+20 clv+15|{c} vai ficar bem. Eu passo frio.','Acender uma fogueira grande|ruido+15 chp+15|Calor e fumaça.'],{crew:1,when:ZSE(2)}],
+  ['Degelo','Na primavera, o degelo revelou coisas escondidas pela neve.',['Explorar|?fur it:lata*2 it:muni*2 it:faca|Mochilas perdidas no inverno.|hl-8|Zumbis descongelando.','Seguir|h+0|Cuidado com o que a neve esconde.'],{when:ZSE(3)}],
+  ['Primavera','Os pássaros voltaram a cantar.',['Pescar e caçar|it:sardinha*2 it:lata|Bichos por todo lado.','Plantar|zcom+6|Sementes na terra.'],{when:ZSE(3)}],
+  ['Chuva de primavera','Uma chuva leve deixou tudo verde.',['Coletar água|it:agua*2|Água limpa.','Descansar ouvindo a chuva|san+8|Paz.'],{when:ZSE(3)}],
+  ['Barulho demais','O barulho de vocês atraiu zumbis de longe.',['Lutar|?pwr kills ruido-10 zxp+10|Limpamos a área.|hl-12|Eram muitos.','Fugir e fazer silêncio|ruido-20 -it:@comida|Largamos coisas para trás.'],{when:ZRU(50)}],
+  ['Horda atraída','Uma horda média vem na direção do barulho que vocês fizeram.',['Enfrentar|?pwr kills zxp+20 ruido-20|Foi duro, mas vencemos.|hl-20 rdie|Perdemos alguém.','Distrair com fogos|-it:molotov ruido-30|Os zumbis seguiram o fogo.','Fugir|-it:gas ruido-30|Pé na estrada.'],{when:ZRU(70)}],
+  ['Silêncio absoluto','Hoje vocês conseguiram não fazer barulho nenhum.',['Aproveitar para descansar|hl+8 san+6|Dia raro de paz.','Saquear em silêncio|?fur it:lata*2 it:agua|Saque tranquilo.|h+0|Nada encontrado.'],{when:ZW(sc=>sc.id==='zumbi'&&(sc.ruido||0)<15)}],
+  ['Zumbi diferente','Um zumbi corre, abre portas e parece pensar.',['Matar rápido|?pwr kills zxp+15|Era mais forte que os outros.|hl-15|Ele quase me pegou.','Estudar de longe|zxp+10 san-4|Estão evoluindo?'],{when:ZDIA(30)}],
+  ['Zumbi blindado','Um zumbi com roupa de choque da polícia, imune a golpes.',['Mirar na cabeça|?mir kills zxp+15 it:colete|Derrubei e fiquei com o colete.|hl-12|Não consegui acertar.','Fugir|h+0|Não vale a pena.'],{when:ZDIA(20)}],
+  ['Horda migrando','Uma horda gigante migra pela região, como um rio de mortos.',['Esperar passar escondido|?fur stay zxp+15|Dois dias de silêncio. Passaram.|hl-15 rdie|Nos acharam.','Mudar de rota|-it:gas*2|Desvio longo e caro.'],{when:ZDIA(15)}],
+  ['Cidade em chamas','Uma cidade inteira queima no horizonte.',['Ir saquear o que sobrou|?pwr it:lata*2 it:muni*2 it:kit|Muita coisa sobrou.|hl-15|Fumaça e zumbis.','Ficar longe|san-4|Triste.']],
+  ['Ruínas de um shopping','Um shopping desabado, cheio de lojas soterradas.',['Escavar|?mec zmat+8 it:roupa it:lanterna|Muito material.|hl-12|Desabamento.','Seguir|h+0|Instável demais.']],
+  ['Ponte caída','A ponte do caminho caiu.',['Construir uma travessia|zmat-4 zxp+8|Passamos com uma ponte improvisada.','Dar a volta|-it:gas|Desvio longo.']],
+  ['Rio cheio','O rio transbordou e alagou a estrada.',['Atravessar|?pwr h+2|Passamos.|vhp-20 -it:@comida|A água levou carga.','Esperar baixar|stay|Um dia perdido.']],
+  ['Animais selvagens','Cães selvagens, mais perigosos que zumbis, cercam o grupo.',['Lutar|?pwr zxp+10 it:lata|Os cães fugiram.|hl-15 chp-10|Mordidas por todo lado.','Jogar comida|-it:@comida*2|Funcionou.'],{crew:1,when:ZW(sc=>sc.id==='zumbi')}],
+  ['Zoológico solto','Animais do zoológico vagam pela cidade.',['Fugir do leão|?fur h+2|Ele não nos viu.|hl-20|Ele viu.','Caçar uma zebra|?mir it:lata*4|Carne para uma semana.|hl-10|A zebra deu um coice.']],
+  ['Supermercado intocado','Um supermercado com a porta de aço ainda fechada.',['Arrombar|?mec it:lata*4 it:agua*3 it:arroz|Natal no apocalipse.|hl-10 ruido+20|Barulho demais.','Entrar pelo telhado|?fur it:lata*3 it:agua*2|Saque silencioso.|hl-12|Caí no meio de zumbis.']],
+  ['Farmácia trancada','Uma farmácia com grades intactas.',['Serrar as grades|?mec it:antib it:kit it:analg*2|Remédios de verdade.|hl-6 ruido+10|Barulho atraiu zumbis.','Procurar outra entrada|?fur it:kit it:calm|Achei uma janela.|h+0|Nada.']],
+  ['Depósito militar','Um depósito militar com portão aberto.',['Entrar|?pwr it:muni*5 it:rifle it:colete|Arsenal!|hl-20|Os soldados mortos ainda andavam.','Mandar um batedor|?fur it:muni*3|Ele voltou carregado.|rdie|Ele não voltou.']],
+  ['Posto de gasolina intacto','Um posto com combustível no tanque subterrâneo.',['Bombear manualmente|?mec it:gas*4|Tanques cheios.|hl-4|Engoli gasolina.','Pegar o que der|it:gas*2|Dois galões.']],
+  ['Ferro-velho','Um ferro-velho cheio de peças.',['Garimpar|zmat+10 zxp+5|Muita sucata boa.','Procurar um carro bom|?mec veh+|Consertamos um carro!|h+0|Nada funciona.']],
+  ['Loja de armas','Uma loja de caça e pesca.',['Saquear|?fur it:besta it:muni*3 it:faca|Equipamento de caça!|hl-10|O dono ainda estava lá.','Seguir|h+0|Talvez já esteja vazia.']],
+  ['Biblioteca abandonada','Uma biblioteca com livros de sobrevivência.',['Estudar|zxp+15 zat.mec+1|Aprendi a construir coisas.','Pegar livros|it:livro*2|Leitura para as noites.']],
+  ['Hospital abandonado','Um hospital que caiu nos primeiros dias.',['Saquear a farmácia|?pwr it:kit*2 it:antib*2 it:vacina|Remédio para meses.|hl-20 bite|Fui mordid{o}.','Ficar longe|h+0|Hospital é o pior lugar do apocalipse.']],
+  ['Escola cheia de suprimentos','Uma escola virou abrigo e depois foi abandonada.',['Revirar|it:lata*2 it:agua*2 it:livro|Estoque de abrigo.','Procurar sobreviventes|?50 crew|{n} estava escondid{on} no porão.|h-2|Ninguém.']],
+  ['Shopping ocupado','Um shopping é ocupado por um grupo que não aceita visitas.',['Negociar|?lid it:roupa*2 it:muni|Trocamos e saímos.|hl-8|Expulsos a tiros.','Seguir|h+0|Respeito.']],
+  ['Caminhão de comida','Um caminhão de carga de alimentos tombado.',['Saquear tudo|it:lata*4 it:arroz*2 ruido+5|Carga de comida!','Levar só o essencial|it:lata*2|Rápido e discreto.']],
+  ['Carros abandonados','Uma estrada cheia de carros abandonados.',['Revirar porta-malas|it:agua it:barra it:gas|Coisas úteis.','Desmontar peças|zmat+6|Sucata.']],
+  ['O bunker','Um bunker de algum milionário paranoico.',['Abrir|?mec it:racao*4 it:muni*4 it:kit*2|Um tesouro!|hl-10|Armadilhas.','Seguir|h+0|Parece trancado para sempre.']],
+  ['Estação de rádio','Uma antena de rádio no alto do morro.',['Transmitir uma mensagem|zpop+2 ruido+10|Gente ouviu e veio até nós.','Pegar os equipamentos|it:radio it:pilha*2|Equipamento de rádio.']],
+  ['Torre de celular','Do alto de uma torre de celular, dá para ver tudo.',['Subir|?for zxp+15 it:mapa|Mapeei a região.|hl-15|Caí.','Seguir|h+0|Alto demais.']],
+  ['Cemitério','Um cemitério onde os mortos já saíram das covas.',['Atravessar rápido|?fur h+2|Nada aconteceu.|hl-10|Alguns ainda estavam lá.','Desviar|-it:gas|Prudência.']],
+  ['Parque de diversões','Um parque abandonado com a roda-gigante parada.',['Subir na roda-gigante|zxp+8 san+6|De lá de cima, o mundo parecia normal.','Saquear as lanchonetes|it:doce it:salgadinho*2|Algodão-doce velho.']],
+  ['A ponte cheia de carros','Uma ponte entupida de carros, com zumbis presos dentro.',['Atravessar entre os carros|?fur it:gas it:agua|Passamos e ainda achamos coisas.|hl-10|Um braço saiu de um carro.','Achar outro caminho|-it:gas|Mais longe.']],
+  ['Animais domésticos','Uma casa com gatos e cachorros abandonados.',['Libertar os bichos|k+6 h+6|Fugiram correndo para a liberdade.','Adotar um cachorro|moral+6 h+8|Agora temos um vigia de quatro patas.']],
+  ['Laboratório do governo','Um laboratório com o símbolo de risco biológico.',['Entrar com cuidado|?med it:vacina*2 zxp+20|Vacinas experimentais!|hl-15 bite|Era um ninho.','Ficar longe|h+0|Foi aqui que tudo começou?']],
+  ['Mergulho','Um barco afundado num lago, com caixas visíveis no fundo.',['Mergulhar|?for it:muni*3 it:lata*2|Caixas militares!|hl-12|Quase me afoguei.','Seguir|h+0|Fundo demais.']],
+  ['Igreja abandonada','Uma igreja vazia, com velas ainda acesas.',['Entrar|?50 it:lata*2 it:calm san+6|Alguém deixou ofertas.|san-10|Havia algo no altar.','Rezar do lado de fora|san+4|Pedi forças.']],
+  ['Faroeste','Uma cidade de interior virou terra sem lei.',['Atravessar armado|?pwr zxp+10 it:muni*2|Ninguém mexeu com a gente.|hl-12|Tiroteio.','Desviar|-it:gas|Longe dali.']],
+  ['A grande cidade','Os arranha-céus da capital, tomados de mortos.',['Arriscar uma incursão|?pwr it:muni*4 it:kit*2 it:gas*2 zxp+25|Saque épico.|hl-25 rdie|A cidade nos engoliu.','Ficar longe|h+0|Cidade grande é cemitério.'],{when:ZDIA(10)}],
+  ['Zumbis no telhado','Zumbis caem dos telhados quando vocês passam.',['Correr|?fur h+2|Escapamos.|hl-12|Um caiu em cima de mim.','Lutar|?pwr kills|Telhado limpo.|hl-10|Muitos.']],
+  ['Garrafas de água','Um caminhão de água mineral tombado.',['Pegar tudo|it:agua*5 sede-15|Água para dias!','Pegar o que cabe|it:agua*2|Leve.']],
+  ['Fábrica de enlatados','Uma fábrica de enlatados com estoque.',['Saquear|?pwr it:lata*6|Enlatados para semanas.|hl-15|Zumbis operários.','Seguir|h+0|Grande demais.']],
+  ['Armadilha de outros','Você cai numa armadilha montada por outro grupo.',['Se soltar|?for hl-4|Saí com cortes.|hl-15|Fiquei preso horas.','Pedir ajuda|?50 crew|{n}, que montou a armadilha, pediu desculpas e se juntou a nós.|hl-10|Ninguém veio.']],
+  ['Vazamento de gás','Um cheiro forte de gás numa rua.',['Desviar|h+0|Prudência.','Acender e explodir os zumbis|?mec kills zxp+15 ruido+30|Explosão gigante, zumbis pelos ares.|hl-20|Explodi junto.']],
+  ['Oficina mecânica','Uma oficina com ferramentas penduradas.',['Pegar ferramentas|it:chave it:reparo*2|Ferramentas!','Consertar o carro aqui|vhp+30|Carro novo, quase.']],
+  ['A noite mais longa','Uma noite sem lua, cheia de gemidos.',['Ficar acordad{o}|hl-4 san-4 zdef+5|Ninguém dormiu.','Dormir e confiar no vigia|?50 hl+6|Noite tranquila.|hl-12|Ataque de madrugada.']],
+  ['Gritos ao longe','Gritos de socorro vêm de um prédio.',['Ir ajudar|?pwr crew k+6|Resgatamos {n}.|hl-12|Era uma isca.','Ignorar|k-4 san-4|Os gritos pararam.']],
+  ['Pichação','Uma parede pichada: "NÃO VÁ PARA O NORTE".',['Ir para o sul|-it:gas h+2|Melhor obedecer.','Ir para o norte mesmo assim|?50 zxp+15 it:muni*3|Achamos um depósito escondido.|hl-15|Devíamos ter obedecido.']],
+  ['Diário de um morto','Num carro, o diário de alguém que não sobreviveu.',['Ler|san-4 zxp+5|Aprendi com os erros dele.','Guardar|it:livro|Talvez um dia eu tenha coragem.']],
+  ['Bicicleta','Uma bicicleta em perfeito estado.',['Usar para batedor|zxp+5 h+4|Silenciosa e rápida.','Desmontar|zmat+3|Peças.']],
+  ['Pneus furados','Os pneus do {carro} estão carecas.',['Trocar com outro carro|vhp+15|Pneus novos.','Remendar|zmat-1 vhp+5|Aguenta mais um pouco.'],{when:ZW(sc=>sc.id==='zumbi'&&sc.veh.length>0)}],
+  ['Motor fundido','O motor do {carro} fundiu.',['Consertar|?mec zmat-4 vhp+20|Ressuscitou.|veh-|Morreu de vez.','Abandonar|veh-|Mais um carro na estrada.'],{when:ZW(sc=>sc.id==='zumbi'&&sc.veh.length>0)}],
+  ['Estrada livre','Uma estrada inteira sem zumbis e sem carros.',['Acelerar|-it:gas zxp+5|Viagem rápida!','Ir devagar e saquear as casas|it:lata it:agua|Casas intocadas.']],
+  ['Acampamento abandonado','Um acampamento de sobreviventes abandonado às pressas.',['Revirar|it:lata*2 it:muni it:kit|Deixaram muita coisa.','Investigar o que aconteceu|san-6 zxp+8|Eles foram mordidos um por um.']],
+  ['Cão-guia','Um cachorro guia leva vocês até um esconderijo.',['Seguir|it:lata*3 it:agua*2 moral+6|O dono dele tinha um estoque.','Ignorar|h+0|Cachorro esperto.']],
+  ['Fazenda abandonada','Uma fazenda com animais soltos.',['Pegar galinhas|it:ovo*3 zcom+5|Ovos frescos.','Caçar um porco|?mir it:lata*4|Carne de porco.|hl-6|O porco era bravo.']],
+  ['Pesadelos','Você acorda gritando todas as noites.',['Conversar com o grupo|san+6 moral+4|Todos têm pesadelos.','Tomar um calmante|-it:calm san+10|Dormi melhor.']],
+  ['Zumbi conhecido','Entre os zumbis, você reconhece alguém da sua vida antiga.',['Dar descanso|san-8 kills|Doeu.','Desviar|san-6|Não consegui.']],
+  ['Sinais de vida','Fumaça de chaminé sobe de uma casa.',['Bater na porta|?lid crew it:lata|Uma família acolhedora. {n} veio com a gente.|hl-8|Fomos expulsos.','Ignorar|h+0|Melhor não incomodar.']],
+  ['Cem dias','Você percebe que sobreviveu cem dias.',['Comemorar|moral+15 san+10 zxp+30|Cem dias. Ninguém acreditava.','Continuar como se fosse um dia comum|zxp+20|Amanhã é dia 101.'],{when:ZDIA(100)}],
+  ['Cinquenta dias','Cinquenta dias desde o fim do mundo.',['Fazer uma homenagem aos mortos|san+8 moral+8|Lemos cada nome.','Abrir uma lata de pêssego para comemorar|-it:pessego h+10|Doce como vitória.'],{when:ZDIA(50)}],
+  ['Duzentos dias','Duzentos dias. Você virou lenda entre os sobreviventes.',['Aceitar a fama|f+5 zxp+40|Todos falam de {eu}.','Continuar humilde|zxp+30 k+4|Só mais um dia.'],{when:ZDIA(200)}],
+  ['Horda de outono','No outono, as hordas migram para o sul.',['Esconder|?fur stay|Passaram.|hl-15|Nos acharam.','Lutar|?pwr kills zxp+20|Seguramos a linha.|hl-20|Difícil demais.'],{when:ZSE(1)}],
+  ['Zumbi criança','Uma criança zumbi aparece no caminho.',['Fazer o necessário|san-10 kills|Difícil.','Desviar|san-6|Não consegui.']],
+  ['Horda pequena','Um grupo de dez zumbis bloqueia a rua.',['Lutar|?pwr kills zxp+10|Limpo.|hl-10|Mordidas de raspão.','Atrair para longe|?fur zxp+5|Funcionou.|hl-8|Me cercaram.']],
+  ['Caminhão de bombeiros','Um caminhão de bombeiros abandonado.',['Pegar o machado|it:machado|Machado de incêndio!','Pegar a água|it:agua*3|Água!']],
+  ['Ponto de ônibus','Uma placa de ponto de ônibus com recados de sobreviventes.',['Ler os recados|zxp+5 san+4|"Estamos vivos, indo para o Porto Seguro."','Deixar um recado|zpop+1|Alguém leu e veio até nós.']],
+  ['Moto','Uma moto de trilha com a chave no contato.',['Pegar|veh+:moto|Moto nova para os batedores.','Tirar a gasolina|it:gas|Um galão.']],
+  ['A loja de brinquedos','Uma loja de brinquedos intacta.',['Pegar brinquedos para as crianças|moral+8 zmoral+6|Sorrisos raros.','Seguir|h+0|Sem utilidade.']],
+  ['Barulho de motor','Um carro passa em alta velocidade, perseguido por zumbis.',['Ajudar|?pwr crew zxp+10|Salvamos {n}.|hl-12|Os zumbis vieram para nós.','Se esconder|h+0|Melhor assim.']],
+  ['Inverno cruel','O inverno está mais rigoroso do que nunca.',['Queimar móveis para aquecer|ruido+10 hl+6|Calor e fumaça.','Juntar todos num cômodo|moral+6 hl+3|Calor humano.'],{when:ZSE(2)}],
+  ['Lago congelado','Um lago congelado separa vocês de uma cidade.',['Atravessar|?fur zxp+8|Passamos.|hl-15|O gelo rachou.','Dar a volta|-it:gas|Longe.'],{when:ZSE(2)}],
+  ['Abelhas','Uma colmeia gigante numa casa abandonada.',['Pegar o mel|?50 it:doce*2|Mel!|hl-8|Picadas.','Deixar|h+0|Abelhas também sobrevivem.']],
+  ['Eclipse','Um eclipse escurece o céu no meio do dia.',['Observar|san+6|Bonito e assustador.','Aproveitar a escuridão para saquear|?fur it:lata*2|Saque no escuro.|hl-8|Escuro demais.']],
+  ['Terremoto','Um tremor de terra sacode tudo.',['Proteger o grupo|moral+4|Ninguém se feriu.','Correr para fora|hl-6|Uma telha caiu em mim.']],
+  ['Caixa eletrônico','Um caixa eletrônico arrombado, cheio de dinheiro.',['Pegar o dinheiro|h+4|Inútil, mas dá para fazer fogueira.','Deixar|h+0|Dinheiro não vale nada.']],
+  ['Cidade fantasma','Uma cidade sem zumbis e sem gente.',['Investigar|?50 it:lata*3 it:muni*2|Todos foram embora às pressas.|san-10|Algo levou todos.','Seguir|h+0|Estranho demais.']],
+  ['Ninho de zumbis','Um prédio com centenas de zumbis dormindo.',['Passar em silêncio|?fur zxp+10|Ninguém acordou.|hl-20 ruido+30|Alguém espirrou.','Incendiar o prédio|-it:molotov kills zxp+20 ruido+20|Fogaréu.']],
+  ['Chuva ácida','Uma chuva escura e fedorenta.',['Se proteger|stay h+0|Ninguém se molhou.','Continuar|hl-6|A pele ardeu.']],
+  ['Prisão abandonada','Uma prisão com as celas abertas.',['Saquear o arsenal|?pwr it:muni*3 it:espingarda|Armas dos guardas.|hl-15|Presos zumbis.','Procurar sobreviventes|?50 crew|{n} estava trancad{on} numa cela.|h-2|Ninguém.']],
+  ['Aeroporto','Um aeroporto com aviões parados na pista.',['Revirar as malas|it:roupa it:barra*2 it:livro|Malas cheias.','Procurar combustível|it:gas*3|Querosene não, mas gasolina dos carrinhos.']],
+  ['Estrada de terra','Uma estrada de terra leva a uma vila isolada.',['Ir|?50 it:lata*2 it:ovo*2 zpop+1|Gente acolhedora.|hl-10|Vila tomada.','Seguir pela principal|h+0|Mais seguro.']],
+  ['Lua cheia','A lua cheia ilumina tudo. Zumbis enxergam melhor também.',['Ficar escondido|stay san+2|Noite tensa.','Aproveitar para viajar|?fur zxp+5|Viagem tranquila.|hl-10|Visto por uma horda.']],
+  ['Antena parabólica','Uma antena capta transmissões de outros países.',['Ouvir|san+6 zxp+5|No Japão, ainda tem cidades funcionando.','Desmontar|zmat+4|Sucata.']],
+  ['O velho caminhoneiro','Um caminhoneiro idoso vive no caminhão estacionado.',['Trocar|-it:@comida it:gas*2|Gasolina por comida.','Convidar|?lid crew|{n} trouxe o caminhão!|h+0|Ele prefere a solidão.'],{gn:'M'}],
+  ['Pedras no caminho','A estrada está bloqueada por uma barricada antiga.',['Desmontar|zmat+5 hl-3|Sucata e caminho livre.','Contornar|-it:gas|Mais longe.']],
+  ['O mapa','Um mapa marcado com X vermelho em vários lugares.',['Seguir o mapa|?50 it:muni*3 it:lata*3|Esconderijos de suprimentos!|hl-12|Armadilhas.','Guardar|it:mapa|Para depois.']],
+  ['Fogueira estranha','Uma fogueira acesa recentemente, sem ninguém por perto.',['Investigar|?50 crew it:lata|{n} voltou da caçada e se juntou a nós.|hl-10|Era uma emboscada.','Ir embora|h+0|Alguém está por perto.']],
+]);
+
+// ===== Pesadelo zumbi · eventos da vida no apocalipse: grupo, dramas, habilidades, cura e o longo prazo =====
+const ZCR={crew:1,when:ZW(sc=>sc.id==='zumbi')};
+pack({k:'Pesadelo zumbi',w:1.5,cd:40,scen:'zumbi',when:ZW(sc=>sc.id==='zumbi')},[
+  ['Aprendendo a mirar','{c} quer aprender a atirar.',['Ensinar|clv+8 zat.mir+1 -it:muni|Gastamos uma bala e ganhamos mais uma boa pontaria no grupo.','Ensinar com arco|clv+6|Treino silencioso.'],ZCR],
+  ['Ferida que não fecha','Um corte na sua mão infeccionou.',['Usar antibiótico|-it:antib hl+10|Melhorou em dois dias.','Cauterizar com faca quente|?med hl+4 zat.med+1|Doeu muito, mas resolveu.|hl-12|Piorou.']],
+  ['A primeira morte do grupo','Pela primeira vez, alguém do grupo vira zumbi na sua frente.',['Fazer o necessário|san-10 zxp+10|Nunca vou esquecer o rosto.','Chorar e deixar outro fazer|san-6 moral-4|Não consegui.']],
+  ['Saudade','{c} chora toda noite pela família perdida.',['Ficar do lado|clv+12 san-2|Ficamos em silêncio até amanhecer.','Dar uma tarefa para distrair|clv+4 zmat+2|Ajudou um pouco.'],ZCR],
+  ['Rivalidade no grupo','{c} e outro membro do grupo não se suportam.',['Mediar|?lid clv+6 moral+6|Fizeram as pazes.|clv-6|Piorou.','Separar em turnos diferentes|moral+2|Paz pela distância.'],ZCR],
+  ['Habilidade escondida','{c} revela que era mecânic{co} antes de tudo.',['Pedir que conserte os carros|vhp+25 clv+6|Carros zerados.','Pedir que ensine|zat.mec+1 clv+4|Aprendi a mexer em motor.'],ZCR],
+  ['Medo de altura','{c} trava ao ter que subir num telhado para fugir.',['Encorajar|?lid clv+10|Subiu tremendo, mas subiu.|chp-15|Escorregou.','Achar outra rota|-it:gas clv+4|Rota alternativa.'],ZCR],
+  ['Insônia','Você não dorme há três noites.',['Tomar um calmante|-it:calm hl+6 san+8|Dormi doze horas.','Ler até cansar|san+4|Dormi de madrugada.']],
+  ['Aniversário no fim do mundo','Hoje é aniversário de {c}.',['Fazer um bolo de bolacha|-it:@comida clv+15 moral+8|Cantamos parabéns baixinho.','Dar um presente|-it:livro clv+12|Um livro achado numa casa.'],ZCR],
+  ['O covarde','{c} fugiu no meio de uma briga e deixou os outros sozinhos.',['Perdoar|clv+8 moral-4|Todo mundo tem medo.','Expulsar|cbye moral+4|O grupo aprovou.','Dar outra função|clv+2|Agora cuida da comida.'],ZCR],
+  ['Herói inesperado','{c} salvou você de um zumbi que vinha por trás.',['Agradecer|clv+10 h+6|Devo minha vida.','Dar sua melhor arma|clv+15|Agora {celn} carrega o meu facão.'],ZCR],
+  ['Promessa','{c} faz você prometer que, se for mordid{co}, você vai acabar com o sofrimento.',['Prometer|clv+10 san-4|Promessa pesada.','Recusar|clv-4|Não consigo.'],ZCR],
+  ['Mordido','{c} foi mordid{co} no braço.',['Amputar|?med chp-30 clv+10|Cortamos a tempo. {c} sobreviveu.|cdie san-10|Não foi rápido o bastante.','Usar a vacina|-it:vacina chp-5 clv+15|A vacina funcionou!','Fazer o necessário|cdie san-12|Cumpri a promessa.'],ZCR],
+  ['O líder','O grupo questiona suas decisões.',['Ouvir as críticas|?lid moral+10 zat.lid+1|Mudamos o que precisava.|moral-4|Nada mudou.','Impor sua vontade|moral-8|Calaram, mas não concordaram.']],
+  ['Reunião de grupo','O grupo quer votar o próximo destino.',['Deixar votar|moral+8|Decisão coletiva.','Decidir sozinh{o}|moral-4 zxp+5|Mais rápido.']],
+  ['Diário','Você começa a escrever um diário do apocalipse.',['Escrever todo dia|san+6 zxp+5|Escrever me mantém de pé.','Escrever só os dias importantes|san+4|Registro histórico.']],
+  ['Música','{c} encontrou um violão.',['Pedir que toque|moral+10 clv+6 ruido+5|Música no fim do mundo.','Pedir silêncio|clv-4 ruido-5|Zumbis ouvem tudo.'],ZCR],
+  ['Habilidade de cozinha','{c} transforma sobras em pratos incríveis.',['Elogiar|clv+8 fome-10 moral+6|Ensopado de lata gourmet.','Pedir que ensine|zat.med+0 clv+4|Aprendi a aproveitar tudo.'],ZCR],
+  ['Crise de pânico','Você tem uma crise de pânico no meio de um saque.',['Respirar fundo|?50 san+4|Passou.|hl-6 san-6|Tive que voltar.','Pedir ajuda a {c}|clv+8 san+6|{c} me tirou de lá.'],ZCR],
+  ['A carta','Você encontra uma carta da sua família, deixada numa porta.',['Ler|san+10 h+8|Estão vivos, indo para o litoral.','Guardar para ler depois|it:foto|Talvez um dia.']],
+  ['Um amor','Você e {c} se aproximam nas noites de vigia.',['Deixar acontecer|clv+20 h+12 moral+4|Amor no fim do mundo.','Manter distância|clv-4|Não é hora.'],ZCR],
+  ['Ciúmes','O grupo acha que você favorece {c}.',['Ser mais justo|moral+6 clv-4|Equilíbrio.','Defender {c}|clv+8 moral-6|Fofoca no grupo.'],ZCR],
+  ['Velho sábio','{c}, a pessoa mais velha do grupo, conta como sobreviveu a outras crises.',['Ouvir|zxp+10 san+6|Sabedoria de quem já viu muito.','Pedir conselhos|zat.lid+1 clv+6|Aprendi a liderar.'],ZCR],
+  ['Treino de corrida','O grupo treina correr em silêncio.',['Treinar junto|zat.fur+1 hl+4|Agora corremos sem fazer barulho.','Supervisionar|zat.lid+1|Organizei o treino.']],
+  ['Treino de luta','O grupo treina luta com bastões.',['Treinar|zat.for+1 hl-3|Mais forte.','Ensinar|zat.lid+1 moral+4|Bons alunos.']],
+  ['Aula de primeiros socorros','{c} ensina primeiros socorros ao grupo.',['Prestar atenção|zat.med+1 clv+6|Aprendi a fazer torniquete.','Dormir|clv-4|{c} percebeu.'],ZCR],
+  ['Oficina improvisada','Você passa o dia consertando coisas.',['Consertar armas|zat.mec+1 zxp+5|Armas afiadas e ajustadas.','Construir uma armadilha|it:trap zat.mec+0|Armadilha pronta.']],
+  ['Cansaço','O grupo está exausto. Ninguém aguenta mais andar.',['Dar um dia de folga|stay moral+12 hl+6|Dormimos o dia inteiro.','Continuar|moral-8 hl-4|Cansaço extremo.']],
+  ['Fome','O estoque está acabando e a fome aperta.',['Racionar|fome+5 moral-4|Meia porção para todos.','Caçar|?mir it:lata*3|Abati um javali.|hl-8|Nada.'],{when:ZW(sc=>sc.id==='zumbi'&&sc.fome>=60)}],
+  ['Sede','A água acabou e a sede é desesperadora.',['Beber água de chuva suja|?50 sede-30|Desceu bem.|hl-12 sede-30|Passei mal.','Procurar a qualquer custo|?fur it:agua*2|Achei garrafas num carro.|hl-6|Nada.'],{when:ZW(sc=>sc.id==='zumbi'&&sc.sede>=60)}],
+  ['A arma perfeita','{c} encontrou uma arma lendária numa delegacia: um rifle de precisão.',['Ficar com o rifle|it:rifle clv-4|Rifle meu.','Deixar com {c}|clv+12|{c} virou nosso atirador.'],ZCR],
+  ['Sem munição','A munição acabou no pior momento.',['Lutar no corpo a corpo|?for kills zat.for+1|Facão resolveu.|hl-15|Foi feio.','Fugir|-it:@comida|Largamos coisas.'],{when:ZW(sc=>sc.id==='zumbi'&&countCat('muni')===0&&FIREARMS.includes(sc.arma&&sc.arma.id))}],
+  ['Mochila rasgada','Sua mochila rasgou e itens caíram.',['Costurar|zmat-1|Mochila consertada.','Juntar o que der|-it:@comida|Perdi um pouco.']],
+  ['A cura existe?','Um rumor: um cientista descobriu a cura e está escondido numa universidade.',['Ir atrás|?pwr zxp+25 it:vacina*2|Era verdade! Ele nos deu vacinas.|hl-20|A universidade era um ninho.','Ignorar|h+0|Rumores existem aos montes.']],
+  ['A vacina funciona','A vacina experimental salvou alguém mordido.',['Comemorar|moral+15 h+10|Mordida não é mais sentença de morte.','Guardar o segredo|zxp+10|Outros grupos matariam por isso.'],{when:ZW(sc=>sc.id==='zumbi'&&(sc.cure||0)>=50)}],
+  ['Pesquisa da cura','Você analisa sangue de zumbi num microscópio velho.',['Continuar|?med zxp+15|Algo interessante: os mortos não suportam calor.|san-4|Nada útil.','Parar|h+0|Perigoso demais.']],
+  ['Outro sobrevivente antigo','Você reencontra alguém da sua vida antes do apocalipse.',['Abraçar|crew h+15|{n} está viv{on}! Vem com a gente.','Desconfiar|?50 crew|{n} provou que era {eln} mesm{on}.|h-4|Era só parecid{on}.']],
+  ['Bebê no grupo','Uma mulher do grupo dá à luz.',['Ajudar no parto|?med moral+20 h+15 zat.med+1 bebe|Um bebê saudável.|moral-10 bebe|Complicações, mas o bebê nasceu.','Montar guarda|moral+10 bebe|O bebê nasceu. Os gritos atraíram zumbis, mas seguramos.']],
+  ['Criança órfã','Uma criança sozinha pede para entrar no grupo.',['Aceitar|crew k+8 moral+6|{n} é rápid{on} e espert{on}.','Deixar comida e seguir|-it:@comida k+2|Não temos como cuidar.']],
+  ['A volta para casa','Você passa perto da sua antiga casa.',['Entrar|san-6 it:foto h+6|Achei fotos de família.','Seguir|san-2|Não consigo.']],
+  ['Sonho com o mundo antigo','Você sonha com um dia comum: café, trânsito, trabalho.',['Contar ao grupo|moral+6 san+4|Rimos de saudade do trânsito.','Guardar para si|san-4|Saudade.']],
+  ['Ganhando fama','Outros sobreviventes falam de você pelo rádio.',['Aproveitar|f+3 zpop+2|Gente quer se juntar a nós.','Pedir discrição|ruido-10|Fama atrai saqueadores.']],
+  ['O mentor','Um velho sobrevivente ensina truques de sobrevivência.',['Aprender|zat.fur+1 zat.mec+1 zxp+10|Aprendi a fazer fogo sem fumaça.','Agradecer|h+4|Boa conversa.']],
+  ['Prova de liderança','O grupo enfrenta uma decisão difícil e todos olham para você.',['Decidir com firmeza|?lid moral+10 zat.lid+1|Decisão certa.|moral-8|Decisão errada.','Pedir opinião|moral+4|Decisão coletiva.']],
+  ['Tédio','Um dia sem nada para fazer.',['Jogar baralho|moral+6 h+4|Perdi sete partidas.','Treinar|zxp+8|Dia produtivo.']],
+  ['Visita de animal','Um cervo aparece no acampamento.',['Caçar|?mir it:lata*3|Carne fresca.|h+0|Fugiu.','Deixar ir|san+6|Bonito ver vida.']],
+  ['Brigas por armas','Dois membros do grupo brigam por uma arma.',['Dar a quem atira melhor|moral+2|Lógico.','Sortear|moral+4|Justo.']],
+  ['Sem dormir','Ninguém dormiu por causa de gemidos lá fora.',['Fazer silêncio|ruido-10 hl-3|Passou.','Investigar|?pwr kills|Eram só três.|hl-10|Eram trinta.']],
+  ['Um novo começo','O grupo decide nomear o próprio grupo.',['Os Sobreviventes|moral+8|Simples e verdadeiro.','Família|moral+12|Porque é isso que viramos.']],
+  ['Lição de silêncio','{c} faz barulho demais em todo lugar.',['Treinar silêncio com {c}|clv+6 ruido-10|Agora anda como um gato.','Dar bronca|clv-6|{c} emburrou.'],ZCR],
+  ['Feridos demais','Metade do grupo está ferida.',['Usar todos os kits|-it:@remedio*2 moral+8|Todos tratados.','Descansar alguns dias|stay hl+8|Recuperação lenta.']],
+  ['Notícias pelo rádio','Pelo rádio, alguém fala que existe uma ilha sem zumbis.',['Acreditar|etapa+2 h+8|Novo objetivo.','Desconfiar|h+0|Promessas demais.']],
+  ['O mais forte do grupo','{c} ficou muito forte depois de semanas de luta.',['Colocar na linha de frente|clv+6 zdef+5|Muralha humana.','Pedir que treine os outros|moral+6 clv+4|Todos mais fortes.'],ZCR],
+  ['O aniversário do apocalipse','Faz um ano desde que tudo começou.',['Fazer um minuto de silêncio|san+10 moral+10|Pelos que se foram.','Festa de sobrevivência|-it:@comida*2 moral+15|Um ano vivos.'],{when:ZDIA(365)}],
+  ['Dia de sorte','Hoje tudo deu certo.',['Aproveitar|it:lata*2 it:muni*2 h+8|Dia lendário.','Guardar a sorte|h+6|Amanhã pode ser pior.']],
+  ['Dia de azar','Hoje tudo deu errado.',['Aceitar e descansar|san+4|Amanhã é outro dia.','Insistir|hl-10|Piorou.']],
+  ['A pergunta','{c} pergunta se vale a pena continuar vivendo assim.',['Responder que sim|?lid clv+12 san+4|Convenci a nós dois.|clv-6|{c} não acreditou.','Ficar em silêncio|clv+2 san-6|Não sei a resposta.'],ZCR],
+  ['Habilidade nova','Você descobre que sabe consertar rádios.',['Consertar um|zat.mec+1 it:radio|Rádio funcionando.','Ensinar o grupo|zat.lid+1|Todos aprenderam.']],
+  ['Monstro no rio','Algo enorme se mexe no rio onde vocês pescam.',['Investigar|?pwr zxp+15 it:lata*2|Era um zumbi preso em redes, com peixes presos também.|hl-15|Era um jacaré.','Mudar de rio|h+0|Melhor não saber.']],
+  ['Neve no acampamento','Uma nevasca surpreende o grupo.',['Abraçar todos para aquecer|moral+8 hl-2|Calor humano.','Queimar o que tiver|ruido+10 hl+4|Fogo.'],{when:ZSE(2)}],
+  ['Sobrevivente famoso','Você encontra um ex-atleta famoso sobrevivendo sozinho.',['Convidar|crew f+2|{n} é rápid{on} e forte.','Pedir autógrafo|h+8|Até no fim do mundo.']],
+  ['A promessa cumprida','{c} lembra a promessa que você fez de não desistir.',['Renovar a promessa|clv+10 san+8|Juntos até o fim.','Ficar em silêncio|clv-2|Pesado.'],ZCR],
+  ['O dia em que o rádio falou','O rádio transmite a voz de um governo provisório.',['Ouvir com esperança|san+10 moral+8|Ainda existe ordem em algum lugar.','Desconfiar|san+2|Política no apocalipse.']],
+  ['Pedido de casamento','{c} pede você em casamento.',['Aceitar|clv+25 h+15 moral+10|Casamento no fim do mundo, com anéis de arame.','Recusar com carinho|clv-10|{c} entendeu. Doeu.'],ZCR],
+  ['Ferimento de bala','Você levou um tiro de raspão de um saqueador.',['Tratar|?med hl+6 zat.med+1|Bala tirada com pinça.|hl-10|Infeccionou.','Pedir ajuda a {c}|clv+6 hl+4|{c} costurou.'],ZCR],
+  ['Exploração solitária','Você sai sozinh{o} para explorar.',['Ir longe|?fur it:lata*2 it:muni*2 zxp+10|Voltei carregad{o}.|hl-15|Me perdi.','Voltar cedo|h+2|Prudência.']],
+  ['A grande decisão','O grupo quer se dividir: metade quer ir para o litoral.',['Ir junto para o litoral|etapa+2 moral+4|Novo rumo.','Ficar|rdie moral-6|Alguns foram embora.','Convencer todos a ficarem juntos|?lid moral+10|Ninguém foi embora.|rdie|Alguns foram.']],
+  ['A tatuagem do grupo','O grupo quer uma tatuagem igual para todos.',['Fazer|moral+10 hl-2|Agora somos família de verdade.','Recusar|moral-2|Fiquei de fora.']],
+  ['O fim de um amigo','{c} está muito doente e pede para não ser deixad{co} para trás.',['Cuidar até o fim|-it:@remedio chp+20 clv+15|{c} se recuperou!','Fazer o que {celn} pediu|cdie san-10|Ficamos juntos até o último suspiro.'],ZCR],
+  ['Zumbi de estimação','{c} quer prender um zumbi como "alarme".',['Permitir|zdef+5 clv+4|Ele geme quando alguém chega.','Proibir|clv-4|Mórbido demais.'],ZCR],
+  ['Nostalgia','O grupo canta músicas antigas em volta da fogueira.',['Cantar junto|moral+10 ruido+5|Lembranças boas.','Ficar de vigia|zdef+3|Alguém precisa vigiar.']],
+  ['O mapa do tesouro','{c} achou um mapa de um esconderijo de outro grupo.',['Seguir|?pwr it:muni*3 it:lata*3 it:kit|Esconderijo cheio.|hl-12|O dono voltou.','Deixar|h+0|Não é nosso.'],ZCR],
+  ['Desconfiança','Alguém do grupo está roubando comida.',['Investigar|?fur moral+6 crianca|Era {c}, pegando para uma criança escondida. Ela entrou no grupo.|moral-6|Ninguém confessou.','Trancar a comida|moral-4|Desconfiança.'],ZCR],
+  ['O sobrevivente perfeito','Você percebe que se tornou outra pessoa: mais forte, mais fria.',['Aceitar|zxp+15 san-4|O apocalipse me moldou.','Tentar manter a humanidade|k+6 san+6|Ainda sou eu.']],
+  ['Ensinar uma criança','Uma criança do grupo quer aprender a sobreviver.',['Ensinar|zat.lid+1 moral+6|Ela aprende rápido.','Proteger em vez de ensinar|moral+2|Ela ainda é criança.']],
+  ['Coleção de tampinhas','{c} coleciona tampinhas de garrafa. Os Mercadores aceitam como moeda.',['Usar para trocar|it:muni*2 clv-2|Tampinhas viraram balas.','Deixar com {c}|clv+6|Deixei a coleção em paz.'],ZCR],
+  ['Hora de partir','O lugar onde estão ficou perigoso demais.',['Partir agora|-it:gas zxp+5|Pé na estrada.','Ficar e reforçar|zdef+6|Não vamos fugir.']],
+  ['Memórias','Você encontra um álbum de fotos numa casa vazia.',['Olhar|san-4 h+4|Gente feliz, num mundo que não existe mais.','Deixar|h+0|Não é meu.']],
+  ['Sobrevivente veterano','Você virou referência para outros sobreviventes.',['Ensinar quem chega|zpop+2 zat.lid+1|Formei novos sobreviventes.','Seguir sozinh{o}|zxp+10|Prefiro discrição.'],{when:ZDIA(60)}],
+  ['Um dia comum','Hoje não aconteceu nada. Foi lindo.',['Aproveitar|san+10 hl+6|Um dia normal no fim do mundo.','Preparar para amanhã|zxp+5|Nunca baixar a guarda.']],
+  ['Recaída','{c} encontrou bebida e se embebedou durante a vigia.',['Conversar|?lid clv+8|Prometeu parar.|clv-4|Bebeu de novo.','Tirar da vigia|clv-6 zdef-3|Menos um vigia.'],ZCR],
+  ['Zumbi com aliança','Um zumbi com uma aliança gravada com um nome que você conhece.',['Pegar a aliança|it:foto san-8|Guardei para quem ainda estiver vivo.','Deixar|san-4|Que descanse.']],
+  ['A grande caçada','O grupo caça uma manada de javalis.',['Liderar|?pwr it:lata*5 zxp+15|Carne para semanas.|hl-15|Javali bravo.','Montar armadilhas|?mec it:lata*3|Pegamos dois.|h+0|Nenhum.']],
+  ['Barco','Um barco atracado num rio.',['Pegar e descer o rio|?mec etapa+2 zxp+10|Viagem tranquila pelo rio.|hl-10|O motor pegou fogo.','Saquear|it:sinal it:lata|Sinalizador e comida.']],
+  ['Corrida','Uma corrida contra uma horda para chegar ao carro.',['Correr|?for h+4 zxp+5|Chegamos!|hl-15|Tropecei.','Distrair a horda|-it:molotov zxp+10|O fogo segurou.']],
+  ['Herança','Um sobrevivente moribundo te dá a mochila dele.',['Aceitar|it:muni*3 it:kit it:mapa k+3|Ele sorriu antes de fechar os olhos.','Ficar com ele até o fim|san-4 k+6|Ninguém morre sozinho.']],
+  ['Reencontro','Alguém que você deixou para trás aparece vivo.',['Pedir perdão|?lid crew k+6|{n} perdoou e voltou ao grupo.|san-6|{n} cuspiu no chão e foi embora.','Fingir que não reconheceu|san-6|Covardia.']],
+  ['A noite das estrelas','Sem luz elétrica, o céu está cheio de estrelas.',['Deitar e olhar|san+10|Nunca vi tantas.','Ensinar constelações ao grupo|moral+8 zat.lid+0|Viramos astrônomos.']],
+  ['Moeda de troca','{c} sugere trocar uma pessoa do grupo por suprimentos com os Corvos.',['Recusar indignad{o}|clv-10 k+8 moral+6|Nunca.','Expulsar {c}|cbye moral+6|Monstros não ficam.'],ZCR],
+  ['Último pacote','O último pacote de comida especial do grupo.',['Dividir com todos|moral+10 fome-5|Cada um ganhou um pedaço.','Guardar para emergência|h+2|Prudência.']],
+  ['Paranoia','Você jura que está sendo seguid{o}.',['Investigar|?fur zxp+10|Era um cachorro curioso.|san-8|Nunca descobri.','Mudar de lugar|-it:gas san+2|Melhor prevenir.']],
+  ['Lenda viva','Crianças de outros grupos brincam de ser você.',['Visitar|h+12 f+2|Elas surtaram.','Ignorar|h+4|Sorri escondid{o}.'],{when:ZDIA(80)}],
+  ['O pior dia','Um dia horrível: chuva, fome, feridos e zumbis.',['Aguentar firme|?lid moral+6 zxp+10|Sobrevivemos ao pior dia.|moral-10|Quase desistimos.','Chorar|san+4|Às vezes precisa.']],
+  ['Uma nova manhã','Depois de uma noite de ataques, o sol nasce.',['Agradecer por estar viv{o}|san+8 h+6|Mais um dia.','Contar os mortos|san-4 zxp+5|Quatro a menos.']],
+  ['O fim chegará','Você sabe que um dia vai cair, como todos.',['Aceitar|san+6 zxp+5|Enquanto isso, viver.','Lutar contra essa ideia|hl+4 zxp+5|Não hoje.']],
+]);
 
 // ===== Isekai · cidade: Vila de Aurora (100 eventos) — vida rural, colheita, vizinhos =====
 const CID=k=>ZW(sc=>sc.id==='isekai'&&((sc.morada===k&&!sc.vila)||(ISK_TOWNS[k]&&sc.rota===ISK_TOWNS[k][2])));
@@ -6477,7 +7165,7 @@ pack({k:'Aerion',w:1.6,cd:30,scen:'isekai',fant:true,when:CID('aerion')},[
   ['A ponte do arco-íris','Uma ponte de arco-íris liga Aerion a uma ilha menor.',['Atravessar|?50 it:gema xp+60|A ilha tinha um jardim secreto.|hl-10|A ponte sumiu na metade.','Admirar|h+6|Lindo.']],
   ['Livro vivo','Um livro da biblioteca fugiu e está mordendo as pessoas.',['Capturar|?agi xp+40 trep+6|Livro de volta na estante.|hl-6|Ele mordeu.','Ler o livro|?mag spell|Ele se acalmou e me ensinou um feitiço.|hl-6|Ele mordeu de novo.']],
   ['Tempestade de mana','Uma tempestade de mana pura passa por Aerion.',['Absorver|?mag mana+50 at.mag+1|Me senti um deus.|hl-15|Explodi um pouco.','Se esconder|h+0|Melhor não arriscar.']],
-  ['O jardim suspenso','O jardim suspenso de Aerion tem frutas que flutuam.',['Colher|it:maca*2 h+4|Maçãs que flutuam até a boca.','Ajudar o jardineiro|trep+6|Ele me deu sementes.']],
+  ['O jardim suspenso','O jardim suspenso de Aerion tem frutas que flutuam.',['Colher|it:maca*2 h+4|Maçãs que flutuam até a boca.','Ajudar o jardineiro|trep+6 it:semente it:maca|Ele me deu sementes e uma maçã que flutua.']],
   ['Grifo ferido','Um grifo ferido caiu na praça.',['Curar|?mag k+8 trep+8|O grifo voou de novo.|h-2|A magia não foi suficiente.','Chamar o veterinário de grifos|ouro-20 trep+5|O veterinário resolveu.']],
   ['Feira de invenções','Os inventores de Aerion mostram suas criações.',['Mostrar uma invenção do seu mundo|?sm f+3 ouro+60|Desenhei um guarda-chuva. Ganhei o prêmio.|h-2|Ninguém entendeu.','Comprar uma invenção|ouro-40 h+6|Um relógio que fala.']],
   ['O mago do tempo','Um mago diz que pode mostrar seu futuro por alguns segundos.',['Aceitar|?50 xp+80|Vi uma vitória.|san-10|Vi algo terrível.','Recusar|h+0|Prefiro não saber.']],
@@ -7084,7 +7772,7 @@ pack({k:'Pesadelo zumbi',w:1.5,cd:40,scen:'zumbi',when:scWhen('zumbi')},[
   ['Vendedor ambulante','Um vendedor ambulante grita: "Olha a água, olha o biscoito, olha a munição!"',['Trocar remédio por água|-it:@remedio it:agua*3|Tem gente que não perde o jeito.','Trocar foto de família por biscoito|-it:foto it:biscoito*2 h-4|Doeu, mas fome é fome.','Rir e seguir|h+5|Comerciante nato.']],
   ['Pesadelo coletivo','Todo mundo acordou com o mesmo pesadelo: o mundo normal de volta, e ninguém se lembrando deles.',['Conversar sobre isso|moral+6 h+2|Ficamos mais unidos.','Mudar de assunto|h-3|Ninguém conseguiu esquecer.']],
   ['Mulher grávida','Uma mulher grávida de oito meses pede para entrar no grupo.',['Aceitar|crew k+8 moral+6|{n} veio. Todo mundo quer ser padrinho.','Dar remédio e indicar um hospital de campanha|-it:@remedio k+4|Ela agradeceu muito.'],{gn:'F'}],
-  ['O nascimento','No meio da noite, nasce um bebê no acampamento.',['Ajudar no parto|?55 moral+15 h+15|Um menino forte, chorando alto. Pela primeira vez em semanas, todo mundo sorriu.|h-10|Foi difícil. Muito difícil. Mas a mãe sobreviveu.','Montar guarda lá fora|moral+8|Os gritos atraíram zumbis, mas seguramos.']],
+  ['O nascimento','No meio da noite, nasce um bebê no acampamento.',['Ajudar no parto|?55 moral+15 h+15 bebe|Um menino forte, chorando alto. Pela primeira vez em semanas, todo mundo sorriu.|h-10 bebe|Foi difícil. Muito difícil. Mas a mãe e o bebê sobreviveram.','Montar guarda lá fora|moral+8 bebe|O bebê nasceu. Os gritos atraíram zumbis, mas seguramos.']],
   ['Arma escondida','{c} esconde uma pistola carregada e não contou para ninguém.',['Exigir que divida|clv-10 it:pistola|{c} entregou, de cara fechada.','Deixar com {c}|clv+6|Confiança é tudo.'],ZC],
   ['Torre de celular','Do alto de uma torre de celular dá para ver quilômetros.',['Subir|?60 etapa+1|Vi o caminho todo até a costa.|hl-15|Caí do quinto degrau.','Mandar {c} subir|?55 etapa+1 clv+5|{c} desenhou um mapa do que viu.|chp-20|{c} escorregou.'],ZC],
   ['Lanchonete de estrada','Uma lanchonete de estrada com a chapa ainda morna. Tem alguém lá dentro.',['Entrar devagar|?55 crew it:lata*2|Era {n}, que fritava hambúrguer de lata para quem passasse.|kills hl-8|Quem estava lá dentro não fritava nada.','Gritar de longe|?50 h+3|Ninguém respondeu. Pegamos o que deu.|h-2|Silêncio.']],
@@ -7461,7 +8149,7 @@ pack({k:'Eldoria',w:1.5,cd:40,scen:'isekai',fant:true,when:scWhen('isekai')},[
   ['Missão de escolta','Uma princesa disfarçada pede escolta até a fronteira.',['Aceitar|?pwr ouro+150 f+3|Ela revelou quem era na fronteira e prometeu recompensa.|hl-14|Assassinos no caminho.','Recusar|h+0|Problema real, não meu.']],
   ['Cogumelos falantes','Cogumelos numa clareira discutem política.',['Participar do debate|sm+2 h+8|Venci o debate. Os cogumelos ficaram ofendidos.','Comer um|?40 mana+30|Mana pura!|hl-10|Ele gritou antes de ser comido.']],
   ['A invasão','Um exército de esqueletos marcha em direção à capital.',['Defender a capital|?pwr xp+200 f+5 ouro+100|Herói da batalha de Valmor!|hl-25 rdie|Vencemos, mas perdemos alguém.','Atacar o necromante na retaguarda|?agi xp+250|Sem o necromante, os esqueletos caíram.|hl-20|Ele me viu chegando.']],
-  ['Ovo misterioso','Um ovo enorme e quente na beira do vulcão.',['Chocar|h+8 xp+60|Nasceu um filhote de grifo! Ele me segue para todo lado.','Vender|ouro+150|Um colecionador pagou bem.']],
+  ['Ovo misterioso','Um ovo enorme e quente na beira do vulcão.',['Chocar|h+8 xp+60 bicho:grifo|Nasceu um filhote de grifo! Ele me segue para todo lado.','Vender|ouro+150|Um colecionador pagou bem.']],
   ['Ladrão de identidade','Alguém está se passando por você e cobrando favores em seu nome.',['Caçar o impostor|?pwr xp+60 ouro+60|Era um metamorfo. Agora é um metamorfo preso.|h-6|Ele escapou.','Deixar|f-2|Minha fama não está bonita.']],
   ['Chá com a rainha das fadas','A rainha das fadas te convida para um chá.',['Ir|mana+40 h+10 k+3|Chá de pétalas e conversa sobre o destino.','Recusar educadamente|h+0|Dizem que quem toma chá com fada fica cem anos lá.']],
   ['Sereia','Uma sereia canta no rio e chama você.',['Tapar os ouvidos e seguir|h+2|Ainda bem.','Ir até ela|?50 it:gema h+6|Ela só queria companhia e me deu uma pérola.|hl-15|Ela queria jantar.']],
@@ -7741,7 +8429,7 @@ pack({k:'Superpoderes',w:1.5,cd:40,scen:'heroi',when:scWhen('heroi')},[
   ['Super-herói falido','Um herói antigo vive na rua.',['Ajudar|$-3000 k+8 crew|{n} voltou à ativa.','Ignorar|k-4|Triste.']],
   ['Ataque aos hospitais','Capangas atacam hospitais para roubar remédios.',['Proteger|?pwr rep+12 k+5|Hospitais seguros.|hl-12|Eles levaram algo.','Investigar quem comprou os remédios|?sm pista+20|Era {inimigo}.|h-2|Nada.']],
   ['Ponte aérea','Um avião perdeu o motor sobre a cidade.',['Segurar o avião|?sc.pw rep+30 f+10|Pousei o avião no rio.|hl-30|Pousou, com feridos.','Guiar até o aeroporto|rep+15|Pouso forçado.']],
-  ['Vilão chorando','Você encontra um vilão chorando num banco de praça.',['Conversar|k+6 pista+10|Ele contou que trabalha para {inimigo} por dívida.','Prender|rep+4|Ele não resistiu.']],
+  ['Vilão chorando','Você encontra um vilão chorando num banco de praça.',['Conversar|k+6 pista+10|Ele contou que trabalha para {inimigo} por dívida.','Prender|rep+4|Ele se entregou sem reagir.']],
   ['Super-poder novo?','Algo novo acontece: além de {poder}, você sente outra coisa.',['Treinar o novo poder|pw+12 san-4|Agora tenho dois poderes!','Reprimir|pw+2|Um poder já é muito.']],
   ['Uniforme na lavanderia','O uniforme foi parar na lavanderia do prédio.',['Buscar escondido|?agi sec+2|Recuperado.|sec-10|A vizinha viu.','Deixar lá|sec-4|Alguém vai achar.']],
   ['A grande revelação','{inimigo} revela ao vivo que sabe quem você é.',['Negar|?car sec+5|Ninguém acreditou nele.|sec-25|Todos acreditaram.','Assumir tudo|sec-40 rep+10 f+10|Agora o mundo sabe. Que alívio.']],
@@ -7950,7 +8638,7 @@ pack({k:'Marte',w:1.5,cd:40,scen:'marte',when:scWhen('marte')},[
   ['Crise de ansiedade','A pressão da missão afeta você.',['Meditar|san+8|Respirei.','Conversar com a médica|san+10 hl+2|Ajudou muito.']],
   ['Recompensa da agência','A agência espacial manda um bônus por bom trabalho.',['Comemorar|h+8 $+5000|Dinheiro em outro planeta.','Doar a uma escola|k+8 $+0|Para o futuro da ciência.']],
   ['Mudança de equipe','Uma colona quer trocar de função.',['Aceitar|moral+4|Equipe feliz.','Recusar|moral-4|Precisamos dela onde está.']],
-  ['A primeira criança','A primeira criança marciana nasceu.',['Celebrar|moral+15 h+15 f+10|História da humanidade.','Escrever uma carta para ela ler no futuro|h+12|"Você nasceu num planeta vermelho."'],{when:ZW(sc=>sc.dia>=20)}],
+  ['A primeira criança','A primeira criança marciana nasceu.',['Celebrar|moral+15 h+15 f+10 bebe|História da humanidade.','Escrever uma carta para ela ler no futuro|h+12 bebe|"Você nasceu num planeta vermelho."'],{when:ZW(sc=>sc.dia>=20)}],
   ['Chegada da nave de carga','A nave de carga chegou com suprimentos.',['Descarregar|it:liof*3 it:o2*2 it:pecas|Despensa cheia!','Abrir as caixas com calma|it:liof*2 it:kit h+6|Tinha chocolate!']],
   ['Ferrugem','Os equipamentos estão enferrujando com a poeira.',['Limpar e lubrificar|-it:pecas h+2|Equipamentos novos.','Ignorar|o2-6|Problemas aparecendo.']],
   ['Alienígenas?','Um sinal de rádio repetitivo vem do espaço.',['Investigar|?sm ciencia+15 san-4|Era um pulsar.|san-10|Nunca descobrimos.','Avisar a Terra|ciencia+6|Eles ficaram animados.']],
@@ -8335,7 +9023,12 @@ function selfTest(){
       else if(crew().length){ const c=R.pick(crew()); c.lv=Math.min(100,c.lv+5); const w=sc.inv.find(x=>itCat(x.id)==='arma'); if(w&&!c.arma){ sc.inv=sc.inv.filter(y=>y!==w); c.arma=w; } }
       if(S.scen&&sc.fome>60){ const f=sc.inv.find(x=>itCat(x.id)==='comida'); if(f) scUse(f); } if(S.scen&&sc.hl<40){ const f=sc.inv.find(x=>itCat(x.id)==='remedio'); if(f) scUse(f); }
       if(S.scen&&sc.id==='ilha'&&sc.sede>60){ const f=sc.inv.find(x=>itCat(x.id)==='agua'); if(f) scUse(f); }
-      if(S.scen&&sc.id==='zumbi'&&R.chance(.15)) sc.stay=1; if(S.scen&&sc.id==='isekai') sc.travel=sc.lvl>=sc.rota*2+1?1:0;
+      if(S.scen&&sc.id==='zumbi'){ zEnsure(sc); if(R.chance(.15)) sc.stay=1; while(sc.zpts>0){ sc.zpts--; sc.zat[R.pick(Object.keys(ZAT))]++; }
+        if(R.chance(.3)){ const k=R.pick(['comida','agua','remedio','gas','armas','mat']); if(sc.ap>0&&!sc.done['zs_'+k]){ sc.ap--; sc.done['zs_'+k]=1; zScav(k); } }
+        if(R.chance(.2)&&sc.ap>=2&&!sc.done.zexp){ sc.ap-=2; sc.done.zexp=1; zExpedition(R.pick(Object.keys(ZEXP))); }
+        const rc=R.pick(ZRECIPES); if(sc.zmat>=rc[3]&&rc[5]<=zBaseLv(sc,'oficina')&&rc[4].every(i=>sc.inv.some(x=>x.id===i))) zCraft(rc);
+        if(!sc.zb&&sc.dia>6&&R.chance(.2)) zFoundBase('Teste'); if(sc.zb){ const ks=Object.keys(ZB).filter(k=>sc.zb.b[k]<ZB[k][4]&&sc.zmat>=ZB[k][2]*(sc.zb.b[k]+1)); if(ks.length&&R.chance(.5)){ const k=R.pick(ks); sc.zmat-=ZB[k][2]*(sc.zb.b[k]+1); sc.zb.b[k]++; } sc.zb.racao=R.int(0,2); sc.zb.portas=R.int(0,2); }
+        if(R.chance(.15)){ const f=R.pick(Object.keys(ZFAC)); const r=V.zFacOne(f); if(r) r.items.map(rowHtml).join(''); } } if(S.scen&&sc.id==='isekai') sc.travel=sc.lvl>=sc.rota*2+1?1:0;
       if(S.scen&&sc.id==='isekai'){ iskEnsure(sc); while(sc.pts>0){ sc.pts--; sc.at[R.pick(['for','mag','agi','vit'])]++; } const sp=sc.sp.filter(id=>!sc.done['sp_'+id]); if(sp.length&&R.chance(.6)) castSpell(R.pick(sp));
         if(!sc.vila&&sc.lvl>=4&&sc.ouro>=250) vilaFound('Teste'); if(sc.vila&&R.chance(.5)){ const ks=Object.keys(VILA_B).filter(k=>sc.vila.b[k]<5&&sc.ouro>=VILA_B[k][2]*(sc.vila.b[k]+1)); if(ks.length){ const k=R.pick(ks); sc.ouro-=VILA_B[k][2]*(sc.vila.b[k]+1); sc.vila.b[k]++; } } if(sc.vila&&R.chance(.2)){ sc.vila.imp=R.int(0,2); sc.vila.imig=R.int(0,2); sc.vila.racao=R.int(0,2); } if(sc.vila&&!sc.vila.res){ const c=Object.keys(TECH).filter(t=>!vHas(sc.vila,t)&&(!TECH[t][4]||vHas(sc.vila,TECH[t][4]))); if(c.length) sc.vila.res=R.pick(c); }
         if(!sc.vila&&atHome(sc)&&!sc.casa&&sc.ouro>=ISK_TOWNS[sc.morada][3]&&R.chance(.3)){ sc.ouro-=ISK_TOWNS[sc.morada][3]; sc.casa=1; } }
@@ -8373,9 +9066,9 @@ function selfTest(){
     for(let k=0;k<8;k++){ T('advLife',()=>{ newLife({}); const m=S.me; while(m.alive&&m.age<22){ S.pending=[]; ageUp(); } m.alive=true; m.prison=null; S.pending=[]; MQ.length=0; scStart(id); if(id==='isekai') S.scen.cls=R.pick(Object.keys(CLASSES)); });
       const before=(S.me.c.scenWin||0); let g=0;
       while(S.scen&&g++<(id==="isekai"?160:80)){ T('advDay:'+id,()=>{ scNextDay(); }); let e2=0; while(S.scen&&S.pending.length&&e2++<12){ const e=S.pending.shift(); if(!evValid(e)) continue; const ev=EVENTS[e.id]; events++; T('advEv:'+id+':'+e.id,()=>{ const sh=ev.show(e.d); if(sh.ch.length<2) errs['só 1 escolha: '+e.id]=1; const c=R.pick(sh.ch); const r=ev.pick(c[1],e.d); chk(e.id,[sh.t,sh.x,c[0],r]); }); T('advCheck',scCheck); }
-        if(S.scen) T('advAct:'+id,scenRandomDay); if(S.scen) T('advCheck',scCheck); if(S.scen) T('advViews:'+id,()=>{ [V.scLocal,V.scActs,V.scCrew,V.scItems,V.scMe].concat(id==='isekai'?[V.iskMe,V.iskMagic,V.iskVila]:[]).forEach(v=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }); crew().forEach(c=>{ const r=V.scMember(c); if(r) r.items.map(rowHtml).join(''); }); renderScen(); }); }
-      if(S.scen){ errs['aventura não terminou: '+id]=1; S.scen=null; } n++; days+=(S.log[S.log.length-1].lines.map(l=>typeof l==='string'?l:l.t).join(' ').match(/: (\d+) (dia|sol)/)||[0,0])[1]*1; if((S.me.c.scenWin||0)>before) win++; MQ.length=0; }
-    T('advSweep:'+id,()=>{ newLife({}); S.me.age=25; scStart(id); if(id==='isekai'){ S.scen.cls='mago'; iskEnsure(S.scen); S.scen.ouro=3000; S.scen.lvl=6; vilaFound('Teste'); } for(let i=0;i<4;i++){ scNextDay(); } S.pending=[]; const snap=JSON.stringify(S); let nev=0;
+        if(S.scen) T('advAct:'+id,scenRandomDay); if(S.scen) T('advCheck',scCheck); if(S.scen) T('advViews:'+id,()=>{ [V.scLocal,V.scActs,V.scCrew,V.scItems,V.scMe].concat(id==='isekai'?[V.iskMe,V.iskMagic,V.iskVila]:id==='zumbi'?[V.zMe,V.zScav,V.zExp,V.zCraft,V.zFac,V.zBase]:[]).forEach(v=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }); crew().forEach(c=>{ const r=V.scMember(c); if(r) r.items.map(rowHtml).join(''); }); renderScen(); }); }
+      if(S.scen){ if(id!=='zumbi') errs['aventura não terminou: '+id]=1; else days+=S.scen.dia; S.scen=null; } n++; days+=(S.log[S.log.length-1].lines.map(l=>typeof l==='string'?l:l.t).join(' ').match(/: (\d+) (dia|sol)/)||[0,0])[1]*1; if((S.me.c.scenWin||0)>before) win++; MQ.length=0; }
+    T('advSweep:'+id,()=>{ newLife({}); S.me.age=25; scStart(id); if(id==='isekai'){ S.scen.cls='mago'; iskEnsure(S.scen); S.scen.ouro=3000; S.scen.lvl=6; vilaFound('Teste'); } if(id==='zumbi'){ zEnsure(S.scen); zFoundBase('Teste'); } for(let i=0;i<4;i++){ scNextDay(); } S.pending=[]; const snap=JSON.stringify(S); let nev=0;
       for(const [eid,ev] of Object.entries(EVENTS)){ if(ev.scen!==id||!ev.w) continue; nev++; T('advVarre:'+eid,()=>{ S=JSON.parse(snap); if(ev.when&&!ev.when(S.me)){ S.scen.crew.length||mkCrew(); } const d=ev.prep?ev.prep(S.me):{}; if(d==null) return; const sh=ev.show(d); if(sh.ch.length<2) errs['só 1 escolha: '+eid+' ('+sh.t+')']=1; for(const c of sh.ch){ S=JSON.parse(snap); const r=ev.pick(c[1],d); chk(eid,[sh.t,sh.x,c[0],r]); } swept++; }); }
       S=JSON.parse(snap); S.scen=null; adv.push(`${id}: ${nev} eventos`); });
     adv.push(`${id}: ${win}/${n} vitórias, média ${(days/n).toFixed(1)} dias`); }
@@ -8418,6 +9111,15 @@ function advDiag(){ const out=[];
     const w=sc.inv.filter(i=>itCat(i.id)==='arma').sort((a,b)=>itV(b.id)-itV(a.id))[0]; if(w&&(!sc.arma||itV(w.id)>itV(sc.arma.id))){ sc.inv=sc.inv.filter(i=>i!==w); if(sc.arma) addItem(sc.arma.id,sc.arma.hp,true); sc.arma=w; }
     crew().forEach(c=>{ if(!c.arma){ const w2=sc.inv.find(i=>itCat(i.id)==='arma'); if(w2){ sc.inv=sc.inv.filter(i=>i!==w2); c.arma=w2; } } });
     if(sc.id==='isekai'){ iskEnsure(sc); while(sc.pts>0){ sc.pts--; sc.at[R.pick(['for','for','vit','agi','mag'])]++; } sc.sp.forEach(id=>{ if(!sc.done['sp_'+id]&&sc.mana>=spCost(sc,id)&&['atq','atq2','atq3','def','cura','aliado'].includes(SPELLS[id][4])) castSpell(id); }); sc.travel=sc.lvl>=2+sc.rota*1.5?1:0; }
+    if(sc.id==='zumbi'){ zEnsure(sc); while(sc.zpts>0){ sc.zpts--; sc.zat[R.pick(['for','for','fur','med','mec','mir'])]++; }
+      const sc2=k=>{ if(sc.ap>0&&!sc.done['zs_'+k]){ sc.ap--; sc.done['zs_'+k]=1; zScav(k); } };
+      if(sc.sede>40||countCat('agua')<2) sc2('agua'); if(sc.fome>40||countCat('comida')<3) sc2('comida'); if(sc.hl<60) sc2('remedio'); if(!S.scen) return;
+      if(!sc.zb&&sc.dia>=5) zFoundBase('Base');
+      if(sc.zb){ const b=sc.zb; ['agua','comida'].forEach(k=>{ if(b[k==='agua'?'agua':'com']<8) sc2(k); }); sc2('mat');
+        for(const k of ['horta','poco','muro','alojamento','enfermaria','armadilhas','torre','oficina','cozinha','deposito']){ const c=ZB[k][2]*(b.b[k]+1); if(b.b[k]<ZB[k][4]&&sc.zmat>=c&&sc.ap>0&&!sc.done['zb_'+k]){ sc.ap--; sc.done['zb_'+k]=1; sc.zmat-=c; b.b[k]++; break; } }
+        b.racao=b.com<10?0:1; if(sc.ap>=2&&!sc.done.zexp&&sc.hl>60){ sc.ap-=2; sc.done.zexp=1; zExpedition(R.pick(['mercado','ferragens','farmacia','posto','bairro'])); } }
+      for(const r of ZRECIPES){ if(sc.done['zc_'+r[0]]) continue; if(sc.zmat>=r[3]+4&&r[5]<=zBaseLv(sc,'oficina')&&r[4].every(i=>sc.inv.some(x=>x.id===i))&&['curativo','roupa','aguaf','armadura','tacop','lancaf','kit','muni'].includes(r[0])){ sc.done['zc_'+r[0]]=1; zCraft(r); } }
+      if(!S.scen) return; }
     const pri=(sc.hl<45||sc.san<35)?['descanso','acampar','meditar','fogueira','falar','terra','festa','exerc']:null;
     let g=0; while(S.scen&&sc.ap>0&&g++<8){
       if(pri){ const k=pri.find(k=>d.acts[k]&&!sc.done[k]&&!(d.acts[k].min&&!d.acts[k].min(sc))); if(k){ sc.ap-=d.acts[k].ap??1; sc.done[k]=1; d.acts[k].fn(sc,S.me); continue; } }
@@ -8427,7 +9129,7 @@ function advDiag(){ const out=[];
   for(const id of Object.keys(SCEN)){ let win=0,days=0,hl=0,san=0,other=0; const snaps=[];
     for(let k=0;k<40;k++){ newLife({}); const m=S.me; m.age=25; m.alive=true; m.prison=null; m.fight=40; S.pending=[]; MQ.length=0; scStart(id); if(id==='isekai'){ S.scen.cls=R.pick(Object.keys(CLASSES)); UI.close(); }
       const w0=m.c.scenWin||0; let g=0, last=null;
-      while(S.scen&&g++<(id==='isekai'?160:90)){ const sc=S.scen; last={hl:sc.hl,san:sc.san,fome:sc.fome,dia:sc.dia}; play(sc); scCheck(); if(!S.scen) break; scNextDay(); let e=0; while(S.scen&&S.pending.length&&e++<10){ const p=S.pending.shift(); const ev=EVENTS[p.id]; if(!evValid(p)) continue; const sh=ev.show(p.d); ev.pick(R.pick(sh.ch)[1],p.d); scCheck(); } if(S.scen&&sc.dia===8) snaps.push(`hl${Math.round(sc.hl)} san${Math.round(sc.san)} f${Math.round(sc.fome)}${sc.o2!=null?' o2'+Math.round(sc.o2):''}${sc.lvl?' lv'+sc.lvl:''}`); }
+      while(S.scen&&g++<(id==='isekai'?160:id==='zumbi'?300:90)){ const sc=S.scen; last={hl:sc.hl,san:sc.san,fome:sc.fome,dia:sc.dia}; play(sc); scCheck(); if(!S.scen) break; scNextDay(); let e=0; while(S.scen&&S.pending.length&&e++<10){ const p=S.pending.shift(); const ev=EVENTS[p.id]; if(!evValid(p)) continue; const sh=ev.show(p.d); ev.pick(R.pick(sh.ch)[1],p.d); scCheck(); } if(S.scen&&sc.dia===8) snaps.push(`hl${Math.round(sc.hl)} san${Math.round(sc.san)} f${Math.round(sc.fome)}${sc.o2!=null?' o2'+Math.round(sc.o2):''}${sc.lvl?' lv'+sc.lvl:''}`); }
       if(S.scen){ S.scen=null; other++; } days+=last?last.dia:0; if((m.c.scenWin||0)>w0) win++; else if(last&&last.hl<=last.san) hl++; else san++; }
     out.push(`${id}: vitórias ${win}/40 · média ${(days/40).toFixed(1)} dias · derrotas por saúde ${hl}, por sanidade ${san}, sem fim ${other}\n   dia 8: ${snaps.slice(0,6).join(' | ')}`); }
   const o=document.createElement('pre'); o.id='out'; o.textContent=out.join('\n'); o.style.cssText='position:fixed;inset:0;z-index:999;background:#fff;color:#000;overflow:auto;padding:10px;font-size:11px;white-space:pre-wrap'; document.body.appendChild(o); document.title='AVENTURA OK'; }
