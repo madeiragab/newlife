@@ -11,12 +11,12 @@ pack({k:'Bicho',who:'dog'},[
  ['Carteiro','{p} late furiosamente para o carteiro todo dia.',['Contratar um adestrador|$-1200 bond+4|{p} agora só abana o rabo para o carteiro.','Deixar assim|h-1|O carteiro joga as cartas por cima do muro.']],
  ['Concurso de cães','Vai ter um concurso de cães na cidade.',['Inscrever {p}|?45 $1000 f+1 h+8|{p} ganhou o primeiro lugar!|h+2|{p} tentou morder o jurado.','Desistir|h+0|{p} não precisa de troféu.','Pintar o pelo de {p} para ficar diferente|?35 $1000 f+2 h+6|O júri amou o visual!|bond-4 h-3|Fomos desclassificados e {p} ficou irritad{o2}.']],
  ['Cachorro na cama','{p} decidiu que agora dorme na minha cama.',['Deixar|bond+6 h+3|Durmo espremid{o}, mas feliz.','Colocar limites|bond-2|{p} chorou na porta a noite inteira.']],
- ['Fuga pelo portão','O portão ficou aberto e {p} saiu correndo pela rua.',['Correr atrás|?70 bond+4|Peguei {p} no quarteirão de baixo.|h-10|{p} sumiu.','Chamar pelo nome|?55 bond+3|{p} voltou abanando o rabo.|h-10|{p} não voltou.']],
+ ['Fuga pelo portão','O portão ficou aberto e {p} saiu correndo pela rua.',['Correr atrás|?70 bond+4|Peguei {p} no quarteirão de baixo.|h-10|{p} sumiu.','Chamar pelo nome|?55 bond+3|{p} voltou abanando o rabo.|h-10 petgone|{p} não voltou.']],
 ]);
 pack({k:'Bicho',who:'cat'},[
  ['Presente felino','{p} deixou um passarinho morto no meu travesseiro.',['Agradecer o presente|bond+5|É amor, à maneira dos gatos.','Dar bronca|bond-4|{p} me ignorou por três dias.']],
  ['Sofá destruído','{p} transformou o sofá novo em arranhador.',['Comprar um arranhador de verdade|$-300 bond+3|O sofá foi salvo. Mais ou menos.','Aceitar o destino do sofá|h-3|O sofá agora é dele.']],
- ['Sumiu por três dias','{p} sumiu e não volta há três dias.',['Procurar pelo bairro|?65 bond+6|{p} estava preso numa garagem.|h-10|Nunca mais vi {p}.','Esperar|?55 bond+2|{p} voltou como se nada tivesse acontecido.|h-10|{p} não voltou.']],
+ ['Sumiu por três dias','{p} sumiu e não volta há três dias.',['Procurar pelo bairro|?65 bond+6|{p} estava preso numa garagem.|h-10|Nunca mais vi {p}.','Esperar|?55 bond+2|{p} voltou como se nada tivesse acontecido.|h-10 petgone|{p} não voltou.']],
  ['Copo na mesa','{p} está olhando fixamente para um copo cheio na beira da mesa.',['Tirar o copo dali|h+1|Desafio evitado.','Pagar para ver|h-1|O copo caiu. {p} nem piscou.']],
 ]);
 pack({k:'Bicho',who:'bird'},[

@@ -26,7 +26,7 @@ pack({k:'Aerion',w:1.6,cd:30,scen:'isekai',fant:true,when:CID('aerion')},[
   ['A ponte do arco-íris','Uma ponte de arco-íris liga Aerion a uma ilha menor.',['Atravessar|?50 it:gema xp+60|A ilha tinha um jardim secreto.|hl-10|A ponte sumiu na metade.','Admirar|h+6|Lindo.']],
   ['Livro vivo','Um livro da biblioteca fugiu e está mordendo as pessoas.',['Capturar|?agi xp+40 trep+6|Livro de volta na estante.|hl-6|Ele mordeu.','Ler o livro|?mag spell|Ele se acalmou e me ensinou um feitiço.|hl-6|Ele mordeu de novo.']],
   ['Tempestade de mana','Uma tempestade de mana pura passa por Aerion.',['Absorver|?mag mana+50 at.mag+1|Me senti um deus.|hl-15|Explodi um pouco.','Se esconder|h+0|Melhor não arriscar.']],
-  ['O jardim suspenso','O jardim suspenso de Aerion tem frutas que flutuam.',['Colher|it:maca*2 h+4|Maçãs que flutuam até a boca.','Ajudar o jardineiro|trep+6|Ele me deu sementes.']],
+  ['O jardim suspenso','O jardim suspenso de Aerion tem frutas que flutuam.',['Colher|it:maca*2 h+4|Maçãs que flutuam até a boca.','Ajudar o jardineiro|trep+6 it:semente it:maca|Ele me deu sementes e uma maçã que flutua.']],
   ['Grifo ferido','Um grifo ferido caiu na praça.',['Curar|?mag k+8 trep+8|O grifo voou de novo.|h-2|A magia não foi suficiente.','Chamar o veterinário de grifos|ouro-20 trep+5|O veterinário resolveu.']],
   ['Feira de invenções','Os inventores de Aerion mostram suas criações.',['Mostrar uma invenção do seu mundo|?sm f+3 ouro+60|Desenhei um guarda-chuva. Ganhei o prêmio.|h-2|Ninguém entendeu.','Comprar uma invenção|ouro-40 h+6|Um relógio que fala.']],
   ['O mago do tempo','Um mago diz que pode mostrar seu futuro por alguns segundos.',['Aceitar|?50 xp+80|Vi uma vitória.|san-10|Vi algo terrível.','Recusar|h+0|Prefiro não saber.']],

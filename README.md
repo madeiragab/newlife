@@ -78,12 +78,13 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 
 ### 🚔 Crime e prisão
 - Crimes avulsos com minijogos (assalto a casa e ao cofre), **facção** do olheiro ao dono do morro, **assassino de aluguel**.
+- O que você rouba vai para os **Bens**: o item furtado da loja, a TV da casa invadida, o carro roubado, as joias. Vender coisa roubada paga menos e pode dar cadeia.
 - Prisão com rotina, grupo, motim, brigas e **fuga em minijogo de labirinto**.
 
 ### 🌍 E mais
 - **Autoescola** com prova de placas (22 placas desenhadas), passaporte (inclusive falsificado) e emigração.
 - **80 doenças**, com tratamentos, doenças crônicas e câncer.
-- **Mais de 2.400 eventos**: 640 na vida normal, coerentes com idade, carreira e situação, e mais de 1.800 nos modos fictícios.
+- **Mais de 2.800 eventos**: 640 na vida normal, coerentes com idade, carreira e situação, e mais de 2.100 nos modos fictícios.
 - Selos, cemitério, desafios, dificuldade, herdeiros (continue a vida com um filho).
 - **Sons e música** sintetizados (sem arquivos de áudio), tema claro e escuro, efeito de dano.
 - Segredos para quem zerar o jogo. 😉
@@ -95,15 +96,34 @@ A partir dos 18 anos (Menu → Modos fictícios), você pode viver uma aventura 
 - **3 de energia por dia**: cada ação e cada lugar só pode ser feito uma vez por dia.
 - **Grupo** com nome, rosto, arma, saúde e lealdade; **itens** como cartas com estado de 0 a 100% (comida estraga, armas quebram).
 - **Eventos de escolha** próprios de cada modo, com consequências de verdade.
-- Perdeu? Você **acorda** e a vida continua. Venceu? Volta com recompensas.
+- Perdeu? Você **acorda** e a vida continua. Venceu? Volta com recompensas. **Exceção: no isekai, quem morre em Eldoria morre de verdade**; a única volta é o portal, depois de derrotar o Rei Demônio.
 
 | Modo | Resumo | Eventos |
 |---|---|:-:|
-| 🧟 **Pesadelo zumbi** | Lidere um comboio até o Porto Seguro. Cada dia é um destino novo com nível de ameaça e pontos de interesse. Carros quebram e gastam gasolina, a carga é limitada, o grupo precisa de armas e comida. Mordido? Esconder, amputar ou contar ao grupo. | 200+ |
+| 🧟 **Pesadelo zumbi** | O apocalipse **não tem fim**: é sobreviver até morrer e bater o seu recorde de dias. Comboio de carros ou base fixa, facções, oficina, estações do ano e hordas cada vez maiores. | 570+ |
 | 🏝️ **Ilha deserta** | Explore praia, selva, cachoeira, caverna e os destroços do avião. Fome, sede, abrigo, fogueira, SOS e uma jangada. | 200+ |
 | ⚔️ **Isekai** | Você acorda numa das 4 cidades de Eldoria (sorteada). Classe, níveis, atributos, grimório com 16 magias, masmorras, companheiros e o Rei Demônio. Dá para morar numa cidade ou **fundar sua vila**. | 980+ |
 | 🦸 **Superpoderes** | Um poder, um codinome e um arqui-inimigo. Ocorrências pelos bairros, pistas, identidade secreta, traje e a liga dos heróis. | 200+ |
 | 🚀 **Colônia em Marte** | Oxigênio, comida e sanidade da equipe, rover, pesquisa e expedições até a nave de resgate no sol 30. | 200+ |
+
+### 🧟 Pesadelo zumbi em detalhe
+
+- **Sem final**: não existe resgate. Cada dia vivido conta, e o jogo guarda o seu **recorde**. Com o tempo, as hordas ficam maiores e os zumbis mais perigosos.
+- **Ficha do sobrevivente**: Força, Pontaria, Furtividade, Medicina, Mecânica e Liderança, com pontos a cada nível.
+- **Atividades de apocalipse**: procurar comida, água, remédios, combustível, armas e materiais; expedições a supermercados, farmácias, quartéis e ferro-velhos; caçar, pescar, filtrar água, patrulhar, montar armadilhas, apagar rastros, tratar feridos e pesquisar a cura.
+- **Saúde, sanidade, fome e sede**, **munição** para armas de fogo e **barulho**: tiros, gerador e fogueiras atraem hordas.
+- **Estações do ano**: verão (sede), outono, inverno (frio sem roupas de frio machuca) e primavera (horta rende mais).
+- **Base**: você escolhe o lugar e o nome. Tem 14 construções (muros, torre de vigia, armadilhas, horta, poço, cozinha, alojamentos, depósito, enfermaria, oficina, garagem, rádio, gerador e laboratório), moradores que comem e bebem do estoque, moral, regras de ração e de quem entra.
+- **Oficina**: 16 receitas com sucata (taco com pregos, besta, coquetel molotov, armadura de pneu, recarga de munição, silenciador, vacina caseira…).
+- **4 facções** com reputação: Mercadores do Viaduto, Os Corvos, Guarda Nacional e Igreja da Última Hora. Dá para trocar, fazer missões, pedir ajuda, roubar o acampamento, atacar ou firmar aliança.
+- **A grande horda** chega a cada 16 a 24 dias e é cada vez maior.
+
+<p align="center">
+  <img src="docs/img/zumbi-acoes.png" width="200" alt="Ações do apocalipse">
+  <img src="docs/img/zumbi-base.png" width="200" alt="Base">
+  <img src="docs/img/zumbi-faccoes.png" width="200" alt="Facções">
+  <img src="docs/img/zumbi-oficina.png" width="200" alt="Oficina">
+</p>
 
 ### ⚔️ Isekai em detalhe
 
@@ -169,6 +189,7 @@ Rode `make-exe.ps1` antes do `make-apk.ps1`, porque ele gera o ícone usado pelo
 |---|---|
 | `.\test.ps1` | Abre o jogo no Edge sem janela e simula dezenas de vidas inteiras, testando ações, telas, todos os eventos em várias idades, regras da prisão, equilíbrio das brigas e textos com lacunas. |
 | `.\quality.ps1` | Relatório de qualidade do texto: concordância de gênero, frases repetidas e eventos que nunca aparecem. |
+| `python -I tools/audit_events.py` | Procura eventos cujo texto promete algo que o efeito não faz: nascimento sem bebê, morte sem ninguém morrer, item ganho sem item. |
 | `.\aventura.ps1` | Joga cada modo fictício 40 vezes e mostra a taxa de vitória e por que se perde (saúde ou sanidade), para equilibrar a dificuldade. |
 | `.\shots.ps1 -Views demo-rostos` | Tira prints de telas de demonstração (`#demo-…`) para conferir o visual. |
 
@@ -188,9 +209,10 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   prison.js       vida na prisão
   social.js       relações, autoescola, passaporte, facção, assassino de aluguel
   scen.js         modos fictícios: motor das aventuras (dias, energia, grupo, itens, locais)
+  zumbi.js        pesadelo zumbi: atributos, base, oficina, facções, estações e hordas
   isekai.js       isekai: atributos, magias e cidades para morar
   vila.js         isekai: a sua vila (recursos, construções, tecnologias, leis)
-  ev_sc_*.js      eventos de cada modo fictício
+  ev_sc_*.js      eventos de cada modo fictício (ev_z_*.js: base, facções, mundo e vida no apocalipse)
   ev_cid_*.js     eventos das 4 cidades do isekai
   ev_vila*.js     eventos da sua vila, por fase de crescimento
   sound.js        sons e música sintetizados

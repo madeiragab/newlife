@@ -46,7 +46,14 @@ function castSpell(id){ const sc=S.scen, sp=SPELLS[id], m=S.me; iskEnsure(sc); c
     case 'reviver': { const f=(sc.fallen||[]).pop(); if(!f) return `${sp[1]} Não há ninguém para trazer de volta. Que bom.`; f.hp=60; sc.crew.push(f); return `${sp[1]} ${f.first} abriu os olhos de novo. Chorou. Eu também.`+up; }
   } return ''; }
 // ---------- integração ----------
-SCEN.isekai.maxDays=150; SCEN.isekai.capWin=sc=>!!sc.hero||!!(sc.vila&&sc.vila.tier>=3);
+SCEN.isekai.maxDays=Infinity;
+// em Eldoria não existe acordar: quem morre lá, morre de verdade. A única volta é o portal, depois de derrotar o Rei Demônio
+scCheck=(o=>function(){ const sc=S.scen; if(!sc||sc.id!=='isekai') return o();
+  if(sc.san<=0){ sc.san=25; scHurt(30); scLog('A mente desabou de exaustão. Desmaiei por um dia inteiro e acordei ferid'+oa()+'.','bad'); }
+  if(sc.hl>0) return o();
+  const d=SCEN.isekai; scLog('Tudo ficou escuro. Desta vez, não houve luz branca nem deusa. Só silêncio.','bad');
+  const days=sc.dia, lv=sc.lvl, cls=sc.cls?clsName(sc.cls).toLowerCase():'aventureir'+oa(); S.scen=null; S.pending=S.pending.filter(e=>!(EVENTS[e.id]&&EVENTS[e.id].scen));
+  log(`⚔️ Vivi ${days} dias em Eldoria como ${cls} de nível ${lv}.`,'warn'); die(`em Eldoria, longe do próprio mundo, como ${cls} de nível ${lv}`); UI.close(); })(scCheck);
 SCEN.isekai.init=(i0=>m=>Object.assign(i0(m),{at:{for:5,mag:5,agi:5,vit:5},pts:0,sp:[],mu:{},buff:{},vila:null,fallen:[]}))(SCEN.isekai.init);
 SCEN.isekai.pow=(sc,m)=>{ const a=iskAt(sc); return 6+sc.lvl*2.2+a.for*1.1+a.agi*.6+myDmg()*.7+sc.arm*5+crew().reduce((s,c)=>s+5+(c.arma?itV(c.arma.id)*.3:0),0)+m.fight*.08+(sc.buff&&sc.buff.atq||0)+vB(sc,'ferraria')*3; };
 SCEN.isekai.upkeep=(u0=>sc=>{ iskEnsure(sc); sc.buff={}; u0(sc); vilaDay(sc); scStat('mana',Math.round(iskAt(sc).mag/2)); })(SCEN.isekai.upkeep);

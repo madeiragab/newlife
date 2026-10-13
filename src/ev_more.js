@@ -13,8 +13,8 @@ pack({k:'Infância',min:8,max:12},[
  ['Mesada','Meus pais propuseram uma mesada em troca de tarefas de casa.',['Aceitar|$+100 k+1|Lavo a louça e ganho meu dinheirinho.','Negociar mais|?50 $+150|Fechamos em um valor melhor.|h-2|Eles disseram "então nada".']],
  ['Clube do livro mirim','A biblioteca da escola abriu um clube de leitura.',['Entrar|sm+3 h+2|Li sete livros este ano.','Não entrar|h+1|Prefiro desenho.','Entrar e fingir que li|k-1 h+2|Contei o final errado e todo mundo descobriu.']],
  ['Truque de mágica','Ganhei um kit de mágica e quero fazer um show.',['Apresentar para a família|?tal.acting h+5 tal.acting+2|Todo mundo ficou impressionado.|h-2|O coelho de pelúcia caiu da manga.','Fazer o truque com o celular do meu pai|?40 h+6|Funcionou!|h-5 bond-4|O celular caiu na privada.','Desistir de apresentar|h-1|Fiquei com vergonha.']],
- ['Bicicleta roubada','Roubaram minha bicicleta na frente da escola.',['Contar aos meus pais|h-4|Ganhei uma nova no Natal.','Procurar pelo bairro|?30 h+6|Achei com um menino da outra rua!|h-4|Nunca mais vi a bicicleta.']],
- ['Primeiro celular','Todos da sala têm celular, menos eu.',['Pedir aos meus pais|?50 h+8|Ganhei um celular usado!|h-4|"Só aos 14 anos."','Juntar dinheiro|sm+1|Comecei a guardar moedas.']],
+ ['Bicicleta roubada','Roubaram minha bicicleta na frente da escola.',['Contar aos meus pais|h-4 item:Bicicleta:900|Ganhei uma nova no Natal.','Procurar pelo bairro|?30 h+6|Achei com um menino da outra rua!|h-4|Nunca mais vi a bicicleta.']],
+ ['Primeiro celular','Todos da sala têm celular, menos eu.',['Pedir aos meus pais|?50 h+8 item:Celular_usado:700|Ganhei um celular usado!|h-4|"Só aos 14 anos."','Juntar dinheiro|sm+1|Comecei a guardar moedas.']],
  ['Acampamento de férias','Meus pais querem me mandar para um acampamento de férias.',['Ir|h+8 tal.athletic+2|Fiz amigos para a vida toda.','Ficar em casa|h-1|Férias no sofá.']],
 ]);
 pack({k:'Adolescência',min:13,max:17},[

@@ -51,6 +51,7 @@ function dslApply(s,d){
     else if(mm=tok.match(/^meet(2)?(?::(\w+))?$/)){ meetP(d,mm[2]||'amigo',mm[1]?'n2':'n'); }
     else if(mm=tok.match(/^sc\.(\w+)([+-]\d+)$/)){ if(S.scen){ const k=mm[1]; S.scen[k]=Math.max(0,(S.scen[k]||0)+ +mm[2]); if(['sup','def','cure','comida','agua','abrigo','sos','o2','moral','pw','sec'].includes(k)) S.scen[k]=Math.min(100,S.scen[k]); if(k==='xp'&&typeof lvlUp==='function') lvlUp(); } }
     else if(tok==='kill'){ cnt('kills'); }
+    else if(mm=tok.match(/^item:([^:]+):(\d+)$/)){ const n=mm[1]==='coisa'&&d.coisa?d.coisa.replace(/^(um|uma|uns|umas) /,''):mm[1].replace(/_/g,' '); m.assets.push({id:newId(),k:'item',n:n[0].toUpperCase()+n.slice(1),value:+mm[2],buy:0,cond:100}); }
     else if(tok==='petdie'||tok==='petgone'){ const p=d.pid&&P(d.pid); if(p&&p.alive){ p.alive=false; st('happy',tok==='petdie'?-10:-5); } }
     else if(tok==='pet'){ const p=addPet(R.pick(['Cachorro','Cachorro','Gato','Gato','Coelho','Calopsita'])); out.push(`Chama-se ${p.first}.`); }
     else if(mm=tok.match(/^dis:(\w+)$/)) addDisease(mm[1]);

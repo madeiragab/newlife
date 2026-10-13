@@ -193,7 +193,7 @@ function buy(kind,l,financed){
   log(`Comprei: ${l.n.toLowerCase()} por ${fmt(l.v)}.`,'good');
   return `Comprei ${l.n.toLowerCase()}!`;
 }
-function sellAsset(a){ const m=S.me; const v=Math.round(a.value*(a.k==='casa'?(.75+a.cond/400):(.5+a.cond/220))); m.money+=v-(a.loan||0); m.assets=m.assets.filter(x=>x!==a); log(`Vendi ${a.n.toLowerCase()} por ${fmt(v)}.`); return `Vendi por ${fmt(v)}${a.loan?` (quitei ${fmt(a.loan)} de financiamento)`:''}.`; }
+function sellAsset(a){ const m=S.me; if(a.stolen&&R.chance(.12)){ m.assets=m.assets.filter(x=>x!==a); arrest('receptação de produto roubado',0,2); return `O comprador era policial disfarçado. Perdi ${a.n.toLowerCase()} e fui pres${oa()}.`; } const v=Math.round(a.value*(a.stolen?.45:1)*(a.k==='casa'?(.75+a.cond/400):(.5+a.cond/220))); m.money+=v-(a.loan||0); m.assets=m.assets.filter(x=>x!==a); log(`Vendi ${a.n.toLowerCase()} por ${fmt(v)}.`); return `Vendi por ${fmt(v)}${a.loan?` (quitei ${fmt(a.loan)} de financiamento)`:''}.`; }
 function fixAsset(a){ const m=S.me; const c=Math.round(a.value*(100-a.cond)/100*(a.k==='casa'?.25:.4)); if(!canPay(c)) return `A reforma custa ${fmt(c)} e eu não tenho.`; m.money-=c; a.cond=100; a.value=Math.round(a.value*1.04); return `${a.k==='casa'?'Reformei':'Consertei'} por ${fmt(c)}.`; }
 function invest(k,v){ const m=S.me; if(v>0&&!canPay(v)) return 'Não tenho esse dinheiro.'; if(v<0&&m.inv[k]<-v) v=-m.inv[k]; m.money-=v; m.inv[k]+=v; return v>0?`Investi ${fmt(v)}.`:`Resgatei ${fmt(-v)}.`; }
 
@@ -322,11 +322,19 @@ function murder(p){
 }
 
 // ---------- crimes ----------
+// o que é roubado vira bem do personagem (vender coisa roubada paga menos e tem risco)
+function stolenLoot(c,v,flavor){ const m=S.me, add=(k,n,val,cond)=>{ m.assets.push({id:newId(),k,n,value:Math.max(50,Math.round(val)),buy:0,cond:cond??100,stolen:1}); };
+  if(c.id==='loja'){ const n=flavor.replace(/^(um|uma) /,''); add('item',n[0].toUpperCase()+n.slice(1)+' (furtado)',v); return `Saí da loja com ${flavor} escondido na roupa. Agora está nos meus bens.`; }
+  if(c.id==='casa'&&R.chance(.6)){ const it=R.pick([['Televisão de 65 polegadas',4000],['Notebook',3500],['Caixa de joias',9000],['Console de videogame',2800],['Coleção de relógios',12000]]); add('item',it[0]+' (roubado)',it[1]*(.6+R.f()*.8)); m.money+=Math.round(v/3); return `Saí da casa com ${it[0].toLowerCase()} e ${fmt(Math.round(v/3))} em dinheiro. Guardei tudo nos meus bens.`; }
+  if(c.id==='carro'){ const car=R.pick(CARS.filter(x=>x.v>=9000&&x.v<=300000)); add('carro',car.t+' (roubado)',car.v*(.7+R.f()*.3),R.int(55,95)); return `Fiz ligação direta num ${car.t.toLowerCase()} e saí acelerando. O carro agora é meu, pelo menos até a polícia descobrir.`; }
+  if(c.id==='joalheria'){ add('item','Joias roubadas',v); return `Esvaziei as vitrines. As joias, avaliadas em ${fmt(v)}, estão escondidas nos meus bens.`; }
+  return null; }
 function crime(c){
   const m=S.me; cnt('crimes'); cnt('actions'); m.rec.crimes++; m.karma=clamp(m.karma-c.k);
   const p=c.p+(m.smarts-50)/400+(m.fight/500)+(m.job&&m.job.spc==='crime'?.1:0);
   const flavor={loja:R.pick(['um batom','um fone de ouvido','um chocolate','uma garrafa de vinho','um tênis','uma camiseta']),carteira:R.pick(['de um turista','de um executivo','de uma senhora no ônibus','de um homem distraído no celular']),casa:R.pick(['de um médico','de um casal em viagem','de um vizinho rico','de uma mansão na serra']),carro:R.pick(CARS.slice(3)).t.toLowerCase(),golpe:R.pick(['um falso site de vendas','um perfil falso de namoro','um boleto falso','uma falsa central do banco'])}[c.id]||'';
-  if(R.chance(p)){ const v=R.int(...c.cash); m.money+=v; st('happy',R.int(1,5));
+  if(R.chance(p)){ const v=R.int(...c.cash); st('happy',R.int(1,5));
+    const loot=stolenLoot(c,v,flavor); if(loot) return loot; m.money+=v;
     if(c.id==='pichar') return `Pichei ${R.pick(['meu apelido','uma caveira','o nome da minha banda','um coração'])} no muro da escola.`;
     return `${c.n} deu certo${flavor?' ('+flavor+')':''}. Lucro: ${fmt(v)}.`; }
   if(R.chance(.3)&&c.id!=='banco'&&c.id!=='joalheria') return `${c.n} deu errado, mas consegui fugir.`;

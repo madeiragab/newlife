@@ -58,7 +58,7 @@ pack({k:'Marte',w:1.5,cd:40,scen:'marte',when:scWhen('marte')},[
   ['Crise de ansiedade','A pressão da missão afeta você.',['Meditar|san+8|Respirei.','Conversar com a médica|san+10 hl+2|Ajudou muito.']],
   ['Recompensa da agência','A agência espacial manda um bônus por bom trabalho.',['Comemorar|h+8 $+5000|Dinheiro em outro planeta.','Doar a uma escola|k+8 $+0|Para o futuro da ciência.']],
   ['Mudança de equipe','Uma colona quer trocar de função.',['Aceitar|moral+4|Equipe feliz.','Recusar|moral-4|Precisamos dela onde está.']],
-  ['A primeira criança','A primeira criança marciana nasceu.',['Celebrar|moral+15 h+15 f+10|História da humanidade.','Escrever uma carta para ela ler no futuro|h+12|"Você nasceu num planeta vermelho."'],{when:ZW(sc=>sc.dia>=20)}],
+  ['A primeira criança','A primeira criança marciana nasceu.',['Celebrar|moral+15 h+15 f+10 bebe|História da humanidade.','Escrever uma carta para ela ler no futuro|h+12 bebe|"Você nasceu num planeta vermelho."'],{when:ZW(sc=>sc.dia>=20)}],
   ['Chegada da nave de carga','A nave de carga chegou com suprimentos.',['Descarregar|it:liof*3 it:o2*2 it:pecas|Despensa cheia!','Abrir as caixas com calma|it:liof*2 it:kit h+6|Tinha chocolate!']],
   ['Ferrugem','Os equipamentos estão enferrujando com a poeira.',['Limpar e lubrificar|-it:pecas h+2|Equipamentos novos.','Ignorar|o2-6|Problemas aparecendo.']],
   ['Alienígenas?','Um sinal de rádio repetitivo vem do espaço.',['Investigar|?sm ciencia+15 san-4|Era um pulsar.|san-10|Nunca descobrimos.','Avisar a Terra|ciencia+6|Eles ficaram animados.']],

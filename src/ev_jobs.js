@@ -94,7 +94,7 @@ pack({k:'Embaixada',when:jobIn('dipl')},[
  ['Jantar de gala','Fui convidad{o} para um jantar com o presidente de outro país.',['Ir e conversar com todo mundo|perf+6 h+4|Fiz contatos valiosos.','Ficar no canto|perf-1|Comi muito bem.']],
 ]);
 pack({k:'Trabalho',min:14,max:18,when:m=>m.job&&!m.job.spc&&JOBS.find(x=>x.id===m.job.id).pt},[
- ['Primeiro salário','Recebi meu primeiro pagamento: {v}.',['Gastar tudo com besteira|h+6|Comprei {coisa}. Valeu cada centavo.','Guardar|sm+1|Abri minha primeira poupança.','Dar uma parte para os meus pais|k+4|Minha mãe chorou.'],{v:[200,800]}],
+ ['Primeiro salário','Recebi meu primeiro pagamento: {v}.',['Gastar tudo com besteira|h+6 item:coisa:800|Comprei {coisa}. Valeu cada centavo.','Guardar|sm+1|Abri minha primeira poupança.','Dar uma parte para os meus pais|k+4|Minha mãe chorou.'],{v:[200,800]}],
  ['Escola e trabalho','Está difícil conciliar trabalho e estudos.',['Largar o trabalho|fire h+3|Larguei. A escola agradece.','Continuar|hl-2 grade-4|Estou cansad{o}, mas firme.']],
 ]);
 

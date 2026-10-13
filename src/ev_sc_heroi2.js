@@ -70,7 +70,7 @@ pack({k:'Superpoderes',w:1.5,cd:40,scen:'heroi',when:scWhen('heroi')},[
   ['Super-herói falido','Um herói antigo vive na rua.',['Ajudar|$-3000 k+8 crew|{n} voltou à ativa.','Ignorar|k-4|Triste.']],
   ['Ataque aos hospitais','Capangas atacam hospitais para roubar remédios.',['Proteger|?pwr rep+12 k+5|Hospitais seguros.|hl-12|Eles levaram algo.','Investigar quem comprou os remédios|?sm pista+20|Era {inimigo}.|h-2|Nada.']],
   ['Ponte aérea','Um avião perdeu o motor sobre a cidade.',['Segurar o avião|?sc.pw rep+30 f+10|Pousei o avião no rio.|hl-30|Pousou, com feridos.','Guiar até o aeroporto|rep+15|Pouso forçado.']],
-  ['Vilão chorando','Você encontra um vilão chorando num banco de praça.',['Conversar|k+6 pista+10|Ele contou que trabalha para {inimigo} por dívida.','Prender|rep+4|Ele não resistiu.']],
+  ['Vilão chorando','Você encontra um vilão chorando num banco de praça.',['Conversar|k+6 pista+10|Ele contou que trabalha para {inimigo} por dívida.','Prender|rep+4|Ele se entregou sem reagir.']],
   ['Super-poder novo?','Algo novo acontece: além de {poder}, você sente outra coisa.',['Treinar o novo poder|pw+12 san-4|Agora tenho dois poderes!','Reprimir|pw+2|Um poder já é muito.']],
   ['Uniforme na lavanderia','O uniforme foi parar na lavanderia do prédio.',['Buscar escondido|?agi sec+2|Recuperado.|sec-10|A vizinha viu.','Deixar lá|sec-4|Alguém vai achar.']],
   ['A grande revelação','{inimigo} revela ao vivo que sabe quem você é.',['Negar|?car sec+5|Ninguém acreditou nele.|sec-25|Todos acreditaram.','Assumir tudo|sec-40 rep+10 f+10|Agora o mundo sabe. Que alívio.']],

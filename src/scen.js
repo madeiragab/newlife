@@ -60,7 +60,7 @@ function mkCrew(o={}){ const sc=S.scen, f=SM().names; let p;
   const roles=SM().roles; const c={id:++sc.cid,first:p.first,last:p.last,gender:p.gender,age:p.age,genes:p.genes,look:p.look,hp:100,lv:o.lv||rnd(55,75),arma:o.arma||null,role:o.role||R.pick(Object.keys(roles))};
   if(SM().names) c.race=R.pick(RACES[c.gender]);
   sc.crew.push(c); return c; }
-const roleName=c=>{ const r=SM().roles[c.role]; if(!r) return ''; if(r[2]===false) return r[0]; if(typeof r[2]==='string') return c.gender==='F'?r[2]:r[0]; return r[0]+oaG(c.gender); };
+const roleName=c=>{ if(c.bebe) return c.age<3?'Bebê':'Criança'; if(c.bicho) return 'Companheiro'; const r=SM().roles[c.role]; if(!r) return ''; if(r[2]===false) return r[0]; if(typeof r[2]==='string') return c.gender==='F'?r[2]:r[0]; return r[0]+oaG(c.gender); };
 const hasRole=k=>crew().some(c=>c.role===k);
 function addCrewFromEvent(d,key){ if(!d||!d[key]) return null; if(d['crew_'+key]) return null; const c=mkCrew({first:d[key],last:d[key+'l'],gender:d[key+'G'],age:d.nAge}); d['crew_'+key]=c.id; return c; }
 function crewLeave(c,why,dead){ const sc=S.scen; sc.crew=sc.crew.filter(x=>x!==c); if(c.arma&&!dead) {} else if(c.arma&&dead&&R.chance(.6)) addItem(c.arma.id,c.arma.hp,true); if(why) scLog(why,dead?'bad':'warn'); }
@@ -74,7 +74,7 @@ const countCat=cat=>S.scen.inv.filter(x=>itCat(x.id)===cat).length;
 function lootText(ids){ const got=[]; ids.forEach(id=>{ if(addItem(id)) got.push(itIc(id)+' '+itN(id)); }); return got.length?' Peguei: '+got.join(', ')+'.':''; }
 const myDmg=()=>S.scen.arma?itV(S.scen.arma.id)*(S.scen.arma.hp>0?1:.3):4;
 function scPow(){ const sc=S.scen, m=S.me; if(!sc) return 50; if(SM().pow) return Math.round(Math.max(5,Math.min(95,SM().pow(sc,m))));
-  const cr=crew().reduce((s,c)=>s+4+(c.arma?itV(c.arma.id)*.45:1.5)*(c.hp/100),0);
+  const cr=crew().filter(c=>!c.bebe).reduce((s,c)=>s+(c.bicho?8:4)+(c.arma?itV(c.arma.id)*.45:1.5)*(c.hp/100),0);
   return Math.round(Math.max(5,Math.min(95,12+m.fight*.3+myDmg()*.9+cr+(hasRole('ati')?8:0)))); }
 function wearWeapon(){ const sc=S.scen; if(sc.arma){ sc.arma.hp-=rnd(4,10); if(sc.arma.hp<=0){ scLog(`Meu ${itN(sc.arma.id).toLowerCase()} quebrou.`,'warn'); sc.arma=null; } } }
 function scHurt(n){ scStat('hl',-n); }
@@ -82,7 +82,7 @@ function scHurt(n){ scStat('hl',-n); }
 function scFight(thr,what){ const p=scPow(), need=10+thr*17; const ok=pct(.5+(p-need)/90); wearWeapon();
   if(ok){ sc_kill(rnd(1,3)*(thr+1)); return {ok:true,t:''}; }
   const dmg=rnd(6,12)*(1+Math.min(thr,4)*.4); scHurt(Math.round(dmg)); let t=`${what||'A briga'} me deixou ferid${oa()}.`;
-  const cs=crew(); if(cs.length&&R.chance(.12+thr*.06)){ const c=R.pick(cs); c.hp-=rnd(20,45); if(c.hp<=0){ crewLeave(c,`${c.first} não sobreviveu.`,true); t+=` Perdemos ${c.first}.`; } else t+=` ${c.first} se machucou.`; }
+  const cs=crew().filter(c=>!c.bebe); if(cs.length&&R.chance(.12+thr*.06)){ const c=R.pick(cs); c.hp-=rnd(20,45); if(c.hp<=0){ crewLeave(c,`${c.first} não sobreviveu.`,true); t+=` Perdemos ${c.first}.`; } else t+=` ${c.first} se machucou.`; }
   if(S.scen.id==='zumbi'&&R.chance(.05+thr*.04)) t+=' '+bite();
   return {ok:false,t}; }
 function sc_kill(n){ const sc=S.scen; sc.kills=(sc.kills||0)+n; }
@@ -202,7 +202,7 @@ const SCEN={
     },
     win:'Fui resgatad{o} da ilha',lose:'Acordei de um sonho na ilha deserta',reward:(m,sc)=>{ m.money+=40000; m.fame=clamp(m.fame+10); st('happy',10); },
   },
-  isekai:{n:'Isekai',ic:'⚔️',d:'Um caminhão, uma luz branca, e você acorda em Eldoria. Suba de nível, monte um grupo e atravesse o reino até o Castelo do Rei Demônio.',
+  isekai:{n:'Isekai',ic:'⚔️',d:'Um caminhão, uma luz branca, e você acorda em Eldoria. Suba de nível, monte um grupo e atravesse o reino até o Castelo do Rei Demônio. Atenção: em Eldoria não se acorda. Se morrer lá, morre de verdade. A única volta é o portal.',
     intro:'Um caminhão desgovernado. Uma luz branca. Quando você abriu os olhos, estava num campo com dois sóis no céu. Uma janela flutuante apareceu: "Bem-vind{o} a Eldoria".',
     day:'Dia',bag:22,names:true,cap:{xp:1e9},tabs:['Local','Inventário','Próximo dia','Grupo','Ações'],tabIc:['🗺️','🎒','🌅','🧝','✨'],
     stats:[['hl','Vida','❤️'],['mana','Mana','🔮'],['fome','Fome','🍖',1],['san','Ânimo','🌟']],
@@ -297,9 +297,9 @@ function zUpkeep(sc){ const m=S.me;
   else { sc.loc.pois.forEach(p=>{ if(R.chance(.35)) p.done=0; }); if(R.chance(.4)) sc.loc.thr=Math.min(4,sc.loc.thr+1); }
   sc.stay=0;
   // capacidade: pessoas e carga
-  const ppl=crew().length+1, st0=seats(); if(sc.veh.length&&ppl>st0) queue('z_lotado',{}); else if(sc.inv.length>bagCap()) queue('z_lotado',{});
+  const ppl=crew().length+1, st0=seats(); if(!sc.zb&&sc.veh.length&&ppl>st0) queue('z_lotado',{}); else if(sc.inv.length>bagCap()) queue('z_lotado',{});
   // ataque de madrugada
-  if(R.chance(.08+sc.loc.thr*.05-(sc.vig?.08:0))){ const f=scFight(sc.loc.thr,'O ataque de madrugada'); scLog(f.ok?'Zumbis atacaram de madrugada. A vigia segurou.':f.t,f.ok?'warn':'bad'); }
+  if(!sc.zb&&R.chance(.08+sc.loc.thr*.05-(sc.vig?.08:0))){ const f=scFight(sc.loc.thr,'O ataque de madrugada'); scLog(f.ok?'Zumbis atacaram de madrugada. A vigia segurou.':f.t,f.ok?'warn':'bad'); }
   sc.vig=0;
   if(sc.inf){ sc.inf++; if(sc.inf>=5){ scenEnd(false,'A febre da mordida venceu. A última coisa que vi foi o grupo se afastando de mim, devagar.'); return; } scLog('A mordida está queimando.','bad'); }
   if(sc.etapa>=20&&!sc.fim) { sc.fim=1; queue('z_final',{}); } }
@@ -386,7 +386,7 @@ function scNextDay(){ const sc=S.scen, d=SM(), m=S.me; if(!sc) return;
   if(sc.fome>=100){ scHurt(12); scLog('Fome de verdade. Minhas mãos tremem.','bad'); }
   if(sc.fome>=75){ const f=takeItem('@comida'); if(f){ scStat('fome',-Math.round(itV(f.id)*f.hp/100)); scLog(`Comi ${itN(f.id).toLowerCase()} antes de desmaiar de fome.`); } }
   if(sc.id==='ilha'&&sc.sede>=75){ const a=takeItem('@agua'); if(a){ scStat('sede',-Math.round(itV(a.id)*a.hp/100)); scLog(`Bebi ${itN(a.id).toLowerCase()}.`); } }
-  if((!hasF||sc.fome<60)&&!(sc.id==='ilha'&&sc.sede>=70)) scStat('hl',sc.id==='isekai'?5:3);
+  if((!hasF||sc.fome<60)&&!(sc.sede!=null&&sc.sede>=70)) scStat('hl',sc.id==='isekai'?5:3);
   d.upkeep(sc); if(!S.scen) return;
   sc.log[sc.log.length-1].pl=sc.loc.n; scLog(`${sc.loc.ic} ${sc.loc.n}${sc.id==='zumbi'?` · ameaça zumbi: ${THREAT[sc.loc.thr].toLowerCase()}`:''}`);
   if(sc.dia>=(d.maxDays||60)&&S.scen) { const w=d.capWin?d.capWin(sc):true; scenEnd(w,w?'Os dias viraram semanas, as semanas viraram rotina. Um dia, simplesmente acabou.':'O tempo passou e a missão ficou pela metade. Acordei com a sensação de que faltou alguma coisa.'); return; }
@@ -460,7 +460,7 @@ V.scMember=c=>{ const sc=S.scen; if(!crew().includes(c)) return null; const it=[
   it.push({ic:'💬',l:'Conversar',s:'Lealdade',dis:once('c'),why:'Já conversamos hoje.',on:()=>scAct(()=>{ sc.done['m'+c.id+'c']=1; c.lv=Math.min(100,c.lv+rnd(5,10)); scStat('san',2); return R.pick([`${c.first} contou que era ${R.pick(['dentista','tatuador'+(c.gender==='F'?'a':''),'motorista de aplicativo','professor'+(c.gender==='F'?'a':''),'confeiteir'+oaG(c.gender),'influencer de academia'])} antes de tudo isso.`,`${c.first} riu de uma piada minha. Primeira vez em dias.`,`${c.first} disse que confia em mim. Pesou.`]); },c.first)});
   it.push({ic:'🍞',l:'Dar comida',s:'Saúde e lealdade',dis:!sc.inv.some(x=>itCat(x.id)==='comida'),why:'Não tenho comida.',on:()=>scAct(()=>{ const f=takeItem('@comida'); c.hp=Math.min(100,c.hp+10); c.lv=Math.min(100,c.lv+8); return `Dei ${itN(f.id).toLowerCase()} para ${c.first}.`; },c.first)});
   it.push({ic:'🩹',l:'Cuidar dos ferimentos',s:'Usa um remédio',dis:c.hp>=100||!sc.inv.some(x=>itCat(x.id)==='remedio'),why:c.hp>=100?`${c.first} está bem.`:'Não tenho remédio.',on:()=>scAct(()=>{ const r=takeItem('@remedio'); c.hp=Math.min(100,c.hp+itV(r.id)); c.lv=Math.min(100,c.lv+5); return `Cuidei de ${c.first} com ${itN(r.id).toLowerCase()}.`; },c.first)});
-  sc.inv.filter(x=>itCat(x.id)==='arma').forEach(x=>it.push({ic:itIc(x.id),l:`Entregar ${itN(x.id).toLowerCase()}`,s:`Estado ${x.hp}%`,on:()=>scAct(()=>{ sc.inv=sc.inv.filter(y=>y!==x); if(c.arma) addItem(c.arma.id,c.arma.hp,true); c.arma=x; c.lv=Math.min(100,c.lv+4); return `${c.first} agora carrega ${itN(x.id).toLowerCase()}.`; },c.first)}));
+  if(!c.bebe&&!c.bicho) sc.inv.filter(x=>itCat(x.id)==='arma').forEach(x=>it.push({ic:itIc(x.id),l:`Entregar ${itN(x.id).toLowerCase()}`,s:`Estado ${x.hp}%`,on:()=>scAct(()=>{ sc.inv=sc.inv.filter(y=>y!==x); if(c.arma) addItem(c.arma.id,c.arma.hp,true); c.arma=x; c.lv=Math.min(100,c.lv+4); return `${c.first} agora carrega ${itN(x.id).toLowerCase()}.`; },c.first)}));
   if(c.arma) it.push({ic:'✋',l:`Pegar a arma de ${c.first}`,s:`${itN(c.arma.id)} · lealdade cai`,on:()=>scAct(()=>{ if(sc.arma) addItem(sc.arma.id,sc.arma.hp,true); sc.arma=c.arma; c.arma=null; c.lv-=15; return `Peguei ${itN(sc.arma.id).toLowerCase()} de ${c.first}. ${c.gender==='F'?'Ela':'Ele'} sorriu sem mostrar os dentes.`; },c.first)});
   it.push({ic:'🚪',l:'Deixar para trás',tone:'bad',on:()=>confirmBox('Deixar para trás?',`${c.first} vai ficar sozinh${oaG(c.gender)}.`,'Deixar',()=>{ crewLeave(c,`Deixei ${c.first} para trás.`); scStat('san',-6); crew().forEach(x=>x.lv-=6); UI.back(); after(); })});
   return {title:c.first,items:it}; };
@@ -476,7 +476,7 @@ V.scItems=()=>{ const sc=S.scen, d=SM(), it=[];
     it.push({ic:itIc(x.id),l:itN(x.id),s:`Estado ${x.hp}%${c==='comida'?' · mata a fome':c==='agua'?' · mata a sede':c==='remedio'?' · cura':c==='arma'?' · dano '+itV(x.id):''}`,bars:[['',x.hp,x.hp>=60?'#3BB273':x.hp>=30?'#F2A93B':'#E5484D']],
       on:()=>modal({t:itN(x.id),x:`Estado ${x.hp}%`,ch:[...(usable?[{l:c==='comida'?'Comer':c==='agua'?'Beber':'Usar',fn:()=>{ const r=scUse(x); scLog(r); MQ.unshift({t:itN(x.id),x:r}); }}]:[]),...(c==='arma'?[{l:'Equipar',fn:()=>{ sc.inv=sc.inv.filter(y=>y!==x); if(sc.arma) addItem(sc.arma.id,sc.arma.hp,true); sc.arma=x; }}]:[]),{l:'Descartar',cls:'danger',fn:()=>{ sc.inv=sc.inv.filter(y=>y!==x); }},{l:'Voltar',cls:'alt'}]})}); });
   return {title:d.tabs[1],items:it}; };
-V.scenPick=()=>({title:'Modos fictícios',items:[{html:'<div class="card"><p>Uma aventura contada em dias, fora da vida normal. Enquanto durar, a vida real fica pausada e não envelhece. Se der errado, você só acorda. Se der certo, volta com recompensas.</p></div>'}]
+V.scenPick=()=>({title:'Modos fictícios',items:[{html:'<div class="card"><p>Uma aventura contada em dias, fora da vida normal. Enquanto durar, a vida real fica pausada e não envelhece. Se der errado, você só acorda, menos no isekai: quem morre em Eldoria morre de verdade. Se der certo, volta com recompensas.</p></div>'}]
   .concat(Object.entries(SCEN).map(([id,d])=>({ic:d.ic,l:d.n,s:fill(d.d.replace(/\{o\}/g,oa())),on:()=>confirmBox(d.n,'Começar a aventura agora?','Começar',()=>{ UI.close(); scStart(id); render.jump=true; after(); })})))});
 V.scenClass=()=>({title:'Escolha sua classe',items:Object.entries(CLASSES).map(([k,c])=>({ic:c.ic,l:clsName(k),s:c.sk.join(' · '),on:()=>{ if(S.scen&&S.scen.id==='isekai'){ S.scen.cls=k; scLog(`Escolhi ser ${clsName(k).toLowerCase()} em Eldoria.`,'good'); if(k==='mago') addItem('cajado',90,true); if(k==='arqueiro') addItem('arco',90,true); if(k==='ladino') addItem('adaga',90,true); } UI.close(); after(); }}))});
 // ---------- tela principal durante a aventura ----------
@@ -501,7 +501,7 @@ V.career=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scLocal():orig())(V.career);
 V.activities=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scActs():orig())(V.activities);
 V.relations=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scCrew():orig())(V.relations);
 V.assets=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scItems():orig())(V.assets);
-V.menu=(orig=>()=>{ const r=orig(); if(S&&S.scen&&S.scen.v===SC_V&&S.me.alive) r.items.unshift({ic:'⏰',l:'Acordar',s:'Encerra a aventura e volta para a vida real',tone:'bad',on:()=>confirmBox('Acordar?','A aventura termina aqui.','Acordar',()=>{ scenEnd(false,'Belisquei o próprio braço com força. Funcionou.'); after(); })}); return r; })(V.menu);
+V.menu=(orig=>()=>{ const r=orig(); if(S&&S.scen&&S.scen.v===SC_V&&S.me.alive&&S.scen.id!=='isekai') r.items.unshift({ic:'⏰',l:'Acordar',s:'Encerra a aventura e volta para a vida real',tone:'bad',on:()=>confirmBox('Acordar?','A aventura termina aqui.','Acordar',()=>{ scenEnd(false,'Belisquei o próprio braço com força. Funcionou.'); after(); })}); return r; })(V.menu);
 occupation=(orig=>()=>S.scen&&S.scen.v===SC_V?SCEN[S.scen.id].n:orig())(occupation);
 function scenYear(){} function startScen(id){ scStart(id); }
 // ---------- eventos especiais ----------
@@ -563,6 +563,9 @@ function scTok(tok,d,out){ const sc=S.scen; if(!sc||sc.v!==SC_V) return false; l
   if(tok==='bite'){ out.push(bite()); return true; }
   if(tok==='kills'){ sc_kill(rnd(2,6)); return true; }
   if(tok==='stay'){ sc.stay=1; return true; }
+  if(tok==='bebe'||tok==='crianca'){ if(sc.zb){ sc.zb.pop++; out.push(tok==='bebe'?`O bebê agora mora em ${sc.zb.nome}.`:'A criança agora mora na base.'); return true; } if(sc.vila){ sc.vila.pop++; return true; }
+    const c=mkCrew({age:tok==='bebe'?1:rnd(6,11)}); c.bebe=1; c.lv=95; c.arma=null; out.push(tok==='bebe'?`O bebê se chama ${c.first}.`:`${c.first}, de ${c.age} anos, agora viaja com a gente.`); return true; }
+  if(mm=tok.match(/^bicho:(\w+)$/)){ const c=mkCrew({first:R.pick(['Pena','Trovão','Faísca','Garra','Nuvem','Brasa'])}); c.bicho=mm[1]; c.race=mm[1]; c.lv=90; out.push(`${c.first} agora faz parte do grupo.`); return true; }
   if(tok==='win'){ sc.winNow=1; return true; }
   return false; }
 function scVar(k){ const sc=S.scen, m=S.me; if(!sc||sc.v!==SC_V) return null;

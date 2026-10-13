@@ -2,7 +2,7 @@
 const GANG_NAMES=['Irmandade do Pátio','Comando da Ala B','Os Esquecidos','Família do Corredor','Bonde do Refeitório','Liga da Lavanderia','Os Sem Visita','Tropa da Cela 13'];
 const GANG_RANK=['membro','braço direito','líder'];
 // detentos com nome, do mesmo gênero (a ala é separada)
-function inmates(){ const m=S.me; if(!m.yr.inmates) m.yr.inmates=[0,1,2,3].map(()=>{ const p=stranger({gender:m.gender}); return {n:p.first+' '+R.pick(['"'+R.pick(['Tatu','Marreta','Cicatriz','Pitbull','Baixinho','Professor','Navalha','Tanque','Fantasma','Gordo'])+'"','',''])+'',fight:R.int(25,90),gang:R.chance(.5)?R.pick(GANG_NAMES):null}; }); return m.yr.inmates; }
+function inmates(){ const m=S.me; if(!m.yr.inmates) m.yr.inmates=[]; while(m.yr.inmates.length<4) m.yr.inmates.push((()=>{ const p=stranger({gender:m.gender}); return {n:p.first+' '+R.pick(['"'+R.pick(['Tatu','Marreta','Cicatriz','Pitbull','Baixinho','Professor','Navalha','Tanque','Fantasma','Gordo'])+'"','',''])+'',fight:R.int(25,90),gang:R.chance(.5)?R.pick(GANG_NAMES):null}; })()); return m.yr.inmates; }
 const prisonFoe=i=>{ const x=inmates()[i]; return {name:x.n.trim(),power:x.fight,gender:S.me.gender}; };
 function prisonDo(k){
   const m=S.me,pr=m.prison; if(!pr) return 'Não estou pres'+oa()+'.';
