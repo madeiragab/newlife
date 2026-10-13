@@ -619,6 +619,7 @@ const CLUBS = [
 const MARTIAL = ['Karatê','Jiu-jítsu','Capoeira','Judô','Boxe','Muay thai','Taekwondo','Kung fu'];
 
 const RIBBONS = [
+ {id:'primeira',n:'Minha primeira vez',d:'Passou a primeira noite com alguém (ganho na hora, não na morte).',inst:1},
  {id:'desistente',n:'Desistente',d:'Desistiu desta vida no meio do caminho.'},
  {id:'coroado',n:'Coroado',d:'Reinou sobre um país.'},
  {id:'assassino',n:'Sanguinário',d:'Matou três pessoas ou mais.'},
@@ -2449,7 +2450,7 @@ function pack(gr,list){
       prep:m=>{ const v=o.v||[100,2000]; const d=Object.assign(strangers(m,o),{v:amt(v[0],v[1]),v2:amt(v[0]*4,v[1]*4),xi:R.int(0,(Array.isArray(text)?text.length:1)-1),
           co:m.job?m.job.co:m.biz?m.biz.n:'empresa',lugar:R.pick(TRIPS),coisa:R.pick(['um tênis caro','fones novos','um videogame','roupas','um celular usado','ingressos de show']),prod:R.pick(['refrigerante','perfume','carro','banco digital','sabão em pó','aplicativo de comida']),palavra2:R.pick(['Bom dia!','Cadê o café?','Gostosa!','Olha o ladrão!','Vai, Corinthians!','Para de gritar!','Alô?']),dieta:R.pick(['ovo','jejum','abacate','suco verde','sopa']),bico:R.pick(['pintura de parede','mudança','garçom num casamento','jardinagem','entregas']),invest:R.pick(['fazendas de gado','criptomoedas','imóveis no exterior','uma startup de energia']),festa:R.pick(['procissões e fogos','um festival de comida de rua','um desfile de carros alegóricos','música e dança na praça','o dia do padroeiro']),objeto:R.pick(['o sofá novo','um par de sapatos','o controle remoto','as almofadas','o carregador do celular']),curso2:R.pick(['padaria','eletricista','informática','corte e costura','marcenaria']),sonho:R.pick(['fazer faculdade','trabalhar com música','abrir uma oficina','ser cozinheir'+oa(),'voltar a jogar futebol']),materia:R.pick(['matemática','física','química','biologia','história','português','geografia']),prof:R.pick(['astronauta','veterinári'+oa(),'advogad'+oa(),'chef de cozinha','engenheir'+oa(),'músico','psicólog'+oa(),'piloto']),palavra:R.pick(['mamã','papá','água','não','bola','au-au','tchau','biscoito']),assunto:R.pick(['trabalho','casamento','dinheiro','mudar de cidade','ter filhos','abrir um negócio']),hobby:R.pick(['culinária japonesa','fotografia','marcenaria','dança de salão','canto','pintura em aquarela','programação']),hobby2:R.pick(['fazer crochê','jogar tênis','cuidar de orquídeas','pescar','aprender piano','fazer trilhas']),comida:R.pick(['torresmo','feijoada','doce','sal','fritura','pão francês']),ocorrencia:R.pick(['incêndio num prédio','assalto a banco','acidente na rodovia','briga generalizada num estádio','pessoa presa num elevador']),job:m.job?jobTitle(m.job).toLowerCase():'',curso:m.edu.cur?m.edu.cur.n:'',city:m.city,pais:countryOf(m.country).n,biz:m.biz?m.biz.n:''});
         if(o.fant&&typeof fantNames==='function') Object.assign(d,fantNames());
-        if(o.crew){ const cs=typeof crew==='function'?crew():[]; if(!cs.length) return null; const c=R.pick(cs); d.c=c.first; d.co=c.gender==='F'?'a':'o'; d.celn=c.gender==='F'?'ela':'ele'; d.cid=c.id; }
+        if(o.crew){ const all=typeof crew==='function'?crew():[], cs=o.crew==='par'?all.filter(c=>c.par):o.crew==='sol'?all.filter(c=>typeof romOK==='function'&&romOK(c)&&!c.par):all.filter(c=>!c.bebe&&!c.bicho); if(!cs.length) return null; const c=R.pick(cs); d.c=c.first; d.co=c.gender==='F'?'a':'o'; d.celn=c.gender==='F'?'ela':'ele'; d.cid=c.id; }
         if(o.who){ const p=WHO[o.who](); if(!p) return null; d.pid=p.id; d.p=p.first; d.ele=p.gender==='F'?'ela':'ele'; d.o2=p.gender==='F'?'a':'o'; d.idade=p.age; }
         return d; },
       show:d=>({k:o.k,t:tp(title,d),x:tp(Array.isArray(text)?text[d.xi]:text,d),ch:choices.map((c,i)=>[tp(c.split('|')[0],d),String(i)])}),
@@ -3586,8 +3587,11 @@ function askOut(p){
   log(`Comecei a namorar ${fullName(p)}.`,'good');
   return {ok:true,t:`${p.first} topou! Estamos namorando.`};
 }
+// selo na hora: a primeira noite com alguém (só adultos)
+function primeiraVez(nm){ const m=S.me; if(!m||m.c.primeira||m.age<18) return; m.c.primeira=1; m.primeira={n:nm,a:m.age}; META.ribbons.primeira=(META.ribbons.primeira||0)+1; log(`🎖️ Minha primeira vez: com ${nm}, aos ${m.age} anos.`,'good'); MQ.push({k:'Selo',t:'🎖️ Minha primeira vez',x:`Com ${nm}, aos ${m.age} anos. Um selo novo na coleção.`}); }
 function hookup(){
   const m=S.me; const p=candidate(true); st('happy',R.int(3,8)); cnt('hookups');
+  primeiraVez(fullName(p));
   let t=`Fiquei com ${p.first}, ${p.age} anos, que conheci ${R.pick(['numa balada','num bar','num aplicativo','num show','na praia'])}.`;
   if(R.chance(.06)){ const id=R.chance(.25)?'herpes':'ist'; addDisease(id); t+=' Depois descobri que peguei uma infecção.'; }
   const pr=partner(); if(pr&&R.chance(.3)){ pr.bond=clamp(pr.bond-40); t+=` ${pr.first} descobriu.`; }
@@ -3618,7 +3622,8 @@ function interact(p,k,extra){
     case 'casar': { const [c,prenup]=extra; if(!canPay(c)) return 'Não tenho dinheiro para essa festa.'; m.money-=c; if(prenup){ S.flags['prenup'+p.id]=1; if(R.chance(.3)){ p.bond=clamp(p.bond-25); return `${nm} se ofendeu com o pacto antenupcial e adiou o casamento.`; } } p.rel='conjuge'; p.yrs=0; cnt('marriages'); st('happy',20); S.flags.movedOut=1; log(`Casei com ${fullName(p)}!`,'good'); return `Casei com ${nm}! ${c>30000?'A festa foi inesquecível.':''}`; }
     case 'terminar': p.rel='ex'; st('happy',-8); log(`Terminei com ${nm}.`); return `Terminei com ${nm}.`;
     case 'divorcio': divorce(p,false); return `Me divorciei de ${nm}.`;
-    case 'filho': { if(use('tryKid')>2) return 'Já tentamos bastante este ano.'; const fem=m.gender==='F'?m:p; const fa=fem===m?m.age:p.age; if(m.gender===p.gender) return 'Para termos filhos juntos, precisamos adotar.'; const pr=clamp((fem===m?m.fert:60)-(fa>35?(fa-35)*5:0),0,90)/100*.6; if(S.births.length) return 'Já tem um bebê a caminho!'; if(R.chance(pr)){ S.births.push({with:p.id}); return 'Deu positivo! O bebê nasce no ano que vem.'; } return 'Ainda não foi desta vez.'; }
+    case 'noite': { if(tired) return `${nm} e eu já tivemos nossas noites este ano.`; p.bond=clamp(p.bond+R.int(5,12)); st('happy',R.int(4,9)); primeiraVez(fullName(p)); if(m.gender!==p.gender&&!S.births.length&&m.age<=50&&p.age<=50&&R.chance(.05)){ S.births.push({with:p.id}); return `Passamos a noite juntos. Semanas depois, a surpresa: vem um bebê aí.`; } return R.pick([`Passamos a noite juntos. Acordei com ${nm} roubando o cobertor.`,`Jantar, vinho e a noite inteira só nossa.`,`Desliguei o celular. A noite foi só de ${nm} e minha.`]); }
+    case 'filho': { if(m.age>=18&&p.age>=18) primeiraVez(fullName(p)); if(use('tryKid')>2) return 'Já tentamos bastante este ano.'; const fem=m.gender==='F'?m:p; const fa=fem===m?m.age:p.age; if(m.gender===p.gender) return 'Para termos filhos juntos, precisamos adotar.'; const pr=clamp((fem===m?m.fert:60)-(fa>35?(fa-35)*5:0),0,90)/100*.6; if(S.births.length) return 'Já tem um bebê a caminho!'; if(R.chance(pr)){ S.births.push({with:p.id}); return 'Deu positivo! O bebê nasce no ano que vem.'; } return 'Ainda não foi desta vez.'; }
     case 'viagem': { const c=extra; if(!canPay(c)) return 'Não temos dinheiro para isso.'; m.money-=c; p.bond=clamp(p.bond+R.int(8,18)); st('happy',R.int(6,12)); cnt('trips'); return `Viajei com ${nm} para ${R.pick(TRIPS)}.`; }
     case 'reatar': if(R.chance(p.bond/150+.15)){ p.rel='namoro'; p.bond=clamp(p.bond+20); return `Voltei com ${nm}.`; } return `${nm} disse que não volta nem morto.`.replace('morto',p.gender==='F'?'morta':'morto');
     case 'perdao': if(R.chance(.5)){ p.rel=p.rel==='inimigo'?'amigo':p.rel; p.bond=clamp(p.bond+15); return `Fiz as pazes com ${nm}.`; } return `${nm} não aceitou minhas desculpas.`;
@@ -3920,6 +3925,9 @@ function ensureLook(p){
   return p.look;
 }
 const HEAD='M50,20 C67,20 75.5,32 75.5,48 C75.5,63 67.5,76 50,78 C32.5,76 24.5,63 24.5,48 C24.5,32 33,20 50,20Z';
+// rosto masculino: mandíbula quadrada · feminino: maçãs arredondadas e queixo fino
+const HEAD_M='M50,20 C67.5,20 76,32 76,48 C76,59 74.8,67.5 68.5,73.2 C63.5,77.6 57,79.2 50,79.2 C43,79.2 36.5,77.6 31.5,73.2 C25.2,67.5 24,59 24,48 C24,32 32.5,20 50,20Z';
+const HEAD_F='M50,20.5 C66.5,20.5 75,32 75,47 C75,60 69.5,70.5 60.5,75.4 C56.5,77.4 53.2,78 50,78 C46.8,78 43.5,77.4 39.5,75.4 C30.5,70.5 25,60 25,47 C25,32 33.5,20.5 50,20.5Z';
 const HEAD_KID='M50,22 C67,22 77,34 77,50 C77,67 65,77.5 50,77.5 C35,77.5 23,67 23,50 C23,34 33,22 50,22Z';
 const HEAD_BABY='M50,26 C67,26 77,38 77,53 C77,69 65,79 50,79 C35,79 23,69 23,53 C23,38 33,26 50,26Z';
 // macacão de bebê
@@ -3945,8 +3953,9 @@ function faceSVG(p,size=44,over){
   const DS=new Set((p.dis||[]).map(d=>d.id)), chemo=hasCancer(p), regrow=!chemo&&p.hairBack&&S&&S.year<p.hairBack;
   const H=chemo&&!baby?HAIRS.find(h=>h.id==='careca'):regrow&&!['careca','raspado'].includes(L.hair)?HAIRS.find(h=>h.id==='raspado'):!F&&!baby&&((age>=50&&uid%4===0)||(age>=62&&uid%4===1))?HAIRS.find(h=>h.id==='careca'):HAIRS.find(h=>h.id===L.hair)||HAIRS[0];
   const hat=HATS.find(x=>x.id===L.hat)||HATS[0];
-  const head=baby?HEAD_BABY:kid?HEAD_KID:HEAD, dy=baby?4:small?2.5:kid?1.5:0;
+  const head=baby?HEAD_BABY:kid?HEAD_KID:F?HEAD_F:HEAD_M, dy=baby?4:small?2.5:kid?1.5:0;
   const hairClip=hat.cut&&!baby?` clip-path="url(#${id}c)"`:'';
+  const sx=small?1:kid?(F?.94:1.03):F?.88:1.08, mAd=!F&&age>=16, fAd=F&&age>=13;
   const SK=`url(#${id}sk)`, HG=`url(#${id}hg)`;
   const body=[], hd=[];
   // ---- corpo (escala por idade) ----
@@ -3956,6 +3965,7 @@ function faceSVG(p,size=44,over){
   const top=baby?ONESIE:TOPS.find(x=>x.id===tid)||TOPS[0];
   body.push(top.d(L.shirt,skin,dark));
   body.push(`<path d="${TORSO}" fill="url(#${id}cl)"/>`);
+  if(mAd&&age>=18) body.push(`<path d="M49.2,72.5 Q50.9,74.6 49.6,76.8" stroke="${dark}" stroke-width="1" fill="none" opacity=".45" stroke-linecap="round"/>`);
   if(age>=55) body.push(`<path d="M45.5,72 Q47.5,75 45.5,78 M54.5,72 Q52.5,75 54.5,78" stroke="${dark}" stroke-width=".8" fill="none" opacity=".55"/>`);
   // ---- cabeça (inclui cabelo e acessórios) ----
   EDGE=hairEdge;
@@ -3966,8 +3976,10 @@ function faceSVG(p,size=44,over){
   hd.push(`<path d="${head}" fill="${SK}" ${ol()}/>`);
   hd.push(`<g clip-path="url(#${id}h)">${!baby&&H.id!=='careca'?`<g transform="translate(0 2.4)" opacity=".16">${H.front('#3A1A10','#3A1A10')}</g>`:''}<path d="M24,${66+dy} Q50,${84+dy} 76,${66+dy} L76,90 L24,90Z" fill="${dark}" opacity=".08"/></g>`);
   // bochechas, sardas, espinhas, rugas
-  const blushO=baby?.45:kid?.32:L.makeup==='blush'||L.makeup==='completa'?.4:.12;
+  const blushO=baby?.45:kid?.32:L.makeup==='blush'||L.makeup==='completa'?.4:fAd?.22:.08;
   hd.push(`<ellipse cx="33.5" cy="${62+dy}" rx="4.6" ry="2.8" fill="#FF6F86" opacity="${blushO}"/><ellipse cx="66.5" cy="${62+dy}" rx="4.6" ry="2.8" fill="#FF6F86" opacity="${blushO}"/>`);
+  if(mAd&&age>=20&&L.beard==='none'&&!chemo&&uid%3!==0) hd.push(`<g clip-path="url(#${id}h)"><path d="M28.5,58 Q31,74 50,79.5 Q69,74 71.5,58 Q68,70 58.5,71.8 Q54,68.6 50,69.2 Q46,68.6 41.5,71.8 Q32,70 28.5,58Z" fill="${mixHex(hc,'#3A3A3A',.3)}" opacity=".16"/></g>`);
+  if(mAd) hd.push(`<path d="M30.5,66 Q34,73.5 41,76.6 M69.5,66 Q66,73.5 59,76.6" stroke="${dark}" stroke-width=".9" fill="none" opacity=".22" stroke-linecap="round"/>`);
   // catapora: pintas vermelhas na doença e marquinhas para sempre depois
   const POX=[[33,40],[62,37],[38,58],[64,61],[44,70],[58,46],[30,52],[69,50],[52,33],[47,76]];
   if(DS.has('catapora')) hd.push(POX.map(([x,y])=>`<circle cx="${x}" cy="${y+dy}" r="1.6" fill="#E04A5A" opacity=".85"/><circle cx="${x+.4}" cy="${y+dy-.4}" r=".55" fill="#fff" opacity=".6"/>`).join(''));
@@ -3990,7 +4002,7 @@ function faceSVG(p,size=44,over){
   }
   // olhos: amendoados e escuros nos adultos, grandes nos pequenos
   const es=kid?3:(ge.eyeShape||0);
-  const ey=52+dy, rx=baby||small?5.3:kid?4.9:teen?4.6:4.4, ry=baby||small?5:kid?4.3:es===3?3.9:es===1?2.6:teen?3.6:3.3, ir=baby||small?3.8:kid?3.3:es===1?2.3:teen?2.8:2.65;
+  const ge2=kid?1:F?1.1:.92, ey=52+dy, rx=(baby||small?5.3:kid?4.9:teen?4.6:4.4)*(kid?1:F?1.05:1), ry=(baby||small?5:kid?4.3:es===3?3.9:es===1?2.6:teen?3.6:3.3)*ge2, ir=(baby||small?3.8:kid?3.3:es===1?2.3:teen?2.8:2.65)*(kid?1:F?1.05:1);
   const lidC='#2B1D18';
   for(const x of [ex,ex2]){
     const side=x<50?-1:1;
@@ -4002,22 +4014,24 @@ function faceSVG(p,size=44,over){
     if(es===2&&!kid) hd.push(`<path d="M${x-rx-.4},${ey+.3} Q${x},${ey-ry-1.2} ${x+rx+.4},${ey+.3} L${x+rx+.4},${ey-ry-1} L${x-rx-.4},${ey-ry-1}Z" fill="${skin}"/><path d="M${x-rx-.3},${ey+.3} Q${x},${ey-1.8} ${x+rx+.3},${ey+.3}" stroke="${lidC}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`);
     else hd.push(`<path d="M${x-rx-.2},${ey+.2} Q${x},${ey-ry*1.45} ${x+rx+.2},${ey+.2}" stroke="${lidC}" stroke-width="${F&&!kid?1.9:1.5}" fill="none" stroke-linecap="round"/>`);
     hd.push(`<path d="M${x-rx*.7},${ey+ry*.85} Q${x},${ey+ry*1.2} ${x+rx*.7},${ey+ry*.85}" stroke="${dark}" stroke-width=".7" fill="none" opacity=".35"/>`);
-    if(F&&!kid) hd.push(`<path d="M${x+side*(rx+.1)},${ey-.4} l${side*1.9},-1.5" stroke="${lidC}" stroke-width="1.3" stroke-linecap="round"/>`);
+    if(F&&kid&&!baby) hd.push(`<path d="M${x+side*(rx+.1)},${ey-.4} l${side*1.8},-1.4 M${x+side*rx*.7},${ey-ry*.98} l${side*1.2},-1.6" stroke="${lidC}" stroke-width="1.1" stroke-linecap="round"/>`);
+    if(F&&!kid) hd.push(`<path d="M${x+side*(rx+.1)},${ey-.4} l${side*2.2},-1.7 M${x+side*rx*.78},${ey-ry*.95} l${side*1.6},-2 M${x+side*rx*.35},${ey-ry*1.2} l${side*.9},-2.1" stroke="${lidC}" stroke-width="1.2" stroke-linecap="round"/>`);
     if(age>=46) hd.push(`<path d="M${x-3.4},${ey+ry+1.3} Q${x},${ey+ry+3.4} ${x+3.4},${ey+ry+1.3}" stroke="${dark}" stroke-width=".8" fill="none" opacity="${age>=65?.5:age>=55?.38:.24}"/>`);
     if(L.makeup==='delineado'||L.makeup==='completa') hd.push(`<path d="M${x-side*rx*.1},${ey-ry*1.05} Q${x+side*rx*.7},${ey-ry*.8} ${x+side*(rx+.3)},${ey-.3} L${x+side*(rx+3.2)},${ey-2.6}" stroke="#141414" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
   }
   // sobrancelhas grossas e expressivas
-  if(!baby){ const bw=({fina:1.8,grossa:3.3,arqueada:2.5}[L.brow]||2.5)*(kid?.85:1)*(chemo?.45:1); const ang=mood<30?2.4:0; const bc=age>=68?mixHex(hc,'#7A7A7A',.3):mixHex(hc,'#000000',.38); const by=ey-7.6-(kid?.6:0);
-    hd.push(L.brow==='arqueada'?`<path d="M${ex-5.6},${by+1.6+ang} Q${ex-.5},${by-3.6} ${ex+5.4},${by+.2} M${ex2-5.4},${by+.2} Q${ex2+.5},${by-3.6} ${ex2+5.6},${by+1.6+ang}" stroke="${bc}" stroke-width="${bw}" fill="none" stroke-linecap="round"/>`
+  if(!baby){ const bw=({fina:1.8,grossa:3.3,arqueada:2.5}[L.brow]||2.5)*(kid?(F?.72:.95):F?.72:1.25)*(chemo?.45:1); const ang=mood<30?2.4:0; const bc=age>=68?mixHex(hc,'#7A7A7A',.3):mixHex(hc,'#000000',.38); const by=ey-7.6-(kid?.6:F?.9:-.5);
+    hd.push(L.brow==='arqueada'||(F&&!kid)?`<path d="M${ex-5.6},${by+1.6+ang} Q${ex-.5},${by-3.6} ${ex+5.4},${by+.2} M${ex2-5.4},${by+.2} Q${ex2+.5},${by-3.6} ${ex2+5.6},${by+1.6+ang}" stroke="${bc}" stroke-width="${bw}" fill="none" stroke-linecap="round"/>`
       :`<path d="M${ex-5.6},${by+1+ang} Q${ex},${by-2.2} ${ex+5.4},${by-ang/2} M${ex2-5.4},${by-ang/2} Q${ex2},${by-2.2} ${ex2+5.6},${by+1+ang}" stroke="${bc}" stroke-width="${bw}" fill="none" stroke-linecap="round"/>`); }
   // nariz com sombra
   if(baby||small) hd.push(`<path d="M48.4,${60+dy} Q50,${61.4+dy} 51.6,${60+dy}" stroke="${dark}" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".7"/>`);
-  else { const nl=kid?.75:1; hd.push(`<path d="M48.7,${50+dy} Q47.3,${55.5+dy} 47.2,${59+dy}" stroke="${dark}" stroke-width="1.1" fill="none" opacity=".3" stroke-linecap="round"/><path d="M${50-3.3*nl},${59.4+dy} Q${50-1.8*nl},${61.8+dy} 50,${61.3+dy} Q${50+1.8*nl},${61.8+dy} ${50+3.3*nl},${59.4+dy}" stroke="${dark}" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".62"/><ellipse cx="50.8" cy="${57.6+dy}" rx="1.4" ry="1.1" fill="#fff" opacity=".22"/>`); }
+  else { const nl=kid?.75:F?.82:1.12; hd.push(`<path d="M48.7,${50+dy} Q47.3,${55.5+dy} 47.2,${59+dy}" stroke="${dark}" stroke-width="1.1" fill="none" opacity=".3" stroke-linecap="round"/><path d="M${50-3.3*nl},${59.4+dy} Q${50-1.8*nl},${61.8+dy} 50,${61.3+dy} Q${50+1.8*nl},${61.8+dy} ${50+3.3*nl},${59.4+dy}" stroke="${dark}" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".62"/><ellipse cx="50.8" cy="${57.6+dy}" rx="1.4" ry="1.1" fill="#fff" opacity=".22"/>`); }
   if(L.pierce==='nariz'&&adult) hd.push(`<circle cx="53.3" cy="${61}" r="1.4" fill="none" stroke="#B9BFCB" stroke-width="1"/>`);
   if(age>=17&&!F&&!chemo){ EDGE=hairEdge; hd.push((BEARDS.find(b=>b.id===L.beard)||BEARDS[0]).d(age>=52?hc:mixHex(hc,'#000000',.08))); EDGE=skinEdge; }
   // boca: sorriso largo com dentes quando feliz
   const my=66.5+dy, lipN=mixHex(skin,'#A8423F',.5), lipD=mixHex(lipN,'#000000',.35);
   const lipC=L.makeup==='batom'||L.makeup==='completa'?'#C8283F':L.makeup==='rosa'?'#E26A98':null;
+  if(fAd&&!lipC&&!dead&&mood<75) hd.push(`<path d="M44.4,${my} Q47.2,${my-2} 50,${my-.8} Q52.8,${my-2} 55.6,${my} Q50,${my+4.4} 44.4,${my}Z" fill="${mixHex(skin,'#C9506A',.42)}" opacity=".8"/>`);
   if(lipC&&adult&&!dead) hd.push(`<path d="M43.6,${my} Q47,${my-2.3} 50,${my-.9} Q53,${my-2.3} 56.4,${my} Q50,${my+5.4} 43.6,${my}Z" fill="${lipC}"/>`);
   if(dead) hd.push(`<path d="M44.5,${my+1} L55.5,${my+1}" stroke="${lipD}" stroke-width="1.6" stroke-linecap="round"/>`);
   else if(baby&&uid%3===0) hd.push(`<ellipse cx="50" cy="${my+1.4}" rx="6.4" ry="4.2" fill="#7FC8F8" ${ol(.9,'#3C86B8')}/><circle cx="50" cy="${my+1.4}" r="2.4" fill="#fff" ${ol(.8,'#3C86B8')}/>`);
@@ -4055,7 +4069,7 @@ function faceSVG(p,size=44,over){
     +`<linearGradient id="${id}cl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>`;
   const bg=BGS[uid%BGS.length];
   return `<svg class="face" viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true"><defs>${defs}</defs><g clip-path="url(#${id})"><rect width="100" height="100" fill="${bg}"/><circle cx="50" cy="44" r="40" fill="#fff" opacity=".22"/>`
-    +`<g transform="translate(50 100) scale(${bs}) translate(-50 -100)">${body.join('')}</g>`
+    +`<g transform="translate(50 100) scale(${bs*sx} ${bs}) translate(-50 -100)">${body.join('')}</g>`
     +`<g transform="translate(50 ${hcy}) scale(${hsc}) translate(-50 -50)">${hd.join('')}</g>`
     +`${dead?'<rect width="100" height="100" fill="#000" opacity=".14"/>':''}</g></svg>`;
 }
@@ -4469,6 +4483,7 @@ V.person=p=>{
   A('flertar','Flertar',null,canFlirt);
   A('reatar','Tentar voltar',null,rel==='ex');
   if(love){
+    A('noite','Passar a noite juntos',null,a>=18&&p.age>=18);
     A('viagem','Viajar juntos',5000,a>=18,fmt(5000));
     A('filho','Tentar ter um filho',null,a>=16&&a<=55&&p.age<=55);
     if(rel==='namoro'&&a>=16) it.push({l:'Pedir em casamento',on:()=>modal({t:'Qual anel?',ch:[[500,'Anel simples'],[5000,'Anel de ouro'],[40000,'Diamante enorme']].map(([c,l])=>({l:`${l} (${fmt(c)})`,fn:()=>{ const r=interact(p,'pedido',[c]); log(r); MQ.unshift({t:p.first,x:r}); }})).concat([{l:'Cancelar',cls:'alt'}])})});
@@ -4740,7 +4755,7 @@ function boot(){
   if(location.hash==='#teste'){ selfTest(); return; } if(location.hash.startsWith('#qualidade')){ try{ qualityReport(); }catch(e){ const o=document.createElement('pre'); o.id='out'; o.textContent='ERRO '+e.message+' '+e.stack; document.body.appendChild(o); } return; }
   if(location.hash==='#autoano'){ const sv=loadKey(SAVE_KEY); if(sv&&sv.me) S=sv; else newLife({}); for(let i=0;i<3&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[0][1],e.d); log(sh.t+' → '+sh.ch[0][0]+(r?'. '+r:'.'),'choice'); } } save(); render.jump=true; render(); return; }
   if(location.hash.startsWith('#demo')){ const hs=location.hash; newLife({}); setTimeout(()=>{ if(hs.includes('rel')) UI.open(V.relations); if(hs.includes('style')) UI.open(V.style); if(hs.includes('hair')){ UI.open(V.style); UI.push(V.styleHair); } if(hs.includes('act')) UI.open(V.activities); if(hs.includes('person')){ UI.open(V.relations); UI.push(()=>V.person(people('mae')[0]||people()[0])); } if(hs.includes('ev')){ queue('carteira',EVENTS.carteira.prep()); pump(); } if(hs.includes('death')){ die('de teste'); showDeath(); } if(hs.includes('start')) showStart(); if(hs.includes('cars')){ UI.open(V.assets); UI.push(V.cars); } if(hs.includes('pets')){ UI.open(V.activities); UI.push(V.pets); } if(hs.includes('shop')){ UI.open(V.assets); UI.push(V.shop); } if(hs.includes('vis')){ UI.open(V.style); } if(hs.includes('icone')){ document.documentElement.style.background='transparent'; document.body.style.cssText='margin:0;background:transparent'; document.body.innerHTML=appIconSVG(512); return; } if(hs.includes('cenarios')){ S.me.alive=true; S.me.prison=null; UI.open(V.scenPick); }
-    else if(/zumbi|isekai|sc-\w+/.test(hs)){ const m=S.me; m.prison=null; while(m.age<20){ m.alive=true; m.health=Math.max(m.health,60); S.pending=[]; ageUp(); } S.pending=[]; m.alive=true; const id=(hs.match(/sc-(\w+)/)||[])[1]||(hs.includes('isekai')?'isekai':'zumbi'); scStart(id); if(id==='isekai'){ UI.close(); S.scen.cls='guerreiro'; } for(let i=0;i<3;i++){ S.pending=[]; scNextDay(); } S.pending=[]; MQ.length=0; render.jump=true; render(); const pane=(hs.match(/-(local|grupo|itens|acoes|vila|magia|ficha|base|oficina|faccoes|procurar)$/)||[])[1]; if(id==='zumbi'&&pane){ const sc=S.scen; zEnsure(sc); sc.zmat=46; sc.zlv=4; sc.zpts=2; sc.dia=38; sc.rec=38; sc.nextHorde=45; Object.assign(sc.zat,{for:9,mir:7,fur:8,med:6,mec:10,lid:7}); if(['base','acoes','oficina','faccoes','procurar'].includes(pane)){ zFoundBase('Último Refúgio'); const b=sc.zb; b.pop=14; b.moral=72; b.com=36; b.agua=28; Object.assign(b.b,{muro:3,horta:2,poco:2,enfermaria:1,oficina:2,alojamento:3,torre:1,armadilhas:1}); sc.zf.merc.rep=42; sc.zf.corvos.rep=-38; sc.zf.guarda.rep=12; sc.zf.igreja.rep=-6; addItem('corda',90,true); addItem('pilha',90,true); addItem('taco',80,true); } UI.open({base:V.zBase,acoes:V.scActs,oficina:V.zCraft,faccoes:V.zFac,procurar:V.zScav,ficha:V.zMe,local:V.scLocal,grupo:V.scCrew,itens:V.scItems}[pane]); } if(id==='isekai'&&pane&&['vila','magia','ficha'].includes(pane)){ const sc=S.scen; sc.ouro=4200; sc.lvl=9; sc.cls='mago'; iskEnsure(sc); learnSpell(sc,true); learnSpell(sc,true); sc.pts=3; if(pane==='vila'){ vilaFound('Nova Aurora'); const v=sc.vila; v.pop=27; Object.assign(v.b,{casa:4,fazenda:3,tecelagem:2,serraria:2,mercado:1,escola:1,taverna:1,muralha:1}); v.tech=['agricultura','escrita','tear']; v.tier=2; v.res='moeda'; v.pqT=24; v.com=120; v.rou=34; v.man=41; v.fel=78; } } if(pane&&id!=='zumbi') UI.open({local:V.scLocal,grupo:V.scCrew,itens:V.scItems,acoes:V.scActs,vila:V.iskVila,magia:V.iskMagic,ficha:V.iskMe}[pane]); }
+    else if(/zumbi|isekai|sc-\w+/.test(hs)){ const m=S.me; m.prison=null; while(m.age<20){ m.alive=true; m.health=Math.max(m.health,60); S.pending=[]; ageUp(); } S.pending=[]; m.alive=true; const id=(hs.match(/sc-(\w+)/)||[])[1]||(hs.includes('isekai')?'isekai':'zumbi'); scStart(id); if(id==='isekai'){ UI.close(); S.scen.cls='guerreiro'; } for(let i=0;i<3;i++){ S.pending=[]; scNextDay(); } S.pending=[]; MQ.length=0; render.jump=true; render(); const pane=(hs.match(/-(local|grupo|itens|acoes|vila|magia|ficha|base|oficina|faccoes|procurar|equipe|amor)$/)||[])[1]; if(id==='zumbi'&&pane){ const sc=S.scen; zEnsure(sc); sc.zmat=46; sc.zlv=4; sc.zpts=2; sc.dia=38; sc.rec=38; sc.nextHorde=45; Object.assign(sc.zat,{for:9,mir:7,fur:8,med:6,mec:10,lid:7}); if(['base','acoes','oficina','faccoes','procurar'].includes(pane)){ zFoundBase('Último Refúgio'); const b=sc.zb; b.pop=14; b.moral=72; b.com=36; b.agua=28; Object.assign(b.b,{muro:3,horta:2,poco:2,enfermaria:1,oficina:2,alojamento:3,torre:1,armadilhas:1}); sc.zf.merc.rep=42; sc.zf.corvos.rep=-38; sc.zf.guarda.rep=12; sc.zf.igreja.rep=-6; addItem('corda',90,true); addItem('pilha',90,true); addItem('taco',80,true); } UI.open({base:V.zBase,acoes:V.scActs,oficina:V.zCraft,faccoes:V.zFac,procurar:V.zScav,ficha:V.zMe,local:V.scLocal,grupo:V.scCrew,itens:V.scItems}[pane]); } if(id==='isekai'&&pane&&['vila','magia','ficha'].includes(pane)){ const sc=S.scen; sc.ouro=4200; sc.lvl=9; sc.cls='mago'; iskEnsure(sc); learnSpell(sc,true); learnSpell(sc,true); sc.pts=3; if(pane==='vila'){ vilaFound('Nova Aurora'); const v=sc.vila; v.pop=27; Object.assign(v.b,{casa:4,fazenda:3,tecelagem:2,serraria:2,mercado:1,escola:1,taverna:1,muralha:1}); v.tech=['agricultura','escrita','tear']; v.tier=2; v.res='moeda'; v.pqT=24; v.com=120; v.rou=34; v.man=41; v.fel=78; } } if(id==='heroi'&&pane){ const sc=S.scen; hEnsure(sc); sc.rep=62; sc.reg='nao'; sc.proc=38; m.job={hero:'sentinelas',lvl:1,perf:71,yrs:0,co:HTEAMS.sentinelas.n}; sc.hxp=3; if(!partner()){ const p=candidate(false); p.rel='namoro'; S.people.push(p); } sc.sab[partner().id]=1; mkCrew(); } if(pane==='amor'){ const c=crew().find(x=>romOK(x))||mkCrew({gender:S.me.gender==='F'?'M':'F',age:S.me.age}); c.gender=S.me.gender==='F'?'M':'F'; c.am=74; romStart(c); c.par='noivo'; S.scen.grav={pid:c.id,due:S.scen.dia+4}; UI.open(()=>V.scMember(c)); } if(pane==='equipe') UI.open(V.hTeam); if(pane&&id!=='zumbi'&&!['amor','equipe'].includes(pane)) UI.open({local:V.scLocal,grupo:V.scCrew,itens:V.scItems,acoes:V.scActs,vila:V.iskVila,magia:V.iskMagic,ficha:V.iskMe}[pane]); }
     else if(hs.includes('doencas')){ const L=[['catapora',8,'F'],['marcas',25,'F'],['cancer_mama',40,'F'],['leucemia',12,'M'],['volta',45,'M'],['vitiligo',30,'M'],['conjuntivite',22,'F'],['sarampo',6,'M'],['catarata',72,'F'],['psoriase',35,'M'],['acne',16,'M'],['verruga',50,'F']];
       document.body.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#fff">'+L.map(([d,a,gd],i)=>{ const q=mkPerson({rel:'tmp',gender:gd,age:a,bond:70}); q.id=i+3; ensureLook(q); q.look.hair=gd==='F'?'longo':'curto'; q.dis=d==='marcas'||d==='volta'?[]:[{id:d,y:0}]; if(d==='marcas') q.genes.pox=1; if(d==='vitiligo') q.genes.vitiligo=1; if(d==='volta') q.hairBack=S.year+2; return '<div style="text-align:center;font:10px sans-serif">'+faceSVG(q,110)+'<br>'+d+'</div>'; }).join('')+'</div>'; }
     else if(hs.includes('faccao')){ const m=S.me; m.prison=null; m.job={spc:'crime',lvl:2,perf:64,yrs:1,lvlYrs:1,co:'Facção',heat:45}; UI.open(V.faccao); }
@@ -5825,10 +5840,10 @@ let NAV0=null;
 function renderScen(){ const sc=S.scen, d=SM(), m=S.me;
   if(!NAV0) NAV0=['#nCareer','#nAssets','#nAge','#nRel','#nAct'].map(s=>$(s).innerHTML);
   ['#nCareer','#nAssets','#nAge','#nRel','#nAct'].forEach((s,i)=>{ $(s).innerHTML=i===2?`<div class="plus">${d.tabIc[i]}</div><span>${d.tabs[i]}</span>`:`<div class="scic">${d.tabIc[i]}</div><span>${d.tabs[i]}</span>`; });
-  $('#hName').textContent=`${m.first} ${m.last}`; $('#hSub').textContent=`${d.ic} ${d.n} · ${d.day} ${sc.dia}`;
+  $('#hName').textContent=`${m.first} ${m.last}`; $('#hSub').textContent=`${d.ic} ${d.n} · ${d.yl?S.year+' · '+m.age+' anos':d.day+' '+sc.dia}`;
   const h=d.hdr(sc); $('#hMoney').textContent=h[0]; $('#hdr .lbl').textContent=h[1]; $('#hMoney').classList.remove('neg');
   $('#avatar').innerHTML=faceSVG(m,46);
-  const lg=$('#log'); lg.innerHTML=sc.log.map(y=>`<section class="yr ph2 scy"><h3><span>${d.day} ${y.d}</span><span>${esc(y.pl||'')}</span></h3>${y.lines.map(l=>typeof l==='string'?`<p>${esc(l)}</p>`:`<p class="${l.c}">${esc(l.t)}</p>`).join('')||'<p style="color:var(--muted)">Um dia tranquilo. Raridade.</p>'}</section>`).join(''); lg.scrollTop=lg.scrollHeight;
+  const lg=$('#log'); lg.innerHTML=sc.log.map(y=>`<section class="yr ph2 scy"><h3><span>${d.yl?d.yl(y):d.day+' '+y.d}</span><span>${esc(y.pl||'')}</span></h3>${y.lines.map(l=>typeof l==='string'?`<p>${esc(l)}</p>`:`<p class="${l.c}">${esc(l.t)}</p>`).join('')||'<p style="color:var(--muted)">Um dia tranquilo. Raridade.</p>'}</section>`).join(''); lg.scrollTop=lg.scrollHeight;
   $('#stats').innerHTML=d.stats.map(([k,l,e,inv])=>{ const v=Math.round(sc[k]||0); return `<div class="st"><span class="se">${e}</span><b>${l}</b><div class="bar"><i style="width:${v}%;background:${grad(inv?100-v:v)}"></i></div><span>${v}%</span></div>`; }).join(''); }
 function navNormal(){ if(NAV0){ ['#nCareer','#nAssets','#nAge','#nRel','#nAct'].forEach((s,i)=>$(s).innerHTML=NAV0[i]); NAV0=null; } }
 function scMoral(sc){ const c=crew(); return c.length?Math.round(c.reduce((s,x)=>s+x.lv,0)/c.length):Math.round(sc.san); }
@@ -5836,13 +5851,14 @@ function scMoral(sc){ const c=crew(); return c.length?Math.round(c.reduce((s,x)=
 render=(orig=>function(){ if(S&&S.scen&&S.scen.v===SC_V&&S.me.alive){ if(S.scen.id==='zumbi') S.scen.moral=scMoral(S.scen); return renderScen(); } navNormal(); return orig.apply(this,arguments); })(render);
 after=(orig=>function(){ if(S&&S.scen) scCheck(); return orig.apply(this,arguments); })(after);
 doAge=(orig=>function(){ if(S&&S.scen&&S.scen.v===SC_V){ if(!S.me.alive||S.pending.length||MQ.length||modalOpen) return; UI.close(); try{ scNextDay(); }catch(e){ showErr(e); } after(); return; } return orig.apply(this,arguments); })(doAge);
-ageUp=(orig=>function(){ if(S&&S.scen&&S.scen.v===SC_V) return scNextDay(); if(S&&S.scen) S.scen=null; return orig.apply(this,arguments); })(ageUp);
-log=(orig=>function(t,tone){ if(S&&S.scen&&S.scen.v===SC_V&&S.scen.log) return scLog(t,tone); return orig(t,tone); })(log);
+let AGE0=null; // envelhecimento da vida real (o modo herói passa por ano)
+ageUp=(orig=>{ AGE0=orig; return function(){ if(S&&S.scen&&S.scen.v===SC_V) return scNextDay(); if(S&&S.scen) S.scen=null; return orig.apply(this,arguments); }; })(ageUp);
+log=(orig=>function(t,tone){ if(S&&S.scen&&S.scen.v===SC_V&&S.scen.log){ if(S.scen.id==='heroi') orig(t,tone); return scLog(t,tone); } return orig(t,tone); })(log);
 V.career=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scLocal():orig())(V.career);
 V.activities=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scActs():orig())(V.activities);
 V.relations=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scCrew():orig())(V.relations);
 V.assets=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scItems():orig())(V.assets);
-V.menu=(orig=>()=>{ const r=orig(); if(S&&S.scen&&S.scen.v===SC_V&&S.me.alive&&S.scen.id!=='isekai') r.items.unshift({ic:'⏰',l:'Acordar',s:'Encerra a aventura e volta para a vida real',tone:'bad',on:()=>confirmBox('Acordar?','A aventura termina aqui.','Acordar',()=>{ scenEnd(false,'Belisquei o próprio braço com força. Funcionou.'); after(); })}); return r; })(V.menu);
+V.menu=(orig=>()=>{ const r=orig(); if(S&&S.scen&&S.scen.v===SC_V&&S.me.alive&&!['isekai','heroi'].includes(S.scen.id)) r.items.unshift({ic:'⏰',l:'Acordar',s:'Encerra a aventura e volta para a vida real',tone:'bad',on:()=>confirmBox('Acordar?','A aventura termina aqui.','Acordar',()=>{ scenEnd(false,'Belisquei o próprio braço com força. Funcionou.'); after(); })}); return r; })(V.menu);
 occupation=(orig=>()=>S.scen&&S.scen.v===SC_V?SCEN[S.scen.id].n:orig())(occupation);
 function scenYear(){} function startScen(id){ scStart(id); }
 // ---------- eventos especiais ----------
@@ -6424,6 +6440,335 @@ V.scItems=(o=>()=>{ const r=o(), sc=S.scen; if(!sc||sc.id!=='zumbi') return r; z
 V.scCrew=(o=>()=>{ const r=o(), sc=S.scen; if(sc&&sc.id==='zumbi'&&r.items[0]){ r.items[0].on=()=>UI.push(V.zMe); if(sc.zb) r.items.push({html:`<div class="card"><p style="color:var(--muted);font-size:13px">Além do grupo, ${sc.zb.pop} morador(es) vivem em ${esc(sc.zb.nome)}.</p></div>`}); } return r; })(V.scCrew);
 // no fim do pesadelo, guarda o recorde
 scenEnd=(o=>function(win,txt){ const sc=S.scen; if(sc&&sc.id==='zumbi'){ zEnsure(sc); const d=SCEN.zumbi; d.onEnd(S.me,sc); const rec=META.zrec; txt+=`\n\nVocê sobreviveu ${sc.dia} dias. Recorde: ${rec} dias.`; } return o(win,txt); })(scenEnd);
+
+// ===== Romance dentro dos modos fictícios =====
+// Qualquer adulto do grupo pode virar par: flerte, encontro, namoro, noivado, casamento e filhos.
+// Se a aventura terminar bem, o par e os filhos voltam junto para a vida real.
+// No modo de super-herói, além do grupo, vale o romance da vida real (é o mesmo mundo).
+const ROM={
+  zumbi:{enc:['no telhado de um prédio, vendo o pôr do sol sem nenhuma luz acesa na cidade','num cinema abandonado, com uma lanterna apontada para a tela vazia','na beira do rio, longe dos gemidos','dançando devagar ao som de um rádio a pilha','num supermercado vazio, empurrando um carrinho como se fosse sábado','dividindo a última lata de pêssego em calda','num carrossel parado de um parque abandonado'],
+    risco:'Um zumbi apareceu no meio do encontro. Acabamos com ele juntos. Foi estranhamente romântico.',
+    casa:'no meio do acampamento, com alianças feitas de arruela e um padre que ninguém sabe se era padre mesmo',
+    novo:[c=>`Na estrada, encontrei ${c.first}, que sobrevivia sozinh${oaG(c.gender)} num posto de gasolina. A conversa durou a noite inteira. Agora viaja com a gente.`,c=>`${c.first} estava escondid${oaG(c.gender)} num ônibus escolar. Dividimos um biscoito, e alguma coisa a mais. Juntou-se ao grupo.`],pNovo:.45,
+    sem:'Ninguém por perto. Só zumbis, e eles não fazem meu tipo.'},
+  ilha:{enc:['na areia, contando estrelas que eu nunca tinha visto','dividindo um coco na beira do mar','tomando banho de cachoeira','em volta da fogueira, contando como era a vida antes do avião','pescando de mãos dadas, sem pegar nada','assistindo às tartarugas chegarem na praia'],
+    risco:'Um caranguejo gigante beliscou o pé no meio do beijo. Rimos até doer a barriga.',
+    casa:'na praia, com coroas de flores, conchas no lugar das alianças e a bola de vôlei de testemunha',
+    novo:[c=>`Um bote salva-vidas chegou à praia. Dentro, ${c.first}, desidratad${oaG(c.gender)} e lind${oaG(c.gender)}. Cuidei de cada queimadura de sol.`],pNovo:.18,
+    sem:'Não tem ninguém na ilha. Só eu, os caranguejos e o barulho das ondas.'},
+  isekai:{enc:['no festival das lanternas, soltando luzes mágicas no rio','num piquenique sob os dois sóis','na taverna, dividindo uma caneca de hidromel','voando num grifo alugado por cima das nuvens','no lago das fadas, onde a água brilha à noite','dançando no baile da guilda'],
+    risco:'Um slime pulou no meio da toalha do piquenique. Derretemos ele com magia e voltamos a nos beijar.',
+    casa:'no templo da deusa, com bênção dos elfos, chuva de pétalas mágicas e um anão chorando na primeira fila',
+    novo:[c=>`Na taverna, ${c.first}, ${(c.race||'aventureir'+oaG(c.gender)).toLowerCase()}, sentou na minha mesa e pagou uma rodada. Topou entrar para o grupo.`,c=>`Salvei ${c.first} de uma emboscada de goblins. ${c.gender==='F'?'Ela':'Ele'} disse que me deve a vida, e resolveu me seguir.`],pNovo:.55,
+    sem:'A taverna estava vazia. Só um bardo bêbado cantando sobre amores perdidos.'},
+  marte:{enc:['vendo o pôr do sol azul de Marte pela escotilha','num jantar de batata à luz de LED','numa caminhada de traje pela borda da cratera','assistindo a um filme antigo no módulo de carga','dançando em gravidade baixa, quase voando','olhando a Terra, um pontinho azul no céu'],
+    risco:'O alarme de pressão disparou no meio do encontro. Consertamos o vazamento abraçados, de capacete.',
+    casa:'no módulo central, no primeiro casamento da história de Marte, transmitido ao vivo para a Terra',
+    novo:null,pNovo:0,sem:'Na colônia, todo mundo já se conhece. Não tem gente nova a 225 milhões de quilômetros.'},
+  heroi:{enc:['no alto da torre do relógio, vendo a cidade acesa','num jantar num restaurante pequeno, sem máscara','voando (ou correndo) por cima do mar','num cinema, de mãos dadas, com o rádio da polícia no bolso','num terraço, comendo pizza fria'],
+    risco:'O alarme de crime tocou no meio do encontro. Voltei com a camisa rasgada, mas voltei.',
+    casa:'num terraço, à noite, com os aliados de padrinhos e as máscaras guardadas',
+    novo:null,pNovo:0,sem:''},
+};
+const romOK=c=>{ const m=S.me; if(!c||c.bebe||c.bicho||c.filho) return false; if(m.age<16||c.age<16||(m.age<18)!==(c.age<18)) return false; return !m.pref||m.pref==='A'||c.gender===m.pref; };
+const romPar=()=>{ const sc=S.scen; if(!sc||!sc.par) return null; const c=crewById(sc.par); if(!c){ sc.par=null; return null; } return c; };
+const romSt=c=>c.par==='casado'?`Casad${oaG(c.gender)} comigo`:c.par==='noivo'?`Noiv${oaG(c.gender)}`:c.par==='namoro'?'Namorando':'';
+const romPrefG=()=>{ const m=S.me; return !m.pref||m.pref==='A'?(R.chance(.5)?'F':'M'):m.pref; };
+function romAm(c,n){ c.am=Math.max(0,Math.min(100,(c.am||10)+n)); }
+function romStart(c){ const sc=S.scen; sc.par=c.id; c.par='namoro'; c.parD=sc.dia; c.ex=0; c.lv=Math.min(100,c.lv+10); romAm(c,10); cnt('partners'); const r=partner(); if(r&&!sc.trai){ sc.trai=r.id; return ` Lá na vida real, ${r.first} nem imagina.`; } return ''; }
+function romEnd(c){ const sc=S.scen; if(sc.par===c.id) sc.par=null; if(sc.grav&&sc.grav.pid===c.id) sc.grav=null; c.par=null; c.ex=1; c.am=Math.min(c.am||0,10); c.lv=Math.max(0,c.lv-20); }
+const romCanBaby=c=>{ const m=S.me; if(c.gender===m.gender) return false; const mae=m.gender==='F'?m:c; return mae.age>=16&&mae.age<=46; };
+function romGrav(c){ const sc=S.scen; if(sc.grav) return 'Já tem um bebê a caminho.'; if(!romCanBaby(c)) return null; if(!R.chance(.4)) return 'Ainda não foi desta vez.'; sc.grav={pid:c.id,due:sc.dia+(sc.id==='heroi'?1:rnd(5,8))};
+  return S.me.gender==='F'?'Fiz o teste no escuro, com uma lanterna. Positivo. Vou ter um bebê!':`${c.first} me mostrou o teste com as mãos tremendo. Positivo. Vamos ter um bebê!`; }
+function romBaby(pid){ const sc=S.scen, m=S.me, par=crewById(pid); const gd=R.chance(.5)?'F':'M';
+  const b=mkCrew({gender:gd,age:1,last:m.last}); b.age=0; b.bebe=1; b.filho=1; b.lv=100; b.arma=null; b.race=gd==='F'?'Minha filha':'Meu filho';
+  if(par&&par.genes&&m.genes){ try{ const k=childOf(m,Object.assign({looks:50,smarts:50,health:70},par),gd); if(k&&k.genes) b.genes=k.genes; }catch(e){} }
+  if(sc.grav&&sc.grav.pid===pid) sc.grav=null; cnt('kids'); return b; }
+// conhecer alguém novo ou reparar em alguém do grupo
+function romProcurar(){ const sc=S.scen, rm=ROM[sc.id]||ROM.zumbi; const cs=crew().filter(c=>romOK(c)&&!c.par&&!c.ex);
+  if(cs.length&&R.chance(rm.pNovo?.7:1)){ const c=R.pick(cs); romAm(c,rnd(8,14)); return R.pick([`Peguei ${c.first} me olhando de canto de olho. Quando olhei de volta, ${c.gender==='F'?'ela':'ele'} sorriu.`,`Passei a tarde ajudando ${c.first}. Teve um momento em que nossas mãos se encostaram e ninguém tirou.`,`${c.first} guardou o melhor pedaço da comida para mim. Isso, aqui, é quase uma declaração.`]); }
+  if(rm.novo&&R.chance(rm.pNovo)){ const m=S.me, c=mkCrew({gender:romPrefG(),age:m.age<18?rnd(16,17):Math.max(18,Math.min(70,m.age+rnd(-6,6)))}); c.am=rnd(25,40); return R.pick(rm.novo)(c); }
+  return rm.sem||'Não apareceu ninguém hoje.'; }
+// ---------- telas ----------
+function romItems(c){ const sc=S.scen, it=[], rm=ROM[sc.id]||ROM.zumbi, once=k=>!!sc.done['r'+c.id+k], other=romPar(); const o=oaG(c.gender), ele=c.gender==='F'?'ela':'ele';
+  it.push({sec:'Romance'},{html:`<div class="card">${bar('Paixão',c.am||0)}${c.par?kv('Situação',romSt(c)):c.ex?kv('Situação','Ex'):''}</div>`});
+  it.push({ic:'😉',l:'Flertar',s:'Paixão',dis:once('f'),why:'Já flertei hoje. Calma.',on:()=>scAct(()=>{ sc.done['r'+c.id+'f']=1; if(pct(.35+sc.car/250+c.lv/300+(c.am||0)/400)){ romAm(c,rnd(6,12)); scStat('san',3); return R.pick([`${c.first} riu da minha cantada ruim. Riu de verdade.`,`Elogiei ${c.first}. ${ele[0].toUpperCase()+ele.slice(1)} ficou vermelh${o} e mudou de assunto.`,`${c.first} devolveu o flerte na mesma moeda. Alguém do grupo assobiou.`]); } romAm(c,-3); return R.pick([`${c.first} fingiu que não entendeu.`,`Tentei uma cantada. ${c.first} me olhou como se eu tivesse levado uma pancada na cabeça.`,`${c.first} disse que não é hora para isso.`]); },c.first)});
+  it.push({ic:'🌹',l:'Chamar para um encontro',s:'1 de energia · paixão e sanidade',dis:once('e')||sc.ap<1||(c.am||0)<20,why:(c.am||0)<20?`${c.first} ainda não me vê desse jeito. Preciso flertar antes.`:once('e')?'Já tivemos um encontro hoje.':'Sem energia hoje.',
+    on:()=>scAct(()=>{ if(!spend('r'+c.id+'e',1)) return 'Sem energia.'; romAm(c,rnd(10,18)); c.lv=Math.min(100,c.lv+5); scStat('san',rnd(6,10)); let t=`Fomos ${R.pick(rm.enc)}.`; if(R.chance(.15)){ scHurt(rnd(3,8)); t+=' '+rm.risco; } else t+=' '+R.pick(['Foi o melhor dia desde que tudo começou.','Não falamos do perigo nem uma vez.','Teve beijo. Teve sim.','Fiquei sorrindo à toa o resto do dia.']); return t; },'Encontro')});
+  const gift=sc.inv.find(x=>['san','venda'].includes(itCat(x.id)))||sc.inv.find(x=>itCat(x.id)==='comida');
+  it.push({ic:'🎁',l:'Dar um presente',s:gift?`Dar ${itN(gift.id).toLowerCase()}`:'Preciso de algum item',dis:!gift||once('g'),why:!gift?'Não tenho nada para dar.':'Já dei um presente hoje.',on:()=>scAct(()=>{ sc.done['r'+c.id+'g']=1; sc.inv=sc.inv.filter(y=>y!==gift); romAm(c,rnd(8,14)); return `Dei ${itN(gift.id).toLowerCase()} para ${c.first}. Num mundo desses, presente vale ouro.`; },c.first)});
+  if(!c.par&&!other) it.push({ic:'💞',l:'Pedir em namoro',s:'Precisa de paixão',dis:(c.am||0)<35||once('n'),why:(c.am||0)<35?`Ainda é cedo. A paixão de ${c.first} está baixa.`:'Já pedi hoje.',on:()=>scAct(()=>{ sc.done['r'+c.id+'n']=1; if(pct(.25+(c.am||0)/110)){ const x=romStart(c); scStat('san',10); return `${c.first} disse sim! Estamos namorando.${x}`; } romAm(c,-8); scStat('san',-4); return `${c.first} disse que gosta de mim, mas não quer nada sério agora.`; },c.first)});
+  if(c.par==='namoro') it.push({ic:'💍',l:'Pedir em casamento',s:'Precisa de muita paixão',dis:(c.am||0)<65||sc.dia-(c.parD||0)<4||once('p'),why:(c.am||0)<65?'Ainda não estamos tão firmes.':sc.dia-(c.parD||0)<4?'Começamos a namorar há pouco tempo.':'Já pedi hoje.',on:()=>scAct(()=>{ sc.done['r'+c.id+'p']=1; if(pct(.3+(c.am||0)/120)){ c.par='noivo'; romAm(c,8); scStat('san',12); return `Ajoelhei. ${c.first} chorou e disse sim. Estamos noivos!`; } romAm(c,-10); return `${c.first} disse que ainda não está pront${o}.`; },'Pedido')});
+  if(c.par==='noivo') it.push({ic:'💒',l:'Casar',s:'Cerimônia com todo o grupo',ap:1,dis:sc.ap<1,why:'Sem energia hoje.',on:()=>scAct(()=>{ if(!spend(null,1)) return 'Sem energia.'; c.par='casado'; romAm(c,15); scStat('san',18); crew().forEach(x=>x.lv=Math.min(100,x.lv+6)); return `Casamos ${rm.casa}. Por um dia inteiro, o mundo lá fora não existiu.`; },'Casamento')});
+  if(c.par&&S.me.age>=18&&c.age>=18) it.push({ic:'🌙',l:'Passar a noite juntos',s:'Paixão e sanidade',dis:once('t'),why:'Hoje não.',on:()=>scAct(()=>{ sc.done['r'+c.id+'t']=1; romAm(c,rnd(6,12)); scStat('san',rnd(5,9)); primeiraVez(`${c.first} ${c.last}`); return R.pick([`Passamos a noite juntos, longe de tudo. ${ROM[sc.id]&&sc.id==='zumbi'?'Nem os gemidos lá fora atrapalharam.':'O mundo podia esperar.'}`,`Uma noite só nossa. Acordei com ${c.first} sorrindo para mim.`]); },c.first)});
+  if(c.par&&romCanBaby(c)&&!sc.grav) it.push({ic:'👶',l:'Tentar ter um filho',s:'Um bebê no meio de tudo isso?',dis:once('b')||(c.am||0)<50,why:(c.am||0)<50?'Precisamos estar mais firmes antes.':'Hoje não.',on:()=>scAct(()=>{ sc.done['r'+c.id+'b']=1; return romGrav(c)||'Não deu.'; },c.first)});
+  if(c.par&&!romCanBaby(c)&&c.gender===S.me.gender&&!sc.adot) it.push({ic:'🧸',l:'Adotar uma criança órfã',s:'Uma criança perdida no caminho',dis:(c.am||0)<50||sc.id==='marte'||sc.id==='ilha',why:sc.id==='marte'||sc.id==='ilha'?'Não tem crianças aqui.':'Precisamos estar mais firmes antes.',on:()=>scAct(()=>{ sc.adot=1; const k=mkCrew({age:rnd(4,10),last:S.me.last}); k.bebe=1; k.filho=1; k.lv=100; k.arma=null; k.race=k.gender==='F'?'Minha filha':'Meu filho'; cnt('kids'); return `Encontramos ${k.first}, de ${k.age} anos, sozinh${oaG(k.gender)}. Agora tem dois pais${c.gender==='F'?' (duas mães, no caso)':''} e um lugar no grupo.`; },'Adoção')});
+  if(c.par) it.push({ic:'💔',l:'Terminar',tone:'bad',on:()=>confirmBox('Terminar?',`${c.first} vai ficar arrasad${o}.`,'Terminar',()=>{ romEnd(c); scStat('san',-6); scLog(`Terminei com ${c.first}.`,'warn'); if(R.chance(.3)) crewLeave(c,`${c.first} juntou as coisas e foi embora.`); UI.back(); after(); })});
+  return it; }
+V.scMember=(o=>c=>{ const r=o(c); if(!r) return r; if(romOK(c)||c.par) { const i=r.items.findIndex(x=>x.l==='Deixar para trás'); const add=romItems(c); if(i>=0) r.items.splice(i,0,...add); else r.items.push(...add); }
+  if(c.filho) r.items.splice(1,0,{html:`<div class="card"><p>${c.gender==='F'?'Minha filha':'Meu filho'}. Se a aventura terminar bem, ${c.gender==='F'?'ela':'ele'} vem comigo para a vida real.</p></div>`});
+  return r; })(V.scMember);
+V.scCrew=(o=>()=>{ const r=o(); const sc=S.scen; if(!sc) return r; const it=[{sec:'Amor'}], p=romPar(), real=partner();
+  if(p) it.push({face:faceSVG(p,40),l:`${p.first} ${p.last}`,s:`${romSt(p)} · paixão ${p.am||0}%`,bars:[['💗',p.am||0,'#E5487D']],on:()=>UI.push(()=>V.scMember(p))});
+  else if(sc.id==='heroi'&&real) it.push({face:faceSVG(real,40),l:`${real.first} ${real.last}`,s:`${relLabel(real)}${sc.sab&&sc.sab[real.id]?' · sabe quem eu sou':''}`,bars:[['❤️',real.bond,'#E5487D']],on:()=>UI.push(()=>V.hPessoa(real))});
+  else it.push({html:'<div class="card"><p style="color:var(--muted)">Sem ninguém por enquanto.</p></div>'});
+  if(sc.grav){ const g=crewById(sc.grav.pid); it.push({ic:'🤰',l:'Bebê a caminho',s:`Nasce em ${Math.max(1,sc.grav.due-sc.dia)} dia(s)${g?' · com '+g.first:''}`,dis:true,why:'Falta pouco.'}); }
+  if(sc.id!=='heroi') it.push({ic:'💘',l:'Procurar romance',s:'1 de energia',dis:sc.ap<1||!!sc.done.rprocura,why:sc.done.rprocura?'Já procurei hoje.':'Sem energia hoje.',on:()=>scAct(()=>{ if(!spend('rprocura',1)) return 'Sem energia.'; return romProcurar(); },'Romance')});
+  if(real&&sc.id!=='heroi') it.push({face:faceSVG(real,40),l:`${real.first} ${real.last}`,s:`${relLabel(real)} na vida real · a vida real está pausada`,dis:true,why:`${real.first} está lá na vida real, esperando eu voltar.`});
+  r.items.splice(Math.min(r.items.length,1),0,...it,{sec:sc.id==='heroi'?'Aliados':'Grupo'}); return r; })(V.scCrew);
+// ---------- efeitos diários e eventos ----------
+function romDay(sc){ const p=romPar(); if(p){ scStat('san',p.par==='casado'?3:2); romAm(p,p.lv<35?-3:-1); if((p.am||0)<12&&!sc.rfim){ sc.rfim=1; queue('rom_fim',{cid:p.id}); } }
+  if(sc.grav&&sc.dia>=sc.grav.due) queue('rom_parto',{cid:sc.grav.pid}); }
+scNextDay=(o=>function(){ const r=o.apply(this,arguments); const sc=S.scen; if(sc&&sc.v===SC_V) romDay(sc); return r; })(scNextDay);
+crewLeave=(o=>function(c,why,dead){ const sc=S.scen; const was=sc&&sc.par===c.id; const r=o.apply(this,arguments);
+  if(sc&&was){ sc.par=null; if(sc.grav&&sc.grav.pid===c.id&&S.me.gender!=='F') sc.grav=null; if(dead){ scStat('san',-25); scLog(`Perdi ${c.first}, o amor que encontrei no meio de tudo isso.`,'bad'); } else { scStat('san',-10); scLog(`${c.first} foi embora. Levou um pedaço de mim.`,'bad'); } }
+  else if(sc&&c.filho&&dead){ scStat('san',-35); scLog(`Perdi ${c.gender==='F'?'minha filha':'meu filho'}, ${c.first}. Não existe dor maior.`,'bad'); }
+  return r; })(crewLeave);
+EVENTS.rom_fim={scen:'*',show:d=>{ const c=crewById(d.cid); return {k:'Amor',t:'A gente precisa conversar',x:`${c?c.first:'Meu par'} diz que sente que eu não estou mais presente. Que a relação esfriou.`,ch:[['Lutar pela relação','l'],['Prometer mudar','p'],['Aceitar o fim','f']]}; },
+  pick:(k,d)=>{ const sc=S.scen; if(!sc) return ''; sc.rfim=0; const c=crewById(d.cid); if(!c) return '';
+    if(k==='f'){ romEnd(c); scStat('san',-8); return `Terminamos. ${c.first} continua no grupo, mas evita meu olhar.`; }
+    if(pct(k==='l'?.35+sc.car/200:.5)){ romAm(c,rnd(20,30)); return k==='l'?'Falei tudo o que sentia. Choramos juntos. Ainda tem amor aqui.':`${c.first} aceitou me dar mais uma chance.`; }
+    romEnd(c); scStat('san',-10); return `${c.first} já tinha decidido. Acabou.`; }};
+EVENTS.rom_parto={scen:'*',show:d=>{ const c=crewById(d.cid), me=S.me.gender==='F'; return {k:'Amor',t:'Vai nascer!',x:me?'As contrações começaram. Não tem hospital, não tem médico. Tem o grupo, e tem você.':`${c?c.first:'Meu par'} entrou em trabalho de parto. Não tem hospital. Tem a gente.`,ch:[['Fazer o parto com quem estiver por perto','g'],['Usar o kit de primeiros socorros','k'],['Rezar e respirar','r']]}; },
+  pick:(k,d)=>{ const sc=S.scen; if(!sc) return ''; const c=crewById(d.cid), me=S.me.gender==='F'; if(k==='k') takeItem('@remedio');
+    const risk=k==='k'?.08:k==='g'?(hasRole('med')?.06:.15):.2; let t='';
+    if(R.chance(risk)){ if(me) scHurt(rnd(15,30)); else if(c){ c.hp=Math.max(1,c.hp-rnd(20,40)); } t='Foi um parto difícil, com muito sangue e muito medo. ';}
+    const b=romBaby(d.cid); scStat('san',20); crew().forEach(x=>x.lv=Math.min(100,x.lv+5));
+    return `${t}${b.gender==='F'?'Nasceu uma menina':'Nasceu um menino'}: ${b.first}. ${R.pick(['O grupo inteiro chorou.','Ninguém lembrou do perigo por uma noite.','Um choro forte no meio do silêncio. Esperança tem som.'])}`; }};
+// ---------- de volta à vida real ----------
+function romBring(list){ const m=S.me, out=[]; const par=list.find(c=>c.par);
+  if(par){ const old=partner(); if(old){ if(old.rel==='conjuge'&&typeof divorce==='function') divorce(old,true); else old.rel='ex'; log(`Terminei com ${old.first}. Voltei com outra pessoa no coração.`,'warn'); }
+    const p=mkPerson({rel:par.par==='casado'?'conjuge':par.par==='noivo'?'noivo':'namoro',gender:par.gender,age:par.age,first:par.first,last:par.last,bond:Math.max(65,par.am||0)}); if(par.genes) p.genes=par.genes; S.people.push(p);
+    if(p.rel==='conjuge'){ cnt('marriages'); S.flags.movedOut=1; } out.push(`${par.first} veio comigo para a vida real.`); }
+  list.filter(c=>c.filho).forEach(c=>{ const k=mkPerson({rel:'filho',gender:c.gender,age:c.age,first:c.first,last:m.last,bond:95,parentId:par?null:null}); if(c.genes) k.genes=c.genes; S.people.push(k); out.push(`${c.first}, ${c.gender==='F'?'minha filha':'meu filho'}, também.`); });
+  if(out.length) log(out.join(' '),'good'); }
+scenEnd=(o=>function(win,txt){ const sc=S.scen; const keep=sc&&win?crew().filter(c=>c.par||c.filho):[]; const r=o.apply(this,arguments); if(keep.length&&S.me.alive&&!S.scen) romBring(keep); return r; })(scenEnd);
+// ---------- linguagem dos eventos de romance ----------
+// am±n (paixão do {c}) · namorar noivar casar terminar (com o {c}) · grav (tenta engravidar com o {c}) · filho (nasce um bebê do casal)
+scTok=(o=>function(tok,d,out){ const sc=S.scen; let mm; if(!sc||sc.v!==SC_V) return o(tok,d,out); const c=d&&d.cid?crewById(d.cid):null;
+  if(mm=tok.match(/^am([+-]\d+)$/)){ if(c) romAm(c,+mm[1]); return true; }
+  if(tok==='namorar'){ if(c&&romOK(c)&&!romPar()){ out.push(`Estou namorando ${c.first}.`+romStart(c)); } return true; }
+  if(tok==='noivar'){ if(c&&c.par==='namoro'){ c.par='noivo'; out.push('Estamos noivos!'); } return true; }
+  if(tok==='casar'){ if(c&&(c.par==='noivo'||c.par==='namoro')){ c.par='casado'; scStat('san',15); out.push('Estamos casados!'); } return true; }
+  if(tok==='terminar'){ if(c&&c.par){ romEnd(c); out.push(`Terminei com ${c.first}.`); } return true; }
+  if(tok==='grav'){ if(c&&c.par){ const r=romGrav(c); if(r&&sc.grav) out.push(S.me.gender==='F'?'Estou grávida!':`${c.first} está grávida!`); } return true; }
+  if(tok==='filho'){ const p=c&&c.par?c:romPar(); if(p&&romCanBaby(p)){ const b=romBaby(p.id); out.push(`${b.gender==='F'?'Nasceu nossa filha':'Nasceu nosso filho'}, ${b.first}.`); } return true; }
+  return o(tok,d,out); })(scTok);
+
+const RW=f=>m=>!!S.scen&&f(S.scen,m);
+const romSol=()=>crew().some(c=>romOK(c)&&!c.par);
+
+// ===== Superpoderes: equipes (contam como emprego), Lei de Registro, identidade e família =====
+const HTEAMS={
+  novatos:{n:'Novatos Unidos',ic:'🧢',rep:10,sal:24000,reg:1,d:'Equipe-escola para heróis iniciantes. Paga pouco e ensina muito.'},
+  sentinelas:{n:'Sentinelas do Sul',ic:'🛡️',rep:35,sal:52000,reg:0,d:'Heróis independentes. São contra a Lei de Registro e protegem quem se recusa.'},
+  vertice:{n:'Vértice Corp',ic:'🏢',rep:30,sal:150000,reg:1,corp:1,d:'Heróis de empresa: salário alto, logotipo no uniforme e chefe cobrando resultado.'},
+  afc:{n:'Agência Federal de Contenção',ic:'🏛️',rep:25,sal:78000,reg:2,d:'O braço do governo. Exige que você entregue sua identidade e caça quem não se registra.'},
+  liga:{n:'Liga Guardiã',ic:'🌟',rep:60,sal:110000,reg:1,d:'A equipe mais famosa do país. Entrar é um sonho; sair vira manchete.'},
+};
+const HRANK=['Herói recruta|Heroína recruta','Herói de equipe|Heroína de equipe','Herói veterano|Heroína veterana','Capitão de equipe|Capitã de equipe','Líder de equipe'];
+const HREG={sim:'Registrad{o}',nao:'Procurad{o} pela Lei',prazo:'Prazo correndo'};
+const FAM_RELS=['conjuge','noivo','namoro','filho','adot','mae','pai','irmao','avo'];
+jobTitle=(o=>function(j){ if(j&&j.hero) return g(HRANK[Math.min(j.lvl,HRANK.length-1)],S.me.gender); return o(j); })(jobTitle);
+jobSalary=(o=>function(j){ if(j&&j.hero){ const t=HTEAMS[j.hero]; return Math.round((t?t.sal:30000)*(1+.35*j.lvl)*(j.mul||1)); } return o(j); })(jobSalary);
+occupation=(o=>()=>{ const sc=S.scen, j=S.me&&S.me.job; if(sc&&sc.id==='heroi'&&j&&j.hero) return `${jobTitle(j)} · ${j.co}`; return o(); })(occupation);
+const hTeam=()=>{ const j=S.me.job; return j&&j.hero?HTEAMS[j.hero]:null; };
+function hEnsure(sc){ if(sc.leiD==null) sc.leiD=rnd(3,5); sc.sab=sc.sab||{}; sc.hEx=sc.hEx||{}; if(sc.proc==null) sc.proc=0; return sc; }
+const famAll=()=>people(...FAM_RELS).filter(p=>p.rel!=='pet');
+const famAlvos=sc=>famAll().filter(p=>!(p.esc&&p.esc>=sc.dia));
+function famPick(sc){ const a=famAlvos(sc); if(!a.length) return null; return R.wpick(a.map(p=>[p,['conjuge','noivo','namoro','filho','adot'].includes(p.rel)?3:['mae','pai'].includes(p.rel)?2:1])); }
+function famLog(t,c){ scLog(t,c); const y=S.log[S.log.length-1]; if(y) y.lines.push({t,c}); }
+function famDie(p,why){ if(!p||!p.alive) return ''; p.alive=false; st('happy',-25); scStat('san',-30); if(p.rel==='conjuge') cnt('widow'); const sc=S.scen; if(sc){ sc.vinga=(sc.vinga||0)+1; scStat('pw',8); }
+  famLog(`${relLabel(p)} ${fullName(p)} morreu ${why}, aos ${p.age} anos.`,'bad'); return `${p.first} não sobreviveu.`; }
+function famHurt(p,n){ if(!p||!p.alive) return ''; p.health=clamp(p.health-n); p.bond=clamp(p.bond-6); scStat('san',-10); if(p.health<=0) return famDie(p,'depois do ataque'); return `${p.first} foi parar no hospital.`; }
+function hRevela(sc,why){ if(sc.rev) return; sc.rev=1; sc.sec=0; scLog(why,'bad'); scStat('san',-12); S.me.fame=clamp(S.me.fame+10); queue('h_revelada',{}); }
+function hFire(sc,why){ const m=S.me; if(!m.job||!m.job.hero) return ''; sc.hEx[m.job.hero]=1; const n=m.job.co; endJob(); scLog(`Fui expuls${oa()} da ${n}. ${why||''}`.trim(),'bad'); return `Fui expuls${oa()} da ${n}.`; }
+function hJoin(id){ const sc=S.scen, m=S.me, t=HTEAMS[id];
+  if(sc.rep<t.rep) return `A ${t.n} só aceita heróis com reputação de ${t.rep}% ou mais.`;
+  if(t.reg&&sc.reg==='nao') return `A ${t.n} não aceita quem se recusou a se registrar. Para eles, sou um criminoso.`;
+  if(sc.hEx[id]) return `A ${t.n} já me mandou embora uma vez. Não querem nem ouvir meu nome.`;
+  if(!pct(.4+sc.rep/180+sc.pw/400)) { scStat('san',-3); return R.pick([`A ${t.n} disse que vai "manter meu currículo em arquivo".`,'Fui reprovad'+oa()+' no teste prático. Derrubei o simulador inteiro.',`O líder da ${t.n} disse que ainda sou muito verde.`]); }
+  if(m.job) endJob();
+  m.job={hero:id,lvl:0,perf:55,yrs:0,co:t.n}; sc.hxp=0; sc.hPay=sc.dia; scStat('rep',5);
+  let x=''; if(t.reg===2&&sc.reg!=='sim'){ sc.reg='sim'; sc.proc=0; x=' Precisei entregar meu nome verdadeiro, endereço e DNA para o governo.'; }
+  if(R.chance(.7)){ const c=mkCrew(); x+=` ${c.first} virou ${c.gender==='F'?'minha parceira':'meu parceiro'} de patrulha.`; }
+  return `Fui aceit${oa()} na ${t.n}! Agora sou ${jobTitle(m.job).toLowerCase()}, com salário de ${fmt(jobSalary(m.job))} por ano.${x}`; }
+// ---------- telas ----------
+V.hTeams=()=>{ const sc=S.scen, m=S.me, it=[{html:`<div class="card"><p>Entrar numa equipe conta como emprego: tem salário toda semana, cargo e chefe. ${m.job&&!m.job.hero?`Vou ter que largar o emprego de ${jobTitle(m.job).toLowerCase()}.`:''}</p>${kv('Minha reputação',sc.rep+'%')}${kv('Lei de Registro',sc.reg?fill(HREG[sc.reg]||'—').replace(/\{o\}/g,oa()):'Ainda não existe')}</div>`}];
+  Object.entries(HTEAMS).forEach(([id,t])=>{ const cur=m.job&&m.job.hero===id; it.push({ic:t.ic,l:t.n,s:`${t.d} · ${fmt(t.sal)}/ano · reputação ${t.rep}%+${t.reg===0?' · contra o registro':t.reg===2?' · exige registro':''}`,r:cur?'✓':'',dis:cur||sc.ap<1,why:cur?'Já faço parte dessa equipe.':'Sem energia hoje.',
+    on:()=>confirmBox(t.n,'Pedir para entrar? Gasta 1 de energia.','Pedir',()=>scAct(()=>{ if(!spend(null,1)) return 'Sem energia.'; return hJoin(id); },t.n))}); });
+  return {title:'Equipes de heróis',items:it}; };
+V.hTeam=()=>{ const sc=S.scen, m=S.me, j=m.job, t=hTeam(); if(!t) return V.hTeams(); const need=(j.lvl+1)*2;
+  const it=[{html:`<div class="card"><p><b>${t.ic} ${esc(t.n)}</b></p>${kv('Cargo',jobTitle(j))}${kv('Salário',fmt(jobSalary(j))+'/ano · pago toda semana')}${bar('Desempenho',j.perf)}${kv('Missões no cargo',`${sc.hxp||0} de ${need}`)}</div>`},{sec:'Trabalho'}];
+  it.push({ic:'🚨',l:'Missão da equipe',s:'1 de energia · desempenho e bônus',dis:!!sc.done.hmis||sc.ap<1,why:sc.done.hmis?'Já fiz a missão de hoje.':'Sem energia hoje.',on:()=>scAct(()=>{ if(!spend('hmis',1)) return 'Sem energia.'; const f=scFight(rnd(1,3)+Math.floor(j.lvl/2),'A missão');
+    if(f.ok){ j.perf=clamp(j.perf+rnd(6,12)); sc.hxp=(sc.hxp||0)+1; scStat('rep',4); const b=Math.round(jobSalary(j)/12); m.money+=b; return `${R.pick(['Desativamos uma bomba num shopping.','Contivemos um robô gigante na marginal.','Resgatamos um navio encalhado.','Prendemos uma quadrilha inteira de supervilões menores.','Evacuamos um bairro antes de um prédio desabar.'])} Bônus de ${fmt(b)}.`; }
+    j.perf=clamp(j.perf-6); return `A missão deu errado. ${f.t}`; },t.n)});
+  it.push({ic:'🏋️',l:'Treinar com a equipe',s:'1 de energia · poder e desempenho',dis:!!sc.done.htre||sc.ap<1,why:sc.done.htre?'Já treinei hoje.':'Sem energia hoje.',on:()=>scAct(()=>{ if(!spend('htre',1)) return 'Sem energia.'; scStat('pw',rnd(3,6)); j.perf=clamp(j.perf+3); return R.pick(['Treino na sala de simulação. Quebrei dois robôs de treino.','O capitão me fez repetir o mesmo salto 40 vezes.','Treinei combinações de poder com a equipe.']); },t.n)});
+  it.push({ic:'☕',l:'Reunião da equipe',s:'Sanidade e desempenho',dis:!!sc.done.hreu,why:'Já teve reunião hoje.',on:()=>scAct(()=>{ sc.done.hreu=1; j.perf=clamp(j.perf+2); scStat('san',4); return R.pick(['Discutimos estratégia. E quem comeu o iogurte da geladeira.','Reunião de duas horas que podia ser um e-mail.','O líder elogiou meu trabalho na frente de todo mundo.']); },t.n)});
+  it.push({ic:'📈',l:'Pedir promoção',s:j.lvl>=HRANK.length-1?'Já estou no topo':`Próximo cargo: ${g(HRANK[j.lvl+1],m.gender)}`,dis:j.lvl>=HRANK.length-1||!!sc.done.hpro,why:j.lvl>=HRANK.length-1?'Não tem cargo acima.':'Já pedi hoje.',on:()=>scAct(()=>{ sc.done.hpro=1; if(j.perf>=70&&(sc.hxp||0)>=need&&pct(.5+j.perf/250)){ j.lvl++; sc.hxp=0; j.perf=clamp(j.perf-5); scStat('rep',6); return `Promovid${oa()}! Agora sou ${jobTitle(j).toLowerCase()}, ganhando ${fmt(jobSalary(j))} por ano.`; } j.perf=clamp(j.perf-4); return (sc.hxp||0)<need?`Disseram que preciso de mais missões no cargo (${sc.hxp||0} de ${need}).`:'Disseram que meu desempenho ainda não é suficiente.'; },t.n)});
+  it.push({ic:'💵',l:'Pedir aumento',dis:!!sc.done.haum,why:'Já pedi hoje.',on:()=>scAct(()=>{ sc.done.haum=1; if(j.perf>=60&&pct(.35+j.perf/300)){ j.mul=(j.mul||1)*1.12; return `Aumento de 12%. Agora ganho ${fmt(jobSalary(j))} por ano.`; } j.perf=clamp(j.perf-5); return 'O financeiro riu. Literalmente.'; },t.n)});
+  it.push({ic:'🚪',l:'Sair da equipe',tone:'bad',on:()=>confirmBox('Sair da equipe?',`Vou deixar de ser ${jobTitle(j).toLowerCase()} da ${t.n}.`,'Sair',()=>{ const n=t.n; endJob(); scLog(`Saí da ${n}.`,'warn'); UI.back(); after(); })});
+  return {title:t.n,items:it}; };
+V.hPessoa=p=>{ const sc=S.scen; if(!p||!p.alive) return null; const base=V.person(p)||{items:[]}; const it=[]; const knows=sc.sab&&sc.sab[p.id];
+  it.push(base.items[0]||{html:''},{sec:'Vida de herói'});
+  it.push({html:`<div class="card">${kv('Sabe quem eu sou?',knows||sc.rev?'Sabe':'Não sabe')}${p.esc&&p.esc>=sc.dia?kv('Proteção',`Escondid${oaG(p.gender)} por mais ${p.esc-sc.dia+1} ano(s)`):''}</div>`});
+  if(!knows&&!sc.rev) it.push({ic:'🎭',l:'Contar meu segredo',s:'Pode aproximar, ou vazar',on:()=>scAct(()=>{ sc.sab[p.id]=1; if(R.chance(.35+p.bond/200)){ p.bond=clamp(p.bond+12); scStat('san',6); return R.pick([`${p.first} ficou em silêncio um tempão. Depois me abraçou e disse que sempre desconfiou.`,`${p.first} riu de nervoso, depois chorou, depois pediu para ver o poder. Agora somos cúmplices.`]); }
+    p.bond=clamp(p.bond-12); if(R.chance(.4)){ scStat('sec',-20); return `${p.first} surtou e contou para alguém. A notícia está correndo.`; } return `${p.first} disse que precisa de um tempo para digerir isso.`; },p.first)});
+  if(sc.rev||(sc.sab&&sc.sab[p.id])) it.push({ic:'🏠',l:'Levar para um esconderijo',s:'$5.000 · protege por 2 anos',dis:p.esc>=sc.dia||!canPay(5000),why:p.esc>=sc.dia?`${p.first} já está escondid${oaG(p.gender)}.`:'Não tenho $5.000.',on:()=>scAct(()=>{ S.me.money-=5000; p.esc=sc.dia+1; p.bond=clamp(p.bond-4); return `Levei ${p.first} para um apartamento seguro do outro lado da cidade. ${R.pick(['Reclamou do sofá, mas está viv'+oaG(p.gender)+'.','Ninguém sabe o endereço. Nem eu anotei.'])}`; },p.first)});
+  it.push({sec:'Relação'},...base.items.slice(1)); return {title:p.first,items:it}; };
+// Aliados: equipe, vida pessoal e amor da vida real
+V.scCrew=(o=>()=>{ const r=o(); const sc=S.scen; if(!sc||sc.id!=='heroi') return r; hEnsure(sc); const m=S.me, t=hTeam(), it=[];
+  it.push({sec:'Equipe'}); if(t) it.push({ic:t.ic,l:t.n,s:`${jobTitle(m.job)} · ${fmt(jobSalary(m.job))}/ano`,on:()=>UI.push(V.hTeam)}); else it.push({ic:'🛡️',l:'Entrar para uma equipe',s:'Conta como emprego',on:()=>UI.push(V.hTeams)});
+  it.push({sec:'Vida pessoal'}); const fam=famAll().filter(p=>!['namoro','noivo','conjuge'].includes(p.rel)||p!==partner());
+  fam.forEach(p=>it.push({face:faceSVG(p,40),l:`${p.first} ${p.last}`,s:`${relLabel(p)}${sc.sab[p.id]||sc.rev?' · sabe quem eu sou':''}${p.esc>=sc.dia?' · escondid'+oaG(p.gender):''}`,bars:[['❤️',p.bond,'#E5487D']],on:()=>UI.push(()=>V.hPessoa(p))}));
+  if(!fam.length) it.push({html:'<div class="card"><p style="color:var(--muted)">Sem família por perto.</p></div>'});
+  it.push({ic:'👥',l:'Todas as relações',s:'Amigos, colegas, ex',on:()=>UI.push(V.relReal)});
+  const love=[]; if(m.age>=16){ love.push({ic:'💘',l:'Procurar alguém',s:'Na vida civil, sem máscara',on:()=>dateFlow(false)}); if(m.age>=18) love.push({ic:'📱',l:'Aplicativo de namoro',s:'Com um nome que não é o de herói',on:()=>dateFlow(true)}); }
+  const i=r.items.findIndex(x=>x.sec==='Amor'); r.items.splice(i>=0?i:1,0,...it); const j=r.items.findIndex(x=>x.sec==='Aliados'); r.items.splice(j>=0?j:r.items.length,0,...love); return r; })(V.scCrew);
+V.relations=(o=>{ V.relReal=()=>{ const sv=S.scen; S.scen=null; try{ return o(); } finally{ S.scen=sv; } }; return o; })(V.relations);
+// Ações: carreira de herói, Lei de Registro e identidade
+V.scActs=(o=>()=>{ const r=o(); const sc=S.scen; if(!sc||sc.id!=='heroi') return r; hEnsure(sc); const m=S.me, t=hTeam();
+  const it=[{sec:'Carreira e identidade'},t?{ic:t.ic,l:t.n,s:`${jobTitle(m.job)} · desempenho ${m.job.perf}%`,on:()=>UI.push(V.hTeam)}:{ic:'🛡️',l:'Entrar para uma equipe',s:'Conta como emprego',on:()=>UI.push(V.hTeams)}];
+  it.push({html:`<div class="card">${kv('Identidade',sc.rev?'Revelada':`Secreta (${sc.sec}%)`)}${kv('Lei de Registro',sc.reg?fill(HREG[sc.reg]).replace(/\{o\}/g,oa()):'Ainda não existe')}${sc.reg==='nao'?bar('Caçada da polícia',sc.proc):''}</div>`});
+  const i=r.items.findIndex(x=>x.sec==='Vida real'); r.items.splice(i>=0?i:r.items.length,0,...it); return r; })(V.scActs);
+Object.assign(SCEN.heroi.acts,{
+  sumir:{ic:'🕳️',l:'Sumir do radar',s:'Diminui a caçada da polícia',min:sc=>sc.reg==='nao',why:'Ninguém está me caçando.',fn:sc=>{ sc.proc=Math.max(0,sc.proc-rnd(12,18)); scStat('crime',4); return R.pick(['Passei o dia num porão, sem usar o poder nem o celular.','Troquei de esconderijo três vezes. A polícia perdeu meu rastro.','Fiquei em casa vendo novela. Herói procurado também descansa.']); }},
+  registrar:{ic:'📝',l:'Me registrar na Lei',s:'Acaba a caçada · o governo saberá quem sou',min:sc=>sc.reg==='nao'||sc.reg==='prazo',why:'Não preciso.',fn:sc=>{ const multa=sc.reg==='nao'?10000:0; if(multa&&!canPay(multa)) return 'Preciso de $10.000 para pagar a multa do atraso.'; S.me.money-=multa; sc.reg='sim'; sc.proc=0; if(hTeam()&&HTEAMS[S.me.job.hero].reg===0) return 'Me registrei. '+hFire(sc,'Os Sentinelas me chamaram de traidor.'); return `Entreguei meu nome, endereço e DNA.${multa?' Paguei a multa de '+fmt(multa)+'.':''} A perseguição acabou.`; }},
+  fingir:{ic:'⚰️',l:'Fingir a própria morte',s:'Identidade volta a ser secreta · custa caro',ap:3,min:sc=>!!sc.rev,why:'Minha identidade ainda é secreta.',fn:sc=>{ sc.rev=0; sc.sec=70; sc.rep=Math.min(sc.rep,25); const old=sc.codinome; sc.codinome=R.pick(Object.values(CODI).flat().filter(x=>x!==old)); famAll().forEach(p=>{ if(!sc.sab[p.id]) p.bond=clamp(p.bond-15); }); scStat('san',-12); return `Encenei minha morte numa explosão no porto. ${old} morreu. Agora a cidade conhece ${sc.codinome}, que ninguém sabe quem é. A família chorou num enterro de caixão vazio.`; }},
+});
+SCEN.heroi.acts.disfarce.min=sc=>!sc.rev; SCEN.heroi.acts.disfarce.why='Não adianta mais: todo mundo já sabe quem eu sou.';
+// ---------- dia a dia ----------
+heroiUpkeep=function(sc){ const m=S.me; hEnsure(sc);
+  if(!sc.rev){ scStat('sec',-4+sc.traje+(sc.reg==='sim'?1:0)); if(sc.sec<=0) hRevela(sc,'Minha identidade secreta vazou. Meu rosto está em todos os jornais.'); } else sc.sec=0;
+  scStat('crime',5); scStat('rep',-1);
+  if(sc.crime>=85&&R.chance(.5)){ scStat('rep',-6); scLog('A cidade está um caos. Picharam "CADÊ VOCÊ?" no prédio da prefeitura.','warn'); }
+  if(R.chance(.12)){ scHurt(rnd(5,12)); scLog(`${sc.inimigo} atacou a cidade durante a noite. Lutei até o amanhecer.`,'warn'); }
+  // equipe = emprego
+  const j=m.job; if(j&&j.hero){ j.perf=clamp(j.perf-4); if(j.perf<=15&&!sc.hDem){ sc.hDem=1; queue('h_demissao',{}); } }
+  // Lei de Registro
+  if(!sc.reg&&sc.dia>=sc.leiD){ sc.reg='votando'; queue('h_lei',{}); }
+  if(sc.reg==='prazo'&&sc.dia>=sc.regAte) queue('h_prazo',{});
+  if(sc.reg==='nao'){ sc.proc=Math.min(100,sc.proc+2+Math.round(sc.rep/40)); if(sc.proc>=55&&R.chance((sc.proc-40)/120)&&!sc.cerco){ sc.cerco=1; queue('h_cerco',{}); } }
+  if(sc.reg==='sim'&&!sc.rev&&R.chance(sc.fake?.03:.015)){ if(sc.fake){ sc.fake=0; sc.reg='nao'; sc.proc=50; scLog('O governo descobriu que meu registro tinha nome falso. Agora sou procurad'+oa()+'.','bad'); } else hRevela(sc,'Hackers invadiram o banco de dados da Lei de Registro. Minha ficha vazou com nome, foto e endereço.'); }
+  if(sc.rgrav&&sc.dia>=sc.rgrav.due) queue('h_nasce',{pid:sc.rgrav.pid});
+  // família na mira
+  if(sc.rev&&!sc.famEv){ const p=famPick(sc); if(p&&R.chance(.18+(sc.pista>50?.06:0))){ sc.famEv=1; queue('h_familia',{pid:p.id,tp:R.pick(p.age<14?['escola','sequestro','casa']:['sequestro','casa','trabalho','ameaca'])}); } }
+  sc.loc=SM().place(sc); };
+scenEnd=(o=>function(win,txt){ const sc=S.scen, m=S.me; const r=o.apply(this,arguments); if(sc&&sc.id==='heroi'&&m.job&&m.job.hero&&!S.scen){ const n=m.job.co; endJob(); log(`Deixei a ${n} quando pendurei a capa.`,'warn'); } return r; })(scenEnd);
+// ---------- eventos especiais ----------
+const relDe=p=>{ const l=relLabel(p).toLowerCase(); const f=['mae','avo','irmao','filho','adot','namoro','noivo','conjuge'].includes(p.rel)&&p.gender==='F'; return (f||p.rel==='mae'?'minha ':'meu ')+l; };
+EVENTS.h_lei={scen:'heroi',show:()=>({k:'Superpoderes',t:'Lei de Registro aprovada',x:'O Congresso aprovou a Lei de Registro de Super-Humanos. Todo herói precisa entregar ao governo nome verdadeiro, endereço e DNA. Quem atuar sem registro comete crime e pode ser preso.',ch:[['Registrar minha identidade','s'],['Me recusar (vira crime)','n'],['Registrar com nome falso','f'],['Pensar até o fim do prazo (1 ano)','p']]}),
+  pick:k=>{ const sc=S.scen; if(!sc) return ''; hEnsure(sc); const t=hTeam();
+    if(k==='p'){ sc.reg='prazo'; sc.regAte=sc.dia+1; return 'Tenho até o ano que vem para decidir. A cidade está dividida.'; }
+    if(k==='f'){ if(pct(.35+S.me.smarts/250)){ sc.reg='sim'; sc.fake=1; return 'Registrei um nome inventado, com um endereço de uma lavanderia. Passou. Por enquanto.'; } k='n'; sc.proc=30; }
+    if(k==='s'){ sc.reg='sim'; scStat('rep',4); let x='Fui à delegacia de máscara e saí sem ela. Agora o governo sabe quem eu sou.'; if(t&&HTEAMS[S.me.job.hero].reg===0) x+=' '+hFire(sc,'Os Sentinelas me chamaram de traidor.'); return x; }
+    sc.reg='nao'; sc.proc=Math.max(sc.proc,25); scStat('rep',R.chance(.5)?6:-6); let x='Recusei. Para metade da cidade virei símbolo de liberdade; para a polícia, virei criminoso.'; if(t&&HTEAMS[S.me.job.hero].reg) x+=' '+hFire(sc,'A equipe segue a lei.'); if(t&&S.me.job==null&&HTEAMS.afc===t) sc.proc+=25; return x; }};
+EVENTS.h_prazo={scen:'heroi',show:()=>({k:'Superpoderes',t:'O prazo acabou',x:'O prazo terminou. A partir de agora, quem não tiver registro passa a ser procurado.',ch:[['Registrar agora','s'],['Continuar sem registro','n']]}),
+  pick:k=>{ const sc=S.scen; if(!sc) return ''; const t=hTeam(); if(k==='s'){ sc.reg='sim'; let x='Me registrei no último minuto. Fila de três horas, de máscara.'; if(t&&HTEAMS[S.me.job.hero].reg===0) x+=' '+hFire(sc,'Os Sentinelas me chamaram de traidor.'); return x; }
+    sc.reg='nao'; sc.proc=Math.max(sc.proc,25); let x='Não fui. A partir de hoje, sou procurad'+oa()+'.'; if(t&&HTEAMS[S.me.job.hero].reg) x+=' '+hFire(sc,'A equipe segue a lei.'); return x; }};
+EVENTS.h_cerco={scen:'heroi',show:()=>({k:'Superpoderes',t:'Cercad'+oa()+'!',x:'A Força-Tarefa Anti-Vigilantes cercou o prédio. Helicópteros, atiradores e um megafone: "Você está pres'+oa()+' por atuar sem registro".',ch:[['Lutar para sair','l'],['Fugir pelos telhados','f'],['Me render','r']]}),
+  pick:k=>{ const sc=S.scen, m=S.me; if(!sc) return ''; sc.cerco=0;
+    if(k==='l'&&pct(scPow()/100)){ sc.proc=Math.min(100,sc.proc+10); scStat('rep',-8); m.karma=clamp(m.karma-4); scHurt(rnd(6,14)); return 'Derrubei uma viatura e saí pelo buraco. Agora sou procurad'+oa()+' e perigos'+oa()+'.'; }
+    if(k==='f'&&pct(.35+sc.pw/200)){ sc.proc=Math.max(0,sc.proc-10); return 'Pulei de telhado em telhado até perder os helicópteros.'; }
+    if(k!=='r'&&R.chance(.3)){ scHurt(rnd(15,25)); sc.proc=Math.max(0,sc.proc-5); return 'Escapei por um triz, ferid'+oa()+', no meio da fumaça.'; }
+    const txt=k==='r'?'Levantei as mãos. Me colocaram algemas especiais que anulam o poder.':'Não deu. Uma rede de energia me derrubou. Acordei algemad'+oa()+'.';
+    return txt+' '+hPrisao(sc); }};
+EVENTS.h_demissao={scen:'heroi',show:()=>({k:'Superpoderes',t:'Chamad'+oa()+' na sala do chefe',x:`A liderança da ${S.me.job&&S.me.job.co||'equipe'} diz que meu desempenho está péssimo e que estou faltando às missões.`,ch:[['Prometer melhorar','p'],['Pedir demissão antes','d'],['Reclamar do chefe','r']]}),
+  pick:k=>{ const sc=S.scen, j=S.me.job; if(!sc||!j||!j.hero) return ''; sc.hDem=0;
+    if(k==='p'&&R.chance(.6)){ j.perf=35; return 'Ganhei uma última chance. Melhor não desperdiçar.'; }
+    if(k==='d'){ const n=j.co; endJob(); return `Pedi demissão da ${n}. Pelo menos saí com dignidade.`; }
+    return hFire(sc,k==='r'?'Reclamar do chefe na frente dele não ajudou.':''); }};
+EVENTS.h_revelada={scen:'heroi',show:()=>({k:'Superpoderes',t:'Todo mundo sabe quem eu sou',x:`Meu nome verdadeiro está na TV, ao lado de "${S.scen?S.scen.codinome:'meu codinome'}". Vizinhos na porta, repórteres no muro. E ${S.scen?S.scen.inimigo:'meu arqui-inimigo'} também está assistindo.`,ch:[['Assumir em público','a'],['Negar tudo na TV','n'],['Esconder a família','e']]}),
+  pick:k=>{ const sc=S.scen, m=S.me; if(!sc) return '';
+    if(k==='a'){ scStat('rep',10); m.fame=clamp(m.fame+10); scStat('san',4); return 'Fiz um pronunciamento sem máscara. Metade da cidade aplaudiu. A outra metade quer meu endereço.'; }
+    if(k==='n'){ if(pct(sc.car/120)){ sc.rev=0; sc.sec=25; return 'Apareci na TV ao lado de um "sósia" que contratei. Colou. Por enquanto.'; } scStat('rep',-6); return 'Neguei com a voz tremendo. Ninguém acreditou.'; }
+    const fam=famAll(); const custo=Math.max(5000,fam.length*5000); if(!canPay(custo)) return `Não tenho ${fmt(custo)} para esconder todo mundo. Escondi só quem deu.`; m.money-=custo; fam.forEach(p=>{ p.esc=sc.dia+1; p.bond=clamp(p.bond-5); }); return `Gastei ${fmt(custo)} em esconderijos. A família está segura, e furiosa por ter largado tudo.`; }};
+EVENTS.h_familia={scen:'heroi',show:d=>{ const sc=S.scen, p=P(d.pid), v=sc?sc.inimigo:'O vilão'; const quem=p?`${relDe(p)}, ${p.first}`:'alguém da família';
+    const x={sequestro:`${v} sequestrou ${quem}. Mandou um vídeo: troca pela minha rendição, no porto, à meia-noite.`,casa:`Capangas de ${v} invadiram a casa de ${quem}. Estão lá dentro agora.`,trabalho:`Uma bomba foi plantada no trabalho de ${quem}. O relógio marca dez minutos.`,ameaca:`${v} mandou flores para ${quem}, com um bilhete: "Bonita família, ${S.me.first}".`,escola:`${v} invadiu a escola de ${quem}. As crianças estão trancadas no ginásio.`}[d.tp]||`${v} atacou ${quem}.`;
+    const ch=d.tp==='ameaca'?[['Esconder '+(p?p.first:'a família'),'e'],['Ir atrás do vilão primeiro','v'],['Ignorar a ameaça','i']]:[['Ir sozinh'+oa()+' agora','s'],[hTeam()||crew().length?'Chamar a equipe':'Chamar a polícia','t'],['Me entregar no lugar','r']];
+    if(d.tp==='sequestro') ch.push(['Pagar um resgate','p']);
+    return {k:'Superpoderes',t:'Atacaram minha família',x,ch}; },
+  pick:(k,d)=>{ const sc=S.scen, m=S.me; if(!sc) return ''; sc.famEv=0; const p=P(d.pid); if(!p||!p.alive) return '';
+    if(d.tp==='ameaca'){ if(k==='e'){ if(canPay(5000)){ m.money-=5000; p.esc=sc.dia+1; return `Levei ${p.first} para longe. As flores foram para o lixo.`; } return 'Sem dinheiro para um esconderijo. Fiquei de vigia na porta a noite toda.'; }
+      if(k==='v'){ scStat('pista',15); if(pct(scPow()/110)){ scStat('rep',6); return 'Fui atrás dos capangas que entregaram as flores. Agora sei onde fica um dos esconderijos.'; } scHurt(rnd(10,18)); return 'Era armadilha. Apanhei, mas saí com uma pista.'; }
+      if(R.chance(.5)){ sc.famEv=0; return famHurt(p,rnd(25,45))+' Não era só uma ameaça.'; } return 'Nada aconteceu. Ainda.'; }
+    if(k==='p'){ const v=rnd(40,120)*1000; if(canPay(v)&&R.chance(.7)){ m.money-=v; p.bond=clamp(p.bond+5); return `Paguei ${fmt(v)}. ${p.first} foi solt${oaG(p.gender)} num ponto de ônibus, assustad${oaG(p.gender)}, mas inteir${oaG(p.gender)}.`; } k='s'; }
+    if(k==='r'){ scHurt(rnd(25,40)); scStat('san',-10); scStat('pista',25); p.bond=clamp(p.bond+15); return `Me entreguei. Soltaram ${p.first}. Passei a noite apanhando acorrentad${oa()}, mas vi o covil inteiro. E fugi de madrugada.`; }
+    const bonus=k==='t'?(hTeam()?.18:crew().length?.12:sc.reg==='nao'?-.1:.06):0;
+    if(pct(scPow()/100+bonus-.05)){ p.bond=clamp(p.bond+15); scStat('rep',8); scStat('pista',10); return k==='t'&&sc.reg==='nao'&&!hTeam()&&!crew().length?`A polícia veio, salvou ${p.first}, e tentou me prender também. Fugi.`:`Cheguei a tempo. ${p.first} está a salvo, tremendo nos meus braços.`; }
+    if(R.chance(.4)) return famDie(p,`num ataque de ${sc.inimigo}`)+' Cheguei tarde demais.';
+    return famHurt(p,rnd(30,55))+' Cheguei tarde. Por pouco não perco.'; }};
+// ---------- linguagem dos eventos ----------
+// hteam:id (convite para entrar) · hperf±n · hpromo · hfire · proc±n · reg:sim|nao · rev (identidade revelada) · sab (o {p} passa a saber)
+// famhurt famdie esc (no {p}) · hcrew (alguém da equipe vira parceiro)
+scTok=(o=>function(tok,d,out){ const sc=S.scen; let mm; if(!sc||sc.id!=='heroi') return o(tok,d,out); hEnsure(sc); const m=S.me, j=m.job&&m.job.hero?m.job:null, p=d&&typeof d.pid==='number'?P(d.pid):null;
+  if(mm=tok.match(/^hteam:(\w+)$/)){ const t=HTEAMS[mm[1]]; if(t&&!(j&&j.hero===mm[1])){ if(t.reg&&sc.reg==='nao') out.push(`A ${t.n} descobriu que não tenho registro e retirou o convite.`); else { if(m.job) endJob(); m.job={hero:mm[1],lvl:0,perf:60,yrs:0,co:t.n}; sc.hxp=0; sc.hPay=sc.dia; if(t.reg===2) { sc.reg='sim'; sc.proc=0; } out.push(`Agora sou ${jobTitle(m.job).toLowerCase()} da ${t.n}, com salário de ${fmt(jobSalary(m.job))} por ano.`); } } return true; }
+  if(mm=tok.match(/^hperf([+-]\d+)$/)){ if(j) j.perf=clamp(j.perf+ +mm[1]); return true; }
+  if(tok==='hpromo'){ if(j&&j.lvl<HRANK.length-1){ j.lvl++; sc.hxp=0; out.push(`Promovid${oa()} a ${jobTitle(j).toLowerCase()}!`); } return true; }
+  if(tok==='hfire'){ if(j) out.push(hFire(sc,'')); return true; }
+  if(mm=tok.match(/^proc([+-]\d+)$/)){ if(sc.reg==='nao') sc.proc=Math.max(0,Math.min(100,sc.proc+ +mm[1])); return true; }
+  if(mm=tok.match(/^reg:(sim|nao)$/)){ sc.reg=mm[1]; if(mm[1]==='sim'){ sc.proc=0; if(j&&HTEAMS[j.hero].reg===0) out.push(hFire(sc,'Os Sentinelas me chamaram de traidor.')); } else { sc.proc=Math.max(sc.proc,25); if(j&&HTEAMS[j.hero].reg) out.push(hFire(sc,'A equipe segue a lei.')); } return true; }
+  if(tok==='rev'){ hRevela(sc,'Minha identidade foi revelada.'); return true; }
+  if(tok==='sab'){ if(p) sc.sab[p.id]=1; return true; }
+  if(tok==='famhurt'){ if(p) out.push(famHurt(p,rnd(25,45))); return true; }
+  if(tok==='famdie'){ if(p) out.push(famDie(p,`por causa de ${sc.inimigo}`)); return true; }
+  if(tok==='esc'){ if(p) p.esc=sc.dia+1; return true; }
+  if(tok==='rnoivo'){ if(p&&p.rel==='namoro'){ p.rel='noivo'; p.bond=clamp(p.bond+10); out.push(`Estou noiv${oa()} de ${p.first}!`); } return true; }
+  if(tok==='rcasar'){ if(p&&['namoro','noivo'].includes(p.rel)){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } return true; }
+  if(tok==='rgrav'){ if(p&&!sc.rgrav&&p.gender!==m.gender&&(m.gender==='F'?m:p).age<=46){ sc.rgrav={pid:p.id,due:sc.dia+1}; out.push(m.gender==='F'?'Estou grávida!':`${p.first} está grávida!`); } return true; }
+  if(tok==='hcrew'){ const c=mkCrew(); out.push(`${c.first} agora patrulha comigo.`); return true; }
+  return o(tok,d,out); })(scTok);
+scChance=(o=>function(key){ const sc=S.scen; if(sc&&sc.id==='heroi'){ const j=S.me.job; if(key==='perf') return j&&j.hero?j.perf:30; if(key==='proc') return sc.proc||0; } return o(key); })(scChance);
+scVar=(o=>function(k){ const sc=S.scen; if(sc&&sc.id==='heroi'){ const j=S.me.job; if(k==='equipe') return j&&j.hero?j.co:'a equipe'; if(k==='cargo') return j&&j.hero?jobTitle(j).toLowerCase():'herói'; } return o(k); })(scVar);
+const HW=f=>m=>!!S.scen&&S.scen.id==='heroi'&&f(hEnsure(S.scen),m);
+EVENTS.h_nasce={scen:'heroi',show:d=>{ const p=P(d.pid); return {k:'Família',t:'Vai nascer!',x:S.me.gender==='F'?'A bolsa estourou no meio de uma patrulha. Tirei a máscara no táxi a caminho da maternidade.':`${p?p.first:'Meu amor'} ligou: a bolsa estourou. Eu estava pendurad${oa()} num helicóptero.`,ch:[['Largar tudo e correr para a maternidade','c'],['Terminar o resgate primeiro','r']]}; },
+  pick:(k,d)=>{ const sc=S.scen, m=S.me; if(!sc) return ''; sc.rgrav=null; const par=P(d.pid); const gd=R.chance(.5)?'F':'M';
+    const kid=mkPerson({rel:'filho',gender:gd,age:0,last:m.last,bond:R.int(85,100),parentId:par?par.id:null,from:par?[m,par]:undefined}); uniqFirst(kid); S.people.push(kid); cnt('kids'); st('happy',15);
+    if(k==='r'){ scStat('rep',6); if(par) par.bond=clamp(par.bond-15); }
+    if(par) par.bond=clamp(par.bond+(k==='c'?10:0)); scStat('san',15);
+    famLog(`${gd==='F'?'Minha filha':'Meu filho'} ${kid.first} nasceu!`,'good');
+    return `${gd==='F'?'Nasceu uma menina':'Nasceu um menino'}: ${kid.first}. ${k==='c'?'Cheguei a tempo de segurar a mão no parto.':'Cheguei dez minutos depois. Ainda ouço essa história até hoje.'}`; }};
+ageUp=(o=>function(){ const m=S&&S.me; if(m&&m.job&&m.job.hero&&!(S.scen&&S.scen.id==='heroi')) endJob(); return o.apply(this,arguments); })(ageUp);
+// ---------- o modo herói passa por ano e não tem fim: só acaba quando você pendura a capa ----------
+Object.assign(SCEN.heroi,{day:'Ano',maxDays:Infinity,yl:y=>y.yr?`${y.yr} · ${y.age} anos`:`Ano ${y.d}`,
+  d:'Um raio, um laboratório e um poder novo. A vida segue ano a ano, com família, amor e emprego, agora com uma capa no armário. Entre para uma equipe, proteja sua identidade e enfrente vilões. Não tem fim: só acaba quando você se aposentar.',
+  tabs:['Bairro','Equipamento','Próximo ano','Aliados','Ações']});
+SCEN.heroi.acts.aposentar.fn=sc=>{ scenEnd(true,'Pendurei a capa. Guardei a máscara numa caixa no fundo do armário e voltei a ser só eu.'); return ''; };
+SCEN.heroi.acts.aposentar.s='Volta para a vida normal';
+yearWork=(o=>function(){ const m=S.me, j=m.job; if(j&&j.hero){ j.yrs++; m.job=null; try{ return o.apply(this,arguments); } finally{ m.job=j; } } return o.apply(this,arguments); })(yearWork);
+function heroYear(){ const sc=S.scen, m=S.me, d=SM(); hEnsure(sc);
+  sc.dia++; sc.ap=3; sc.done={}; sc.log.push({d:sc.dia,pl:'',lines:[],age:m.age+1});
+  // a vida real anda um ano: idade, família, saúde, dinheiro e salário da equipe
+  const ye=yearEvents, pend=S.pending; yearEvents=function(){}; S.pending=[]; try{ if(AGE0) AGE0(); } finally{ yearEvents=ye; S.pending=pend.concat(S.pending); }
+  if(!m.alive||!S.scen) return;
+  Object.assign(sc.log[sc.log.length-1],{age:m.age,yr:S.year});
+  scStat('san',-2); scStat('hl',rnd(12,22));
+  crew().forEach(c=>{ c.age++; if(c.bebe&&c.age>=16){ c.bebe=0; c.race=c.race&&/filh/i.test(c.race)?c.race:c.race; c.role=R.pick(Object.keys(d.roles)); } });
+  d.upkeep(sc); if(!S.scen) return;
+  sc.log[sc.log.length-1].pl=sc.loc.n;
+  romDay(sc);
+  scEvents(1+(R.chance(.6)?1:0)); }
+scNextDay=(o=>function(){ const sc=S.scen; if(sc&&sc.id==='heroi'&&sc.v===SC_V) return heroYear(); return o.apply(this,arguments); })(scNextDay);
+// cair em combate não acaba a vida de herói: vai para o hospital (e a saúde de verdade sente)
+scCheck=(o=>function(){ const sc=S.scen, m=S.me; if(!sc||sc.id!=='heroi'||sc.winNow) return o.apply(this,arguments);
+  if(sc.hl<=0){ sc.hl=35; st('health',-rnd(10,22)); scStat('san',-8); scLog('Apaguei no meio da luta. Acordei na UTI, com tubos no braço e a máscara no bolso de alguém da equipe.','bad'); if(m.health<=0){ S.scen=null; die(`em combate como ${sc.codinome}`); UI.close(); return; } }
+  if(sc.san<=0){ sc.san=30; st('happy',-15); scLog('Desabei. Passei semanas sem conseguir vestir o uniforme. Terapia, remédio e muito sono.','bad'); } })(scCheck);
+EVENTS.heroi_final={scen:'heroi',show:()=>({k:'Superpoderes',t:'O último confronto',x:`${S.scen?S.scen.inimigo:'O vilão'} está de joelhos, sem poderes, cercado pela polícia. A cidade inteira assiste ao vivo.`,ch:[['Entregar à justiça','j'],['Oferecer uma segunda chance','c'],['Acabar com isso de vez','m'],['Entregar e pendurar a capa','a']]}),
+  pick:k=>{ const sc=S.scen, m=S.me; if(!sc) return ''; const old=sc.inimigo; m.fame=clamp(m.fame+8); scStat('rep',15);
+    if(k==='a'){ scenEnd(true,`${old} foi para a cadeia de segurança máxima. No dia seguinte, pendurei a capa. A cidade aprendeu a se virar.`); return ''; }
+    if(k==='m'){ m.karma=clamp(m.karma-25); sc.evil=1; scStat('rep',-25); }
+    if(k==='c') m.karma=clamp(m.karma+10);
+    sc.venc=0; sc.pista=0; sc.inimigo=R.pick(VILOES.filter(v=>v!==old));
+    const t=k==='m'?'A cidade ficou em silêncio. Muita gente deixou de me chamar de herói.':k==='c'?(R.chance(.5)?`Anos depois, ${old} abriu uma ONG para jovens. Fui à inauguração, de máscara.`:`Foi um erro. ${old} fugiu na mesma noite.`):'Algemas, flashes e aplausos.';
+    return `${t} Mas a paz durou pouco: um vilão novo apareceu nos jornais. ${sc.inimigo}.`; }};
+// prisão para super-humanos: os anos passam lá dentro, e a vida de herói continua quando sair
+function hPrisao(sc){ const m=S.me, n=rnd(1,3); let t=hFire(sc,'');
+  for(let i=0;i<n&&m.alive;i++){ sc.dia++; sc.log.push({d:sc.dia,pl:'Prisão de Contenção',lines:[],age:m.age+1,yr:S.year+1}); const ye=yearEvents, pend=S.pending; yearEvents=function(){}; S.pending=[]; try{ if(AGE0) AGE0(); } finally{ yearEvents=ye; S.pending=pend.concat(S.pending); } scLog('Mais um ano numa cela com algemas que anulam o poder.','bad'); crew().forEach(c=>c.age++); }
+  m.rec.conv++; m.c.prisonYrs=(m.c.prisonYrs||0)+n; sc.reg='sim'; sc.proc=0; sc.rep=Math.max(0,sc.rep-15); scStat('san',-15); famAll().forEach(p=>p.bond=clamp(p.bond-8));
+  return `Fui condenad${oa()} a ${n} ano${n>1?'s':''} na Prisão de Contenção para Super-Humanos. Saí registrad${oa()} à força, com o nome na ficha. ${t}`.trim(); }
+// morrer de verdade (velhice, doença) encerra o modo junto com a vida
+die=(o=>function(){ const r=o.apply(this,arguments); if(S&&S.scen&&S.me&&!S.me.alive) S.scen=null; return r; })(die);
+scStart=(o=>function(id){ const r=o.apply(this,arguments); const sc=S.scen; if(sc&&sc.id==='heroi'&&sc.log[0]) Object.assign(sc.log[0],{age:S.me.age,yr:S.year}); return r; })(scStart);
 
 // ===== Pesadelo zumbi · eventos da base e da comunidade =====
 const ZBB=ZW(sc=>sc.id==='zumbi'&&!!sc.zb), ZNM=ZW(sc=>sc.id==='zumbi'&&!sc.zb), ZSE=k=>ZW(sc=>sc.id==='zumbi'&&zSeason(sc)===k);
@@ -8282,7 +8627,7 @@ pack({k:'Minha cidade',w:2,cd:20,scen:'isekai',fant:true,when:ZW(sc=>sc.id==='is
 // ===== Eventos dos Superpoderes (parte 1): resgates, vilões, identidade secreta =====
 const HC={crew:1};
 pack({k:'Superpoderes',w:1.5,cd:40,scen:'heroi',when:scWhen('heroi')},[
-  ['Convite da liga','Uma liga de heróis quer que {codinome} entre para a equipe.',['Aceitar|rep+10 pw+6 crew|Agora tenho equipe. {n} vai patrulhar comigo.','Recusar|h+2|Prefiro agir sozinh{o}.']],
+  ['Convite dos Novatos','Os Novatos Unidos, uma equipe de heróis iniciantes, querem {codinome} no time. Paga pouco, mas é emprego de carteira assinada.',['Aceitar|rep+6 pw+4 hteam:novatos crew|Assinei o contrato. {n} vai patrulhar comigo.','Recusar|h+2|Prefiro agir sozinh{o}.'],{when:HW(sc=>!hTeam()&&sc.reg!=='nao')}],
   ['Foto borrada','Um fotógrafo conseguiu uma foto sua sem máscara.',['Comprar a foto|$-5000 sec+20|Comprei a foto e o silêncio.','Deixar sair|sec-25 f+5|Agora todo mundo especula.','Usar {poder} para apagar a foto|?sc.pw sec+15|Funcionou. Não pergunte como.|sec-15|Saiu pior.']],
   ['Gato na árvore','Uma menina chora porque o gato subiu numa árvore enorme.',['Resgatar o gato|rep+3 h+6|O gato me arranhou. A menina me abraçou.','Ensinar a menina a chamar o bombeiro|rep-2 h+2|Prático, mas sem graça.']],
   ['Assalto a banco','Ladrões fazem reféns dentro de um banco.',['Entrar pela frente|?pwr rep+12 crime-8|Reféns soltos, ladrões amarrados.|hl-18 rep-6|Um refém se feriu.','Negociar com os ladrões|?car rep+10|Eles se renderam ouvindo meu discurso.|rep-4|Não quiseram papo.','Esperar a polícia|rep-6|Os jornais perguntaram onde eu estava.']],
@@ -8703,6 +9048,242 @@ pack({k:'Marte',w:1.5,cd:40,scen:'marte',when:scWhen('marte')},[
   ['Dia da Terra','É Dia da Terra e a equipe planta uma árvore na estufa.',['Plantar|moral+8 h+6|Uma pequena árvore em Marte.','Gravar para a Terra|f+3|A Terra se emocionou.']],
 ]);
 
+// ===== Eventos de romance nos modos fictícios =====
+// crew:'par' = o par do jogador ({c}) · crew:'sol' = alguém solteiro do grupo que pode virar par
+const RP=id=>RW(sc=>sc.id===id&&!!romPar()), RS=id=>RW(sc=>sc.id===id&&!romPar()&&romSol()), RR=id=>RW(sc=>sc.id===id&&!!romPar()&&romSol());
+// ---------- apocalipse zumbi ----------
+pack({k:'Amor',w:1.1,cd:25,scen:'zumbi',when:RS('zumbi'),crew:'sol'},[
+  ['Turno de vigia a dois','Você e {c} ficam de vigia a noite inteira, no teto do carro, dividindo um cobertor.',['Conversar até o sol nascer|am+12 h+6|Descobri que {c} tem medo do escuro e ri de piada ruim. Igual a mim.','Ficar em silêncio, ombro com ombro|am+8 h+4|Às vezes o silêncio diz mais.','Dormir no turno|am-4 h-2|{c} cobriu meu turno sozinh{co}. Não reclamou, mas anotou.']],
+  ['Curativo','{c} cortou a mão abrindo uma lata e pede ajuda.',['Fazer o curativo com cuidado|am+10 chp+5|Nossos olhos se cruzaram tempo demais para um curativo.','Mandar {celn} se virar|am-6|{c} se virou. E lembrou disso depois.']],
+  ['Dança no posto','Um rádio de pilha pega uma música lenta. {c} estende a mão.',['Dançar|am+14 h+8|Dançamos entre as bombas de gasolina. O grupo fingiu que não viu.','Rir e recusar|am-3 h+2|{c} dançou com o vento.']],
+  ['Declaração no meio da fuga','Na correria de uma fuga, {c} grita: "Se a gente sair dessa, eu te beijo!"',['Sair dessa e cobrar|?pwr am+15 namorar h+8|Saímos. Cobrei. {c} pagou.|hl-8 am+6|Saímos machucados, mas a promessa ficou no ar.','Fingir que não ouviu|am-2|Ficou um clima esquisito no carro.']],
+  ['Ciúme no grupo','Alguém do grupo está dando em cima de {c}, e {c} só olha para você.',['Chamar {c} para conversar|am+10 namorar|"Achei que você nunca ia perceber." Agora estamos juntos.','Deixar rolar|am-8|{c} cansou de esperar.']],
+  ['Bilhete no para-brisa','Você acha um bilhete preso no para-brisa: "Você é a melhor coisa do fim do mundo." A letra é de {c}.',['Responder com outro bilhete|am+12 h+6|A troca de bilhetes virou nosso jeito secreto de conversar.','Mostrar para o grupo|am-10 h+2|Todo mundo riu. {c} não.']],
+]);
+pack({k:'Amor',w:1.3,cd:25,scen:'zumbi',when:RP('zumbi'),crew:'par'},[
+  ['Aniversário no fim do mundo','Hoje é aniversário de {c}. Não tem bolo, não tem loja, não tem nada.',['Fazer um bolo de bolacha com leite em pó|-it:@comida am+15 h+8|{c} chorou. Disse que foi o melhor aniversário da vida.','Achar um presente num saque|?sc.san am+12 it:livro|Achei um livro que {c} adorava antes de tudo.|hl-8|Os zumbis acharam primeiro.','Esquecer|am-15 h-4|{c} passou o dia calad{co}.']],
+  ['Medo de perder','{c} acorda chorando de um pesadelo em que você era mordid{o}.',['Abraçar até {celn} dormir|am+10 h+4|Ficamos assim até amanhecer.','Prometer que nunca vai acontecer|am+6 h-2|Uma promessa que ninguém pode cumprir.']],
+  ['Pedido com anel de lata','{c} aparece com um anel feito de lacre de latinha e se ajoelha no meio da estrada.',['Dizer sim|noivar am+12 h+12|Sim! O grupo bateu palmas e um zumbi gemeu ao longe, como quem aprova.','Dizer que é cedo|am-12 h-4|{c} guardou o anel no bolso. Com cuidado.'],{when:RW(sc=>sc.id==='zumbi'&&!!romPar()&&romPar().par==='namoro')}],
+  ['Casamento no acampamento','O grupo quer celebrar o noivado de vocês com um casamento de verdade.',['Casar hoje mesmo|casar am+15 moral+8|Casamos sob uma lona azul, com flores de plástico de um cemitério. Foi perfeito.','Esperar um lugar seguro|am-4|{c} entendeu. Mais ou menos.'],{when:RW(sc=>sc.id==='zumbi'&&!!romPar()&&romPar().par==='noivo')}],
+  ['Bebê no apocalipse?','{c} pergunta se você pensa em ter filhos, mesmo agora.',['"Quero. O mundo precisa recomeçar."|am+10 grav|A gente decidiu tentar.','"Num mundo desses? Não."|am-4|{c} entendeu, mas ficou triste.']],
+  ['Briga no carro','Você e {c} brigam feio sobre quem deve ficar com a última água.',['Pedir desculpas primeiro|am+8 h+2|Fizemos as pazes dividindo a garrafa.','Bater o pé|am-12 h-4|Dormimos em carros diferentes.']],
+  ['{c} foi ferid{co}','{c} se feriu numa saída e está com febre.',['Cuidar a noite inteira|-it:@remedio chp+30 am+12|A febre baixou de madrugada. {c} segurou minha mão o tempo todo.','Sair atrás de remédio sozinh{o}|?pwr chp+25 am+15 it:kit|Voltei com remédio e um corte na testa.|hl-15 chp-10|Voltei de mãos vazias.']],
+  ['Ex aparece','Um sobrevivente se aproxima do grupo: é o ex de {c}.',['Deixar entrar no grupo|am-6 crew|{c} ficou desconfortável. {n} também.','Mandar seguir viagem|am+6 h-2|{c} agradeceu com o olhar.']],
+  ['Mordida','{c} esconde o braço. Você vê o curativo sujo de sangue. Pode ser mordida.',['Olhar o braço|?60 am+6 h+4|Era só um arranhão de arame. Respirei de novo.|cdie h-20|Era mordida. {c} pediu que fosse eu. Fui eu.','Fingir que não viu|h-6|Fiquei de olho a noite inteira.']],
+  ['Lua de mel improvisada','O grupo fica de vigia para vocês terem uma noite sozinhos num hotel abandonado.',['Aceitar|am+15 h+12|Uma suíte presidencial empoeirada, só para nós. Esqueci que o mundo acabou.','Recusar, é perigoso|am-4|Melhor prevenir.'],{when:RW(sc=>sc.id==='zumbi'&&!!romPar()&&romPar().par==='casado')}],
+  ['A promessa','{c} pede que, se for mordid{co}, você não hesite.',['Prometer|am+6 h-6|Prometi. Rezo para nunca precisar cumprir.','Dizer que vai achar a cura|am+10 h+2|{c} sorriu. Não acredita, mas gostou de ouvir.']],
+  ['Ciúmes','{c} viu você rindo muito com outra pessoa do grupo.',['Explicar que é só amizade|?car am+4|{c} acreditou.|am-10|{c} não acreditou.','Provocar|am-15 h+2|Foi infantil. Eu sei.'],{when:RR('zumbi')}],
+  ['Música só nossa','{c} encontra um toca-discos e um vinil que você conhece de cor.',['Dançar na sala vazia|am+12 h+10|Por três minutos e meio, o mundo voltou a ser normal.','Guardar para um dia especial|am+4|O vinil vai na carga, embrulhado num casaco.']],
+]);
+pack({k:'Amor',w:1.2,cd:30,scen:'zumbi',when:RW(sc=>sc.id==='zumbi'&&!!romPar()),crew:'par'},[
+  ['Tem um bebê vindo','{c} desmaia de manhã e acorda enjoad{co}. Ou você, quem sabe.',['Fazer o teste da farmácia saqueada|grav am+8|Agora é esperar.','Achar que é só a comida estragada|h+0|Talvez seja.']],
+  ['Partida de baralho','À noite, você e {c} jogam baralho valendo tarefas da base.',['Perder de propósito|am+8 h+6|Lavei a louça feliz.','Ganhar e cobrar|am+2 h+8|{c} lavou a louça resmungando.']],
+  ['Saudade de antes','{c} conta como era a vida antes. Você percebe que talvez nunca tivessem se conhecido.',['Dizer que o fim do mundo trouxe uma coisa boa|am+12 h+6|{c} riu e me chamou de brega.','Ficar em silêncio|am+4 h-2|Algumas coisas não têm resposta.']],
+]);
+// ---------- ilha deserta ----------
+pack({k:'Amor',w:1.1,cd:25,scen:'ilha',when:RS('ilha'),crew:'sol'},[
+  ['Pôr do sol na pedra','{c} chama você para ver o pôr do sol da pedra mais alta da ilha.',['Ir|am+12 h+8|O céu ficou rosa. Ninguém falou nada por meia hora.','Ficar cuidando do fogo|am-4|Alguém precisava cuidar do fogo.']],
+  ['Coco aberto','{c} passou a manhã inteira tentando abrir um coco para você.',['Agradecer com um beijo na bochecha|am+14 h+6|{c} ficou vermelh{co} até as orelhas.','Agradecer com um aperto de mão|am-2 h+2|Educad{o} demais.']],
+  ['Banho de cachoeira','Você chega na cachoeira e {c} já está lá.',['Entrar também|am+12 h+8|Rimos, jogamos água, e a mão encostou na mão.','Esperar a sua vez|am+2|Respeitei. {c} pareceu meio decepcionad{co}.']],
+  ['Mensagem na garrafa','Você encontra uma garrafa na praia. Dentro, um bilhete de {c}: "Se ninguém nos achar, tudo bem. Você está aqui."',['Responder com outro bilhete|am+14 namorar h+8|Começamos a namorar por correio de garrafa, numa ilha de 2 quilômetros.','Fingir que não achou|am-6|Joguei a garrafa no mar. Me arrependi na hora.']],
+]);
+pack({k:'Amor',w:1.3,cd:25,scen:'ilha',when:RP('ilha'),crew:'par'},[
+  ['Casinha para dois','{c} quer construir uma cabana só de vocês dois, longe do acampamento.',['Construir juntos|abrigo+8 am+12 h+6|Ficou torta, com teto de palha e vista para o mar. Nossa casa.','Ficar no abrigo de todos|am-4|Ainda acho mais seguro.']],
+  ['Pedido na areia','Você acorda e encontra escrito na areia, em letras gigantes: "CASA COMIGO?"',['Escrever SIM do lado|noivar am+15 h+12|Se um avião passar agora, vai achar que a ilha é um cartão de dia dos namorados.','Apagar e explicar que é cedo|am-12 h-4|{c} ficou olhando o mar.'],{when:RW(sc=>sc.id==='ilha'&&!!romPar()&&romPar().par==='namoro')}],
+  ['Casamento na praia','Os outros náufragos preparam um casamento com tudo o que acharam na praia.',['Casar ao pôr do sol|casar am+15 h+12|Coroa de flores, alianças de concha e caranguejos de convidados.','Esperar o resgate para casar direito|am-4|{c} entendeu.'],{when:RW(sc=>sc.id==='ilha'&&!!romPar()&&romPar().par==='noivo')}],
+  ['Tempestade','Uma tempestade derruba o abrigo. Você e {c} passam a noite abraçados numa caverna.',['Contar histórias até a chuva passar|am+12 h+4|A melhor noite de tempestade da minha vida.','Tentar salvar o abrigo|?pwr abrigo+5 am+6|Salvei metade.|hl-10|O vento me derrubou.']],
+  ['Pescaria','{c} jura que pesca melhor que você.',['Apostar um beijo|?50 am+10 h+8 it:peixe|Ganhei. Cobrei.|am+12 h+6|Perdi. Paguei com gosto.','Deixar {celn} ganhar|am+6 it:peixe|{c} desconfiou, mas ficou feliz.']],
+  ['Saudade de casa','{c} chora de saudade da família.',['Prometer que vão sair daqui juntos|am+10 h+2|"Juntos", repetiu. Gostei de como soou.','Distrair com uma brincadeira|am+6 h+6|Arranquei uma risada no meio do choro.']],
+  ['Ciúmes do náufrago novo','{c} fica com ciúmes do jeito que você conversa com outra pessoa da ilha.',['Tranquilizar|?car am+6|Funcionou.|am-8|Não funcionou.','Dizer que é bobagem|am-10|Bobagem para quem?'],{when:RR('ilha')}],
+  ['Família na ilha','{c} diz que, se o resgate demorar, quer ter um filho aqui mesmo.',['Topar|grav am+10|Decidimos. A ilha pode ganhar mais um morador.','Esperar o resgate|am-2|É mais seguro esperar.']],
+  ['Coração na pedra','{c} talhou um coração com as iniciais de vocês numa pedra da praia.',['Talhar a data embaixo|am+10 h+6|Dia {dia}. Para quem achar a pedra um dia.','Achar fofo|am+6 h+4|Muito fofo.']],
+  ['Febre','{c} está com febre alta depois de pisar num coral.',['Cuidar sem dormir|chp+25 am+14 h-4|Passei a noite trocando panos molhados. A febre baixou.','Usar o remédio que sobrou|-it:@remedio chp+35 am+10|O último remédio foi para {c}. Valeu a pena.']],
+  ['Briga pela comida','Vocês brigam porque {c} comeu o último peixe sem dividir.',['Perdoar|am+6 h-2|É só um peixe.','Ficar de cara feia o dia todo|am-10 h-4|Ilha pequena demais para ficar de cara feia.']],
+  ['Lua de mel na ilha','Vocês passam o dia na praia do outro lado da ilha, só os dois.',['Aproveitar|am+15 h+12|Areia branca, ninguém por perto. Esqueci que estava pres{o} aqui.','Voltar cedo para o acampamento|am-4|O dever chama.'],{when:RW(sc=>sc.id==='ilha'&&!!romPar()&&romPar().par==='casado')}],
+]);
+// ---------- isekai ----------
+pack({k:'Amor',w:1.1,cd:25,scen:'isekai',when:RS('isekai'),crew:'sol'},[
+  ['Festival das lanternas','A cidade solta lanternas mágicas no rio, e {c} pergunta se você quer soltar uma junto.',['Soltar a lanterna juntos|am+14 h+8|A lanterna ficou dourada. Dizem que é sinal de amor verdadeiro.','Soltar sozinh{o}|am-2 h+4|A lanterna ficou azul. Ninguém soube explicar.']],
+  ['Poção do amor','Um vendedor ambulante oferece uma poção do amor "garantida".',['Comprar e dar para {c}|ouro-20 ?50 am+20|Funcionou? Ou {c} já gostava de mim? Nunca vou saber.|am-10|{c} percebeu o gosto de morango suspeito.','Recusar|k+2|Amor de verdade não vem em frasco.']],
+  ['Salvamento heroico','Um ogro agarra {c} no meio da batalha.',['Salvar {c} com tudo|?pwr am+18 xp+20|Arranquei {c} das mãos do ogro. O olhar que recebi valeu mais que o XP.|hl-15 am+8|Salvei, mas apanhei.','Gritar para alguém ajudar|am-4|Alguém ajudou. Não fui eu.']],
+  ['Aula de magia','{c} se oferece para te ensinar um feitiço de luz.',['Aceitar|mana+10 am+10|O feitiço saiu em forma de coração. Foi sem querer. Eu juro.','Recusar|am-2|Prefiro aprender sozinh{o}.']],
+  ['Baile da guilda','A guilda dá um baile e {c} está sem par.',['Convidar|am+14 namorar h+8|Dançamos a valsa élfica três vezes. No fim, {c} me beijou.','Ir sozinh{o}|am-4 h+4|Dancei com um anão. Também foi divertido.']],
+]);
+pack({k:'Amor',w:1.3,cd:25,scen:'isekai',when:RP('isekai'),crew:'par'},[
+  ['Pedido sob os dois sóis','{c} se ajoelha no alto da colina com um anel de mithril.',['Aceitar|noivar am+15 h+12|Os dois sóis se alinharam. Os elfos dizem que é sorte para sempre.','Pedir mais tempo|am-12|{c} guardou o anel. Com cuidado.'],{when:RW(sc=>sc.id==='isekai'&&!!romPar()&&romPar().par==='namoro')}],
+  ['Casamento no templo','A sacerdotisa da deusa se oferece para casar vocês.',['Casar no templo|casar ouro-30 am+15 h+15|Pétalas mágicas caíram do teto. Um anão chorou alto na primeira fila.','Casar só na guilda, simples|casar am+10 h+8|Uma festa de taverna. Hidromel até de manhã.'],{when:RW(sc=>sc.id==='isekai'&&!!romPar()&&romPar().par==='noivo')}],
+  ['A família de {c}','{c} quer te apresentar à família, num vilarejo a dois dias de viagem.',['Ir|am+12 h+6 ouro+20|O pai de {c} me testou na queda de braço. Perdi. Ele gostou de mim mesmo assim.','Adiar|am-6|Fica para depois.']],
+  ['Ciúmes de outro mundo','{c} pergunta se você tinha alguém no seu mundo de origem.',['Contar a verdade|am+6 h+2|{c} ouviu tudo, segurou minha mão e disse que agora o meu mundo é aqui.','Dizer que não|?car am+4|Acreditou.|am-10|{c} sabe quando eu minto.']],
+  ['A volta para casa','{c} pergunta: "Se você achar o portal, vai me deixar aqui?"',['"Vem comigo."|am+15 h+6|{c} chorou e disse que iria até o fim do mundo. De qualquer mundo.','"Não sei."|am-12 h-6|A noite ficou fria de repente.']],
+  ['Feitiço de proteção','{c} gasta mana para lançar um escudo sobre você antes de dormir.',['Retribuir com outro feitiço|mana-15 am+12|Dormimos dentro de duas bolhas de luz.','Agradecer|am+6|{c} disse que faria isso todas as noites.']],
+  ['Bebê élfico?','{c} fala de ter um filho em Eldoria.',['Querer|grav am+10|A deusa abençoe.','Esperar o fim da guerra|am-2|Depois do Rei Demônio.']],
+  ['Ferid{co} em batalha','{c} levou um golpe de machado protegendo você.',['Usar a melhor poção|-it:@remedio chp+35 am+12|A ferida fechou. A cicatriz ficou em forma de lua.','Carregar {c} até o curandeiro|ouro-20 chp+30 am+15|Andei a noite inteira. Valeu cada passo.']],
+  ['Taverna romântica','O dono da taverna reservou a mesa da lareira para vocês.',['Aceitar|ouro-10 am+12 h+10|Ensopado, hidromel e um bardo que tocou nossa música.','Sentar com o grupo|am+2 moral+6|Todo mundo junto também é bom.']],
+  ['Rival no amor','Um cavaleiro arrogante desafia você a um duelo pelo coração de {c}.',['Aceitar o duelo|?pwr am+15 xp+25|Derrubei o cavaleiro na lama. {c} riu tanto que caiu da cadeira.|hl-15 am+6|Perdi o duelo, mas {c} cuidou das minhas feridas.','Deixar {c} decidir|?car am+12|{c} nem olhou para o cavaleiro.|am-6|{c} achou que eu não liguei.'],{when:RW(sc=>sc.id==='isekai'&&!!romPar())}],
+  ['Lua de mel na cidade flutuante','Um nobre oferece uma semana em Aerion para os recém-casados.',['Aceitar|am+15 h+14|Nuvens embaixo dos pés e café da manhã servido por fadas.','Recusar, há monstros para caçar|am-4 xp+10|O dever primeiro.'],{when:RW(sc=>sc.id==='isekai'&&!!romPar()&&romPar().par==='casado')}],
+  ['Briga por dinheiro','{c} gastou metade do ouro num chapéu encantado.',['Rir e usar o chapéu também|am+8 h+6|O chapéu canta. Desafinado.','Brigar|am-12 ouro+10|Devolvemos o chapéu. Clima pesado.']],
+]);
+// ---------- Marte ----------
+pack({k:'Amor',w:1.1,cd:25,scen:'marte',when:RS('marte'),crew:'sol'},[
+  ['Pôr do sol azul','Em Marte, o pôr do sol é azul. {c} chama você até a escotilha para ver.',['Ver juntos|am+12 h+8|Ficamos de mãos dadas no vidro gelado. Azul. Lindo.','Continuar trabalhando|am-2|O pôr do sol de amanhã é igual.']],
+  ['Batata em forma de coração','{c} serve uma batata cortada em forma de coração no jantar.',['Agradecer com um beijo|am+14 namorar h+8|A colônia inteira assobiou pelo rádio interno.','Comer sem comentar|am-6|{c} ficou olhando o prato.']],
+  ['Caminhada lunar','{c} propõe uma caminhada de traje até a borda da cratera.',['Ir|o2-4 am+12 h+6|Encostamos os capacetes. Dá para ouvir a voz pelo vidro.','Recusar, desperdício de oxigênio|am-4|{c} foi sozinh{co}.']],
+  ['Playlist da Terra','{c} montou uma playlist com músicas que lembram você.',['Ouvir juntos no módulo|am+12 h+8|Dançamos em gravidade baixa. Quase voamos.','Agradecer|am+4|Vou ouvir depois.']],
+]);
+pack({k:'Amor',w:1.3,cd:25,scen:'marte',when:RP('marte'),crew:'par'},[
+  ['Pedido em Marte','{c} imprimiu um anel na impressora 3D e escreveu "CASA COMIGO" com pedras vermelhas.',['Aceitar|noivar am+15 h+12|O primeiro noivado de outro planeta. A Terra vai surtar.','Pedir para esperar a volta|am-10|{c} guardou o anel no bolso do traje.'],{when:RW(sc=>sc.id==='marte'&&!!romPar()&&romPar().par==='namoro')}],
+  ['O primeiro casamento de Marte','A Terra quer transmitir o casamento de vocês ao vivo.',['Casar ao vivo|casar am+15 h+12 ciencia+5|Dois bilhões de pessoas viram. Um atraso de vinte minutos no "sim".','Casar só com a equipe|casar am+12 h+10|Íntimo, com bolo de batata.'],{when:RW(sc=>sc.id==='marte'&&!!romPar()&&romPar().par==='noivo')}],
+  ['Primeiro bebê marciano','{c} pergunta se vocês teriam coragem de ter o primeiro bebê nascido em Marte.',['Ter coragem|grav am+10|Os médicos da Terra estão em pânico. Nós estamos felizes.','Esperar voltar para a Terra|am-2|É mais sensato.']],
+  ['Claustrofobia','{c} tem uma crise no habitat apertado.',['Ficar junto até passar|am+12 h-2 chp+5|Respiramos juntos, contando até dez, umas trinta vezes.','Dar um calmante|-it:calm am+6|Funcionou.']],
+  ['Tempestade de poeira','Uma tempestade isola vocês dois no rover por uma noite inteira.',['Aproveitar a noite|o2-6 am+15 h+10|Melhor tempestade da história.','Racionar oxigênio em silêncio|o2-2 am+4|Sobrevivemos. Um pouco tensos.']],
+  ['Mensagem para a família','{c} quer gravar um vídeo apresentando você para a família na Terra.',['Gravar|am+10 h+6|A mãe de {c} respondeu vinte minutos depois, chorando de alegria.','Ficar envergonhad{o}|am-2|Gravei só um aceno.']],
+  ['Briga na estufa','Vocês discutem sobre quem matou as mudas de batata.',['Assumir a culpa|am+8|Fui eu. Admito.','Culpar {c}|am-12|Fui eu. Não admiti.']],
+  ['Saudade da chuva','{c} diz que sente falta de chuva.',['Fazer chover no chuveiro da base|am+12 h+8 o2-2|Gastamos a água da semana. Valeu cada gota.','Prometer uma chuva na Terra|am+6|"Vou cobrar."']],
+  ['Acidente no traje','O traje de {c} rasgou lá fora.',['Correr para remendar|-it:remendo chp+10 am+15|Remendei com as mãos tremendo. {c} respirou de novo.','Puxar {c} de volta para a câmara|?pwr am+12|Puxei a tempo.|chp-25 am+6|Puxei, mas {c} ficou mal.']],
+  ['Ciúmes do colono novo','{c} acha que você está próxim{o} demais de outra pessoa da colônia.',['Conversar|?car am+6|Resolvido.|am-10|Não resolveu.','Ignorar|am-12|Base pequena demais para ciúmes.'],{when:RR('marte')}],
+]);
+// ---------- super-heróis: romance com aliados ----------
+pack({k:'Amor',w:1,cd:25,scen:'heroi',when:RS('heroi'),crew:'sol'},[
+  ['Treino a dois','{c} propõe um treino de combate. Vocês acabam caídos no tatame, rindo.',['Ficar ali mais um pouco|am+12 h+6|Ficamos olhando para o teto e falando bobagem.','Levantar e voltar ao treino|pw+3 am-2|Foco.']],
+  ['Máscara caiu','A máscara de {c} cai no meio da patrulha. Você vê o rosto pela primeira vez.',['Dizer que é lind{co}|am+14 h+6|{c} recolocou a máscara rápido. Mas sorriu.','Fingir que não viu|am+4|{c} agradeceu o respeito.']],
+  ['Herói e herói','{c} salva você de um prédio caindo e não solta mais a sua mão.',['Beijar no meio da fumaça|am+15 namorar h+8|Os bombeiros aplaudiram. O jornal amanhã vai ter manchete.','Agradecer e voltar ao trabalho|am+4|Tem gente para salvar.']],
+]);
+pack({k:'Amor',w:1.1,cd:25,scen:'heroi',when:RP('heroi'),crew:'par'},[
+  ['Encontro interrompido','No meio do jantar com {c}, o alarme de crime toca para os dois ao mesmo tempo.',['Ir juntos|?pwr am+12 rep+8|Prendemos os bandidos e voltamos para a sobremesa.|hl-8 am+6|Voltamos machucados, mas juntos.','Deixar a cidade se virar uma noite|am+14 crime+8 h+6|Uma noite só nossa.']],
+  ['Casal de heróis','A imprensa descobre que {codinome} e {c} estão juntos.',['Assumir em público|am+10 rep+6 sec-6|Viramos o casal mais famoso da cidade.','Negar|am-6 sec+4|{c} ficou chatead{co}.']],
+  ['Pedido no telhado','{c} espera você no alto da torre do relógio com um anel.',['Aceitar|noivar am+15 h+12|A cidade inteira brilhava lá embaixo.','Pedir tempo|am-10|O anel voltou para o bolso.'],{when:RW(sc=>sc.id==='heroi'&&!!romPar()&&romPar().par==='namoro')}],
+  ['Casamento secreto','Vocês decidem casar com os aliados de testemunha, de madrugada.',['Casar|casar am+15 h+12|Máscaras no bolso, juras sob a lua.','Esperar a paz|am-4|Quando {inimigo} cair.'],{when:RW(sc=>sc.id==='heroi'&&!!romPar()&&romPar().par==='noivo')}],
+  ['{inimigo} descobriu','{inimigo} descobriu que você ama {c} e mandou um recado.',['Proteger {c} a noite toda|am+10 h-6|Ninguém apareceu. Desta vez.','Ir atrás de {inimigo}|?pwr pista+15 am+6|Encontrei um dos esconderijos.|hl-15 chp-15|Era armadilha. {c} se feriu me salvando.']],
+]);
+
+// ===== Superpoderes (parte 3): equipe como emprego, Lei de Registro, identidade, família e amor =====
+const HT=id=>HW(sc=>{ const t=hTeam(); return !!t&&(!id||t===HTEAMS[id]); });
+// ---------- convites para equipes ----------
+pack({k:'Carreira de herói',w:1.3,cd:40,scen:'heroi',when:HW(()=>true)},[
+  ['Olheiro dos Sentinelas','Um herói mascarado deixa um cartão na sua janela: "Os Sentinelas do Sul precisam de gente como você. Sem governo, sem registro."',['Aceitar|hteam:sentinelas crew|Assinei com tinta invisível. {n} será meu parceiro de ronda.','Recusar|h+0|Ainda não.'],{when:HW(sc=>!hTeam()&&sc.rep>=25&&!sc.hEx.sentinelas)}],
+  ['Proposta da Vértice Corp','A Vértice Corp oferece um contrato milionário: salário alto, traje novo e o logotipo da empresa no peito.',['Assinar|hteam:vertice sc.traje+1|Agora sou herói de empresa. O traje tem até bolso para o crachá.','Recusar|rep+3|Não sou outdoor.'],{when:HW(sc=>!hTeam()&&sc.rep>=25&&sc.reg!=='nao'&&!sc.hEx.vertice)}],
+  ['Convocação da Liga Guardiã','A Liga Guardiã manda um holograma: querem {codinome} na equipe mais famosa do país.',['Aceitar|hteam:liga f+6|Entrei para a Liga! Minha foto já está no mural do quartel-general.','Recusar|rep+4 h+2|Recusei a Liga. Os jornais não acreditaram.'],{when:HW(sc=>!hTeam()&&sc.rep>=55&&sc.reg!=='nao'&&!sc.hEx.liga)}],
+  ['Recrutamento do governo','Dois agentes de terno esperam você no estacionamento: a Agência Federal de Contenção quer você. Com uma condição: entregar sua identidade.',['Aceitar|hteam:afc|Assinei. Agora tenho distintivo, salário e um arquivo com meu nome verdadeiro.','Recusar|sec+4|Os agentes anotaram alguma coisa e foram embora.'],{when:HW(sc=>!hTeam()&&sc.reg!=='nao'&&!sc.hEx.afc)}],
+]);
+// ---------- dia a dia na equipe ----------
+pack({k:'Carreira de herói',w:1.2,cd:30,scen:'heroi',when:HT()},[
+  ['Primeiro dia','No primeiro dia na {equipe}, o líder te apresenta como "a nova aposta".',['Fazer um discurso|?car hperf+8 rep+4|Aplaudiram.|hperf-4|Gaguejei.','Só acenar|hperf+2|Discreto.']],
+  ['Missão em equipe','A {equipe} é chamada para conter um supervilão no centro.',['Seguir o plano do líder|?pwr hperf+10 rep+6|Funcionou como no treino.|hl-10 hperf+2|Funcionou, mas apanhei.','Improvisar sozinh{o}|?sc.pw hperf+4 rep+10|Deu certo, mas o líder ficou irritado.|hperf-12 hl-12|Atrapalhei a equipe inteira.']],
+  ['Colega folgado','Um colega da {equipe} vive se aproveitando do seu trabalho nas missões.',['Confrontar|?car hperf+4|Ele parou.|hperf-4|Virou fofoca no quartel.','Reclamar com o líder|hperf+2 k-2|O líder chamou a atenção dele.','Deixar para lá|h-4|Engoli.']],
+  ['Avaliação de desempenho','O líder da {equipe} faz a avaliação trimestral.',['Mostrar as estatísticas de resgate|?perf hperf+10 $+3000|Ganhei elogio e um bônus.|hperf-6|Os números não ajudaram.','Pedir um aumento ali mesmo|?perf raise+8 hperf+2|Aumento aprovado!|hperf-8|Pegou mal.']],
+  ['Promoção na equipe','O líder da {equipe} quer promover alguém. Você ou um colega.',['Lutar pela vaga|?perf hpromo h+8|A vaga é minha!|h-6|Ficou com o colega.','Indicar o colega|k+6 hperf+4|O colega nunca vai esquecer.']],
+  ['Conflito de agenda','A {equipe} marcou um treino obrigatório no mesmo horário do aniversário de alguém da família.',['Ir ao treino|hperf+8 h-6|Treinei. A família guardou um pedaço de bolo.','Ir ao aniversário|hperf-8 h+8|O líder anotou a falta.']],
+  ['Uniforme novo','A {equipe} lançou um uniforme novo. É horroroso.',['Usar sem reclamar|hperf+4 h-4|Fiquei parecendo um sofá.','Customizar o seu|?car h+6|Ficou melhor. O líder fingiu não ver.|hperf-6|Levei advertência.']],
+  ['Herói veterano','Um veterano da {equipe} se oferece para ser seu mentor.',['Aceitar|pw+6 hperf+6|Aprendi truques que nenhum manual ensina.','Recusar|h+0|Prefiro aprender sozinh{o}.']],
+  ['Missão secreta','O líder te escala para uma missão secreta fora do país.',['Ir|?pwr hperf+15 $+8000 pista+10|Voltei sem um arranhão e com um bônus.|hl-18 hperf+4|Voltei com o braço na tipoia.','Recusar|hperf-10|O líder ficou decepcionado.']],
+  ['Folga cancelada','Sua folga foi cancelada: crise na cidade.',['Ir trabalhar|hperf+8 h-6|O trabalho de herói não tem feriado.','Faltar|hperf-12 h+6|Fiquei em casa. A cidade sobreviveu sem mim.']],
+  ['Erro na missão','Um prédio desabou durante uma missão da {equipe} e culparam você.',['Assumir a culpa|hperf-6 k+6 rep+2|Honestidade conta.','Provar que não foi você|?sm hperf+6|As câmeras me inocentaram.|hperf-12|Não consegui provar.']],
+  ['Festa da equipe','A {equipe} faz uma festa no quartel-general.',['Ir e dançar|hperf+4 h+8|Os heróis dançam muito mal.','Ir embora cedo|h+2|Discreto.']],
+  ['Herói lesionado','Você se machucou feio e precisa de afastamento médico.',['Tirar licença|hl+20 hperf-6|Voltei inteir{o}.','Trabalhar machucad{o}|hl-10 hperf+8|Heroico. E burro.']],
+  ['Quebra de protocolo','Você salvou uma criança ignorando ordens diretas do líder.',['Defender sua decisão|?car hperf+4 k+6|O líder acabou concordando.|hperf-12|Levei uma suspensão.','Pedir desculpas|hperf-2 k+4|A criança está viva. Vale a bronca.']],
+  ['Herói do mês','Você foi eleit{o} herói do mês da {equipe}.',['Agradecer|hperf+6 h+10 f+3|Minha foto está na parede do refeitório.','Dividir o prêmio|k+4 hperf+4|Dividi com quem ajudou.']],
+  ['Demissão em massa','A {equipe} está cortando gastos e vai demitir heróis.',['Mostrar serviço|?perf hperf+8|Mantive meu lugar.|hfire|Fui cortad{o}.','Pedir demissão antes|hfire h-4|Saí antes de me demitirem.']],
+]);
+pack({k:'Carreira de herói',w:1.3,cd:30,scen:'heroi',when:HT('vertice')},[
+  ['Comercial de cereal','A Vértice Corp quer você num comercial de cereal, voando com uma tigela na mão.',['Gravar|$+15000 rep-4 f+4|O comercial bombou. Ninguém mais me leva a sério.','Recusar|hperf-12|O diretor de marketing anotou meu nome.']],
+  ['Ordem estranha','A diretoria da Vértice pede que você "não atenda" um assalto num banco concorrente.',['Obedecer|hperf+10 k-10 rep-6|O banco foi roubado. As ações da Vértice subiram.','Atender mesmo assim|hperf-15 k+8 rep+8|Salvei o banco. A diretoria me chamou na sala.']],
+  ['Bônus por curtida','Seu bônus agora depende de curtidas nas redes da empresa.',['Postar fotos heroicas|hperf+8 sec-6 follow+5000|Bombou. Meio exposto, mas bombou.','Ignorar|hperf-6|Metas não batidas.']],
+  ['Escândalo corporativo','A Vértice Corp é acusada de criar os próprios vilões para vender proteção.',['Investigar por dentro|?sm pista+20 hfire k+10|Era verdade. Vazei tudo e fui demitid{o}.|hperf-8|Não achei nada.','Ficar quiet{o}|$+20000 k-8|Ganhei um bônus de silêncio.']],
+]);
+pack({k:'Carreira de herói',w:1.3,cd:30,scen:'heroi',when:HT('afc')},[
+  ['Caçar um colega','A Agência manda você prender um herói que não se registrou. É alguém que já salvou sua vida.',['Cumprir a ordem|hperf+12 k-10|Prendi. Ele me olhou o tempo todo.','Deixar escapar|?sm k+8|Ele fugiu. Ninguém desconfiou.|hfire k+8|Descobriram.']],
+  ['Arquivo confidencial','Você vê no sistema da Agência o arquivo completo de {inimigo}.',['Copiar|?sm pista+25|Copiei sem deixar rastro.|hperf-15|Fui pego. Advertência grave.','Respeitar o protocolo|hperf+6|Bom agente.']],
+  ['Distintivo','Seu distintivo da Agência abre portas, mas metade dos heróis te chama de traíra.',['Usar o distintivo com orgulho|hperf+6 rep-4|A lei é a lei.','Esconder o distintivo|rep+2|Prefiro não arrumar briga.']],
+]);
+pack({k:'Carreira de herói',w:1.3,cd:30,scen:'heroi',when:HT('sentinelas')},[
+  ['Rede de esconderijos','Os Sentinelas mostram uma rede de túneis para heróis sem registro.',['Ajudar a ampliar|hperf+8 proc-10|Agora há mais lugares para se esconder.','Só decorar o mapa|proc-4|Pode ser útil.']],
+  ['Resgate de preso','Os Sentinelas planejam tirar um herói da prisão da Agência.',['Participar|?pwr hperf+12 rep+6 proc+15|Ele está livre. E eu, mais procurad{o}.|hl-15 proc+20|Deu errado. Escapei por pouco.','Ficar de fora|hperf-10|Os Sentinelas anotaram.']],
+]);
+// ---------- Lei de Registro ----------
+pack({k:'Lei de Registro',w:1.2,cd:40,scen:'heroi',when:HW(sc=>!sc.reg||sc.reg==='votando'||sc.reg==='prazo')},[
+  ['Debate na TV','Um deputado diz na TV que "heróis mascarados são milícias com capa".',['Ligar para o programa disfarçad{o}|?car rep+6|Ganhei o debate.|rep-4|Perdi a linha ao vivo.','Desligar a TV|h-2|Melhor nem ouvir.']],
+  ['Protesto','Milhares de pessoas vão às ruas, umas pedindo a lei, outras contra.',['Discursar contra a lei|rep+6 sec-6|Viralizou.','Discursar a favor|rep+4|Metade vaiou.','Proteger a multidão de longe|rep+4 k+4|Ninguém se feriu.']],
+  ['Herói registrado','Um herói famoso se registra ao vivo, tirando a máscara. Os pais dele aparecem chorando no fundo.',['Admirar a coragem|h+2|Talvez seja o certo.','Temer pela família dele|h-4|Agora todos sabem onde ele mora.']],
+  ['Pesquisa de opinião','Uma pesquisa mostra que 60% da população quer heróis registrados.',['Fazer uma ação de imagem|rep+6|Salvei um ônibus escolar na frente das câmeras.','Ignorar|h+0|Pesquisa não é lei. Ainda.']],
+]);
+pack({k:'Lei de Registro',w:1.3,cd:30,scen:'heroi',when:HW(sc=>sc.reg==='sim')},[
+  ['Convocação obrigatória','Como herói registrado, você é convocad{o} para uma operação do governo.',['Ir|?pwr rep+6 $+4000|Missão cumprida, com nota fiscal.|hl-10|Operação mal planejada.','Faltar|$-5000 rep-6|Recebi uma multa de $5.000.']],
+  ['Carta do governo','Chega uma carta com seu nome verdadeiro no envelope, endereçada a {codinome}.',['Queimar a carta|sec+4 h-2|Quem mais viu esse envelope?','Reclamar na ouvidoria|?sm sec+6|Pediram desculpas.|sec-6|Ninguém respondeu.']],
+  ['Vazamento na Agência','Rumores dizem que um funcionário da Agência vende fichas de heróis para criminosos.',['Investigar|?sm pista+15 sec+6|Achei o funcionário. Preso.|sec-12|Ele achou a minha ficha primeiro.','Torcer para não ser a sua|h-4|Durmo pior agora.']],
+  ['Herói de carteirinha','O governo oferece benefícios a heróis registrados: plano de saúde e aposentadoria.',['Aproveitar|hl+10 h+4|Fiz um check-up completo. De graça.','Desconfiar|h+0|Nada é de graça.']],
+]);
+pack({k:'Lei de Registro',w:1.4,cd:25,scen:'heroi',when:HW(sc=>sc.reg==='nao')},[
+  ['Cartaz de procurado','Seu codinome está num cartaz de PROCURADO na estação de metrô.',['Arrancar os cartazes|proc+4 h+4|Arranquei uns vinte.','Fingir que não é você|sec+2|O cartaz ficou parecido demais.']],
+  ['Herói sem registro','Um policial reconhece {codinome} durante um resgate. Ele hesita antes de chamar reforço.',['Pedir que ele finja que não viu|?car proc-4 k+2|Ele baixou o rádio e foi embora.|proc+12|Ele chamou o reforço.','Fugir|proc+6|Fugi antes de ele decidir.']],
+  ['Vizinho dedo-duro','Um vizinho acha que sabe quem você é e ameaça ligar para a Agência.',['Convencer de que está enganado|?car proc-2|Ele ficou sem graça.|proc+15 sec-10|Ele ligou.','Ajudar o vizinho em algo|$-2000 k+4|Consertei o carro dele. Ele esqueceu do assunto.']],
+  ['Oferta de anistia','O governo oferece anistia a quem se registrar esta semana, sem multa.',['Me registrar|reg:sim h+6|Acabou a perseguição. O governo sabe quem eu sou.','Continuar na resistência|rep+4 proc+4|Não vou entregar minha família de bandeja.']],
+  ['Advogada dos heróis','Uma advogada se oferece para defender heróis sem registro de graça.',['Aceitar|proc-10 k+2|Ela conseguiu suspender dois mandados contra mim.','Recusar|h+0|Não confio em ninguém.']],
+  ['Hospital sem nome','Você está ferid{o}, mas não pode ir ao hospital sem documento.',['Ir a um médico clandestino|$-3000 hl+20|Me costuraram numa garagem.','Se tratar sozinh{o}|hl+6 h-4|Doeu muito.']],
+  ['Caçador de recompensas','Um caçador de recompensas está atrás de você pela recompensa do governo.',['Enfrentar|?pwr proc+6 rep+4|Deixei ele amarrado num poste com um laço.|hl-15|Ele era bom.','Despistar|?sc.pw proc-6|Sumi no metrô.|hl-8|Me alcançou numa escada.']],
+  ['Colega preso','Um herói amigo foi preso por não se registrar.',['Planejar o resgate|?pwr proc+15 rep+8 crew|Tirei ele da cadeia. {n} agora anda comigo.|hl-20 proc+20|Não deu. Quase fui pres{o} junto.','Visitar como civil|h-4 sec-4|Ele me pediu para não desistir.']],
+  ['Herói da resistência','Um grupo de jovens pinta murais com seu codinome: "Herói não se registra".',['Agradecer em segredo|rep+6 h+6|Deixei um bilhete no mural.','Pedir que parem|rep-2 proc-4|Eles estão se arriscando por mim.']],
+  ['Barreira policial','A polícia monta blitz com detectores de poder em toda a cidade.',['Ficar em casa|proc-6 crime+6|A cidade ficou sem herói por um dia.','Passar mesmo assim|?sc.pw proc+2|Passei controlando o poder.|proc+15 hl-6|O detector apitou. Fugi correndo.']],
+]);
+// ---------- identidade secreta ----------
+pack({k:'Identidade secreta',w:1.2,cd:30,scen:'heroi',when:HW(sc=>!sc.rev)},[
+  ['Quase pego','Você chega em casa pela janela e dá de cara com alguém da família na sala.',['Inventar que estava fazendo yoga no parapeito|?car sec+4 h+4|Colou. Acho.|sec-12|Ninguém acreditou.','Contar a verdade|sec-6 h+4|Agora tem mais alguém guardando meu segredo.']],
+  ['Teoria da conspiração','Um blogueiro publica uma lista de 10 suspeitos de ser {codinome}. Você é o número 3.',['Processar o blog|$-4000 sec+6|Tiraram do ar.','Ignorar|sec-6|Os comentários estão chegando perto.','Fazer um herói "aparecer" enquanto você está em público|?sm sec+15|Um aliado se fantasiou de mim. Perfeito.|sec-10|Deu muito errado.']],
+  ['Teste de DNA','A polícia coletou seu sangue numa cena de batalha.',['Invadir o laboratório|?sc.pw sec+10 k-4|Troquei a amostra.|sec-15 proc+10|O alarme disparou.','Rezar|sec-8|Agora é questão de tempo.']],
+  ['Voz conhecida','Alguém do trabalho comenta que a voz de {codinome} é "igualzinha à sua".',['Fazer voz fina o resto do dia|sec+2 h-2|Ficou estranho, mas funcionou.','Rir junto|?car sec+4|Todo mundo riu.|sec-6|Ficou um silêncio.']],
+  ['Chantagem','Um bandido descobriu quem você é e pede dinheiro para ficar calado.',['Pagar|$-20000 sec+10|Pago agora. Pago para sempre?','Ameaçar|?pwr sec+6 k-4|Ele entendeu o recado.|sec-25|Ele espalhou para todo mundo.','Prender o chantagista|?sm sec+8 rep+4|Achei provas de outros crimes.|sec-20|Ele contou tudo ao delegado.']],
+  ['Ferimento difícil de explicar','Você acorda com um olho roxo e tem reunião de trabalho.',['Maquiagem|?40 sec+4|Ficou perfeito.|sec-4|Ficou pior.','Dizer que caiu da escada|sec+0|Clássico.']],
+  ['Foto no celular','Uma criança tirou uma foto sua trocando de roupa num beco.',['Pedir com jeitinho para apagar|?car sec+8 k+2|Ela apagou em troca de um autógrafo.|sec-15|Ela postou.','Deixar|sec-12|A foto está borrada. Mas não muito.']],
+]);
+pack({k:'Identidade secreta',w:1.2,cd:30,scen:'heroi',when:HW(sc=>!sc.rev),who:'parent'},[
+  ['{p} desconfia','{p} percebeu que você some sempre que aparece {codinome} na TV.',['Contar a verdade|sab bond+10 h+6|{p} me abraçou e disse que sempre soube que eu era especial.','Negar|bond-4 sec+2|{p} fingiu que acreditou.']],
+  ['Almoço de domingo','{p} quer almoço de família todo domingo, sem desculpas.',['Ir|bond+10 h+8 crime+5|Comi lasanha. A cidade se virou.','Faltar por causa de uma missão|bond-8 rep+4|{p} deixou o prato no forno mesmo assim.']],
+]);
+// ---------- identidade revelada ----------
+pack({k:'Identidade revelada',w:1.4,cd:25,scen:'heroi',when:HW(sc=>!!sc.rev)},[
+  ['Repórteres na porta','Há repórteres acampados na porta da sua casa há três dias.',['Dar uma entrevista para eles irem embora|rep+4 h-2|Foram embora. Voltaram no dia seguinte.','Sair pela janela|h-2|Vivo como um fugitivo na própria casa.']],
+  ['Ameaças nas redes','Você recebe centenas de ameaças contra sua família nas redes sociais.',['Denunciar à polícia|?50 h+2|Prenderam dois.|h-6|Nada aconteceu.','Apagar as contas|h+2 follow-5000|Silêncio. Melhor assim.']],
+  ['Fã obsessivo','Um fã sabe seu endereço e aparece todo dia com presentes.',['Conversar com ele|?car k+4 h+2|Ele entendeu e prometeu parar.|h-4|Ele voltou no dia seguinte.','Chamar a polícia|h+0|Agora ele tem medida protetiva.']],
+  ['Ataque à casa','Alguém pichou "TRAIDOR" no muro da sua casa e quebrou as janelas.',['Consertar e seguir|$-3000 h-4|Janelas novas. Paciência velha.','Mudar de casa|$-15000 h+4|Endereço novo. Por enquanto, ninguém sabe.']],
+  ['Vida normal impossível','Você não consegue mais ir ao mercado sem ser cercad{o} por pessoas pedindo selfie.',['Tirar foto com todo mundo|rep+6 h-4|Duzentas selfies e um pacote de arroz.','Pedir delivery para sempre|h-2|Ficou caro.']],
+  ['Vilão no portão','Um capanga de {inimigo} deixa um envelope no seu portão: fotos de toda a sua família.',['Esconder todo mundo|esc h-4|Mandei todos para fora da cidade.','Ir atrás de {inimigo}|?pwr pista+20 rep+4|Achei o capanga e ele falou.|hl-15|Era armadilha.']],
+]);
+pack({k:'Identidade revelada',w:1.4,cd:25,scen:'heroi',when:HW(sc=>!!sc.rev),who:'parent'},[
+  ['{p} perdeu o emprego','{p} foi demitid{o2} porque a empresa "não quer problemas com vilões".',['Ajudar com dinheiro|$-10000 bond+12|Paguei as contas do mês.','Pedir desculpas|bond+4 h-6|Não foi culpa minha, mas é por minha causa.']],
+  ['{p} ameaçad{o2}','{p} recebeu um telefonema de alguém que sabia tudo sobre a rotina da família.',['Levar {p} para um esconderijo|esc bond-4|Seguro, mas longe de casa.','Ficar de guarda|?pwr bond+8|Ninguém apareceu.|famhurt|Apareceram. Cheguei tarde.']],
+]);
+pack({k:'Identidade revelada',w:1.4,cd:25,scen:'heroi',when:HW(sc=>!!sc.rev),who:'child'},[
+  ['{p} sofre na escola','{p} sofre perseguição na escola por ser filh{o2} de {codinome}.',['Mudar de escola|$-8000 bond+8|Escola nova, sobrenome novo na lista de chamada.','Conversar com a diretora|?car bond+6|Resolveu.|bond-6|Não adiantou.']],
+  ['{p} sequestrad{o2}','Capangas de {inimigo} levaram {p} da porta da escola.',['Ir resgatar agora|?pwr bond+15 rep+8|Trouxe {p} de volta sem um arranhão.|famdie|Cheguei tarde demais.','Chamar todos os aliados|?pwr+10 bond+12|Resgatamos {p} juntos.|famhurt|{p} saiu ferid{o2}.']],
+]);
+pack({k:'Identidade revelada',w:1.4,cd:25,scen:'heroi',when:HW(sc=>!!sc.rev),who:'sib'},[
+  ['{p} usa seu nome','{p} está dando entrevistas pagas sobre "a infância de {codinome}".',['Pedir que pare|?car bond+2|Parou.|bond-10|Brigamos feio.','Deixar|h-4 sec-0|Pelo menos está ganhando dinheiro.']],
+  ['{p} atacad{o2}','{p} foi atacad{o2} na saída do trabalho por gente que odeia heróis.',['Ir ao hospital|bond+10 h-4|{p} vai ficar bem. Mas disse que preferia não ser meu irmão hoje.','Caçar os agressores|?pwr rep+6 k-2|Achei todos.|hl-8|Não achei ninguém.']],
+]);
+// ---------- família (vida real) ----------
+pack({k:'Família',w:1.1,cd:35,scen:'heroi',who:'parent',when:HW(()=>true)},[
+  ['{p} doente','{p} está internad{o2} e pergunta por você.',['Visitar todos os dias|bond+12 h-4 crime+6|Segurei a mão de {p} toda tarde.','Pagar o melhor hospital|$-15000 bond+8|O melhor tratamento da cidade.']],
+  ['Conselho de {p}','{p} diz que tem orgulho de você, mesmo sem saber de tudo.',['Agradecer|bond+8 h+8|Fazia tempo que eu não ouvia isso.','Desabafar|bond+10 h+6 sec-4|Falei demais, mas foi bom.']],
+]);
+pack({k:'Família',w:1.1,cd:35,scen:'heroi',who:'child',when:HW(()=>true)},[
+  ['{p} quer ser herói','{p} amarrou uma toalha nas costas e pulou do sofá gritando "{codinome}!"',['Rir e brincar junto|bond+12 h+10|Voamos pela sala. Bom, eu voei.','Explicar que heróis correm perigo|bond+4 h-2|{p} ficou pensativ{o2}.']],
+  ['Apresentação na escola','{p} tem apresentação na escola hoje, no horário da patrulha.',['Ir à apresentação|bond+12 crime+6 h+8|{p} me viu na plateia e acenou no meio da música.','Patrulhar|bond-10 rep+4|{p} procurou meu rosto na plateia.']],
+]);
+// ---------- amor na vida real ----------
+pack({k:'Amor',w:1.3,cd:25,scen:'heroi',who:'partner',when:HW(()=>true)},[
+  ['{p} desconfia','{p} acha que suas saídas no meio da noite são traição.',['Contar que é {codinome}|sab ?60 bond+12 h+6|{p} riu, chorou e me beijou. "Era isso? Achei que fosse outra pessoa."|bond-10 sec-10|{p} não acreditou e contou para as amigas que estou louc{o}.','Inventar desculpas|?car bond-2|Colou, por enquanto.|bond-15|{p} jogou minhas roupas pela janela.']],
+  ['Jantar de aniversário de namoro','Hoje é aniversário de namoro com {p}, mas {inimigo} está atacando o porto.',['Ficar no jantar|bond+12 crime+8 h+6|A cidade sobreviveu. Nosso amor também.','Sair correndo|bond-12 rep+8|{p} jantou sozinh{o2}. De novo.','Resolver rápido e voltar|?sc.pw bond+8 rep+6|Voltei antes da sobremesa!|bond-8 hl-6|Voltei sujo de fuligem, duas horas depois.']],
+  ['{p} em perigo','{p} estava no prédio que {inimigo} explodiu hoje.',['Salvar {p} primeiro|?pwr bond+15 rep-2|Tirei {p} dos escombros. Outros ficaram sem ajuda.|famhurt|Cheguei tarde.','Salvar todo mundo por ordem|?pwr rep+12 bond+6|Salvei todos, inclusive {p}.|famhurt rep+8|Salvei quase todos. {p} se feriu.']],
+  ['{p} sabe demais','{p} sabe quem você é e vive pedindo para você usar o poder em casa.',['Usar o poder para lavar a louça|h+6 bond+8|Lavei duzentos pratos em três segundos.','Explicar que não é brinquedo|bond-4|{p} fez bico.'],{when:HW(sc=>{ const p=partner(); return !!p&&!!sc.sab[p.id]; })}],
+  ['Pedido de casamento','Você pensa em pedir {p} em casamento, mas teme que vire alvo.',['Pedir mesmo assim|?55 rnoivo h+12|{p} disse sim!|bond-6|{p} disse que precisa pensar.','Esperar a paz|bond-4|Quando {inimigo} cair.'],{when:HW(()=>{ const p=partner(); return !!p&&p.rel==='namoro'; })}],
+  ['Casamento de herói','{p} quer casar logo. Você quer, mas a cerimônia vai ser um alvo.',['Casar em segredo|rcasar h+15|Casamos num cartório de bairro, com dois aliados de testemunha.','Casar em grande estilo|$-30000 rcasar h+12 sec-8|Festa linda. A imprensa toda na porta.','Adiar|bond-8|{p} ficou magoad{o2}.'],{when:HW(()=>{ const p=partner(); return !!p&&p.rel==='noivo'; })}],
+  ['Filho de herói','{p} quer ter um filho. Você pensa nos vilões.',['Topar|rgrav bond+10|Vamos ter um bebê!','Pedir para esperar|bond-8|{p} entendeu, mas ficou triste.'],{when:HW(sc=>{ const p=partner(); return !!p&&p.gender!==S.me.gender&&!sc.rgrav; })}],
+  ['Ciúmes de aliado','{p} está com ciúmes de alguém da sua equipe.',['Apresentar os dois|?car bond+6|Viraram amigos.|bond-8|Foi um desastre.','Dizer que é só trabalho|bond-2|Meio verdade.']],
+  ['Encontro sem máscara','Você e {p} conseguem um dia inteiro sem alarmes.',['Piquenique no parque|bond+12 h+10|O dia mais normal e mais feliz em meses.','Passar o dia no sofá|bond+8 h+8|Pizza, filme e celular desligado.']],
+  ['{p} quer terminar','{p} diz que não aguenta mais dividir você com a cidade inteira.',['Prometer mais tempo juntos|?car bond+10|{p} me deu mais uma chance.|breakup h-15|Acabou.','Aceitar|breakup h-12|Doeu, mas eu entendo.'],{when:HW(()=>{ const p=partner(); return !!p&&p.bond<45; })}],
+  ['Vilã apaixonada','Uma vilã se declarou para {codinome} ao vivo. {p} assistiu.',['Explicar|?car bond+2|{p} riu da situação.|bond-12|{p} não achou graça.','Prender a vilã na frente das câmeras|rep+8 bond+4|Recado dado.']],
+  ['Viagem romântica','{p} comprou passagens para um fim de semana na praia.',['Ir|bond+14 h+12 crime+10|Dois dias sem uniforme. A cidade não acabou.','Ir, mas levar o rádio da polícia|bond+4 h+4|{p} jogou o rádio no mar.']],
+]);
+
 // ===== Sons: tudo sintetizado com Web Audio (sem arquivos), efeitos leves e música ambiente baixinha =====
 const SND={ctx:null,master:null,fx:null,mus:null,timer:null,last:{},step:0};
 const sndOn=()=>META.sfx!==false, musOn=()=>META.music!==false;
@@ -8952,7 +9533,7 @@ function hideSplash(){
 // ===== Teste automático (abre com #teste no endereço) =====
 function selfTest(){
   const errs={},lives=[]; let years=0,events=0,actions=0;
-  const T=(name,fn)=>{ try{ actions++; const r=fn(); if(S&&S.me&&!isFinite(S.me.money)){ const k='NaN após '+name; errs[k]=(errs[k]||0)+1; S.me.money=0; } return r; }catch(e){ const k=name+': '+e.message; errs[k]=(errs[k]||0)+1; if(errs[k]===1) errs[k+' @']=(e.stack||'').split('\n').slice(1,3).join(' | '); } };
+  const T=(name,fn)=>{ window.__T=name; (window.__TR=window.__TR||[]).push(name); if(window.__TR.length>30) window.__TR.shift(); try{ actions++; const r=fn(); if(S&&S.me&&!isFinite(S.me.money)){ const k='NaN após '+name; errs[k]=(errs[k]||0)+1; S.me.money=0; } return r; }catch(e){ const k=name+': '+e.message; errs[k]=(errs[k]||0)+1; if(errs[k]===1) errs[k+' @']=(e.stack||'').split('\n').slice(1,3).join(' | '); } };
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
@@ -9065,14 +9646,27 @@ function selfTest(){
   const adv=[]; for(const id of Object.keys(SCEN)){ let win=0,days=0,n=0;
     for(let k=0;k<8;k++){ T('advLife',()=>{ newLife({}); const m=S.me; while(m.alive&&m.age<22){ S.pending=[]; ageUp(); } m.alive=true; m.prison=null; S.pending=[]; MQ.length=0; scStart(id); if(id==='isekai') S.scen.cls=R.pick(Object.keys(CLASSES)); });
       const before=(S.me.c.scenWin||0); let g=0;
-      while(S.scen&&g++<(id==="isekai"?160:80)){ T('advDay:'+id,()=>{ scNextDay(); }); let e2=0; while(S.scen&&S.pending.length&&e2++<12){ const e=S.pending.shift(); if(!evValid(e)) continue; const ev=EVENTS[e.id]; events++; T('advEv:'+id+':'+e.id,()=>{ const sh=ev.show(e.d); if(sh.ch.length<2) errs['só 1 escolha: '+e.id]=1; const c=R.pick(sh.ch); const r=ev.pick(c[1],e.d); chk(e.id,[sh.t,sh.x,c[0],r]); }); T('advCheck',scCheck); }
+      while(S.scen&&g++<(id==="isekai"?160:id==="heroi"?110:80)){ T('advDay:'+id,()=>{ scNextDay(); }); let e2=0; while(S.scen&&S.pending.length&&e2++<12){ const e=S.pending.shift(); if(!evValid(e)) continue; const ev=EVENTS[e.id]; events++; T('advEv:'+id+':'+e.id,()=>{ const sh=ev.show(e.d); if(sh.ch.length<2) errs['só 1 escolha: '+e.id]=1; const c=R.pick(sh.ch); const r=ev.pick(c[1],e.d); chk(e.id,[sh.t,sh.x,c[0],r]); }); T('advCheck',scCheck); }
         if(S.scen) T('advAct:'+id,scenRandomDay); if(S.scen) T('advCheck',scCheck); if(S.scen) T('advViews:'+id,()=>{ [V.scLocal,V.scActs,V.scCrew,V.scItems,V.scMe].concat(id==='isekai'?[V.iskMe,V.iskMagic,V.iskVila]:id==='zumbi'?[V.zMe,V.zScav,V.zExp,V.zCraft,V.zFac,V.zBase]:[]).forEach(v=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }); crew().forEach(c=>{ const r=V.scMember(c); if(r) r.items.map(rowHtml).join(''); }); renderScen(); }); }
-      if(S.scen){ if(id!=='zumbi') errs['aventura não terminou: '+id]=1; else days+=S.scen.dia; S.scen=null; } n++; days+=(S.log[S.log.length-1].lines.map(l=>typeof l==='string'?l:l.t).join(' ').match(/: (\d+) (dia|sol)/)||[0,0])[1]*1; if((S.me.c.scenWin||0)>before) win++; MQ.length=0; }
+      if(S.scen){ if(!['zumbi','heroi'].includes(id)) errs['aventura não terminou: '+id]=1; else days+=S.scen.dia; S.scen=null; } n++; days+=(S.log[S.log.length-1].lines.map(l=>typeof l==='string'?l:l.t).join(' ').match(/: (\d+) (dia|sol)/)||[0,0])[1]*1; if((S.me.c.scenWin||0)>before) win++; MQ.length=0; }
     T('advSweep:'+id,()=>{ newLife({}); S.me.age=25; scStart(id); if(id==='isekai'){ S.scen.cls='mago'; iskEnsure(S.scen); S.scen.ouro=3000; S.scen.lvl=6; vilaFound('Teste'); } if(id==='zumbi'){ zEnsure(S.scen); zFoundBase('Teste'); } for(let i=0;i<4;i++){ scNextDay(); } S.pending=[]; const snap=JSON.stringify(S); let nev=0;
       for(const [eid,ev] of Object.entries(EVENTS)){ if(ev.scen!==id||!ev.w) continue; nev++; T('advVarre:'+eid,()=>{ S=JSON.parse(snap); if(ev.when&&!ev.when(S.me)){ S.scen.crew.length||mkCrew(); } const d=ev.prep?ev.prep(S.me):{}; if(d==null) return; const sh=ev.show(d); if(sh.ch.length<2) errs['só 1 escolha: '+eid+' ('+sh.t+')']=1; for(const c of sh.ch){ S=JSON.parse(snap); const r=ev.pick(c[1],d); chk(eid,[sh.t,sh.x,c[0],r]); } swept++; }); }
       S=JSON.parse(snap); S.scen=null; adv.push(`${id}: ${nev} eventos`); });
     adv.push(`${id}: ${win}/${n} vitórias, média ${(days/n).toFixed(1)} dias`); }
   lives.unshift('AVENTURAS: '+adv.join(' · '));
+  // romance nos modos: namoro, parto de verdade e volta para a vida real com o par e o filho
+  T('romance',()=>{ for(const id of ['zumbi','ilha','isekai','marte']){ newLife({}); const m=S.me; m.age=25; m.gender='F'; m.pref='M'; m.alive=true; S.pending=[]; scStart(id); if(id==='isekai') S.scen.cls='mago'; UI.close();
+      const c=mkCrew({gender:'M',age:27}); c.am=90; romStart(c); if(!romPar()) errs['romance: sem par em '+id]=1; c.par='casado'; let tries=0; while(!S.scen.grav&&tries++<40) romGrav(c); if(!S.scen.grav){ errs['romance: sem gravidez '+id]=1; continue; }
+      const n0=crew().length; S.pending=[]; EVENTS.rom_parto.pick('g',{cid:c.id}); if(crew().length!==n0+1||!crew().some(x=>x.filho)) errs['romance: parto não criou bebê '+id]=1;
+      const k0=kids().length; scenEnd(true,'teste'); if(!partner()||partner().first!==c.first) errs['romance: par não voltou '+id]=1; if(kids().length!==k0+1) errs['romance: filho não voltou '+id]=1; } });
+  // herói: equipe conta como emprego, lei, prisão de contenção, ataque à família e anos passando
+  T('heroiVida',()=>{ for(let k=0;k<6;k++){ newLife({}); const m=S.me; m.age=24; m.alive=true; m.prison=null; S.pending=[]; scStart('heroi'); const sc=S.scen; hEnsure(sc); sc.rep=70;
+      const a0=m.age; m.job={hero:'liga',lvl:0,perf:60,yrs:0,co:HTEAMS.liga.n}; if(!/Liga/.test(occupation())) errs['herói: equipe não aparece como ocupação']=1; if(jobSalary(m.job)<=0) errs['herói: salário zero']=1;
+      const $0=m.money; S.pending=[]; scNextDay(); if(!S.scen) continue; if(m.age!==a0+1) errs['herói: ano não passou']=1; if(m.money<=$0-1&&m.job) errs['herói: salário não caiu']=1;
+      EVENTS.h_lei.pick('n'); if(sc.reg!=='nao') errs['herói: recusa não virou crime']=1; if(m.job) errs['herói: equipe que segue a lei não expulsou']=1;
+      const y0=m.age; EVENTS.h_cerco.pick('r'); if(!S.scen) errs['herói: prisão encerrou o modo']=1; else if(m.age<=y0||sc.reg!=='sim') errs['herói: prisão de contenção não passou anos']=1;
+      if(!m.alive) continue; const fam=famAll()[0]; if(fam){ hRevela(sc,'teste'); S.pending=[]; const d={pid:fam.id,tp:'sequestro'}; const sh=EVENTS.h_familia.show(d); const r=EVENTS.h_familia.pick('s',d); if(typeof r!=='string') errs['herói: ataque à família sem texto']=1; }
+      for(let y=0;y<5&&S.scen&&m.alive;y++){ S.pending=[]; scNextDay(); } if(S.scen){ SCEN.heroi.acts.aposentar.fn(S.scen); if(S.scen) errs['herói: aposentar não encerrou']=1; if(m.job&&m.job.hero) errs['herói: emprego de herói ficou depois de aposentar']=1; } } });
   // regras da prisão: perde emprego e faculdade, não matricula, escola perde o ano; faculdade só com ensino médio
   T('regrasPrisao',()=>{ for(let k=0;k<12;k++){ newLife({}); const m=S.me; m.age=20; m.alive=true; m.prison=null; m.edu.cur=null;
       const r0=enroll('uni',COURSES[0],'particular','self'); if(!hasDeg('medio')&&!/ensino médio/.test(r0)) errs['faculdade sem ensino médio: '+r0]=1;
@@ -9129,7 +9723,7 @@ function advDiag(){ const out=[];
   for(const id of Object.keys(SCEN)){ let win=0,days=0,hl=0,san=0,other=0; const snaps=[];
     for(let k=0;k<40;k++){ newLife({}); const m=S.me; m.age=25; m.alive=true; m.prison=null; m.fight=40; S.pending=[]; MQ.length=0; scStart(id); if(id==='isekai'){ S.scen.cls=R.pick(Object.keys(CLASSES)); UI.close(); }
       const w0=m.c.scenWin||0; let g=0, last=null;
-      while(S.scen&&g++<(id==='isekai'?160:id==='zumbi'?300:90)){ const sc=S.scen; last={hl:sc.hl,san:sc.san,fome:sc.fome,dia:sc.dia}; play(sc); scCheck(); if(!S.scen) break; scNextDay(); let e=0; while(S.scen&&S.pending.length&&e++<10){ const p=S.pending.shift(); const ev=EVENTS[p.id]; if(!evValid(p)) continue; const sh=ev.show(p.d); ev.pick(R.pick(sh.ch)[1],p.d); scCheck(); } if(S.scen&&sc.dia===8) snaps.push(`hl${Math.round(sc.hl)} san${Math.round(sc.san)} f${Math.round(sc.fome)}${sc.o2!=null?' o2'+Math.round(sc.o2):''}${sc.lvl?' lv'+sc.lvl:''}`); }
+      while(S.scen&&g++<(id==="isekai"?160:id==="zumbi"?300:id==="heroi"?110:90)){ const sc=S.scen; last={hl:sc.hl,san:sc.san,fome:sc.fome,dia:sc.dia}; play(sc); scCheck(); if(!S.scen) break; scNextDay(); let e=0; while(S.scen&&S.pending.length&&e++<10){ const p=S.pending.shift(); const ev=EVENTS[p.id]; if(!evValid(p)) continue; const sh=ev.show(p.d); ev.pick(R.pick(sh.ch)[1],p.d); scCheck(); } if(S.scen&&sc.dia===8) snaps.push(`hl${Math.round(sc.hl)} san${Math.round(sc.san)} f${Math.round(sc.fome)}${sc.o2!=null?' o2'+Math.round(sc.o2):''}${sc.lvl?' lv'+sc.lvl:''}`); }
       if(S.scen){ S.scen=null; other++; } days+=last?last.dia:0; if((m.c.scenWin||0)>w0) win++; else if(last&&last.hl<=last.san) hl++; else san++; }
     out.push(`${id}: vitórias ${win}/40 · média ${(days/40).toFixed(1)} dias · derrotas por saúde ${hl}, por sanidade ${san}, sem fim ${other}\n   dia 8: ${snaps.slice(0,6).join(' | ')}`); }
   const o=document.createElement('pre'); o.id='out'; o.textContent=out.join('\n'); o.style.cssText='position:fixed;inset:0;z-index:999;background:#fff;color:#000;overflow:auto;padding:10px;font-size:11px;white-space:pre-wrap'; document.body.appendChild(o); document.title='AVENTURA OK'; }
