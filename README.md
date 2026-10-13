@@ -7,7 +7,13 @@
 <p align="center">
   <b>Um simulador de vida em português.</b><br>
   Nasça, cresça, estude, trabalhe, ame, erre feio, seja preso, vire herói… e comece de novo.<br>
-  Para <b>Windows</b> e <b>Android</b>, 100% offline.
+  Para <b>Windows</b>, <b>Android</b> e navegador, 100% offline depois de instalado.
+</p>
+
+<p align="center">
+  <a href="https://madeiragab.github.io/newlife/"><b>▶ Jogar no navegador</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/madeiragab/newlife/releases/latest"><b>⬇ Baixar para Windows e Android</b></a>
 </p>
 
 <p align="center">
@@ -110,6 +116,7 @@ Baixe a versão mais recente na aba **[Releases](../../releases)**:
 
 - **Windows**: `NewLife.exe`. É só abrir; o progresso fica salvo em `%LOCALAPPDATA%\OutraVida\saves`.
 - **Android** (5.0 ou mais novo): `NewLife.apk`. Passe para o celular e abra; o Android vai pedir para permitir instalação de fontes desconhecidas.
+- **Navegador**: [madeiragab.github.io/newlife](https://madeiragab.github.io/newlife/). O progresso fica salvo no próprio navegador.
 
 Toque em **Envelhecer** para passar um ano. Use **Carreira**, **Bens**, **Relações** e **Atividades** para viver a vida.
 
@@ -122,6 +129,7 @@ Tudo é feito por scripts PowerShell no Windows.
 | `.\build.ps1` | Junta `src/` em `outra-vida.html` (navegador) e `desktop/outra-vida.html` (app) | Nada |
 | `.\make-exe.ps1` | Gera o ícone e compila `NewLife.exe` com pywebview + PyInstaller | Python 3 (o script cria um ambiente virtual sozinho) e Microsoft Edge |
 | `.\make-apk.ps1` | Compila `NewLife.apk` sem Gradle (aapt2, javac, d8, zipalign, apksigner) | Android SDK em `%LOCALAPPDATA%\Android\Sdk` (`platforms;android-34` e `build-tools;34.0.0`) e JDK 17 |
+| `.\publish-web.ps1` | Atualiza a versão do navegador (branch `gh-pages`) | Git com acesso ao repositório |
 
 > Na primeira compilação do APK, o script cria uma chave de assinatura em `android/newlife.keystore`. **Guarde essa chave**: sem ela não dá para atualizar o app por cima. Ela está no `.gitignore` e nunca deve ir para o repositório.
 
