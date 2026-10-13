@@ -9,7 +9,9 @@ git clone -q --branch gh-pages --single-branch $remote $tmp
 Copy-Item (Join-Path $root 'outra-vida.html') (Join-Path $tmp 'index.html') -Force
 Push-Location $tmp
 git add -A
-git commit -q -m "Atualiza a versão do navegador"
+$msg = Join-Path $env:TEMP 'newlife-msg.txt'
+[IO.File]::WriteAllText($msg, "Atualiza a versão do navegador`n", (New-Object System.Text.UTF8Encoding $false))
+git commit -q -F $msg
 git push -q origin gh-pages
 Pop-Location
 Remove-Item $tmp -Recurse -Force
