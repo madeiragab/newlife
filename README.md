@@ -83,22 +83,50 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 ### 🌍 E mais
 - **Autoescola** com prova de placas (22 placas desenhadas), passaporte (inclusive falsificado) e emigração.
 - **80 doenças**, com tratamentos, doenças crônicas e câncer.
-- **Mais de 640 eventos** coerentes com idade, carreira, relacionamento e situação.
+- **Mais de 2.400 eventos**: 640 na vida normal, coerentes com idade, carreira e situação, e mais de 1.800 nos modos fictícios.
 - Selos, cemitério, desafios, dificuldade, herdeiros (continue a vida com um filho).
 - **Sons e música** sintetizados (sem arquivos de áudio), tema claro e escuro, efeito de dano.
 - Segredos para quem zerar o jogo. 😉
 
 ## Modos fictícios
 
-A partir dos 18 anos, a vida pode tomar um rumo fora do comum:
+A partir dos 18 anos (Menu → Modos fictícios), você pode viver uma aventura contada **em dias**, fora da vida normal. Enquanto ela dura, a vida real fica pausada (carreira, bens e relações aparecem com cadeado) e você não envelhece. A tela vira a da aventura: **Local**, **Itens**, **Próximo dia**, **Grupo** e **Ações**.
 
-| Modo | Resumo |
-|---|---|
-| 🧟 **Apocalipse zumbi** | Suprimentos, abrigo, grupo e a corrida pela cura. Mordido? Esconder, amputar ou arriscar a vacina. |
-| 🏝️ **Ilha deserta** | Comida, água, abrigo, fogueira e SOS até um navio te encontrar. |
-| ⚔️ **Isekai** | Atropelado, você renasce em Eldoria: classe, níveis, masmorras, companheiros e o Rei Demônio. |
-| 🦸 **Superpoderes** | Um poder aleatório, um arqui-inimigo e uma identidade secreta para proteger (ou virar vilão). |
-| 🚀 **Colônia em Marte** | Oxigênio, comida e moral até voltar para a Terra. |
+- **3 de energia por dia**: cada ação e cada lugar só pode ser feito uma vez por dia.
+- **Grupo** com nome, rosto, arma, saúde e lealdade; **itens** como cartas com estado de 0 a 100% (comida estraga, armas quebram).
+- **Eventos de escolha** próprios de cada modo, com consequências de verdade.
+- Perdeu? Você **acorda** e a vida continua. Venceu? Volta com recompensas.
+
+| Modo | Resumo | Eventos |
+|---|---|:-:|
+| 🧟 **Pesadelo zumbi** | Lidere um comboio até o Porto Seguro. Cada dia é um destino novo com nível de ameaça e pontos de interesse. Carros quebram e gastam gasolina, a carga é limitada, o grupo precisa de armas e comida. Mordido? Esconder, amputar ou contar ao grupo. | 200+ |
+| 🏝️ **Ilha deserta** | Explore praia, selva, cachoeira, caverna e os destroços do avião. Fome, sede, abrigo, fogueira, SOS e uma jangada. | 200+ |
+| ⚔️ **Isekai** | Você acorda numa das 4 cidades de Eldoria (sorteada). Classe, níveis, atributos, grimório com 16 magias, masmorras, companheiros e o Rei Demônio. Dá para morar numa cidade ou **fundar sua vila**. | 980+ |
+| 🦸 **Superpoderes** | Um poder, um codinome e um arqui-inimigo. Ocorrências pelos bairros, pistas, identidade secreta, traje e a liga dos heróis. | 200+ |
+| 🚀 **Colônia em Marte** | Oxigênio, comida e sanidade da equipe, rover, pesquisa e expedições até a nave de resgate no sol 30. | 200+ |
+
+### ⚔️ Isekai em detalhe
+
+- **Ficha do herói**: Força, Magia, Agilidade e Vitalidade, com pontos para distribuir a cada nível e habilidades de classe nos níveis 5, 10 e 15.
+- **Grimório**: Bola de Fogo, Cura, Escudo Arcano, Teleporte, Ressurreição e outras. Gastam mana, sobem de rank com o uso e são aprendidas por nível, na Academia arcana e na Torre de magia.
+- **4 cidades**, cada uma com mais de 100 eventos próprios: **Vila de Aurora** (vida no campo), **Valmor** (a capital: corte, nobres e intriga), **Ferro Fundo** (cidade dos anões) e **Aerion** (cidade flutuante dos magos). Dá para trabalhar, ganhar reputação, comprar casa e se mudar.
+- **Sua própria vila**, com mais de 400 eventos, que cresce de **Acampamento → Aldeia → Vila → Cidade → Grande cidade**:
+  - você escolhe o nome (e pode trocar depois);
+  - os moradores consomem **comida, roupas e mantimentos** todo dia;
+  - **16 construções** com níveis (casas, fazenda, tecelagem, serraria, mercado, escola, muralha, hospital, torre de magia, universidade…);
+  - **16 tecnologias** (agricultura, escrita, medicina, engenharia, imprensa, máquina a vapor…);
+  - **leis**: impostos, ração por morador, entrada de novos moradores (aberta, com seleção ou fechada) e se moradores podem entrar no seu grupo.
+
+<p align="center">
+  <img src="docs/img/zumbi.png" width="200" alt="Pesadelo zumbi">
+  <img src="docs/img/zumbi-grupo.png" width="200" alt="Grupo do comboio">
+  <img src="docs/img/isekai-vila.png" width="200" alt="Sua vila no isekai">
+  <img src="docs/img/isekai-magia.png" width="200" alt="Grimório de magias">
+</p>
+<p align="center">
+  <img src="docs/img/heroi.png" width="200" alt="Superpoderes">
+  <img src="docs/img/ilha.png" width="200" alt="Ilha deserta">
+</p>
 
 ## Galeria
 
@@ -106,7 +134,7 @@ A partir dos 18 anos, a vida pode tomar um rumo fora do comum:
 |:-:|:-:|:-:|
 | <img src="docs/img/relacoes.png" width="230"><br>Relações | <img src="docs/img/emprego.png" width="230"><br>Emprego | <img src="docs/img/prova.png" width="230"><br>Prova |
 | <img src="docs/img/faculdade.png" width="230"><br>Faculdade | <img src="docs/img/briga.png" width="230"><br>Briga | <img src="docs/img/faccao.png" width="230"><br>Facção |
-| <img src="docs/img/placa.png" width="230"><br>Autoescola | <img src="docs/img/modos.png" width="230"><br>Modos fictícios | <img src="docs/img/zumbi.png" width="230"><br>Apocalipse zumbi |
+| <img src="docs/img/placa.png" width="230"><br>Autoescola | <img src="docs/img/modos.png" width="230"><br>Modos fictícios | <img src="docs/img/zumbi.png" width="230"><br>Pesadelo zumbi |
 
 <p align="center"><img src="docs/img/doencas.png" width="520" alt="Doenças que aparecem no rosto"></p>
 
@@ -141,6 +169,7 @@ Rode `make-exe.ps1` antes do `make-apk.ps1`, porque ele gera o ícone usado pelo
 |---|---|
 | `.\test.ps1` | Abre o jogo no Edge sem janela e simula dezenas de vidas inteiras, testando ações, telas, todos os eventos em várias idades, regras da prisão, equilíbrio das brigas e textos com lacunas. |
 | `.\quality.ps1` | Relatório de qualidade do texto: concordância de gênero, frases repetidas e eventos que nunca aparecem. |
+| `.\aventura.ps1` | Joga cada modo fictício 40 vezes e mostra a taxa de vitória e por que se perde (saúde ou sanidade), para equilibrar a dificuldade. |
 | `.\shots.ps1 -Views demo-rostos` | Tira prints de telas de demonstração (`#demo-…`) para conferir o visual. |
 
 ## Estrutura do projeto
@@ -158,7 +187,12 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   fight.js        artes marciais, brigas por turnos, aulas
   prison.js       vida na prisão
   social.js       relações, autoescola, passaporte, facção, assassino de aluguel
-  scen.js         modos fictícios
+  scen.js         modos fictícios: motor das aventuras (dias, energia, grupo, itens, locais)
+  isekai.js       isekai: atributos, magias e cidades para morar
+  vila.js         isekai: a sua vila (recursos, construções, tecnologias, leis)
+  ev_sc_*.js      eventos de cada modo fictício
+  ev_cid_*.js     eventos das 4 cidades do isekai
+  ev_vila*.js     eventos da sua vila, por fase de crescimento
   sound.js        sons e música sintetizados
   ui.js           telas e menus
 desktop/        app de Windows (pywebview)

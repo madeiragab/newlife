@@ -18,6 +18,7 @@ const WHO={
 function dslChance(tok){
   const mm=tok.match(/^\?([a-z]+(?:\.[a-z]+)?|\d+)([+-]\d+)?$/i); if(!mm) return .5;
   const m=S.me, key=mm[1], mod=+(mm[2]||0);
+  if(S.scen&&typeof scChance==='function'){ const sv=scChance(key); if(sv!=null) return Math.max(.03,Math.min(.97,(sv+mod)/100)); }
   let v= /^\d+$/.test(key)?+key : key==='sm'?m.smarts : key==='lk'?m.looks : key==='hl'?m.health : key==='h'?m.happy : key==='k'?m.karma : key==='fight'?m.fight
     : key==='perf'?(m.job?m.job.perf:50) : key==='grade'?(m.edu.cur?m.edu.cur.grade:50) : key==='appr'?(m.office?m.office.appr:50) : key==='pop'?(m.royal?m.royal.pop:50)
     : key.startsWith('tal.')?(m.talent[key.slice(4)]||30) : 50;
@@ -27,6 +28,7 @@ function dslApply(s,d){
   const m=S.me, out=[];
   for(const tok of String(s||'').trim().split(/\s+/).filter(Boolean)){
     let mm;
+    if(S.scen&&typeof scTok==='function'&&scTok(tok,d,out)) continue;
     if(mm=tok.match(/^(h|hl|sm|lk|k|f|perf|grade|bond|appr|pop|behav|biz|raise|jail|follow)([+-]\d+)$/)){ const n=+mm[2];
       switch(mm[1]){
         case 'h': st('happy',n); break; case 'hl': st('health',n); break; case 'sm': st('smarts',n); break; case 'lk': st('looks',n); break;
@@ -77,6 +79,8 @@ function pack(gr,list){
       when:m=>(o.min==null||m.age>=o.min)&&(o.max==null||m.age<=o.max)&&(!gr.when||gr.when(m))&&(!op.when||op.when(m))&&(!o.who||!!WHO[o.who]()),
       prep:m=>{ const v=o.v||[100,2000]; const d=Object.assign(strangers(m,o),{v:amt(v[0],v[1]),v2:amt(v[0]*4,v[1]*4),xi:R.int(0,(Array.isArray(text)?text.length:1)-1),
           co:m.job?m.job.co:m.biz?m.biz.n:'empresa',lugar:R.pick(TRIPS),coisa:R.pick(['um tênis caro','fones novos','um videogame','roupas','um celular usado','ingressos de show']),prod:R.pick(['refrigerante','perfume','carro','banco digital','sabão em pó','aplicativo de comida']),palavra2:R.pick(['Bom dia!','Cadê o café?','Gostosa!','Olha o ladrão!','Vai, Corinthians!','Para de gritar!','Alô?']),dieta:R.pick(['ovo','jejum','abacate','suco verde','sopa']),bico:R.pick(['pintura de parede','mudança','garçom num casamento','jardinagem','entregas']),invest:R.pick(['fazendas de gado','criptomoedas','imóveis no exterior','uma startup de energia']),festa:R.pick(['procissões e fogos','um festival de comida de rua','um desfile de carros alegóricos','música e dança na praça','o dia do padroeiro']),objeto:R.pick(['o sofá novo','um par de sapatos','o controle remoto','as almofadas','o carregador do celular']),curso2:R.pick(['padaria','eletricista','informática','corte e costura','marcenaria']),sonho:R.pick(['fazer faculdade','trabalhar com música','abrir uma oficina','ser cozinheir'+oa(),'voltar a jogar futebol']),materia:R.pick(['matemática','física','química','biologia','história','português','geografia']),prof:R.pick(['astronauta','veterinári'+oa(),'advogad'+oa(),'chef de cozinha','engenheir'+oa(),'músico','psicólog'+oa(),'piloto']),palavra:R.pick(['mamã','papá','água','não','bola','au-au','tchau','biscoito']),assunto:R.pick(['trabalho','casamento','dinheiro','mudar de cidade','ter filhos','abrir um negócio']),hobby:R.pick(['culinária japonesa','fotografia','marcenaria','dança de salão','canto','pintura em aquarela','programação']),hobby2:R.pick(['fazer crochê','jogar tênis','cuidar de orquídeas','pescar','aprender piano','fazer trilhas']),comida:R.pick(['torresmo','feijoada','doce','sal','fritura','pão francês']),ocorrencia:R.pick(['incêndio num prédio','assalto a banco','acidente na rodovia','briga generalizada num estádio','pessoa presa num elevador']),job:m.job?jobTitle(m.job).toLowerCase():'',curso:m.edu.cur?m.edu.cur.n:'',city:m.city,pais:countryOf(m.country).n,biz:m.biz?m.biz.n:''});
+        if(o.fant&&typeof fantNames==='function') Object.assign(d,fantNames());
+        if(o.crew){ const cs=typeof crew==='function'?crew():[]; if(!cs.length) return null; const c=R.pick(cs); d.c=c.first; d.co=c.gender==='F'?'a':'o'; d.celn=c.gender==='F'?'ela':'ele'; d.cid=c.id; }
         if(o.who){ const p=WHO[o.who](); if(!p) return null; d.pid=p.id; d.p=p.first; d.ele=p.gender==='F'?'ela':'ele'; d.o2=p.gender==='F'?'a':'o'; d.idade=p.age; }
         return d; },
       show:d=>({k:o.k,t:tp(title,d),x:tp(Array.isArray(text)?text[d.xi]:text,d),ch:choices.map((c,i)=>[tp(c.split('|')[0],d),String(i)])}),

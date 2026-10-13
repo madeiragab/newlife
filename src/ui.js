@@ -76,7 +76,8 @@ function pump(){
     let sh; try{ sh=ev.show(e.d); }catch(err){ S.pending.shift(); showErr(err); return pump(); }
     const who=['pid','p','s','b','k'].map(k=>typeof e.d[k]==='number'?P(e.d[k]):null).find(Boolean);
     const sf=!who&&e.d.n&&String(sh.x).includes(e.d.n)?strangerFace(e.d):null;
-    o={k:sh.k,t:sh.t,x:sh.x,top:who?faceSVG(who,88):sf?faceSVG(sf,88):null,ch:sh.ch.map(([l,key])=>({l,fn:()=>{
+    const cf=!who&&!sf&&e.d.cid&&typeof crewFace==='function'?crewFace(e.d.cid):null;
+    o={k:sh.k,t:sh.t,x:sh.x,top:who?faceSVG(who,88):sf?faceSVG(sf,88):cf,ch:sh.ch.map(([l,key])=>({l,fn:()=>{
       S.pending.shift(); let res; try{ res=ev.pick(key,e.d); }catch(err){ showErr(err); }
       log(sh.t.replace(/[!?.…]+$/,'')+' → '+l+(res?'. '+res:'.'),'choice'); if(res) MQ.unshift({k:sh.k,t:sh.t,x:res});
     }}))};
@@ -615,7 +616,7 @@ window.addEventListener('error',e=>showErr(e.error||e.message));
 // Botão voltar do Android: fecha minijogo/painel; devolve false quando não há nada aberto (aí o app sai)
 window.androidBack=()=>{ const w=id=>{ const e=document.getElementById(id); return e&&!e.hidden; }; if(w('gameWrap')||w('modalWrap')) return true; if(w('sheetWrap')){ UI.back(); return true; } return false; };
 function startApp(){
-  if(/^#(demo|teste|qualidade)/.test(location.hash)) window.NO_SAVE=true;
+  if(/^#(demo|teste|qualidade|aventura)/.test(location.hash)) window.NO_SAVE=true;
   if(!window.DESKTOP){ try{ boot(); }finally{ hideSplash(); } return; }
   let done=false; const go=()=>{ if(done) return; done=true; try{ boot(); }finally{ hideSplash(); } };
   const load=()=>{ try{ window.pywebview.api.load_all().then(all=>{ for(const k in all){ try{ localStorage.setItem(k,all[k]); }catch(e){} } go(); }).catch(go); }catch(e){ go(); } };
@@ -640,11 +641,11 @@ function boot(){
     const idle=$('#sheetWrap').hidden&&$('#modalWrap').hidden&&$('#start').hidden&&$('#death').hidden;
     if(idle&&(e.key===' '||e.key==='+')&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)){ e.preventDefault(); doAge(); }
   });
+  if(location.hash==='#aventura'){ try{ advDiag(); }catch(e){ const o=document.createElement('pre'); o.id='out'; o.textContent='ERRO '+e.message+' '+e.stack; document.body.appendChild(o); } return; }
   if(location.hash==='#teste'){ selfTest(); return; } if(location.hash.startsWith('#qualidade')){ try{ qualityReport(); }catch(e){ const o=document.createElement('pre'); o.id='out'; o.textContent='ERRO '+e.message+' '+e.stack; document.body.appendChild(o); } return; }
   if(location.hash==='#autoano'){ const sv=loadKey(SAVE_KEY); if(sv&&sv.me) S=sv; else newLife({}); for(let i=0;i<3&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[0][1],e.d); log(sh.t+' → '+sh.ch[0][0]+(r?'. '+r:'.'),'choice'); } } save(); render.jump=true; render(); return; }
   if(location.hash.startsWith('#demo')){ const hs=location.hash; newLife({}); setTimeout(()=>{ if(hs.includes('rel')) UI.open(V.relations); if(hs.includes('style')) UI.open(V.style); if(hs.includes('hair')){ UI.open(V.style); UI.push(V.styleHair); } if(hs.includes('act')) UI.open(V.activities); if(hs.includes('person')){ UI.open(V.relations); UI.push(()=>V.person(people('mae')[0]||people()[0])); } if(hs.includes('ev')){ queue('carteira',EVENTS.carteira.prep()); pump(); } if(hs.includes('death')){ die('de teste'); showDeath(); } if(hs.includes('start')) showStart(); if(hs.includes('cars')){ UI.open(V.assets); UI.push(V.cars); } if(hs.includes('pets')){ UI.open(V.activities); UI.push(V.pets); } if(hs.includes('shop')){ UI.open(V.assets); UI.push(V.shop); } if(hs.includes('vis')){ UI.open(V.style); } if(hs.includes('icone')){ document.documentElement.style.background='transparent'; document.body.style.cssText='margin:0;background:transparent'; document.body.innerHTML=appIconSVG(512); return; } if(hs.includes('cenarios')){ S.me.alive=true; S.me.prison=null; UI.open(V.scenPick); }
-    else if(hs.includes('zumbi')){ const m=S.me; m.alive=true; m.prison=null; startScen('zumbi'); S.scen.sup=38; S.scen.def=52; S.scen.cure=24; S.scen.grp=3; render(); UI.open(V.scen); }
-    else if(hs.includes('isekai')){ const m=S.me; m.alive=true; m.prison=null; startScen('isekai'); render(); }
+    else if(/zumbi|isekai|sc-\w+/.test(hs)){ const m=S.me; m.prison=null; while(m.age<20){ m.alive=true; m.health=Math.max(m.health,60); S.pending=[]; ageUp(); } S.pending=[]; m.alive=true; const id=(hs.match(/sc-(\w+)/)||[])[1]||(hs.includes('isekai')?'isekai':'zumbi'); scStart(id); if(id==='isekai'){ UI.close(); S.scen.cls='guerreiro'; } for(let i=0;i<3;i++){ S.pending=[]; scNextDay(); } S.pending=[]; MQ.length=0; render.jump=true; render(); const pane=(hs.match(/-(local|grupo|itens|acoes|vila|magia|ficha)$/)||[])[1]; if(id==='isekai'&&pane&&['vila','magia','ficha'].includes(pane)){ const sc=S.scen; sc.ouro=4200; sc.lvl=9; sc.cls='mago'; iskEnsure(sc); learnSpell(sc,true); learnSpell(sc,true); sc.pts=3; if(pane==='vila'){ vilaFound('Nova Aurora'); const v=sc.vila; v.pop=27; Object.assign(v.b,{casa:4,fazenda:3,tecelagem:2,serraria:2,mercado:1,escola:1,taverna:1,muralha:1}); v.tech=['agricultura','escrita','tear']; v.tier=2; v.res='moeda'; v.pqT=24; v.com=120; v.rou=34; v.man=41; v.fel=78; } } if(pane) UI.open({local:V.scLocal,grupo:V.scCrew,itens:V.scItems,acoes:V.scActs,vila:V.iskVila,magia:V.iskMagic,ficha:V.iskMe}[pane]); }
     else if(hs.includes('doencas')){ const L=[['catapora',8,'F'],['marcas',25,'F'],['cancer_mama',40,'F'],['leucemia',12,'M'],['volta',45,'M'],['vitiligo',30,'M'],['conjuntivite',22,'F'],['sarampo',6,'M'],['catarata',72,'F'],['psoriase',35,'M'],['acne',16,'M'],['verruga',50,'F']];
       document.body.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#fff">'+L.map(([d,a,gd],i)=>{ const q=mkPerson({rel:'tmp',gender:gd,age:a,bond:70}); q.id=i+3; ensureLook(q); q.look.hair=gd==='F'?'longo':'curto'; q.dis=d==='marcas'||d==='volta'?[]:[{id:d,y:0}]; if(d==='marcas') q.genes.pox=1; if(d==='vitiligo') q.genes.vitiligo=1; if(d==='volta') q.hairBack=S.year+2; return '<div style="text-align:center;font:10px sans-serif">'+faceSVG(q,110)+'<br>'+d+'</div>'; }).join('')+'</div>'; }
     else if(hs.includes('faccao')){ const m=S.me; m.prison=null; m.job={spc:'crime',lvl:2,perf:64,yrs:1,lvlYrs:1,co:'Facção',heat:45}; UI.open(V.faccao); }

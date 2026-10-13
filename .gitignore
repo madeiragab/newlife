@@ -29,3 +29,8 @@ env/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# Ajustes de uso único
+tools/bal*.py
+tools/fix*.py
+tools/cut_*.py

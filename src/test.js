@@ -17,8 +17,8 @@ function selfTest(){
     if(m.age>=5&&R.chance(.15)){ const L=R.pick(LESSONS), it=R.pick(L[3]); T('lesson',()=>takeLesson(L[0],it[0],it[2]||L[1],L[2])); }
     if(m.age>=8&&R.chance(.08)){ const ps=people().filter(p=>p.rel!=='pet'); if(ps.length) T('fight',()=>{ startFight({p:R.pick(ps)},'pessoa'); let g=0; while(FIGHT&&!FIGHT.done&&g++<40) fightTurn(R.chance(.08)?null:R.pick(myMoves())); UI.close(); FIGHT=null; }); }
     if(m.age>=13&&R.chance(.2)) T('bico',()=>bico(R.pick(BICOS)));
-    if(m.age>=18&&!S.scen&&!m.prison&&R.chance(.03)) T('scenStart',()=>{ startScen(R.pick(Object.keys(SCEN))); if(S.scen&&S.scen.id==='isekai'&&!S.scen.cls) S.scen.cls=R.pick(Object.keys(CLASSES)); UI.close(); });
-    if(S.scen) T('scenAct',()=>{ for(let i=0;i<3&&S.scen;i++) scenAct(R.pick(Object.keys(SCEN[S.scen.id].acts))); const r=S.scen&&V.scen(); if(r) r.items.map(rowHtml).join(''); });
+    if(m.age>=18&&!S.scen&&!m.prison&&R.chance(.02)) T('scenStart',()=>{ scStart(R.pick(Object.keys(SCEN))); if(S.scen&&S.scen.id==='isekai'&&!S.scen.cls) S.scen.cls=R.pick(Object.keys(CLASSES)); UI.close(); });
+    if(S.scen){ T('scenDay',scenRandomDay); return; }
     if(m.age>=18&&R.chance(.1)) T('passport',()=>R.chance(.8)?getPassport():fakePassport());
     if(m.job&&m.job.spc==='crime') T('faccao',()=>faccao(R.pick(['olho','trafico','cobrar','suborno','contencao','x9','guerra','subir','olho','trafico'])));
     if(m.age>=18&&(m.c.crimes||0)>=3&&R.chance(.1)) T('hit',()=>{ const c=hitContracts(); if(c.length) doHit(0,R.pick(HIT_METHODS)); });
@@ -64,6 +64,19 @@ function selfTest(){
     if(R.chance(.01)&&SNAPS.length) T('time',()=>timeTravel(R.int(0,SNAPS.length-1)));
     if(m.age>=8&&R.chance(.04)) T('body2',()=>body(R.pick(['art','write','comedy'])));
   };
+  const scenRandomDay=()=>{ const sc=S.scen; if(!sc) return; const d=SCEN[sc.id];
+    for(let i=0;i<4&&S.scen;i++){ const r=R.f();
+      if(r<.35){ const p=sc.loc.pois.find(p=>!p.done); if(p&&sc.ap>0){ sc.ap--; p.done=1; d.poi(sc,p); } }
+      else if(r<.7){ const ks=Object.keys(d.acts).filter(k=>k!=='aposentar'&&k!=='zarpar'||R.chance(.05)); const k=R.pick(ks), a=d.acts[k]; if(!(a.min&&!a.min(sc))&&!sc.done[k]&&sc.ap>=(a.ap??1)){ sc.ap-=(a.ap??1); sc.done[k]=1; a.fn(sc,S.me); } }
+      else if(r<.85&&sc.inv.length){ const x=R.pick(sc.inv); if(['comida','agua','remedio','mana','san','o2','vacina','sinal'].includes(itCat(x.id))) scUse(x); else if(itCat(x.id)==='arma'){ sc.inv=sc.inv.filter(y=>y!==x); if(sc.arma) addItem(sc.arma.id,sc.arma.hp,true); sc.arma=x; } }
+      else if(crew().length){ const c=R.pick(crew()); c.lv=Math.min(100,c.lv+5); const w=sc.inv.find(x=>itCat(x.id)==='arma'); if(w&&!c.arma){ sc.inv=sc.inv.filter(y=>y!==w); c.arma=w; } }
+      if(S.scen&&sc.fome>60){ const f=sc.inv.find(x=>itCat(x.id)==='comida'); if(f) scUse(f); } if(S.scen&&sc.hl<40){ const f=sc.inv.find(x=>itCat(x.id)==='remedio'); if(f) scUse(f); }
+      if(S.scen&&sc.id==='ilha'&&sc.sede>60){ const f=sc.inv.find(x=>itCat(x.id)==='agua'); if(f) scUse(f); }
+      if(S.scen&&sc.id==='zumbi'&&R.chance(.15)) sc.stay=1; if(S.scen&&sc.id==='isekai') sc.travel=sc.lvl>=sc.rota*2+1?1:0;
+      if(S.scen&&sc.id==='isekai'){ iskEnsure(sc); while(sc.pts>0){ sc.pts--; sc.at[R.pick(['for','mag','agi','vit'])]++; } const sp=sc.sp.filter(id=>!sc.done['sp_'+id]); if(sp.length&&R.chance(.6)) castSpell(R.pick(sp));
+        if(!sc.vila&&sc.lvl>=4&&sc.ouro>=250) vilaFound('Teste'); if(sc.vila&&R.chance(.5)){ const ks=Object.keys(VILA_B).filter(k=>sc.vila.b[k]<5&&sc.ouro>=VILA_B[k][2]*(sc.vila.b[k]+1)); if(ks.length){ const k=R.pick(ks); sc.ouro-=VILA_B[k][2]*(sc.vila.b[k]+1); sc.vila.b[k]++; } } if(sc.vila&&R.chance(.2)){ sc.vila.imp=R.int(0,2); sc.vila.imig=R.int(0,2); sc.vila.racao=R.int(0,2); } if(sc.vila&&!sc.vila.res){ const c=Object.keys(TECH).filter(t=>!vHas(sc.vila,t)&&(!TECH[t][4]||vHas(sc.vila,TECH[t][4]))); if(c.length) sc.vila.res=R.pick(c); }
+        if(!sc.vila&&atHome(sc)&&!sc.casa&&sc.ouro>=ISK_TOWNS[sc.morada][3]&&R.chance(.3)){ sc.ouro-=ISK_TOWNS[sc.morada][3]; sc.casa=1; } }
+      scCheck(); } };
   const BAD=/\{\w+\}|%\w+%|undefined|NaN|\[object/;
   const chk=(id,arr)=>arr.forEach(x=>{ if(typeof x==='string'&&BAD.test(x)){ const k='texto com lacuna em '+id+': '+x.slice(0,90); errs[k]=(errs[k]||0)+1; } });
   // varredura: cada evento possível em várias idades, uma escolha de cada vez, sem alterar a vida
@@ -92,6 +105,18 @@ function selfTest(){
   for(let L=0;L<14;L++){ T('newLife',()=>newLife({})); for(const age of [3,8,15,22,35,55,80]){ while(S.me.alive&&S.me.age<age){ T('ageUp',ageUp); S.pending=[]; } if(!S.me.alive) break; T('sweepActs',acts); sweep(); } }
   // atestados: pedir sem parar tem que terminar em demissão
   let fired=0; for(let k=0;k<40;k++){ T('atestLife',()=>{ newLife({}); while(S.me.alive&&S.me.age<25){ S.pending=[]; ageUp(); } if(!S.me.alive) return; S.pending=[]; const ok=openings().filter(o=>!jobReqs(JOBS.find(x=>x.id===o.id)).length); if(ok.length) takeJob(R.pick(ok)); if(!S.me.job) return; S.me.money+=5000; for(let i=0;i<8&&S.me.job;i++) sickNote(i%2?'fake':'real'); if(!S.me.job) fired++; }); }
+  // aventuras (modos fictícios): cada modo jogado até o fim várias vezes, e cada evento de aventura varrido
+  const adv=[]; for(const id of Object.keys(SCEN)){ let win=0,days=0,n=0;
+    for(let k=0;k<8;k++){ T('advLife',()=>{ newLife({}); const m=S.me; while(m.alive&&m.age<22){ S.pending=[]; ageUp(); } m.alive=true; m.prison=null; S.pending=[]; MQ.length=0; scStart(id); if(id==='isekai') S.scen.cls=R.pick(Object.keys(CLASSES)); });
+      const before=(S.me.c.scenWin||0); let g=0;
+      while(S.scen&&g++<(id==="isekai"?160:80)){ T('advDay:'+id,()=>{ scNextDay(); }); let e2=0; while(S.scen&&S.pending.length&&e2++<12){ const e=S.pending.shift(); if(!evValid(e)) continue; const ev=EVENTS[e.id]; events++; T('advEv:'+id+':'+e.id,()=>{ const sh=ev.show(e.d); if(sh.ch.length<2) errs['só 1 escolha: '+e.id]=1; const c=R.pick(sh.ch); const r=ev.pick(c[1],e.d); chk(e.id,[sh.t,sh.x,c[0],r]); }); T('advCheck',scCheck); }
+        if(S.scen) T('advAct:'+id,scenRandomDay); if(S.scen) T('advCheck',scCheck); if(S.scen) T('advViews:'+id,()=>{ [V.scLocal,V.scActs,V.scCrew,V.scItems,V.scMe].concat(id==='isekai'?[V.iskMe,V.iskMagic,V.iskVila]:[]).forEach(v=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }); crew().forEach(c=>{ const r=V.scMember(c); if(r) r.items.map(rowHtml).join(''); }); renderScen(); }); }
+      if(S.scen){ errs['aventura não terminou: '+id]=1; S.scen=null; } n++; days+=(S.log[S.log.length-1].lines.map(l=>typeof l==='string'?l:l.t).join(' ').match(/: (\d+) (dia|sol)/)||[0,0])[1]*1; if((S.me.c.scenWin||0)>before) win++; MQ.length=0; }
+    T('advSweep:'+id,()=>{ newLife({}); S.me.age=25; scStart(id); if(id==='isekai'){ S.scen.cls='mago'; iskEnsure(S.scen); S.scen.ouro=3000; S.scen.lvl=6; vilaFound('Teste'); } for(let i=0;i<4;i++){ scNextDay(); } S.pending=[]; const snap=JSON.stringify(S); let nev=0;
+      for(const [eid,ev] of Object.entries(EVENTS)){ if(ev.scen!==id||!ev.w) continue; nev++; T('advVarre:'+eid,()=>{ S=JSON.parse(snap); if(ev.when&&!ev.when(S.me)){ S.scen.crew.length||mkCrew(); } const d=ev.prep?ev.prep(S.me):{}; if(d==null) return; const sh=ev.show(d); if(sh.ch.length<2) errs['só 1 escolha: '+eid+' ('+sh.t+')']=1; for(const c of sh.ch){ S=JSON.parse(snap); const r=ev.pick(c[1],d); chk(eid,[sh.t,sh.x,c[0],r]); } swept++; }); }
+      S=JSON.parse(snap); S.scen=null; adv.push(`${id}: ${nev} eventos`); });
+    adv.push(`${id}: ${win}/${n} vitórias, média ${(days/n).toFixed(1)} dias`); }
+  lives.unshift('AVENTURAS: '+adv.join(' · '));
   // regras da prisão: perde emprego e faculdade, não matricula, escola perde o ano; faculdade só com ensino médio
   T('regrasPrisao',()=>{ for(let k=0;k<12;k++){ newLife({}); const m=S.me; m.age=20; m.alive=true; m.prison=null; m.edu.cur=null;
       const r0=enroll('uni',COURSES[0],'particular','self'); if(!hasDeg('medio')&&!/ensino médio/.test(r0)) errs['faculdade sem ensino médio: '+r0]=1;
@@ -121,6 +146,28 @@ function selfTest(){
   document.body.appendChild(o); document.title='TESTE OK';
 }
 
+// ===== Diagnóstico das aventuras (#aventura): um jogador razoável joga cada modo 40 vezes =====
+function advDiag(){ const out=[];
+  const play=sc=>{ const d=SCEN[sc.id];
+    const useCat=(cat,cond)=>{ if(!S.scen||!cond()) return; const x=sc.inv.filter(i=>itCat(i.id)===cat).sort((a,b)=>a.hp-b.hp)[0]; if(x) scUse(x); };
+    useCat('comida',()=>sc.fome>55); useCat('agua',()=>sc.sede>55); useCat('remedio',()=>sc.hl<55); useCat('o2',()=>sc.o2<40); useCat('san',()=>sc.san<50); useCat('mana',()=>sc.mana<30);
+    if(!S.scen) return;
+    const w=sc.inv.filter(i=>itCat(i.id)==='arma').sort((a,b)=>itV(b.id)-itV(a.id))[0]; if(w&&(!sc.arma||itV(w.id)>itV(sc.arma.id))){ sc.inv=sc.inv.filter(i=>i!==w); if(sc.arma) addItem(sc.arma.id,sc.arma.hp,true); sc.arma=w; }
+    crew().forEach(c=>{ if(!c.arma){ const w2=sc.inv.find(i=>itCat(i.id)==='arma'); if(w2){ sc.inv=sc.inv.filter(i=>i!==w2); c.arma=w2; } } });
+    if(sc.id==='isekai'){ iskEnsure(sc); while(sc.pts>0){ sc.pts--; sc.at[R.pick(['for','for','vit','agi','mag'])]++; } sc.sp.forEach(id=>{ if(!sc.done['sp_'+id]&&sc.mana>=spCost(sc,id)&&['atq','atq2','atq3','def','cura','aliado'].includes(SPELLS[id][4])) castSpell(id); }); sc.travel=sc.lvl>=2+sc.rota*1.5?1:0; }
+    const pri=(sc.hl<45||sc.san<35)?['descanso','acampar','meditar','fogueira','falar','terra','festa','exerc']:null;
+    let g=0; while(S.scen&&sc.ap>0&&g++<8){
+      if(pri){ const k=pri.find(k=>d.acts[k]&&!sc.done[k]&&!(d.acts[k].min&&!d.acts[k].min(sc))); if(k){ sc.ap-=d.acts[k].ap??1; sc.done[k]=1; d.acts[k].fn(sc,S.me); continue; } }
+      const p=sc.loc.pois.find(p=>!p.done&&!(sc.id==='isekai'&&ISK_POI[p.k]&&ISK_POI[p.k][4]==='rei'&&sc.lvl<12)); if(p&&R.chance(.6)){ sc.ap--; p.done=1; d.poi(sc,p); continue; }
+      const ks=Object.keys(d.acts).filter(k=>!['aposentar','roubar','portal'].includes(k)&&!sc.done[k]&&!(d.acts[k].min&&!d.acts[k].min(sc))&&sc.ap>=(d.acts[k].ap??1)); if(!ks.length) break; const k=R.pick(ks); sc.ap-=d.acts[k].ap??1; sc.done[k]=1; d.acts[k].fn(sc,S.me); }
+    if(S.scen&&sc.id==='zumbi') sc.stay=countCat('gas')<sc.veh.length&&R.chance(.5)?1:0; };
+  for(const id of Object.keys(SCEN)){ let win=0,days=0,hl=0,san=0,other=0; const snaps=[];
+    for(let k=0;k<40;k++){ newLife({}); const m=S.me; m.age=25; m.alive=true; m.prison=null; m.fight=40; S.pending=[]; MQ.length=0; scStart(id); if(id==='isekai'){ S.scen.cls=R.pick(Object.keys(CLASSES)); UI.close(); }
+      const w0=m.c.scenWin||0; let g=0, last=null;
+      while(S.scen&&g++<(id==='isekai'?160:90)){ const sc=S.scen; last={hl:sc.hl,san:sc.san,fome:sc.fome,dia:sc.dia}; play(sc); scCheck(); if(!S.scen) break; scNextDay(); let e=0; while(S.scen&&S.pending.length&&e++<10){ const p=S.pending.shift(); const ev=EVENTS[p.id]; if(!evValid(p)) continue; const sh=ev.show(p.d); ev.pick(R.pick(sh.ch)[1],p.d); scCheck(); } if(S.scen&&sc.dia===8) snaps.push(`hl${Math.round(sc.hl)} san${Math.round(sc.san)} f${Math.round(sc.fome)}${sc.o2!=null?' o2'+Math.round(sc.o2):''}${sc.lvl?' lv'+sc.lvl:''}`); }
+      if(S.scen){ S.scen=null; other++; } days+=last?last.dia:0; if((m.c.scenWin||0)>w0) win++; else if(last&&last.hl<=last.san) hl++; else san++; }
+    out.push(`${id}: vitórias ${win}/40 · média ${(days/40).toFixed(1)} dias · derrotas por saúde ${hl}, por sanidade ${san}, sem fim ${other}\n   dia 8: ${snaps.slice(0,6).join(' | ')}`); }
+  const o=document.createElement('pre'); o.id='out'; o.textContent=out.join('\n'); o.style.cssText='position:fixed;inset:0;z-index:999;background:#fff;color:#000;overflow:auto;padding:10px;font-size:11px;white-space:pre-wrap'; document.body.appendChild(o); document.title='AVENTURA OK'; }
 // ===== Relatório de qualidade do texto (#qualidade): repetição, gênero, coerência de idade =====
 function qualityReport(){
   const out=[], dupYear={}, lineCount={}, lifeRep={}, evCount={}, evAge={}, gen={}, me={}, errs={};

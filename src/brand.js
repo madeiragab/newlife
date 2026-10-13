@@ -30,7 +30,7 @@ function appIconSVG(px=1024){
 const SPLASH_T0=Date.now();
 function hideSplash(){
   const s=document.getElementById('splash'); if(!s) return;
-  const fast=/^#(demo|teste|qualidade)/.test(location.hash);
+  const fast=/^#(demo|teste|qualidade|aventura)/.test(location.hash);
   setTimeout(()=>{ s.classList.add('out'); setTimeout(()=>s.remove(),fast?0:450); },fast?0:Math.max(0,1300-(Date.now()-SPLASH_T0)));
 }
 (()=>{ const s=document.getElementById('splashArt'); if(s) s.innerHTML=`<svg viewBox="0 0 100 100" width="150" height="150" aria-hidden="true">${caduceusSVG()}</svg>`; })();

@@ -225,3 +225,7 @@ input.in,select.in{font:inherit;color:var(--ink);background:var(--surface);borde
 .shake{animation:shake .32s ease-in-out}
 @keyframes shake{0%,100%{transform:none}20%{transform:translate(-6px,2px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-4px,1px)}80%{transform:translate(3px,-1px)}}
 @media (prefers-reduced-motion:reduce){.shake{animation:none}#hurt.on{animation-duration:.2s}}
+
+/* aventura (modos fictícios) */
+#nav .scic{font-size:22px;line-height:24px;height:24px}
+.scy h3 span:last-child{max-width:62%;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
