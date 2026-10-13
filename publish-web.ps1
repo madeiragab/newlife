@@ -10,9 +10,9 @@ Copy-Item (Join-Path $root 'outra-vida.html') (Join-Path $tmp 'index.html') -For
 Push-Location $tmp
 git add -A
 $msg = Join-Path $env:TEMP 'newlife-msg.txt'
-[IO.File]::WriteAllText($msg, "Atualiza a versão do navegador`n", (New-Object System.Text.UTF8Encoding $false))
+[IO.File]::WriteAllText($msg, "Atualiza a vers$([char]0xE3)o do navegador`n", (New-Object System.Text.UTF8Encoding $false))
 git commit -q -F $msg
 git push -q origin gh-pages
 Pop-Location
 Remove-Item $tmp -Recurse -Force
-"Publicado. Em alguns minutos a nova versão aparece no GitHub Pages."
+"Publicado. Em alguns minutos a nova vers$([char]0xE3)o aparece no GitHub Pages."
