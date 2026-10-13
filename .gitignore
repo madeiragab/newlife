@@ -34,3 +34,5 @@ desktop.ini
 tools/bal*.py
 tools/fix*.py
 tools/cut_*.py
+/artifact.html
+*.idsig
