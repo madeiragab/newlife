@@ -1,7 +1,7 @@
 // ===== Eventos dos Superpoderes (parte 1): resgates, vilões, identidade secreta =====
 const HC={crew:1};
 pack({k:'Superpoderes',w:1.5,cd:40,scen:'heroi',when:scWhen('heroi')},[
-  ['Convite da liga','Uma liga de heróis quer que {codinome} entre para a equipe.',['Aceitar|rep+10 pw+6 crew|Agora tenho equipe. {n} vai patrulhar comigo.','Recusar|h+2|Prefiro agir sozinh{o}.']],
+  ['Convite dos Novatos','Os Novatos Unidos, uma equipe de heróis iniciantes, querem {codinome} no time. Paga pouco, mas é emprego de carteira assinada.',['Aceitar|rep+6 pw+4 hteam:novatos crew|Assinei o contrato. {n} vai patrulhar comigo.','Recusar|h+2|Prefiro agir sozinh{o}.'],{when:HW(sc=>!hTeam()&&sc.reg!=='nao')}],
   ['Foto borrada','Um fotógrafo conseguiu uma foto sua sem máscara.',['Comprar a foto|$-5000 sec+20|Comprei a foto e o silêncio.','Deixar sair|sec-25 f+5|Agora todo mundo especula.','Usar {poder} para apagar a foto|?sc.pw sec+15|Funcionou. Não pergunte como.|sec-15|Saiu pior.']],
   ['Gato na árvore','Uma menina chora porque o gato subiu numa árvore enorme.',['Resgatar o gato|rep+3 h+6|O gato me arranhou. A menina me abraçou.','Ensinar a menina a chamar o bombeiro|rep-2 h+2|Prático, mas sem graça.']],
   ['Assalto a banco','Ladrões fazem reféns dentro de um banco.',['Entrar pela frente|?pwr rep+12 crime-8|Reféns soltos, ladrões amarrados.|hl-18 rep-6|Um refém se feriu.','Negociar com os ladrões|?car rep+10|Eles se renderam ouvindo meu discurso.|rep-4|Não quiseram papo.','Esperar a polícia|rep-6|Os jornais perguntaram onde eu estava.']],

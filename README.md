@@ -49,6 +49,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 ### 🎨 Personagens desenhados
 - Rostos em vetor com sombreado suave, montados por peças: **21 cabelos**, barbas, óculos de grau e **7 modelos de óculos de sol**, chapéus, brincos, piercings e maquiagem, separados por gênero e trocáveis no menu Visual.
 - **Proporções por idade**: bebê, criança pequena, criança, adolescente, adulto e idoso são visualmente diferentes. Rugas, linhas de expressão e cabelo grisalho aparecem aos poucos; parte dos homens fica calva.
+- **Homens e mulheres com traços próprios**: mandíbula quadrada, sobrancelhas grossas, ombros largos e barba por fazer neles; rosto mais fino, cílios, sobrancelhas arqueadas, nariz menor e lábios marcados nelas.
 - **Doenças aparecem no rosto**: catapora deixa pintas (e marquinhas para sempre), quimioterapia deixa careca, vitiligo, conjuntivite, catarata, acne…
 
 ### 🏫 Escola e faculdade
@@ -70,6 +71,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - Barras de **amor** e **amizade** para cada pessoa.
 - Quem você conhece nos eventos vira uma pessoa de verdade na sua lista, com nome, rosto e gênero coerentes.
 - Namoro, casamento, filhos, divórcio, amigos, pets (cães e gatos por raça, exóticos e animais de fazenda).
+- Selo **Minha primeira vez**, ganho na hora (a partir dos 18 anos), com o nome da pessoa e a idade.
 
 ### 🥋 Lutas e brigas
 - **9 artes marciais** (Judô, Jiu-jítsu, Karatê, Muay thai, Boxe, Taekwondo, Capoeira, Kung fu, Krav maga) com faixas, uma por ano, e um **golpe especial** na última.
@@ -84,7 +86,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 ### 🌍 E mais
 - **Autoescola** com prova de placas (22 placas desenhadas), passaporte (inclusive falsificado) e emigração.
 - **80 doenças**, com tratamentos, doenças crônicas e câncer.
-- **Mais de 2.800 eventos**: 640 na vida normal, coerentes com idade, carreira e situação, e mais de 2.100 nos modos fictícios.
+- **Mais de 2.900 eventos**: 640 na vida normal, coerentes com idade, carreira e situação, e mais de 2.300 nos modos fictícios.
 - Selos, cemitério, desafios, dificuldade, herdeiros (continue a vida com um filho).
 - **Sons e música** sintetizados (sem arquivos de áudio), tema claro e escuro, efeito de dano.
 - Segredos para quem zerar o jogo. 😉
@@ -96,14 +98,15 @@ A partir dos 18 anos (Menu → Modos fictícios), você pode viver uma aventura 
 - **3 de energia por dia**: cada ação e cada lugar só pode ser feito uma vez por dia.
 - **Grupo** com nome, rosto, arma, saúde e lealdade; **itens** como cartas com estado de 0 a 100% (comida estraga, armas quebram).
 - **Eventos de escolha** próprios de cada modo, com consequências de verdade.
-- Perdeu? Você **acorda** e a vida continua. Venceu? Volta com recompensas. **Exceção: no isekai, quem morre em Eldoria morre de verdade**; a única volta é o portal, depois de derrotar o Rei Demônio.
+- **Romance em todos os modos**: flertar, encontros com a cara de cada mundo, namoro, noivado, casamento e filhos. Se a aventura terminar bem, o par e os filhos voltam com você para a vida real.
+- Perdeu? Você **acorda** e a vida continua. Venceu? Volta com recompensas. **Exceção: no isekai, quem morre em Eldoria morre de verdade**; a única volta é o portal, depois de derrotar o Rei Demônio. **O modo Superpoderes é diferente**: passa ano a ano, junto com a vida real, e só acaba quando você se aposenta.
 
 | Modo | Resumo | Eventos |
 |---|---|:-:|
 | 🧟 **Pesadelo zumbi** | O apocalipse **não tem fim**: é sobreviver até morrer e bater o seu recorde de dias. Comboio de carros ou base fixa, facções, oficina, estações do ano e hordas cada vez maiores. | 570+ |
 | 🏝️ **Ilha deserta** | Explore praia, selva, cachoeira, caverna e os destroços do avião. Fome, sede, abrigo, fogueira, SOS e uma jangada. | 200+ |
 | ⚔️ **Isekai** | Você acorda numa das 4 cidades de Eldoria (sorteada). Classe, níveis, atributos, grimório com 16 magias, masmorras, companheiros e o Rei Demônio. Dá para morar numa cidade ou **fundar sua vila**. | 980+ |
-| 🦸 **Superpoderes** | Um poder, um codinome e um arqui-inimigo. Ocorrências pelos bairros, pistas, identidade secreta, traje e a liga dos heróis. | 200+ |
+| 🦸 **Superpoderes** | A vida segue **por ano** e não tem fim, só a aposentadoria. Equipes de heróis que contam como emprego, Lei de Registro, identidade secreta, família na mira dos vilões e arqui-inimigos que nunca acabam. | 290+ |
 | 🚀 **Colônia em Marte** | Oxigênio, comida e sanidade da equipe, rover, pesquisa e expedições até a nave de resgate no sol 30. | 200+ |
 
 ### 🧟 Pesadelo zumbi em detalhe
@@ -123,6 +126,21 @@ A partir dos 18 anos (Menu → Modos fictícios), você pode viver uma aventura 
   <img src="docs/img/zumbi-base.png" width="200" alt="Base">
   <img src="docs/img/zumbi-faccoes.png" width="200" alt="Facções">
   <img src="docs/img/zumbi-oficina.png" width="200" alt="Oficina">
+</p>
+
+### 🦸 Superpoderes em detalhe
+
+- **Por ano, sem fim**: cada turno é um ano da vida real. Você e a família envelhecem, a família ganha e gasta dinheiro, gente nasce e morre. O modo só acaba quando você **pendura a capa** e volta para a vida normal (ou quando morre de verdade).
+- **Equipes de heróis são emprego**: Novatos Unidos, Sentinelas do Sul, Vértice Corp, Agência Federal de Contenção e Liga Guardiã. Cada uma tem salário anual, cargos de recruta a líder, desempenho, promoção, aumento e demissão.
+- **Lei de Registro**: o governo exige nome, endereço e DNA de todo herói. Dá para se registrar, registrar um nome falso ou se recusar, e **recusar é crime**: a polícia passa a caçar você, e ser pego dá anos na Prisão de Contenção para Super-Humanos. Cada equipe toma um lado.
+- **Identidade secreta**: se ela vazar, o mundo inteiro sabe quem você é, e **os vilões passam a atacar sua família** (sequestros, invasões, bombas). Familiares podem se ferir ou morrer de verdade. Dá para esconder a família, contar o segredo a quem você ama, negar tudo na TV ou fingir a própria morte.
+- **Amor da vida real**: namorar, noivar, casar e ter filhos sem largar a capa, com eventos de encontros interrompidos, ciúme e desconfiança.
+- **Arqui-inimigos sem fim**: derrote um três vezes e outro aparece nos jornais.
+
+<p align="center">
+  <img src="docs/img/heroi-aliados.png" width="200" alt="Família, amor e equipe">
+  <img src="docs/img/heroi-equipe.png" width="200" alt="Equipe de heróis">
+  <img src="docs/img/romance.png" width="200" alt="Romance no isekai">
 </p>
 
 ### ⚔️ Isekai em detalhe
@@ -209,6 +227,8 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   prison.js       vida na prisão
   social.js       relações, autoescola, passaporte, facção, assassino de aluguel
   scen.js         modos fictícios: motor das aventuras (dias, energia, grupo, itens, locais)
+  romance.js      romance nos modos fictícios: namoro, casamento, filhos e volta para a vida real
+  heroi.js        superpoderes: equipes como emprego, Lei de Registro, identidade, família e anos
   zumbi.js        pesadelo zumbi: atributos, base, oficina, facções, estações e hordas
   isekai.js       isekai: atributos, magias e cidades para morar
   vila.js         isekai: a sua vila (recursos, construções, tecnologias, leis)

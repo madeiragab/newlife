@@ -261,8 +261,11 @@ function askOut(p){
   log(`Comecei a namorar ${fullName(p)}.`,'good');
   return {ok:true,t:`${p.first} topou! Estamos namorando.`};
 }
+// selo na hora: a primeira noite com alguém (só adultos)
+function primeiraVez(nm){ const m=S.me; if(!m||m.c.primeira||m.age<18) return; m.c.primeira=1; m.primeira={n:nm,a:m.age}; META.ribbons.primeira=(META.ribbons.primeira||0)+1; log(`🎖️ Minha primeira vez: com ${nm}, aos ${m.age} anos.`,'good'); MQ.push({k:'Selo',t:'🎖️ Minha primeira vez',x:`Com ${nm}, aos ${m.age} anos. Um selo novo na coleção.`}); }
 function hookup(){
   const m=S.me; const p=candidate(true); st('happy',R.int(3,8)); cnt('hookups');
+  primeiraVez(fullName(p));
   let t=`Fiquei com ${p.first}, ${p.age} anos, que conheci ${R.pick(['numa balada','num bar','num aplicativo','num show','na praia'])}.`;
   if(R.chance(.06)){ const id=R.chance(.25)?'herpes':'ist'; addDisease(id); t+=' Depois descobri que peguei uma infecção.'; }
   const pr=partner(); if(pr&&R.chance(.3)){ pr.bond=clamp(pr.bond-40); t+=` ${pr.first} descobriu.`; }
@@ -293,7 +296,8 @@ function interact(p,k,extra){
     case 'casar': { const [c,prenup]=extra; if(!canPay(c)) return 'Não tenho dinheiro para essa festa.'; m.money-=c; if(prenup){ S.flags['prenup'+p.id]=1; if(R.chance(.3)){ p.bond=clamp(p.bond-25); return `${nm} se ofendeu com o pacto antenupcial e adiou o casamento.`; } } p.rel='conjuge'; p.yrs=0; cnt('marriages'); st('happy',20); S.flags.movedOut=1; log(`Casei com ${fullName(p)}!`,'good'); return `Casei com ${nm}! ${c>30000?'A festa foi inesquecível.':''}`; }
     case 'terminar': p.rel='ex'; st('happy',-8); log(`Terminei com ${nm}.`); return `Terminei com ${nm}.`;
     case 'divorcio': divorce(p,false); return `Me divorciei de ${nm}.`;
-    case 'filho': { if(use('tryKid')>2) return 'Já tentamos bastante este ano.'; const fem=m.gender==='F'?m:p; const fa=fem===m?m.age:p.age; if(m.gender===p.gender) return 'Para termos filhos juntos, precisamos adotar.'; const pr=clamp((fem===m?m.fert:60)-(fa>35?(fa-35)*5:0),0,90)/100*.6; if(S.births.length) return 'Já tem um bebê a caminho!'; if(R.chance(pr)){ S.births.push({with:p.id}); return 'Deu positivo! O bebê nasce no ano que vem.'; } return 'Ainda não foi desta vez.'; }
+    case 'noite': { if(tired) return `${nm} e eu já tivemos nossas noites este ano.`; p.bond=clamp(p.bond+R.int(5,12)); st('happy',R.int(4,9)); primeiraVez(fullName(p)); if(m.gender!==p.gender&&!S.births.length&&m.age<=50&&p.age<=50&&R.chance(.05)){ S.births.push({with:p.id}); return `Passamos a noite juntos. Semanas depois, a surpresa: vem um bebê aí.`; } return R.pick([`Passamos a noite juntos. Acordei com ${nm} roubando o cobertor.`,`Jantar, vinho e a noite inteira só nossa.`,`Desliguei o celular. A noite foi só de ${nm} e minha.`]); }
+    case 'filho': { if(m.age>=18&&p.age>=18) primeiraVez(fullName(p)); if(use('tryKid')>2) return 'Já tentamos bastante este ano.'; const fem=m.gender==='F'?m:p; const fa=fem===m?m.age:p.age; if(m.gender===p.gender) return 'Para termos filhos juntos, precisamos adotar.'; const pr=clamp((fem===m?m.fert:60)-(fa>35?(fa-35)*5:0),0,90)/100*.6; if(S.births.length) return 'Já tem um bebê a caminho!'; if(R.chance(pr)){ S.births.push({with:p.id}); return 'Deu positivo! O bebê nasce no ano que vem.'; } return 'Ainda não foi desta vez.'; }
     case 'viagem': { const c=extra; if(!canPay(c)) return 'Não temos dinheiro para isso.'; m.money-=c; p.bond=clamp(p.bond+R.int(8,18)); st('happy',R.int(6,12)); cnt('trips'); return `Viajei com ${nm} para ${R.pick(TRIPS)}.`; }
     case 'reatar': if(R.chance(p.bond/150+.15)){ p.rel='namoro'; p.bond=clamp(p.bond+20); return `Voltei com ${nm}.`; } return `${nm} disse que não volta nem morto.`.replace('morto',p.gender==='F'?'morta':'morto');
     case 'perdao': if(R.chance(.5)){ p.rel=p.rel==='inimigo'?'amigo':p.rel; p.bond=clamp(p.bond+15); return `Fiz as pazes com ${nm}.`; } return `${nm} não aceitou minhas desculpas.`;

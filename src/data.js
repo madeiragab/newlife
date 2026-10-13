@@ -340,6 +340,7 @@ const CLUBS = [
 const MARTIAL = ['Karatê','Jiu-jítsu','Capoeira','Judô','Boxe','Muay thai','Taekwondo','Kung fu'];
 
 const RIBBONS = [
+ {id:'primeira',n:'Minha primeira vez',d:'Passou a primeira noite com alguém (ganho na hora, não na morte).',inst:1},
  {id:'desistente',n:'Desistente',d:'Desistiu desta vida no meio do caminho.'},
  {id:'coroado',n:'Coroado',d:'Reinou sobre um país.'},
  {id:'assassino',n:'Sanguinário',d:'Matou três pessoas ou mais.'},

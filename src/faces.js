@@ -116,6 +116,9 @@ function ensureLook(p){
   return p.look;
 }
 const HEAD='M50,20 C67,20 75.5,32 75.5,48 C75.5,63 67.5,76 50,78 C32.5,76 24.5,63 24.5,48 C24.5,32 33,20 50,20Z';
+// rosto masculino: mandíbula quadrada · feminino: maçãs arredondadas e queixo fino
+const HEAD_M='M50,20 C67.5,20 76,32 76,48 C76,59 74.8,67.5 68.5,73.2 C63.5,77.6 57,79.2 50,79.2 C43,79.2 36.5,77.6 31.5,73.2 C25.2,67.5 24,59 24,48 C24,32 32.5,20 50,20Z';
+const HEAD_F='M50,20.5 C66.5,20.5 75,32 75,47 C75,60 69.5,70.5 60.5,75.4 C56.5,77.4 53.2,78 50,78 C46.8,78 43.5,77.4 39.5,75.4 C30.5,70.5 25,60 25,47 C25,32 33.5,20.5 50,20.5Z';
 const HEAD_KID='M50,22 C67,22 77,34 77,50 C77,67 65,77.5 50,77.5 C35,77.5 23,67 23,50 C23,34 33,22 50,22Z';
 const HEAD_BABY='M50,26 C67,26 77,38 77,53 C77,69 65,79 50,79 C35,79 23,69 23,53 C23,38 33,26 50,26Z';
 // macacão de bebê
@@ -141,8 +144,9 @@ function faceSVG(p,size=44,over){
   const DS=new Set((p.dis||[]).map(d=>d.id)), chemo=hasCancer(p), regrow=!chemo&&p.hairBack&&S&&S.year<p.hairBack;
   const H=chemo&&!baby?HAIRS.find(h=>h.id==='careca'):regrow&&!['careca','raspado'].includes(L.hair)?HAIRS.find(h=>h.id==='raspado'):!F&&!baby&&((age>=50&&uid%4===0)||(age>=62&&uid%4===1))?HAIRS.find(h=>h.id==='careca'):HAIRS.find(h=>h.id===L.hair)||HAIRS[0];
   const hat=HATS.find(x=>x.id===L.hat)||HATS[0];
-  const head=baby?HEAD_BABY:kid?HEAD_KID:HEAD, dy=baby?4:small?2.5:kid?1.5:0;
+  const head=baby?HEAD_BABY:kid?HEAD_KID:F?HEAD_F:HEAD_M, dy=baby?4:small?2.5:kid?1.5:0;
   const hairClip=hat.cut&&!baby?` clip-path="url(#${id}c)"`:'';
+  const sx=small?1:kid?(F?.94:1.03):F?.88:1.08, mAd=!F&&age>=16, fAd=F&&age>=13;
   const SK=`url(#${id}sk)`, HG=`url(#${id}hg)`;
   const body=[], hd=[];
   // ---- corpo (escala por idade) ----
@@ -152,6 +156,7 @@ function faceSVG(p,size=44,over){
   const top=baby?ONESIE:TOPS.find(x=>x.id===tid)||TOPS[0];
   body.push(top.d(L.shirt,skin,dark));
   body.push(`<path d="${TORSO}" fill="url(#${id}cl)"/>`);
+  if(mAd&&age>=18) body.push(`<path d="M49.2,72.5 Q50.9,74.6 49.6,76.8" stroke="${dark}" stroke-width="1" fill="none" opacity=".45" stroke-linecap="round"/>`);
   if(age>=55) body.push(`<path d="M45.5,72 Q47.5,75 45.5,78 M54.5,72 Q52.5,75 54.5,78" stroke="${dark}" stroke-width=".8" fill="none" opacity=".55"/>`);
   // ---- cabeça (inclui cabelo e acessórios) ----
   EDGE=hairEdge;
@@ -162,8 +167,10 @@ function faceSVG(p,size=44,over){
   hd.push(`<path d="${head}" fill="${SK}" ${ol()}/>`);
   hd.push(`<g clip-path="url(#${id}h)">${!baby&&H.id!=='careca'?`<g transform="translate(0 2.4)" opacity=".16">${H.front('#3A1A10','#3A1A10')}</g>`:''}<path d="M24,${66+dy} Q50,${84+dy} 76,${66+dy} L76,90 L24,90Z" fill="${dark}" opacity=".08"/></g>`);
   // bochechas, sardas, espinhas, rugas
-  const blushO=baby?.45:kid?.32:L.makeup==='blush'||L.makeup==='completa'?.4:.12;
+  const blushO=baby?.45:kid?.32:L.makeup==='blush'||L.makeup==='completa'?.4:fAd?.22:.08;
   hd.push(`<ellipse cx="33.5" cy="${62+dy}" rx="4.6" ry="2.8" fill="#FF6F86" opacity="${blushO}"/><ellipse cx="66.5" cy="${62+dy}" rx="4.6" ry="2.8" fill="#FF6F86" opacity="${blushO}"/>`);
+  if(mAd&&age>=20&&L.beard==='none'&&!chemo&&uid%3!==0) hd.push(`<g clip-path="url(#${id}h)"><path d="M28.5,58 Q31,74 50,79.5 Q69,74 71.5,58 Q68,70 58.5,71.8 Q54,68.6 50,69.2 Q46,68.6 41.5,71.8 Q32,70 28.5,58Z" fill="${mixHex(hc,'#3A3A3A',.3)}" opacity=".16"/></g>`);
+  if(mAd) hd.push(`<path d="M30.5,66 Q34,73.5 41,76.6 M69.5,66 Q66,73.5 59,76.6" stroke="${dark}" stroke-width=".9" fill="none" opacity=".22" stroke-linecap="round"/>`);
   // catapora: pintas vermelhas na doença e marquinhas para sempre depois
   const POX=[[33,40],[62,37],[38,58],[64,61],[44,70],[58,46],[30,52],[69,50],[52,33],[47,76]];
   if(DS.has('catapora')) hd.push(POX.map(([x,y])=>`<circle cx="${x}" cy="${y+dy}" r="1.6" fill="#E04A5A" opacity=".85"/><circle cx="${x+.4}" cy="${y+dy-.4}" r=".55" fill="#fff" opacity=".6"/>`).join(''));
@@ -186,7 +193,7 @@ function faceSVG(p,size=44,over){
   }
   // olhos: amendoados e escuros nos adultos, grandes nos pequenos
   const es=kid?3:(ge.eyeShape||0);
-  const ey=52+dy, rx=baby||small?5.3:kid?4.9:teen?4.6:4.4, ry=baby||small?5:kid?4.3:es===3?3.9:es===1?2.6:teen?3.6:3.3, ir=baby||small?3.8:kid?3.3:es===1?2.3:teen?2.8:2.65;
+  const ge2=kid?1:F?1.1:.92, ey=52+dy, rx=(baby||small?5.3:kid?4.9:teen?4.6:4.4)*(kid?1:F?1.05:1), ry=(baby||small?5:kid?4.3:es===3?3.9:es===1?2.6:teen?3.6:3.3)*ge2, ir=(baby||small?3.8:kid?3.3:es===1?2.3:teen?2.8:2.65)*(kid?1:F?1.05:1);
   const lidC='#2B1D18';
   for(const x of [ex,ex2]){
     const side=x<50?-1:1;
@@ -198,22 +205,24 @@ function faceSVG(p,size=44,over){
     if(es===2&&!kid) hd.push(`<path d="M${x-rx-.4},${ey+.3} Q${x},${ey-ry-1.2} ${x+rx+.4},${ey+.3} L${x+rx+.4},${ey-ry-1} L${x-rx-.4},${ey-ry-1}Z" fill="${skin}"/><path d="M${x-rx-.3},${ey+.3} Q${x},${ey-1.8} ${x+rx+.3},${ey+.3}" stroke="${lidC}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`);
     else hd.push(`<path d="M${x-rx-.2},${ey+.2} Q${x},${ey-ry*1.45} ${x+rx+.2},${ey+.2}" stroke="${lidC}" stroke-width="${F&&!kid?1.9:1.5}" fill="none" stroke-linecap="round"/>`);
     hd.push(`<path d="M${x-rx*.7},${ey+ry*.85} Q${x},${ey+ry*1.2} ${x+rx*.7},${ey+ry*.85}" stroke="${dark}" stroke-width=".7" fill="none" opacity=".35"/>`);
-    if(F&&!kid) hd.push(`<path d="M${x+side*(rx+.1)},${ey-.4} l${side*1.9},-1.5" stroke="${lidC}" stroke-width="1.3" stroke-linecap="round"/>`);
+    if(F&&kid&&!baby) hd.push(`<path d="M${x+side*(rx+.1)},${ey-.4} l${side*1.8},-1.4 M${x+side*rx*.7},${ey-ry*.98} l${side*1.2},-1.6" stroke="${lidC}" stroke-width="1.1" stroke-linecap="round"/>`);
+    if(F&&!kid) hd.push(`<path d="M${x+side*(rx+.1)},${ey-.4} l${side*2.2},-1.7 M${x+side*rx*.78},${ey-ry*.95} l${side*1.6},-2 M${x+side*rx*.35},${ey-ry*1.2} l${side*.9},-2.1" stroke="${lidC}" stroke-width="1.2" stroke-linecap="round"/>`);
     if(age>=46) hd.push(`<path d="M${x-3.4},${ey+ry+1.3} Q${x},${ey+ry+3.4} ${x+3.4},${ey+ry+1.3}" stroke="${dark}" stroke-width=".8" fill="none" opacity="${age>=65?.5:age>=55?.38:.24}"/>`);
     if(L.makeup==='delineado'||L.makeup==='completa') hd.push(`<path d="M${x-side*rx*.1},${ey-ry*1.05} Q${x+side*rx*.7},${ey-ry*.8} ${x+side*(rx+.3)},${ey-.3} L${x+side*(rx+3.2)},${ey-2.6}" stroke="#141414" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>`);
   }
   // sobrancelhas grossas e expressivas
-  if(!baby){ const bw=({fina:1.8,grossa:3.3,arqueada:2.5}[L.brow]||2.5)*(kid?.85:1)*(chemo?.45:1); const ang=mood<30?2.4:0; const bc=age>=68?mixHex(hc,'#7A7A7A',.3):mixHex(hc,'#000000',.38); const by=ey-7.6-(kid?.6:0);
-    hd.push(L.brow==='arqueada'?`<path d="M${ex-5.6},${by+1.6+ang} Q${ex-.5},${by-3.6} ${ex+5.4},${by+.2} M${ex2-5.4},${by+.2} Q${ex2+.5},${by-3.6} ${ex2+5.6},${by+1.6+ang}" stroke="${bc}" stroke-width="${bw}" fill="none" stroke-linecap="round"/>`
+  if(!baby){ const bw=({fina:1.8,grossa:3.3,arqueada:2.5}[L.brow]||2.5)*(kid?(F?.72:.95):F?.72:1.25)*(chemo?.45:1); const ang=mood<30?2.4:0; const bc=age>=68?mixHex(hc,'#7A7A7A',.3):mixHex(hc,'#000000',.38); const by=ey-7.6-(kid?.6:F?.9:-.5);
+    hd.push(L.brow==='arqueada'||(F&&!kid)?`<path d="M${ex-5.6},${by+1.6+ang} Q${ex-.5},${by-3.6} ${ex+5.4},${by+.2} M${ex2-5.4},${by+.2} Q${ex2+.5},${by-3.6} ${ex2+5.6},${by+1.6+ang}" stroke="${bc}" stroke-width="${bw}" fill="none" stroke-linecap="round"/>`
       :`<path d="M${ex-5.6},${by+1+ang} Q${ex},${by-2.2} ${ex+5.4},${by-ang/2} M${ex2-5.4},${by-ang/2} Q${ex2},${by-2.2} ${ex2+5.6},${by+1+ang}" stroke="${bc}" stroke-width="${bw}" fill="none" stroke-linecap="round"/>`); }
   // nariz com sombra
   if(baby||small) hd.push(`<path d="M48.4,${60+dy} Q50,${61.4+dy} 51.6,${60+dy}" stroke="${dark}" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".7"/>`);
-  else { const nl=kid?.75:1; hd.push(`<path d="M48.7,${50+dy} Q47.3,${55.5+dy} 47.2,${59+dy}" stroke="${dark}" stroke-width="1.1" fill="none" opacity=".3" stroke-linecap="round"/><path d="M${50-3.3*nl},${59.4+dy} Q${50-1.8*nl},${61.8+dy} 50,${61.3+dy} Q${50+1.8*nl},${61.8+dy} ${50+3.3*nl},${59.4+dy}" stroke="${dark}" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".62"/><ellipse cx="50.8" cy="${57.6+dy}" rx="1.4" ry="1.1" fill="#fff" opacity=".22"/>`); }
+  else { const nl=kid?.75:F?.82:1.12; hd.push(`<path d="M48.7,${50+dy} Q47.3,${55.5+dy} 47.2,${59+dy}" stroke="${dark}" stroke-width="1.1" fill="none" opacity=".3" stroke-linecap="round"/><path d="M${50-3.3*nl},${59.4+dy} Q${50-1.8*nl},${61.8+dy} 50,${61.3+dy} Q${50+1.8*nl},${61.8+dy} ${50+3.3*nl},${59.4+dy}" stroke="${dark}" stroke-width="1.3" fill="none" stroke-linecap="round" opacity=".62"/><ellipse cx="50.8" cy="${57.6+dy}" rx="1.4" ry="1.1" fill="#fff" opacity=".22"/>`); }
   if(L.pierce==='nariz'&&adult) hd.push(`<circle cx="53.3" cy="${61}" r="1.4" fill="none" stroke="#B9BFCB" stroke-width="1"/>`);
   if(age>=17&&!F&&!chemo){ EDGE=hairEdge; hd.push((BEARDS.find(b=>b.id===L.beard)||BEARDS[0]).d(age>=52?hc:mixHex(hc,'#000000',.08))); EDGE=skinEdge; }
   // boca: sorriso largo com dentes quando feliz
   const my=66.5+dy, lipN=mixHex(skin,'#A8423F',.5), lipD=mixHex(lipN,'#000000',.35);
   const lipC=L.makeup==='batom'||L.makeup==='completa'?'#C8283F':L.makeup==='rosa'?'#E26A98':null;
+  if(fAd&&!lipC&&!dead&&mood<75) hd.push(`<path d="M44.4,${my} Q47.2,${my-2} 50,${my-.8} Q52.8,${my-2} 55.6,${my} Q50,${my+4.4} 44.4,${my}Z" fill="${mixHex(skin,'#C9506A',.42)}" opacity=".8"/>`);
   if(lipC&&adult&&!dead) hd.push(`<path d="M43.6,${my} Q47,${my-2.3} 50,${my-.9} Q53,${my-2.3} 56.4,${my} Q50,${my+5.4} 43.6,${my}Z" fill="${lipC}"/>`);
   if(dead) hd.push(`<path d="M44.5,${my+1} L55.5,${my+1}" stroke="${lipD}" stroke-width="1.6" stroke-linecap="round"/>`);
   else if(baby&&uid%3===0) hd.push(`<ellipse cx="50" cy="${my+1.4}" rx="6.4" ry="4.2" fill="#7FC8F8" ${ol(.9,'#3C86B8')}/><circle cx="50" cy="${my+1.4}" r="2.4" fill="#fff" ${ol(.8,'#3C86B8')}/>`);
@@ -251,7 +260,7 @@ function faceSVG(p,size=44,over){
     +`<linearGradient id="${id}cl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".14"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>`;
   const bg=BGS[uid%BGS.length];
   return `<svg class="face" viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true"><defs>${defs}</defs><g clip-path="url(#${id})"><rect width="100" height="100" fill="${bg}"/><circle cx="50" cy="44" r="40" fill="#fff" opacity=".22"/>`
-    +`<g transform="translate(50 100) scale(${bs}) translate(-50 -100)">${body.join('')}</g>`
+    +`<g transform="translate(50 100) scale(${bs*sx} ${bs}) translate(-50 -100)">${body.join('')}</g>`
     +`<g transform="translate(50 ${hcy}) scale(${hsc}) translate(-50 -50)">${hd.join('')}</g>`
     +`${dead?'<rect width="100" height="100" fill="#000" opacity=".14"/>':''}</g></svg>`;
 }

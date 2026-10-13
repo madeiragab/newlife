@@ -484,10 +484,10 @@ let NAV0=null;
 function renderScen(){ const sc=S.scen, d=SM(), m=S.me;
   if(!NAV0) NAV0=['#nCareer','#nAssets','#nAge','#nRel','#nAct'].map(s=>$(s).innerHTML);
   ['#nCareer','#nAssets','#nAge','#nRel','#nAct'].forEach((s,i)=>{ $(s).innerHTML=i===2?`<div class="plus">${d.tabIc[i]}</div><span>${d.tabs[i]}</span>`:`<div class="scic">${d.tabIc[i]}</div><span>${d.tabs[i]}</span>`; });
-  $('#hName').textContent=`${m.first} ${m.last}`; $('#hSub').textContent=`${d.ic} ${d.n} · ${d.day} ${sc.dia}`;
+  $('#hName').textContent=`${m.first} ${m.last}`; $('#hSub').textContent=`${d.ic} ${d.n} · ${d.yl?S.year+' · '+m.age+' anos':d.day+' '+sc.dia}`;
   const h=d.hdr(sc); $('#hMoney').textContent=h[0]; $('#hdr .lbl').textContent=h[1]; $('#hMoney').classList.remove('neg');
   $('#avatar').innerHTML=faceSVG(m,46);
-  const lg=$('#log'); lg.innerHTML=sc.log.map(y=>`<section class="yr ph2 scy"><h3><span>${d.day} ${y.d}</span><span>${esc(y.pl||'')}</span></h3>${y.lines.map(l=>typeof l==='string'?`<p>${esc(l)}</p>`:`<p class="${l.c}">${esc(l.t)}</p>`).join('')||'<p style="color:var(--muted)">Um dia tranquilo. Raridade.</p>'}</section>`).join(''); lg.scrollTop=lg.scrollHeight;
+  const lg=$('#log'); lg.innerHTML=sc.log.map(y=>`<section class="yr ph2 scy"><h3><span>${d.yl?d.yl(y):d.day+' '+y.d}</span><span>${esc(y.pl||'')}</span></h3>${y.lines.map(l=>typeof l==='string'?`<p>${esc(l)}</p>`:`<p class="${l.c}">${esc(l.t)}</p>`).join('')||'<p style="color:var(--muted)">Um dia tranquilo. Raridade.</p>'}</section>`).join(''); lg.scrollTop=lg.scrollHeight;
   $('#stats').innerHTML=d.stats.map(([k,l,e,inv])=>{ const v=Math.round(sc[k]||0); return `<div class="st"><span class="se">${e}</span><b>${l}</b><div class="bar"><i style="width:${v}%;background:${grad(inv?100-v:v)}"></i></div><span>${v}%</span></div>`; }).join(''); }
 function navNormal(){ if(NAV0){ ['#nCareer','#nAssets','#nAge','#nRel','#nAct'].forEach((s,i)=>$(s).innerHTML=NAV0[i]); NAV0=null; } }
 function scMoral(sc){ const c=crew(); return c.length?Math.round(c.reduce((s,x)=>s+x.lv,0)/c.length):Math.round(sc.san); }
@@ -495,13 +495,14 @@ function scMoral(sc){ const c=crew(); return c.length?Math.round(c.reduce((s,x)=
 render=(orig=>function(){ if(S&&S.scen&&S.scen.v===SC_V&&S.me.alive){ if(S.scen.id==='zumbi') S.scen.moral=scMoral(S.scen); return renderScen(); } navNormal(); return orig.apply(this,arguments); })(render);
 after=(orig=>function(){ if(S&&S.scen) scCheck(); return orig.apply(this,arguments); })(after);
 doAge=(orig=>function(){ if(S&&S.scen&&S.scen.v===SC_V){ if(!S.me.alive||S.pending.length||MQ.length||modalOpen) return; UI.close(); try{ scNextDay(); }catch(e){ showErr(e); } after(); return; } return orig.apply(this,arguments); })(doAge);
-ageUp=(orig=>function(){ if(S&&S.scen&&S.scen.v===SC_V) return scNextDay(); if(S&&S.scen) S.scen=null; return orig.apply(this,arguments); })(ageUp);
-log=(orig=>function(t,tone){ if(S&&S.scen&&S.scen.v===SC_V&&S.scen.log) return scLog(t,tone); return orig(t,tone); })(log);
+let AGE0=null; // envelhecimento da vida real (o modo herói passa por ano)
+ageUp=(orig=>{ AGE0=orig; return function(){ if(S&&S.scen&&S.scen.v===SC_V) return scNextDay(); if(S&&S.scen) S.scen=null; return orig.apply(this,arguments); }; })(ageUp);
+log=(orig=>function(t,tone){ if(S&&S.scen&&S.scen.v===SC_V&&S.scen.log){ if(S.scen.id==='heroi') orig(t,tone); return scLog(t,tone); } return orig(t,tone); })(log);
 V.career=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scLocal():orig())(V.career);
 V.activities=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scActs():orig())(V.activities);
 V.relations=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scCrew():orig())(V.relations);
 V.assets=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scItems():orig())(V.assets);
-V.menu=(orig=>()=>{ const r=orig(); if(S&&S.scen&&S.scen.v===SC_V&&S.me.alive&&S.scen.id!=='isekai') r.items.unshift({ic:'⏰',l:'Acordar',s:'Encerra a aventura e volta para a vida real',tone:'bad',on:()=>confirmBox('Acordar?','A aventura termina aqui.','Acordar',()=>{ scenEnd(false,'Belisquei o próprio braço com força. Funcionou.'); after(); })}); return r; })(V.menu);
+V.menu=(orig=>()=>{ const r=orig(); if(S&&S.scen&&S.scen.v===SC_V&&S.me.alive&&!['isekai','heroi'].includes(S.scen.id)) r.items.unshift({ic:'⏰',l:'Acordar',s:'Encerra a aventura e volta para a vida real',tone:'bad',on:()=>confirmBox('Acordar?','A aventura termina aqui.','Acordar',()=>{ scenEnd(false,'Belisquei o próprio braço com força. Funcionou.'); after(); })}); return r; })(V.menu);
 occupation=(orig=>()=>S.scen&&S.scen.v===SC_V?SCEN[S.scen.id].n:orig())(occupation);
 function scenYear(){} function startScen(id){ scStart(id); }
 // ---------- eventos especiais ----------
