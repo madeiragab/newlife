@@ -1814,7 +1814,7 @@ function fluffLine(m){
 // ev(id,{k,t,x,ch:[[rótulo,efeito],...], min,max,w,cd,when,jail,once,prep,v:[min,max]})
 // efeito: texto | {t:'texto'|[variantes], h,hl,sm,lk,k,f,$, add:{}, tal:{}, bond, dis, c, fn:(m,d)=>texto, p:chance|fn, y:{...}, n:{...}}
 const tp=(s,d)=>s==null?'':fill(String(s).replace(/\{(\w+)\}/g,(m0,k)=>k==='o'?oa():k==='a'?(S.me.gender==='F'?'a':''):k==='v'?fmt(d.v):k==='v2'?fmt(d.v2)
-  :k==='on'||k==='on2'?(d[k==='on'?'nG':'n2G']==='F'?'a':'o'):k==='eln'||k==='eln2'?(d[k==='eln'?'nG':'n2G']==='F'?'ela':'ele'):d[k]!=null?d[k]:(S.scen&&typeof scVar==='function'&&scVar(k)!=null?scVar(k):m0)));
+  :k==='on'||k==='on2'?(d[k==='on'?'nG':'n2G']==='F'?'a':'o'):k==='eln'||k==='eln2'?(d[k==='eln'?'nG':'n2G']==='F'?'ela':'ele'):d[k]!=null?d[k]:typeof extVar==='function'&&extVar(k)!=null?extVar(k):(S.scen&&typeof scVar==='function'&&scVar(k)!=null?scVar(k):m0)));
 // Desconhecidos dos eventos: {n} e {n2} têm nome, sobrenome e gênero coerentes ({on}/{on2} = o|a, {eln} = ele|ela).
 // date: gênero conforme a preferência do personagem · same: mesmo gênero do personagem (ex.: cela da prisão)
 const loveGender=m=>m.pref==='A'?(R.chance(.5)?'M':'F'):(m.pref||(m.gender==='M'?'F':'M'));
@@ -2387,6 +2387,7 @@ const WHO={
 function dslChance(tok){
   const mm=tok.match(/^\?([a-z]+(?:\.[a-z]+)?|\d+)([+-]\d+)?$/i); if(!mm) return .5;
   const m=S.me, key=mm[1], mod=+(mm[2]||0);
+  if(typeof extChance==='function'){ const xv=extChance(key); if(xv!=null) return Math.max(.03,Math.min(.97,(xv+mod)/100)); }
   if(S.scen&&typeof scChance==='function'){ const sv=scChance(key); if(sv!=null) return Math.max(.03,Math.min(.97,(sv+mod)/100)); }
   let v= /^\d+$/.test(key)?+key : key==='sm'?m.smarts : key==='lk'?m.looks : key==='hl'?m.health : key==='h'?m.happy : key==='k'?m.karma : key==='fight'?m.fight
     : key==='perf'?(m.job?m.job.perf:50) : key==='grade'?(m.edu.cur?m.edu.cur.grade:50) : key==='appr'?(m.office?m.office.appr:50) : key==='pop'?(m.royal?m.royal.pop:50)
@@ -2398,6 +2399,7 @@ function dslApply(s,d){
   for(const tok of String(s||'').trim().split(/\s+/).filter(Boolean)){
     let mm;
     if(S.scen&&typeof scTok==='function'&&scTok(tok,d,out)) continue;
+    if(typeof extTok==='function'&&extTok(tok,d,out)) continue;
     if(mm=tok.match(/^(h|hl|sm|lk|k|f|perf|grade|bond|appr|pop|behav|biz|raise|jail|follow)([+-]\d+)$/)){ const n=+mm[2];
       switch(mm[1]){
         case 'h': st('happy',n); break; case 'hl': st('health',n); break; case 'sm': st('smarts',n); break; case 'lk': st('looks',n); break;
@@ -3937,12 +3939,12 @@ function faceSVG(p,size=44,over){
   if(p.rel==='pet'||p.species){ const sp=g(p.species||'','M'); const em=(typeof BREED_EMOJI!=='undefined'&&p.breed&&BREED_EMOJI[p.breed])||(typeof SPECIES_EMOJI!=='undefined'&&SPECIES_EMOJI[sp])||p.icon||(typeof petDef==='function'&&petDef(p).ic)||PET_EMOJI[sp]||'🐾'; return `<svg class="face" viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="hsl(${hashS(sp+(p.breed||''))%360} 70% 86%)"/><text x="50" y="69" font-size="56" text-anchor="middle">${em}</text></svg>`; }
   const L=Object.assign({},ensureLook(p),over||{}), ge=p.genes, age=p.age??30, dead=p.alive===false;
   if(p.prison&&!(over&&over.top)) L.top='uniforme';
-  const skin0=SKINS[ge.skin??2], skin=p===S?.me&&S.scen&&S.scen.inf?mixHex(skin0,'#86A86A',.45):skin0, dark=mixHex(skin,'#5A2A18',.38), skinEdge=mixHex(skin,'#3A1A10',.4), neck=mixHex(skin,'#5A2A18',.1);
+  const crV=p.criatura==='vampiro', crL=p.criatura==='lobisomem', skin0=crV?mixHex(SKINS[ge.skin??2],'#ECE8F2',.55):SKINS[ge.skin??2], skin=p===S?.me&&S.scen&&S.scen.inf?mixHex(skin0,'#86A86A',.45):skin0, dark=mixHex(skin,'#5A2A18',.38), skinEdge=mixHex(skin,'#3A1A10',.4), neck=mixHex(skin,'#5A2A18',.1);
   // cabelo grisalho aos poucos: começa nas têmporas por volta dos 42 e fica branco depois dos 70
   const hc0=L.dye||HAIR_HEX[ge.hair]||'#4A2E1E'; const gray=L.dye?0:age>=75?.9:age>=65?.72:age>=56?.5:age>=48?.26:age>=42?.1:0;
   let hc=gray?mixHex(hc0,'#E6E6E6',gray):hc0;
   const hs=mixHex(hc,'#000000',.4), hairEdge=mixHex(hc,'#000000',.5);
-  const ec=EYE_HEX[ge.eyes]||'#6a4a2a';
+  const ec=crV?'#C21E2E':crL?'#E3A21A':EYE_HEX[ge.eyes]||'#6a4a2a';
   const mood=p===S?.me?p.happy:(p.bond??60);
   const id='f'+(++FACE_UID), uid=p.id||7;
   // fases da vida: proporções bem diferentes
@@ -4041,6 +4043,8 @@ function faceSVG(p,size=44,over){
   else if(mood>=50) hd.push(`<path d="M43.6,${my} Q50,${my+5.4} 56.4,${my}" stroke="${lipD}" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M46.6,${my+3.6} Q50,${my+5} 53.4,${my+3.6}" stroke="${lipN}" stroke-width="1.3" fill="none" opacity=".6" stroke-linecap="round"/>`);
   else if(mood>=28) hd.push(`<path d="M44.6,${my+1.2} Q50,${my+2.2} 55.4,${my+1.2}" stroke="${lipD}" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M46.6,${my+3.6} Q50,${my+4.6} 53.4,${my+3.6}" stroke="${lipN}" stroke-width="1.2" fill="none" opacity=".5" stroke-linecap="round"/>`);
   else hd.push(`<path d="M44,${my+3.6} Q50,${my-1.2} 56,${my+3.6}" stroke="${lipD}" stroke-width="1.6" fill="none" stroke-linecap="round"/>`);
+  if(crV&&!dead&&!baby) hd.push(`<path d="M46.3,${my+.6} l1,2.6 l1,-2.6Z M51.7,${my+.6} l1,2.6 l1,-2.6Z" fill="#fff" stroke="#9AA0AA" stroke-width=".4"/>`);
+  if(crL&&!baby) hd.push(`<path d="M25.5,47 Q23.5,58 29,66 M74.5,47 Q76.5,58 71,66" stroke="${hc}" stroke-width="3.4" fill="none" stroke-linecap="round" opacity=".85"/>`);
   if(L.pierce==='labio'&&adult) hd.push(`<circle cx="54" cy="${my+3.6}" r="1.4" fill="none" stroke="#B9BFCB" stroke-width="1"/>`);
   // acessórios do rosto ficam por baixo do cabelo da frente (as hastes somem atrás do cabelo)
   if(!baby) hd.push((GLASSES.find(x=>x.id===L.glasses)||GLASSES[0]).d());
@@ -4609,7 +4613,7 @@ V.emigrate=()=>({title:'Emigrar',items:[{html:`<div class="card"><p>Custa ${fmt(
 
 // ---------- menu, início, morte ----------
 V.menu=()=>({title:'Menu',items:[
-  {ic:'🏳️',l:'Desistir desta vida',s:'Encerra a vida atual agora',tone:'bad',on:()=>{ if(!S||!S.me.alive) return msg('Desistir','Essa vida já terminou.'); confirmBox('Desistir desta vida?','A vida de '+S.me.first+' termina agora. Dá para continuar como herdeiro ou voltar no tempo depois.','Desistir',()=>{ UI.close(); die('desistiu'); save(); render(); showDeath(); }); }},
+  {ic:'🏳️',l:'Desistir desta vida',s:'Encerra a vida atual agora',tone:'bad',on:()=>{ if(!S||!S.me.alive) return msg('Desistir','Essa vida já terminou.'); UI.close(); giveUpFlow(); }},
   {l:'Nova vida',on:()=>confirmBox('Nova vida?','A vida atual será perdida.','Começar de novo',()=>{ UI.close(); showStart(); })},
   ...(godUnlocked()?[{l:'Modo Deus',s:'Editar atributos, talentos e genética',on:()=>S.me.alive?UI.push(V.god):msg('Modo Deus','Só funciona com o personagem vivo.')},
   {l:'Máquina do tempo',s:SNAPS.length?`Voltar até ${SNAPS.length} ano(s)`:'Nenhum ano salvo ainda',on:()=>UI.push(V.time)}]:[]),
@@ -4768,7 +4772,13 @@ function boot(){
     else if(hs.includes('cadeia')){ const m=S.me; m.prison={crime:'roubo',left:6,total:8,served:2,behav:40,gang:{n:'Comando da Ala B',rank:1,rep:55}}; render(); UI.open(V.activities); }
     else if(hs.includes('emprego')){ const m=S.me; m.prison=null; if(!m.job){ const o={id:'adm',co:'Grupo Boreal',mul:1}; if(JOBS.find(x=>x.id==='adm')) takeJob(o); else takeJob(openings()[0]); } m.yr.load=7; UI.open(V.career); UI.push(V.jobMenu); }
     else if(hs.includes('clube')){ const m=S.me; m.age=15; m.prison=null; m.edu.cur={type:'medio',n:'Ensino Médio',len:3,yr:0,grade:66}; joinClub(CLUBS[0]); m.edu.clubLvl=1; m.edu.clubPerf=64; UI.open(V.career); UI.push(V.clubMenu); }
-    else if(hs.includes('prova')){ const m=S.me; m.age=11; m.edu.cur={type:'fund',n:'Ensino Fundamental',len:9,yr:5,grade:62}; m.prison=null; S.pending=[]; const d=EVENTS.prova_q.prep(m); if(hs.includes('prova2')) d.go=1; queue('prova_q',d); render(); pump(); } else if(hs.includes('faculdade')){ const m=S.me; m.edu.cur=null; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); m.edu.hist=[{t:'f1',g:72},{t:'f2',g:66},{t:'m',g:70}]; UI.open(V.uniList); UI.push(()=>V.uniList().items.length&&({title:COURSES[1].n,items:[]})); UI.back(); } else if(hs.includes('idades')){ document.body.innerHTML=faceAges(); } else if(hs.includes('rostos')){ document.body.innerHTML=faceGallery(hs.includes('grande'),+(hs.match(/p(\d+)/)||[0,0])[1]); } if(hs.includes('garagem')){ document.body.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#fff\">'+CAR_MODELS.map((c,i)=>'<div style="text-align:center;font:10px sans-serif\">'+carSVG(c,Object.keys(PAINT)[i%10],110)+'<br>'+c.b+' '+c.m+'</div>').join('')+'</div>'; } },50); for(let i=0;i<24&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); if(r) log(sh.t.replace(/[!?.…]+$/,'')+': '+r); } } render.jump=true; render(); return; }
+    else if(hs.includes('prova')){ const m=S.me; m.age=11; m.edu.cur={type:'fund',n:'Ensino Fundamental',len:9,yr:5,grade:62}; m.prison=null; S.pending=[]; const d=EVENTS.prova_q.prep(m); if(hs.includes('prova2')) d.go=1; queue('prova_q',d); render(); pump(); } else if(hs.includes('faculdade')){ const m=S.me; m.edu.cur=null; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); m.edu.hist=[{t:'f1',g:72},{t:'f2',g:66},{t:'m',g:70}]; UI.open(V.uniList); UI.push(()=>V.uniList().items.length&&({title:COURSES[1].n,items:[]})); UI.back(); } else if(/seita|caso|golpe|paranormal|desistir/.test(hs)){ const m=S.me; m.prison=null; m.alive=true; if(m.age<26){ m.age=30; } m.money=Math.max(m.money,400000); S.pending=[]; MQ.length=0;
+      if(hs.includes('seita')){ seitaFundar('apoc','Filhos da Última Aurora'); const s=m.seita; s.fieis=342; s.devo=81; s.caixa=184000; s.susp=46; s.fama=38; s.templo=2; s.anos=4; UI.open(V.activities); UI.push(V.seita); }
+      if(hs.includes('caso')){ if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); takeJob({id:'poli',co:'Polícia Civil',size:'grande',mul:1}); const c=novoCaso(); casoPasso(c,'per',0); casoPasso(c,'int',1); casoPasso(c,'cam',0); UI.open(V.activities); UI.push(V.caso(c)); }
+      if(hs.includes('golpe')){ revStart('Frente Popular de Libertação'); Object.assign(m.rev,{apoio:58,mil:35,armas:44,susp:41,membros:12800}); UI.open(V.politics); UI.push(V.rev); }
+      if(hs.includes('paranormal')){ m.criatura='vampiro'; para().prova=7; para().visitas=9; UI.open(V.activities); UI.push(V.paranormal); }
+      if(hs.includes('desistir')){ if(!partner()){ const p=candidate(false); p.rel='conjuge'; p.bond=88; S.people.push(p); } if(!kids().length){ S.people.push(mkPerson({rel:'filho',age:7,last:m.last,bond:95})); } render(); giveUpFlow(); } }
+    else if(hs.includes('idades')){ document.body.innerHTML=faceAges(); } else if(hs.includes('rostos')){ document.body.innerHTML=faceGallery(hs.includes('grande'),+(hs.match(/p(\d+)/)||[0,0])[1]); } if(hs.includes('garagem')){ document.body.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#fff\">'+CAR_MODELS.map((c,i)=>'<div style="text-align:center;font:10px sans-serif\">'+carSVG(c,Object.keys(PAINT)[i%10],110)+'<br>'+c.b+' '+c.m+'</div>').join('')+'</div>'; } },50); for(let i=0;i<24&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); if(r) log(sh.t.replace(/[!?.…]+$/,'')+': '+r); } } render.jump=true; render(); return; }
   const saved=loadKey(SAVE_KEY);
   if(saved&&saved.me&&saved.v===1){ S=saved; render.jump=true; render(); if(S.me.alive){ showStart(); } else showDeath(); }
   else if(!META.lives){ newLife({royal:R.chance(.01)}); render.jump=true; render(); pump(); }
@@ -5353,6 +5363,334 @@ const UNLOCK_RIBBONS=10;
 const godUnlocked=()=>!!META.unlock||Object.keys(META.ribbons||{}).length>=UNLOCK_RIBBONS;
 V.code=()=>({title:'Resgatar código',items:[{html:'<div class="card"><p>Tem um código? Digite aqui:</p><input class="in" id="codeIn" inputmode="numeric" autocomplete="off" placeholder="••••••••"></div>'},
   {ic:'🔓',l:'Confirmar',on:()=>{ const v=(document.getElementById('codeIn')||{}).value||''; if(v.replace(/\D/g,'')==='40028922'){ META.unlock=1; save(); UI.close(); msg('Código aceito','Algo novo apareceu no menu.'); } else msg('Código','Código inválido.'); }}]});
+
+// ===== Extensões da linguagem de eventos (cada sistema da vida normal pendura os seus tokens aqui) =====
+var extTok=(tok,d,out)=>false, extChance=key=>null, extVar=k=>null;
+// ===== Seita ou grupo religioso =====
+const SEITA_TIPOS={igreja:['Igreja','⛪','Uma igreja de bairro que cresce com cultos animados e muita doação.'],apoc:['Seita apocalíptica','☄️','O fim está próximo, e só os seus seguidores vão se salvar.'],
+  natureza:['Culto à natureza','🌿','Rituais na lua cheia, chás de ervas e abraços em árvores.'],guru:['Movimento espiritual','🧘','Autoajuda, retiros caros e você no papel de guru iluminado.']};
+const SEITA_NOMES=['Igreja da Luz Eterna','Templo do Sétimo Selo','Comunidade do Novo Amanhecer','Ordem da Estrela Azul','Irmandade da Colheita','Caminho da Paz Interior','Ministério Fogo Vivo','Filhos da Última Aurora'];
+const seita=()=>S.me.seita||null;
+function seitaFix(s){ s.fieis=Math.max(0,Math.round(s.fieis)); ['devo','susp','fama'].forEach(k=>s[k]=clamp(s[k])); s.caixa=Math.max(0,Math.round(s.caixa)); return s; }
+function seitaFundar(tipo,nome){ const m=S.me; if(m.seita) return 'Já lidero um grupo.'; const t=SEITA_TIPOS[tipo];
+  m.seita={n:nome,tipo,fieis:R.int(3,9),devo:R.int(55,75),caixa:0,susp:5,fama:2,anos:0,templo:0,regras:{}}; m.c.seita=1;
+  log(`${t[1]} Fundei ${nome}, ${t[0].toLowerCase()}. Os primeiros fiéis já me chamam de ${m.gender==='F'?'mestra':'mestre'}.`,'good'); st('happy',6);
+  return `Fundei ${nome}! Começamos com ${m.seita.fieis} fiéis numa sala alugada.`; }
+function seitaAcao(k){ const m=S.me, s=seita(); if(!s) return ''; const n=use('seita_'+k); if(n>2) return 'Já fiz muito disso este ano. Os fiéis precisam respirar.';
+  const tipo=SEITA_TIPOS[s.tipo][0].toLowerCase(); let t='';
+  switch(k){
+    case 'pregar': { const g=Math.round(R.int(2,8)+m.looks/25+m.smarts/40+s.fama/10); s.fieis+=g; s.fama+=1; t=R.pick([`Preguei na praça debaixo de sol. ${g} pessoas novas pediram para entrar.`,`Fiz um discurso tão forte que um senhor chorou. Ele e mais ${g-1} entraram.`,`Distribuí panfletos na saída do metrô. ${g} novos fiéis.`]); break; }
+    case 'culto': { s.devo+=R.int(6,12); st('happy',4); t=R.pick(['Culto lotado, cantoria até a meia-noite. A fé do grupo está nas alturas.','Fiz todo mundo dar as mãos e repetir um mantra por uma hora. Saíram em transe.','Retiro de fim de semana no sítio. Voltaram me olhando como se eu brilhasse.']); break; }
+    case 'dizimo': { const v=Math.round(s.fieis*R.int(80,260)*(.5+s.devo/100)); s.caixa+=v; s.devo-=R.int(4,9); t=`Passei a sacolinha. Arrecadamos ${fmt(v)} para o caixa do grupo.`; break; }
+    case 'sacar': { if(s.caixa<1000) return 'O caixa está quase vazio.'; const v=Math.round(s.caixa*R.int(30,70)/100); s.caixa-=v; m.money+=v; s.susp+=R.int(6,14); m.karma=clamp(m.karma-6); t=`Transferi ${fmt(v)} do caixa para a minha conta. "Despesas do ministério."`; break; }
+    case 'templo': { const c=60000*(s.templo+1); if(s.caixa+m.money<c) return `Um templo novo custa ${fmt(c)}.`; const dc=Math.min(s.caixa,c); s.caixa-=dc; m.money-=c-dc; s.templo++; s.fama+=6; s.fieis+=R.int(10,30); t=`Inauguramos o templo número ${s.templo}. Fila na porta no primeiro dia.`; break; }
+    case 'tv': { const c=25000; if(s.caixa+m.money<c) return `O horário na TV custa ${fmt(c)}.`; const dc=Math.min(s.caixa,c); s.caixa-=dc; m.money-=c-dc; const g=R.int(15,60); s.fieis+=g; s.fama+=8; m.fame=clamp(m.fame+3); s.susp+=3; t=`Comprei um horário de madrugada na TV. ${g} pessoas ligaram querendo entrar.`; break; }
+    case 'profecia': { s.devo+=R.int(15,25); s.fama+=10; s.susp+=8; s.profecia=S.year+R.int(1,3); t=`Anunciei o fim do mundo para ${s.profecia}. Os fiéis venderam as casas. A imprensa adorou.`; break; }
+    case 'ritual': { s.devo+=R.int(10,18); s.susp+=R.int(8,16); m.karma=clamp(m.karma-3); t=R.pick(['Ritual à luz de velas com túnicas brancas. Alguém desmaiou. Disseram que foi o espírito.','Fizemos um ritual secreto no meio da mata. Ninguém pode contar. Ninguém vai contar.']); break; }
+    case 'comunidade': { s.devo+=R.int(12,20); s.susp+=R.int(12,20); s.regras.comunidade=1; t='Os fiéis agora moram todos juntos num sítio, longe das famílias. A devoção disparou. As famílias deles, não gostaram nada.'; break; }
+    case 'caridade': { const c=Math.min(s.caixa,Math.max(2000,Math.round(s.caixa*.3))); s.caixa-=c; s.fama+=5; s.susp-=R.int(8,15); m.karma=clamp(m.karma+6); t=`Doamos ${fmt(c)} para um abrigo. Saiu no jornal do bairro, do jeito bom.`; break; }
+  }
+  seitaFix(s); return t; }
+function seitaFim(why){ const m=S.me, s=seita(); if(!s) return ''; m.seita=null; log(`${s.n} chegou ao fim. ${why}`,'warn'); return `${s.n} chegou ao fim.`; }
+// todo ano: o grupo cresce ou encolhe, o dízimo cai e a polícia observa
+function seitaAno(){ const m=S.me, s=seita(); if(!s||!m.alive) return; s.anos++;
+  const g=Math.round(s.fieis*((s.devo-45)/250+s.fama/400)+R.int(-2,4)); s.fieis+=g; s.devo+=R.int(-6,2); s.susp+=s.regras.comunidade?4:-4; s.fama+=s.fieis>200?1:0;
+  const v=Math.round(s.fieis*R.int(20,70)*(.4+s.devo/100)); s.caixa+=v;
+  if(m.prison){ s.devo-=10; s.fieis=Math.round(s.fieis*.8); }
+  seitaFix(s); if(s.fieis<=0) return seitaFim('Não sobrou ninguém.');
+  if(s.profecia&&S.year>=s.profecia){ s.profecia=0; queue('seita_profecia',{}); }
+  if(s.susp>=70&&R.chance((s.susp-55)/80)) queue('seita_policia',{}); }
+yearMoney=(o=>function(){ const r=o.apply(this,arguments); try{ seitaAno(); }catch(e){} return r; })(yearMoney);
+V.seita=()=>{ const m=S.me, s=seita(), it=[];
+  if(!s){ it.push({html:'<div class="card"><p>Crie o seu próprio grupo religioso: escolha o tipo, dê um nome e conquiste fiéis. Dinheiro, poder e fé cega, até a polícia bater na porta.</p></div>'},{sec:'Fundar'});
+    Object.entries(SEITA_TIPOS).forEach(([k,t])=>it.push({ic:t[1],l:t[0],s:t[2],on:()=>modal({t:'Nome do grupo',html:`<input class="in" id="seitaNome" style="margin-top:8px" maxlength="40" placeholder="${esc(R.pick(SEITA_NOMES))}" autocomplete="off">`,ch:[{l:'Fundar',fn:()=>{ const el=document.getElementById('seitaNome'); const v=((el&&el.value)||'').trim()||(el&&el.placeholder)||R.pick(SEITA_NOMES); const r=seitaFundar(k,v); MQ.unshift({t:t[0],x:r}); UI.close(); }},{l:'Cancelar',cls:'alt'}]})}));
+    return {title:'Religião',items:it}; }
+  const t=SEITA_TIPOS[s.tipo];
+  it.push({html:`<div class="card"><p><b>${t[1]} ${esc(s.n)}</b></p><p style="color:var(--muted);font-size:13px">${esc(t[0])} · ${s.anos} ano(s) · ${s.templo} templo(s)</p>${kv('Fiéis',s.fieis.toLocaleString('pt-BR'))}${kv('Caixa do grupo',fmt(s.caixa))}${bar('Devoção',s.devo)}${bar('Fama',s.fama)}${bar('Suspeita da polícia',s.susp)}</div>`},{sec:'Liderar'});
+  const A=(k,ic,l,sub,tone)=>it.push({ic,l,s:sub,tone,on:()=>act(()=>seitaAcao(k),l)});
+  A('pregar','📣','Pregar na rua','Mais fiéis'); A('culto','🕯️','Fazer um culto ou retiro','Mais devoção'); A('dizimo','🧺','Pedir o dízimo','Dinheiro para o caixa · cansa os fiéis');
+  A('tv','📺','Programa na TV',`${fmt(25000)} · fama e fiéis`); A('templo','🏛️','Construir um templo',`${fmt(60000*(s.templo+1))} · muitos fiéis`); A('caridade','🤲','Fazer caridade','Fama boa · menos suspeita');
+  it.push({sec:'Do lado escuro'}); A('sacar','💰','Desviar dinheiro do caixa','Para a minha conta · suspeita','bad'); A('ritual','🔥','Ritual secreto','Devoção · suspeita','bad');
+  if(!s.regras.comunidade) A('comunidade','🏚️','Mandar os fiéis morarem juntos','Devoção enorme · famílias revoltadas','bad');
+  if(!s.profecia) A('profecia','☄️','Profetizar o fim do mundo','Devoção e fama agora · e quando não acontecer?','bad');
+  it.push({ic:'🚪',l:'Dissolver o grupo',tone:'bad',on:()=>confirmBox('Dissolver?',`${s.n} deixa de existir. O caixa (${fmt(s.caixa)}) é doado.`,'Dissolver',()=>act(()=>seitaFim('Dissolvi o grupo e doei o caixa.'),'Religião'))});
+  return {title:s.n,items:it}; };
+V.activities=(o=>()=>{ const r=o(); const m=S.me; if(m.prison||!r||!r.items) return r; const s=seita(); r.items.push(Object.assign({ic:'🛐',l:'Religião e seitas',s:s?`${s.n} · ${s.fieis} fiéis`:'Fundar o seu próprio grupo religioso',on:()=>UI.push(V.seita)},ageGate(18))); return r; })(V.activities);
+// eventos especiais
+EVENTS.seita_profecia={show:()=>({k:'Religião',t:'O dia do fim do mundo',x:`Chegou o dia da profecia. Os fiéis de ${seita()?seita().n:'o grupo'} estão reunidos, de túnica, olhando para o céu. Nada acontece.`,ch:[['Dizer que a fé deles adiou o fim','a'],['Marcar uma nova data','n'],['Confessar que errei','c']]}),
+  pick:k=>{ const s=seita(); if(!s) return ''; if(k==='a'){ if(R.chance(.55+S.me.smarts/300)){ s.devo+=15; seitaFix(s); return 'Acreditaram. Choraram de alegria. Dizem que eu salvei o mundo.'; } s.fieis=Math.round(s.fieis*.6); s.devo-=15; seitaFix(s); return 'Metade foi embora xingando. A outra metade ficou ainda mais fanática.'; }
+    if(k==='n'){ s.profecia=S.year+R.int(1,3); s.fieis=Math.round(s.fieis*.8); s.fama+=5; seitaFix(s); return `Nova data: ${s.profecia}. Alguns saíram. Os que ficaram, ficaram mais fiéis.`; }
+    s.fieis=Math.round(s.fieis*.4); s.devo-=20; S.me.karma=clamp(S.me.karma+8); seitaFix(s); return 'Pedi desculpas. Os que ficaram me respeitaram mais. Os outros querem o dinheiro de volta.'; }};
+EVENTS.seita_policia={show:()=>({k:'Religião',t:'Polícia no templo',x:`A Polícia Federal chegou com mandado de busca em ${seita()?seita().n:'o grupo'}. Ex-fiéis denunciaram estelionato e lavagem de dinheiro.`,ch:[['Colaborar','c'],['Destruir os documentos','d'],['Fugir do país','f']]}),
+  pick:k=>{ const m=S.me, s=seita(); if(!s) return '';
+    if(k==='f'){ if(R.chance(.5)&&m.money>20000){ m.money=Math.round(m.money*.6); seitaFim('Fugi do país e deixei os fiéis para trás.'); m.c.fugitive=1; return 'Fugi de madrugada num jatinho. Virei manchete internacional.'; } arrest('estelionato religioso',2,8); seitaFim('A liderança foi presa.'); return 'Me pegaram no aeroporto.'; }
+    if(k==='d'){ if(R.chance(.45)){ s.susp=30; seitaFix(s); return 'Picotei tudo antes de eles subirem. Não acharam nada.'; } arrest('estelionato e obstrução de justiça',3,10); seitaFim('A liderança foi presa.'); return 'Me pegaram com a mão no picotador.'; }
+    if(R.chance(.4+(m.karma-50)/150)){ s.susp=20; s.caixa=Math.round(s.caixa*.5); seitaFix(s); return 'Abri os livros. Pagamos multa, mas o grupo continua.'; }
+    arrest('estelionato religioso',1,6); s.fieis=Math.round(s.fieis*.5); seitaFix(s); return 'Mesmo colaborando, o promotor me denunciou.'; }};
+extTok=(o=>function(tok,d,out){ const s=S.me&&S.me.seita; let mm; if(mm=tok.match(/^(fieis|devo|susp|sfama|caixa)([+-]\d+)$/)){ if(s){ const k=mm[1]==='sfama'?'fama':mm[1]; s[k]=(s[k]||0)+ +mm[2]; seitaFix(s); } return true; }
+  if(tok==='seitafim'){ if(s) out.push(seitaFim('')); return true; } return o(tok,d,out); })(extTok);
+extChance=(o=>function(key){ const s=S.me&&S.me.seita; if(key==='devo') return s?s.devo:30; if(key==='susp') return s?s.susp:10; return o(key); })(extChance);
+const SEW=f=>m=>!!m.seita&&!m.prison&&f(m.seita,m);
+pack({k:'Religião',w:1.4,cd:6,min:18,when:SEW(()=>true)},[
+  ['Fiel milionário','Uma viúva rica quer deixar toda a herança para {seita}.',['Aceitar|caixa+300000 susp+8 k-4|A família dela vai me processar, mas o dinheiro já caiu.','Recusar e mandar falar com a família|k+6 sfama+4 devo+4|Os fiéis acharam lindo.']],
+  ['Ex-fiel no jornal','Um ex-fiel deu entrevista dizendo que {seita} é uma fraude.',['Processar|$-8000 ?50 sfama+3|Ganhei. Ele se retratou.|susp+10|Perdi, e o caso ganhou mais destaque.','Ignorar|fieis-5 susp+5|Alguns fiéis ficaram com dúvidas.','Convidar para voltar|?55 devo+6 fieis+1|Ele voltou, chorando.|susp+6|Ele gravou a conversa.']],
+  ['Milagre?','Uma fiel diz que foi curada de uma doença depois de um culto seu.',['Divulgar o milagre|fieis+25 sfama+8 susp+6|A fila do culto dobrou.','Pedir cautela|k+4 devo+3|Os fiéis me acharam humilde.']],
+  ['Vice ambicioso','Seu braço direito quer dividir a liderança de {seita}.',['Aceitar|devo-6 susp-5|Dividir o poder acalmou as coisas.','Expulsar|?55 devo+6|Ele saiu sozinho.|fieis-20|Ele saiu e levou um monte de gente para um grupo rival.']],
+  ['Político pede apoio','Um candidato quer o apoio de {seita} na eleição, em troca de favores.',['Apoiar|$+20000 sfama+5 susp+4|Os fiéis votaram em peso. Ganhei um amigo poderoso.','Manter o grupo fora da política|devo+4 k+2|Neutralidade.']],
+  ['Família desesperada','Os pais de um jovem fiel acusam você de ter roubado o filho deles.',['Deixar o jovem decidir|?devo devo+4|Ele escolheu ficar.|fieis-1 k+2|Ele voltou para casa.','Proibir o contato com a família|devo+6 susp+12 k-8|A família foi à polícia.']],
+  ['Documentário','Uma plataforma de streaming quer fazer um documentário sobre {seita}.',['Aceitar|sfama+15 fieis+30 susp+10 f+6|Viralizou. Amado e odiado na mesma medida.','Recusar|susp+3|Fizeram mesmo assim, só com ex-fiéis.']],
+  ['Declaração depois do culto','{n}, que nunca falta a um culto, se declarou para você.',['Corresponder|devo-4 susp+6 meet:namoro|Começamos a namorar. Os outros fiéis cochicham.','Recusar com bondade|devo+3 k+2|{n} chorou, mas continuou fiel.']],
+  ['Templo pegou fogo','Um incêndio destruiu parte do templo durante a noite.',['Usar o caixa para reconstruir|caixa-40000 devo+8|Mais bonito que antes.','Pedir doação extra aos fiéis|caixa+10000 devo-6|Reclamaram, mas doaram.','Dizer que foi um sinal|?55 devo+10|Os fiéis acreditaram.|fieis-10|Alguns acharam que era castigo.']],
+  ['Celebridade quer entrar','Um ator famoso quer entrar para {seita}.',['Receber com festa|sfama+12 fieis+40 f+3|A imprensa enlouqueceu.','Tratar como qualquer fiel|devo+4 sfama+4|Ele adorou ser tratado como gente comum.']],
+  ['Fiscalização da Receita','A Receita Federal quer ver as contas de {seita}.',['Mostrar tudo|?60 susp-10|Estava tudo certo. Mais ou menos.|caixa-30000 susp+10|Multa pesada.','Contratar um contador criativo|$-15000 ?55 susp-5|Passou.|susp+20|O contador era criativo demais.']],
+  ['Seita rival','Um grupo rival está roubando seus fiéis com promessas melhores.',['Fazer um culto maior|devo+8 caixa-5000|Os fiéis ficaram.','Espalhar boatos sobre eles|k-6 ?55 fieis+15|Eles perderam gente para nós.|susp+8|Descobriram quem espalhou.']],
+  ['Fiel doente','Um fiel grave recusou o hospital porque "a fé vai curar".',['Mandar para o hospital|k+8 devo-4|Ele se salvou. Alguns acharam que eu perdi a fé.','Rezar com ele|?40 devo+10|Ele melhorou, sem explicação.|susp+25 k-15|Ele morreu. A polícia quer falar comigo.']],
+  ['Livro sagrado','Os fiéis pedem um livro com os seus ensinamentos.',['Escrever|?sm caixa+20000 sfama+6 tal.writing+3|Virou best-seller entre os fiéis.|h-2|Ninguém entendeu nada.','Contratar um escritor-fantasma|$-6000 caixa+15000|Ficou bom. Ninguém sabe.']],
+  ['Jornalista infiltrado','Desconfiam que um novo fiel é jornalista disfarçado.',['Expulsar|susp-2 fieis-1|Era mesmo.','Tratar normalmente|?50 sfama+4|Ele saiu encantado e escreveu bem.|susp+15|A matéria foi devastadora.']],
+  ['Uniforme','Os fiéis querem um uniforme oficial de {seita}.',['Túnica branca|devo+5 caixa-3000|Lindo. E meio assustador.','Camiseta com logotipo|caixa+4000 sfama+2|Vendemos na porta do templo.']],
+  ['Casamento coletivo','Trinta casais de {seita} querem casar no mesmo dia.',['Celebrar|devo+10 sfama+6|Foi emocionante. E barulhento.','Cobrar uma taxa|caixa+15000 devo-4|Lucro abençoado.']],
+  ['Fiel ameaça se matar','Um fiel diz que vai se matar se você não der atenção só para ele.',['Encaminhar para um psicólogo|k+8 devo-2|Ele está em tratamento.','Ignorar|susp+10 k-6|Ele acabou internado. A família culpa você.']],
+  ['Reportagem de TV','Um programa policial fez uma reportagem sobre {seita}.',['Ir ao programa se defender|?sm sfama+8 susp-6|Saí do estúdio aplaudido.|susp+10|O apresentador me destruiu ao vivo.','Ficar em silêncio|susp+6|Silêncio soa como culpa.']],
+]);
+extVar=(o=>k=>k==='seita'?(S.me&&S.me.seita?S.me.seita.n:'o grupo'):o(k))(extVar);
+
+// ===== Polícia: concurso, investigação de crimes (mini-jogo de dedução) =====
+const isCop=()=>{ const j=S.me.job; return !!j&&!j.spc&&!j.hero&&j.id==='poli'; };
+function policeExam(){ const m=S.me; if(isCop()) return 'Já sou da polícia.'; if(m.age<18||m.age>40) return 'O concurso é para quem tem entre 18 e 40 anos.';
+  if(!m.edu.deg.includes('medio')) return 'O concurso exige ensino médio completo.'; if(m.rec.conv) return 'Com ficha criminal, não posso entrar na polícia.';
+  if(use('concursoPol')>1) return 'Só tem um concurso por ano.';
+  const p=.25+m.smarts/250+m.health/400+(m.fight||0)/400; if(!R.chance(Math.min(.9,p))){ st('happy',-5); return R.pick(['Reprovei na prova escrita.','Passei na prova, mas reprovei no teste físico: não aguentei a barra.','Fiquei na lista de espera e ninguém me chamou.']); }
+  takeJob({id:'poli',co:R.pick(['Polícia Civil','Polícia Militar','Polícia Federal']),size:'grande',mul:1}); m.c.cop=1; st('happy',10);
+  log(`Passei no concurso e entrei para a ${m.job.co}.`,'good'); return `Aprovad${oa()}! Seis meses de academia de polícia depois, recebi o distintivo da ${m.job.co}.`; }
+// ---------- o caso ----------
+const CASO_TIPOS=[['Assassinato numa mansão','🔪','foi encontrad{v} morto na biblioteca da mansão'],['Roubo de joias','💎','teve um colar de diamantes roubado do cofre'],['Incêndio criminoso','🔥','teve a loja incendiada durante a madrugada'],
+  ['Envenenamento','🧪','foi envenenad{v} num jantar de família'],['Sequestro','🚐','teve o filho sequestrado na saída da escola'],['Golpe milionário','💸','perdeu todas as economias num golpe'],['Atropelamento com fuga','🚗','foi atropelad{v} e o motorista fugiu']];
+const CASO_REL=['o sócio','a ex-mulher','o sobrinho','a vizinha','o motorista','a secretária','o irmão mais novo','a melhor amiga','o jardineiro','a filha adotiva','o advogado','a governanta'];
+const CASO_MOT=['herança','ciúme','dívida de jogo','vingança antiga','chantagem','seguro de vida','ficar com a empresa','um caso amoroso escondido'];
+const CASO_TR=['é canhoto','fuma charuto','calça 42','tem um carro vermelho','usa perfume amadeirado','tem uma tatuagem de cobra','tem um corte recente na mão','manca da perna esquerda','usa botas de couro','tem cabelo comprido'];
+function novoCaso(){ const tp=R.pick(CASO_TIPOS), vit=mkPerson({rel:'tmp',age:R.int(30,80)}); const rels=R.shuffle(CASO_REL.slice()).slice(0,4), trs=R.shuffle(CASO_TR.slice());
+  const sus=rels.map((r,i)=>{ const g=/^a /.test(r)?'F':'M'; const p=mkPerson({rel:'tmp',gender:g,age:R.int(22,70)}); return {n:p.first+' '+p.last,first:p.first,g,rel:r,mot:R.pick(CASO_MOT),tr:[trs[i*2],trs[i*2+1]],culp:false,ali:R.pick(['estava num jantar com amigos','diz que dormiu cedo','estava viajando a trabalho','diz que estava no cinema, sozinh'+(g==='F'?'a':'o'),'estava na academia','diz que estava em casa vendo novela'])}; });
+  const c=R.int(0,3); sus[c].culp=true;
+  // um inocente divide uma pista com o culpado, para a perícia não resolver sozinha
+  const o=R.pick(sus.filter(x=>!x.culp)); o.tr[1]=sus[c].tr[0];
+  return {tp,vit:{n:vit.first+' '+vit.last,g:vit.gender},sus,passos:5,notas:[],achou:{},fim:false}; }
+function casoTxt(c){ return `${c.vit.n} ${c.tp[2].replace('{v}',c.vit.g==='F'?'a':'o')}.`; }
+function casoPasso(c,k,i){ if(c.passos<=0||c.fim) return; c.passos--; const s=c.sus[i], culp=c.sus.find(x=>x.culp); let t='';
+  if(k==='int'){ const firme=s.culp?R.chance(.3):R.chance(.8); c.achou['ali'+i]=firme?'firme':'frágil'; c.achou['tr'+i]=1; t=`Interroguei ${s.first} (${s.rel}). Motivo possível: ${s.mot}. Álibi: ${s.ali}. ${firme?'A história bate com os fatos.':'A história tem buracos: errou horários e ficou nervos'+(s.g==='F'?'a':'o')+'.'} Reparei que ${s.first} ${s.tr[0]} e ${s.tr[1]}.`; }
+  else if(k==='per'){ const left=culp.tr.filter(x=>!c.notas.includes(x)); const tr=left.length?R.pick(left):culp.tr[0]; if(!c.notas.includes(tr)) c.notas.push(tr); t=`A perícia achou uma pista: o culpado ${tr}.`; }
+  else if(k==='rev'){ if(s.culp&&R.chance(.6)){ c.achou['prova'+i]=1; t=`Revistei a casa de ${s.first} e achei ${R.pick(['a arma escondida no forro','roupas com manchas suspeitas','o colar dentro de uma lata de biscoito','mensagens apagadas recuperadas no computador','um recibo que derruba o álibi'])}.`; } else t=`Revistei a casa de ${s.first}. Nada que ligue ${s.g==='F'?'ela':'ele'} ao crime.`; }
+  if(k==='cam'){ const inoc=c.sus.filter(x=>!x.culp&&!c.achou['fora'+c.sus.indexOf(x)]); t=''; if(inoc.length){ const x=R.pick(inoc); c.achou['fora'+c.sus.indexOf(x)]=1; t=`As câmeras mostram ${x.first} longe do local na hora do crime. Está descartad${x.g==='F'?'a':'o'}.`; } else t='As câmeras não mostram nada novo.'; }
+  c.log=(c.log||[]).concat(t); return t; }
+function casoAcusar(c,i){ const m=S.me, s=c.sus[i], j=m.job; c.fim=true; cnt('casos');
+  if(s.culp){ m.c.casosOk=(m.c.casosOk||0)+1; if(j){ j.perf=clamp(j.perf+15); if(R.chance(.3)&&j.lvl<4){ j.lvl++; log(`Promovid${oa()} a ${jobTitle(j).toLowerCase()} depois de resolver um caso.`,'good'); } } m.fame=clamp(m.fame+2); m.karma=clamp(m.karma+3); st('happy',10);
+    log(`Resolvi o caso: ${c.tp[0].toLowerCase()} de ${c.vit.n}. ${s.n} foi pres${s.g==='F'?'a':'o'}.`,'good'); return `${s.first} confessou na sala de interrogatório. Caso encerrado. A delegacia inteira aplaudiu.`; }
+  if(j) j.perf=clamp(j.perf-18); m.karma=clamp(m.karma-8); st('happy',-10); const real=c.sus.find(x=>x.culp);
+  log(`Errei no caso de ${c.vit.n}: ${s.n} foi pres${s.g==='F'?'a':'o'} injustamente.`,'bad');
+  if(R.chance(.25)&&j){ return `${s.first} era inocente. Meses depois, ${real.first} foi pego por outro crime e confessou tudo. Fui afastad${oa()} do cargo. `+(endJob(),'Perdi o distintivo.'); }
+  return `${s.first} foi pres${s.g==='F'?'a':'o'}. Mas eu tenho uma sensação ruim. ${R.chance(.5)?`Hoje vi ${real.first} sorrindo na rua.`:'O caso não fecha na minha cabeça.'}`; }
+V.caso=c=>()=>{ const it=[{html:`<div class="card"><p><b>${c.tp[1]} ${esc(c.tp[0])}</b></p><p>${esc(casoTxt(c))}</p>${kv('Diligências que restam',c.passos)}${c.notas.length?`<p style="font-size:13px"><b>Pistas da perícia:</b> o culpado ${esc(c.notas.join(' e '))}.</p>`:''}${(c.log||[]).slice(-3).map(t=>`<p style="color:var(--muted);font-size:13px">• ${esc(t)}</p>`).join('')}</div>`}];
+  if(c.fim) return {title:'Caso encerrado',items:it};
+  it.push({sec:'Suspeitos'}); c.sus.forEach((s,i)=>{ const info=[c.achou['ali'+i]?`álibi ${c.achou['ali'+i]}`:'',c.achou['tr'+i]?s.tr.join(', '):'',c.achou['prova'+i]?'PROVA ENCONTRADA':'',c.achou['fora'+i]?'descartad'+(s.g==='F'?'a':'o')+' pelas câmeras':''].filter(Boolean).join(' · ');
+    it.push({ic:s.g==='F'?'👩':'👨',l:`${s.n} · ${s.rel}`,s:info||'Ainda não investiguei',on:()=>modal({t:s.n,x:`${s.rel[0].toUpperCase()+s.rel.slice(1)} da vítima.`,ch:[{l:'Interrogar',fn:()=>{ casoPasso(c,'int',i); UI.refresh(); }},{l:'Revistar a casa',fn:()=>{ casoPasso(c,'rev',i); UI.refresh(); }},{l:'Acusar como culpad'+(s.g==='F'?'a':'o'),cls:'danger',fn:()=>{ const r=casoAcusar(c,i); MQ.unshift({t:'Veredito',x:r}); UI.refresh(); }},{l:'Voltar',cls:'alt'}].map(x=>Object.assign(x,{dis:c.passos<=0&&x.l!=='Voltar'&&!x.l.startsWith('Acusar')})).filter(x=>!(x.dis))})}); });
+  it.push({sec:'Diligências'},{ic:'🔬',l:'Chamar a perícia',s:'Revela uma pista sobre o culpado',dis:c.passos<=0,why:'Acabaram as diligências. Hora de acusar alguém.',on:()=>{ casoPasso(c,'per',0); UI.refresh(); }},{ic:'📹',l:'Checar câmeras da região',s:'Pode descartar um inocente',dis:c.passos<=0,why:'Acabaram as diligências. Hora de acusar alguém.',on:()=>{ casoPasso(c,'cam',0); UI.refresh(); }});
+  return {title:c.tp[0],items:it}; };
+function startCaso(){ const m=S.me; if(!isCop()) return msg('Investigação','Só policiais investigam crimes. Que tal prestar o concurso?'); if(use('caso')>2) return msg('Investigação','Já peguei casos demais este ano.'); const c=novoCaso(); UI.push(V.caso(c)); }
+V.activities=(o=>()=>{ const r=o(); const m=S.me; if(m.prison||!r||!r.items) return r;
+  if(isCop()) r.items.unshift({ic:'🕵️',l:'Investigar um crime',s:'Um caso novo: interrogue, reviste, chame a perícia e acuse',on:()=>startCaso()});
+  else r.items.push(Object.assign({ic:'🚓',l:'Concurso para a polícia',s:'Entre 18 e 40 anos · ensino médio · sem ficha criminal',on:()=>act(policeExam,'Concurso')},ageGate(18)));
+  return r; })(V.activities);
+// eventos da vida de policial
+pack({k:'Polícia',w:1.3,cd:8,min:18,when:m=>isCop()&&!m.prison},[
+  ['Propina','Um traficante oferece {v} para você "não ver" uma entrega.',['Recusar e prender|?fight perf+10 k+8|Prendi ele e a carga.|hl-10 perf+4|Ele reagiu. Saí ferid{o}, mas prendi.','Aceitar|$v2 k-15|Ninguém viu. Eu acho.','Denunciar à corregedoria|perf+6 k+6|Ganhei inimigos dentro da corporação.'],{v:[5000,40000]}],
+  ['Perseguição','Um carro roubado fura a blitz em alta velocidade.',['Perseguir|?60 perf+10 f+1|Peguei na terceira esquina.|hl-12|Bati a viatura no poste.','Passar o rádio|perf+2|Outra viatura pegou.']],
+  ['Colega corrupto','Você descobre que seu parceiro de viatura recebe propina.',['Denunciar|perf+4 k+8|Ele foi afastado. Agora me chamam de X9.','Ficar quiet{o}|k-6|Fingi que não vi.','Pedir uma parte|$+8000 k-15|Agora somos dois.']],
+  ['Tiroteio','Uma troca de tiros começa durante uma abordagem.',['Buscar abrigo e revidar|?fight perf+12 kill|Neutralizei o atirador.|hl-25|Fui baleado no ombro.','Recuar e pedir reforço|perf-2|Ninguém se feriu.']],
+  ['Caso sem solução','Um caso antigo sem solução volta a assombrar a delegacia.',['Reabrir o caso nas horas vagas|?sm perf+15 f+3|Resolvi! Uma família finalmente teve paz.|h-6|Mais uma madrugada perdida.','Deixar arquivado|h+0|Tem caso novo todo dia.']],
+  ['Criança perdida','Uma criança se perdeu num shopping lotado.',['Procurar pessoalmente|perf+6 k+6 h+6|Achei dormindo numa loja de colchões.','Passar pelo sistema de som|perf+2|A mãe apareceu em cinco minutos.']],
+  ['Abordagem polêmica','Um vídeo seu numa abordagem viralizou e as pessoas discordam.',['Pedir desculpas|k+4 perf-2|Mais gente me entendeu.','Defender a abordagem|?50 perf+4|O comando me apoiou.|perf-10 f+2|Fui afastad{o} por uma semana.']],
+  ['Delegado exige resultados','O delegado quer números: mais prisões neste mês.',['Trabalhar dobrado|perf+10 hl-4|Bati a meta.','Prender qualquer um|perf+6 k-12|Bati a meta do jeito errado.']],
+  ['Medalha','Você vai receber uma medalha por bravura.',['Ir à cerimônia|f+3 h+10 perf+4|Minha família assistiu da primeira fila.']],
+  ['Disfarce','Te escalam para se infiltrar numa quadrilha.',['Aceitar|?sm perf+20 $+5000|Derrubei a quadrilha por dentro.|hl-20|Descobriram quem eu era.','Recusar|perf-4|Mandaram outro.']],
+]);
+
+// ===== Derrubar o governo: movimento, armas, generais e o golpe =====
+const rev=()=>S.me.rev||null;
+function revFix(r){ ['apoio','mil','armas','susp'].forEach(k=>r[k]=clamp(r[k])); r.membros=Math.max(1,Math.round(r.membros)); return r; }
+function revStart(nome){ const m=S.me; m.rev={n:nome,apoio:R.int(2,6),mil:0,armas:0,susp:5,membros:R.int(3,8),anos:0}; m.c.rev=1; log(`Fundei em segredo o movimento ${nome}. O objetivo: derrubar o governo.`,'warn'); return `O ${nome} nasceu num porão, com ${m.rev.membros} pessoas e um mimeógrafo.`; }
+function revAcao(k){ const m=S.me, r=rev(); if(!r) return ''; if(use('rev_'+k)>2) return 'Já fiz muito disso este ano. Chamar atenção demais é suicídio.'; let t='';
+  switch(k){
+    case 'panfleto': { const g=R.int(2,6)+Math.round(m.fame/20); r.apoio+=g; r.membros+=R.int(5,30); r.susp+=R.int(3,7); t=`Panfletos na madrugada, pichações nos viadutos. O apoio subiu para ${clamp(r.apoio)}%.`; break; }
+    case 'protesto': { if(R.chance(.25)){ r.susp+=12; r.membros=Math.round(r.membros*.85); st('health',-R.int(5,15)); t='A polícia dispersou o protesto com bombas. Vários companheiros foram presos.'; } else { r.apoio+=R.int(6,12); r.membros+=R.int(30,200); r.susp+=8; m.fame=clamp(m.fame+3); t='Milhares nas ruas gritando o nosso lema. A TV não teve como ignorar.'; } break; }
+    case 'armas': { const c=30000; if(m.money<c) return `Um lote de armas custa ${fmt(c)}.`; m.money-=c; r.armas+=R.int(12,20); r.susp+=6; m.karma=clamp(m.karma-4); t='Um contrabandista entregou caixas de fuzis num galpão do porto.'; break; }
+    case 'general': { const c=80000; if(m.money<c) return `Comprar um general custa pelo menos ${fmt(c)}.`; m.money-=c; if(R.chance(.55+m.smarts/400)){ r.mil+=R.int(15,25); t='Um general aceitou o dinheiro e prometeu que os quartéis não vão reagir.'; } else { r.susp+=20; t='O general aceitou o dinheiro e me denunciou.'; } break; }
+    case 'hacker': { if(R.chance(.5+m.smarts/300)){ r.apoio+=R.int(5,10); r.susp+=4; t='Hackeamos a TV estatal e passamos nosso manifesto no horário nobre.'; } else { r.susp+=12; t='O ataque falhou e deixou rastros.'; } break; }
+    case 'sumir': { r.susp-=R.int(10,18); t='Mandei o movimento hibernar. Sem reuniões, sem panfletos, sem celulares.'; break; }
+  }
+  revFix(r); return t; }
+function revChance(r){ return Math.max(.03,Math.min(.9,r.apoio/250+r.mil/160+r.armas/300+(r.membros>500?.08:0)-.1)); }
+function revGolpe(){ const m=S.me, r=rev(); if(!r) return ''; const p=revChance(r); m.c.golpe=(m.c.golpe||0)+1;
+  if(R.chance(p)){ if(m.job) endJob(); m.office={id:'pres',yrs:0,appr:R.int(30,60),dit:1}; cnt('office_pres'); cnt('pres'); m.fame=clamp(m.fame+70); m.rev=null; st('happy',20);
+    log(`Derrubei o governo. Agora sou ${m.gender==='F'?'a líder suprema':'o líder supremo'} do país.`,'good'); return `Tanques nas ruas, o palácio cercado, o presidente fugindo de helicóptero. Às 6 da manhã, falei em rede nacional: o país agora é meu.`; }
+  const n=R.f(); m.rev=null; m.karma=clamp(m.karma-5);
+  if(n<.2){ die('fuzilad'+oa()+' depois de um golpe de Estado fracassado'); return 'O golpe fracassou. O tribunal militar foi rápido.'; }
+  if(n<.35&&m.money>10000){ m.money=Math.round(m.money*.3); m.c.fugitive=1; return 'O golpe fracassou. Fugi pela fronteira de madrugada, com o que deu para carregar.'; }
+  arrest('tentativa de golpe de Estado',10,30); return 'O golpe fracassou. Os quartéis não se moveram. A polícia me achou no porão.'; }
+// todo ano: a polícia política desconfia, ou esquece
+function revAno(){ const m=S.me, r=rev(); if(!r||!m.alive||m.prison) return; r.anos++; r.susp+=R.int(-4,6); r.apoio+=R.int(-3,2); revFix(r);
+  if(r.susp>=60&&R.chance((r.susp-45)/80)) queue('rev_policia',{}); }
+yearMoney=(o=>function(){ const x=o.apply(this,arguments); try{ revAno(); const of=S.me.office; if(of&&of.dit){ S.pending=S.pending.filter(e=>e.id!=='reeleicao'); if(of.appr<25&&R.chance(.35)) queue('rev_contragolpe',{}); } }catch(e){} return x; })(yearMoney);
+occupation=(o=>()=>{ const m=S.me; if(m&&m.alive&&!m.prison&&m.office&&m.office.dit&&!(S.scen)) return m.gender==='F'?'Líder suprema':'Líder supremo'; return o(); })(occupation);
+V.rev=()=>{ const m=S.me, r=rev(), it=[];
+  if(m.office&&m.office.dit) return {title:'Revolução',items:[{html:'<div class="card"><p>O governo já é meu. Agora é não deixar ninguém fazer comigo o que eu fiz.</p></div>'}]};
+  if(!r){ it.push({html:'<div class="card"><p>Organize um movimento clandestino, conquiste o povo, compre armas e generais, e tome o poder. Se der errado, é prisão perpétua, exílio ou fuzilamento.</p></div>'},
+    {ic:'✊',l:'Fundar um movimento clandestino',s:'O primeiro passo',on:()=>modal({t:'Nome do movimento',html:'<input class="in" id="revNome" style="margin-top:8px" maxlength="40" placeholder="Frente de Libertação Nacional" autocomplete="off">',ch:[{l:'Fundar',fn:()=>{ const el=document.getElementById('revNome'); const v=((el&&el.value)||'').trim()||'Frente de Libertação Nacional'; MQ.unshift({t:'Revolução',x:revStart(v)}); UI.close(); }},{l:'Cancelar',cls:'alt'}]})});
+    return {title:'Revolução',items:it}; }
+  it.push({html:`<div class="card"><p><b>✊ ${esc(r.n)}</b></p>${kv('Membros',r.membros.toLocaleString('pt-BR'))}${bar('Apoio do povo',r.apoio)}${bar('Militares do nosso lado',r.mil)}${bar('Armas',r.armas)}${bar('Suspeita da polícia política',r.susp)}${kv('Chance do golpe hoje',Math.round(revChance(r)*100)+'%')}</div>`},{sec:'Preparar'});
+  const A=(k,ic,l,s)=>it.push({ic,l,s,on:()=>act(()=>revAcao(k),l)});
+  A('panfleto','📜','Panfletar e pichar','Apoio do povo'); A('protesto','📢','Convocar um protesto','Muito apoio · risco de repressão'); A('hacker','💻','Invadir a TV estatal','Apoio · pode deixar rastro');
+  A('armas','🔫',`Comprar armas`,`${fmt(30000)} · armas`); A('general','🎖️','Subornar um general',`${fmt(80000)} · militares`); A('sumir','🤫','Hibernar o movimento','Diminui a suspeita');
+  it.push({sec:'A hora da verdade'},{ic:'💥',l:'Dar o golpe',s:`Chance de ${Math.round(revChance(r)*100)}% · tudo ou nada`,tone:'bad',on:()=>confirmBox('Dar o golpe?','Se der errado: prisão, exílio ou fuzilamento.','Dar o golpe',()=>act(revGolpe,'Golpe de Estado'))},
+    {ic:'🏳️',l:'Abandonar o movimento',on:()=>confirmBox('Abandonar?','O movimento vai seguir sem você, ou acabar.','Abandonar',()=>act(()=>{ m.rev=null; return 'Queimei os papéis e voltei para a vida normal. Torço para ninguém lembrar de mim.'; },'Revolução'))});
+  return {title:r.n,items:it}; };
+V.politics=(o=>()=>{ const r=o(); if(S.me.age>=18) r.items.push({sec:'Por fora das urnas'},{ic:'✊',l:'Derrubar o governo',s:rev()?rev().n:'Movimento clandestino e golpe de Estado',tone:'bad',on:()=>UI.push(V.rev)}); return r; })(V.politics);
+EVENTS.rev_policia={show:()=>({k:'Revolução',t:'A polícia política bateu na porta',x:`Agentes à paisana cercaram o esconderijo do ${rev()?rev().n:'movimento'}.`,ch:[['Resistir com as armas','r'],['Fugir pelos fundos','f'],['Entregar os companheiros','e']]}),
+  pick:k=>{ const m=S.me, r=rev(); if(!r) return '';
+    if(k==='e'){ m.rev=null; m.karma=clamp(m.karma-20); return 'Entreguei todos em troca da minha liberdade. Nunca mais consegui me olhar no espelho.'; }
+    if(k==='r'&&r.armas>=30&&R.chance(.5)){ r.susp=40; r.apoio+=8; cnt('kills'); revFix(r); return 'Houve tiroteio. Os agentes recuaram. Viramos lenda nas ruas.'; }
+    if(k==='f'&&R.chance(.55)){ r.susp=35; r.membros=Math.round(r.membros*.7); revFix(r); return 'Escapei pelos telhados. Perdemos alguns companheiros.'; }
+    m.rev=null; arrest('conspiração contra o Estado',5,20); return 'Não deu. Fui levad'+oa()+' encapuzad'+oa()+'.'; }};
+EVENTS.rev_contragolpe={show:()=>({k:'Política',t:'Contragolpe!',x:'Generais insatisfeitos cercaram o palácio. Querem fazer comigo o que eu fiz com o governo anterior.',ch:[['Resistir','r'],['Negociar','n'],['Fugir para o exílio','f']]}),
+  pick:k=>{ const m=S.me, of=m.office; if(!of) return '';
+    if(k==='f'){ m.office=null; m.money=Math.round(m.money*.5); m.c.fugitive=1; return 'Fugi num avião particular com metade do tesouro. Vivo exilad'+oa()+' numa ilha.'; }
+    if(k==='n'&&R.chance(.5)){ of.appr=clamp(of.appr+15); m.money-=Math.min(m.money,500000); return 'Dei cargos e dinheiro aos generais. Ficaram. Por enquanto.'; }
+    if(k==='r'&&R.chance(.45)){ of.appr=clamp(of.appr+10); return 'A guarda presidencial resistiu. Os generais foram presos.'; }
+    m.office=null; if(R.chance(.35)){ die('num contragolpe militar'); return 'O palácio caiu.'; } arrest('crimes contra o Estado',15,40); return 'O palácio caiu. Fui pres'+oa()+'.'; }};
+const RW2=f=>m=>!!m.rev&&!m.prison&&f(m.rev,m);
+pack({k:'Revolução',w:1.4,cd:6,min:18,when:RW2(()=>true)},[
+  ['Infiltrado','Desconfiam que um novo membro do movimento é agente do governo.',['Expulsar|rsusp-6|Ele sumiu na mesma noite. Era mesmo.','Dar informação falsa para testar|?sm rsusp-10|Ele caiu na armadilha e entregou tudo errado aos chefes.|rsusp+15|Ele percebeu o teste.']],
+  ['Apoio estrangeiro','Um país vizinho oferece dinheiro e armas para o movimento.',['Aceitar|$+60000 armas+15 apoio-5|O povo não gosta de golpe com dinheiro de fora.','Recusar|apoio+5|A revolução tem que ser nossa.']],
+  ['Companheiro preso','Um dos fundadores do movimento foi preso e está sendo interrogado.',['Planejar o resgate|?40 apoio+10 rsusp+10|Tiramos ele de lá.|rsusp+20|Fracasso. Agora sabem de mais coisa.','Mudar todos os esconderijos|rsusp-5 membros-5|Perdemos gente, mas ficamos seguros.']],
+  ['Herói do povo','Uma foto sua discursando no meio da multidão viralizou.',['Aproveitar|apoio+10 rsusp+10 f+4|Viramos símbolo.','Pedir que apaguem|rsusp-3|Tarde demais para alguns.']],
+  ['Racha no movimento','Uma ala quer luta armada; outra quer protestos pacíficos.',['Ficar com a ala armada|armas+10 apoio-6|Mais força, menos simpatia.','Ficar com os pacíficos|apoio+8 armas-5|O povo gostou.','Tentar unir as duas|?sm apoio+4 armas+4|Funcionou por um tempo.|membros-20|Metade foi embora.']],
+  ['Família preocupada','Sua família descobriu o que você anda fazendo e implora para você parar.',['Prometer parar|h-4|Menti para eles.','Explicar a causa|?50 h+4|Entenderam, e ficaram com medo.|h-8|Brigamos feio.']],
+  ['Greve geral','Os sindicatos oferecem uma greve geral no dia do golpe.',['Aceitar|apoio+12 rsusp+6|O país vai parar quando a gente mandar.','Recusar|h+0|Prefiro surpresa.']],
+  ['General arrependido','O general que você subornou quer desistir do acordo.',['Pagar mais|$-40000 mil+5|Ficou.','Ameaçar|?55 mil+5 k-5|Ele ficou, com medo.|mil-15 rsusp+15|Ele correu para o ministro.']],
+]);
+extTok=(o=>function(tok,d,out){ const r=S.me&&S.me.rev; const mm=tok.match(/^(apoio|mil|armas|rsusp|membros)([+-]\d+)$/); if(mm){ if(r){ r[mm[1]==='rsusp'?'susp':mm[1]]+=+mm[2]; revFix(r); } return true; } return o(tok,d,out); })(extTok);
+
+// ===== Investigar o paranormal: fantasmas, vampiros e lobisomens (e virar um deles, para sempre) =====
+const PARA_LUGARES=[
+  ['cemiterio','Cemitério à meia-noite','🪦',['fantasma','vampiro','nada'],.25],['casa','Casa abandonada no fim da rua','🏚️',['fantasma','fantasma','nada'],.15],
+  ['floresta','Floresta na lua cheia','🌕',['lobisomem','lobisomem','nada'],.35],['castelo','Castelo antigo na serra','🏰',['vampiro','vampiro','fantasma'],.4],
+  ['hospital','Hospital psiquiátrico desativado','🏥',['fantasma','fantasma','nada'],.2],['sitio','Sítio com luzes estranhas no céu','🛸',['ovni','nada','nada'],.1],
+  ['boate','Boate que só abre depois das 3 da manhã','🦇',['vampiro','nada'],.3],['estrada','Estrada de terra onde somem viajantes','🛣️',['lobisomem','fantasma','nada'],.25]];
+const CRIATURA={vampiro:['Vampiro|Vampira','🧛'],lobisomem:['Lobisomem|Mulher-loba','🐺']};
+const para=()=>{ const m=S.me; return m.para||(m.para={prova:0,vistos:{},visitas:0}); };
+function virar(tipo,quem){ const m=S.me; if(m.criatura) return ''; m.criatura=tipo; m.c.criatura=1; m.criaturaAno=S.year; if(tipo==='lobisomem') m.fight=clamp((m.fight||0)+20); if(tipo==='vampiro'){ st('looks',8); st('health',20); }
+  log(`${CRIATURA[tipo][1]} Fui mordid${oa()} ${quem?'por '+quem:''} e virei ${g(CRIATURA[tipo][0],m.gender).toLowerCase()}. Para sempre.`,'bad'); return ` Virei ${g(CRIATURA[tipo][0],m.gender).toLowerCase()}.`; }
+function paraVisita(id){ const m=S.me, L=PARA_LUGARES.find(x=>x[0]===id), P=para(); if(use('para')>3) return 'Já me arrisquei demais este ano. Até eu tenho limite.';
+  P.visitas++; const o=R.pick(L[3]), risco=L[4]*(m.criatura?.4:1);
+  if(o==='nada'||(o!=='fantasma'&&o!=='ovni'&&!R.chance(.55))){ if(R.chance(.35)){ P.prova++; return `${L[2]} ${L[1]}: passei a noite com câmera e gravador. Captei um barulho que ninguém sabe explicar. Provas: ${P.prova}.`; } return `${L[2]} ${L[1]}: frio, mosquito e silêncio. Nada de sobrenatural, só o medo.`; }
+  if(o==='fantasma'){ P.vistos.fantasma=1; P.prova+=2; st('happy',-4); if(R.chance(.15)){ st('health',-R.int(5,15)); return `${L[2]} ${L[1]}: uma mulher de branco atravessou a parede e gritou na minha cara. Caí da escada fugindo. Mas filmei! Provas: ${P.prova}.`; } return `${L[2]} ${L[1]}: uma porta bateu sozinha, uma voz chamou meu nome. Filmei tudo. Provas: ${P.prova}.`; }
+  if(o==='ovni'){ P.prova+=2; P.vistos.ovni=1; return `${L[2]} ${L[1]}: três luzes pararam em cima do pasto e sumiram em silêncio. As vacas nem ligaram. Provas: ${P.prova}.`; }
+  // vampiro ou lobisomem
+  P.vistos[o]=1; const nome=o==='vampiro'?R.pick(['um homem pálido de capa','uma mulher elegante de olhos vermelhos','um conde que não aparece no espelho']):R.pick(['uma fera do tamanho de um urso','um homem que se contorcia virando lobo','um vulto peludo de olhos amarelos']);
+  const fuga=.45+(m.fight||0)/250+m.health/400-risco;
+  if(R.chance(fuga)){ P.prova+=3; m.fame=clamp(m.fame+1); return `${L[2]} ${L[1]}: dei de cara com ${nome}. Corri como nunca na vida, e consegui uma foto borrada. Provas: ${P.prova}.`; }
+  if(m.criatura&&m.criatura===o){ P.prova+=2; return `${L[2]} ${L[1]}: ${nome} me farejou, me reconheceu como igual e foi embora.`; }
+  if(R.chance(o==='vampiro'?.32:.38)&&!m.criatura){ return `${L[2]} ${L[1]}: ${nome} me alcançou. A mordida queimou como fogo.`+virar(o,nome); }
+  if(R.chance(.45)){ die(o==='vampiro'?'com o sangue drenado por um vampiro':'despedaçad'+oa()+' por um lobisomem'); return `${L[2]} ${L[1]}: ${nome} me alcançou.`; }
+  st('health',-R.int(20,40)); return `${L[2]} ${L[1]}: ${nome} me jogou contra uma árvore e sumiu. Acordei no hospital, cheio de pontos.`; }
+function paraPublicar(){ const m=S.me, P=para(); if(P.prova<5) return 'Ainda não tenho provas suficientes. Preciso de pelo menos 5.'; const n=P.prova; P.prova=0;
+  if(R.chance(.25+n/40)){ const v=n*R.int(4000,12000); m.money+=v; m.fame=clamp(m.fame+n); st('happy',12); return `Lancei um documentário com as provas. Virou febre: ${fmt(v)} e entrevistas no mundo todo.`; }
+  m.fame=clamp(m.fame+2); st('happy',-8); return 'Publiquei as provas. Me chamaram de farsante na internet. Os memes não param.'; }
+function paraCura(){ const m=S.me; if(!m.criatura) return ''; const c=40000; if(m.money<c) return `O ritual de cura custa ${fmt(c)} em ingredientes raros.`; if(use('cura')>1) return 'Só dá para tentar uma vez por ano.'; m.money-=c;
+  if(R.chance(.18)){ const t=m.criatura; m.criatura=null; log(`Me curei: deixei de ser ${g(CRIATURA[t][0],m.gender).toLowerCase()}.`,'good'); st('happy',15); return 'O ritual funcionou. Senti o sol na pele sem queimar. Voltei a ser humano.'; }
+  st('health',-R.int(5,15)); return R.pick(['O ritual não funcionou. A bruxa ficou com o dinheiro.','Bebi a poção. Vomitei a noite inteira. Continuo o mesmo.']); }
+V.paranormal=()=>{ const m=S.me, P=para(), it=[];
+  it.push({html:`<div class="card"><p>Investigue lugares assombrados com câmera e lanterna. Fantasmas assustam; vampiros e lobisomens matam, ou mordem, e aí é para sempre.</p>${kv('Provas',P.prova)}${kv('Visitas',P.visitas)}${m.criatura?kv('Eu sou',CRIATURA[m.criatura][1]+' '+g(CRIATURA[m.criatura][0],m.gender)):''}</div>`},{sec:'Lugares'});
+  PARA_LUGARES.forEach(L=>it.push({ic:L[2],l:L[1],s:`Perigo ${'☠️'.repeat(Math.max(1,Math.round(L[4]*7)))}`,on:()=>act(()=>paraVisita(L[0]),L[1])}));
+  it.push({sec:'Provas'},{ic:'🎬',l:'Publicar as provas',s:'Fama e dinheiro, ou virar piada',on:()=>act(paraPublicar,'Paranormal')});
+  if(m.criatura) it.push({sec:'A maldição'},{ic:'🧪',l:'Procurar uma cura',s:`${fmt(40000)} · chance pequena`,on:()=>act(paraCura,'Cura')});
+  return {title:'Paranormal',items:it}; };
+V.activities=(o=>()=>{ const r=o(); const m=S.me; if(m.prison||!r||!r.items) return r; r.items.push(Object.assign({ic:'👻',l:'Investigar o paranormal',s:m.criatura?`Sou ${g(CRIATURA[m.criatura][0],m.gender).toLowerCase()}`:'Fantasmas, vampiros e lobisomens',on:()=>UI.push(V.paranormal)},ageGate(14))); return r; })(V.activities);
+// ---------- a vida de criatura ----------
+deathRoll=(o=>function(){ const m=S.me; if(m.criatura==='vampiro') return R.chance(.003); return o.apply(this,arguments); })(deathRoll);
+yearMoney=(o=>function(){ const x=o.apply(this,arguments); const m=S.me; try{ if(m.alive&&m.criatura&&!(S.scen)){
+    if(m.criatura==='vampiro'){ m.health=Math.max(m.health,70); st('looks',1); if(!m.prison) queue('vamp_sede',{}); }
+    if(m.criatura==='lobisomem'){ st('health',2); if(!m.prison) queue('lobo_lua',{}); }
+    if(R.chance(.07)) queue('cacador',{}); } }catch(e){} return x; })(yearMoney);
+occupation=(o=>()=>{ const r=o(); const m=S.me; return m&&m.alive&&m.criatura&&!S.scen?`${r} · ${CRIATURA[m.criatura][1]}`:r; })(occupation);
+const pv=m=>(S.people||[]).filter(p=>p.alive&&p.rel!=='pet'&&p.rel!=='tmp');
+EVENTS.vamp_sede={once:1,show:()=>({k:'Maldição',t:'A sede',x:'A sede de sangue voltou. As veias queimam e o coração de qualquer pessoa por perto soa como um tambor.',ch:[['Roubar bolsas de sangue de um hospital','h'],['Caçar animais na mata','a'],['Atacar alguém num beco escuro','p'],['Resistir à sede','r']]}),
+  pick:k=>{ const m=S.me;
+    if(k==='h'){ if(R.chance(.15)){ arrest('furto em hospital',1,3); return 'O segurança me pegou com a geladeira aberta.'; } cnt('crimes'); return 'Saí do hospital com seis bolsas de sangue numa mochila térmica. O ano está garantido.'; }
+    if(k==='a'){ st('happy',-6); st('health',-5); return 'Sangue de capivara. Sobrevivo. Mal.'; }
+    if(k==='p'){ m.karma=clamp(m.karma-15); cnt('crimes'); if(R.chance(.3)){ cnt('kills'); if(R.chance(.3)){ arrest('homicídio',12,30); return 'Exagerei. A vítima não acordou. A polícia achou o corpo e me achou depois.'; } return 'Exagerei. A vítima não acordou. Ninguém nunca soube.'; } if(R.chance(.15)){ const p=mkPerson({rel:'amigo',age:R.int(20,50),bond:30}); p.criatura='vampiro'; S.people.push(p); return `Mordi ${p.first} e não consegui parar a tempo de evitar a transformação. Agora tem mais um vampiro na cidade, e ele sabe quem eu sou.`; } return 'Um bêbado num beco. Ele vai acordar com dor de cabeça e duas marquinhas no pescoço.'; }
+    st('health',-R.int(20,35)); st('happy',-10); return 'Resisti. Passei semanas tremendo, magr'+oa()+', com os olhos fundos.'; }};
+EVENTS.lobo_lua={once:1,show:()=>({k:'Maldição',t:'Lua cheia',x:'É noite de lua cheia. Os ossos já começaram a estalar.',ch:[['Me trancar no porão com correntes','c'],['Correr para a floresta','f'],['Não fazer nada e torcer','n']]}),
+  pick:k=>{ const m=S.me;
+    if(k==='c'){ st('happy',-4); st('health',-3); return 'Uivei a noite inteira acorrentad'+oa()+'. Os vizinhos acham que tenho um cachorro enorme.'; }
+    if(k==='f'){ if(R.chance(.15)){ st('health',-R.int(15,30)); return 'Um caçador me acertou de raspão. Acordei pelad'+oa()+' na lama, sangrando.'; } st('happy',4); return 'Corri a noite inteira entre as árvores. Cacei um javali. Foi a noite mais livre da minha vida.'; }
+    const fam=pv().filter(p=>['conjuge','namoro','noivo','filho','irmao','mae','pai','amigo'].includes(p.rel));
+    if(fam.length&&R.chance(.35)){ const p=R.pick(fam); if(R.chance(.4)){ p.alive=false; st('happy',-35); m.karma=clamp(m.karma-20); cnt('kills'); log(`${relLabel(p)} ${fullName(p)} morreu atacad${p.gender==='F'?'a':'o'} por uma fera na noite de lua cheia.`,'bad'); return `Acordei com sangue nas mãos. ${p.first} estava no quintal. Nunca vou me perdoar.`; }
+      p.criatura='lobisomem'; p.health=clamp(p.health-20); p.bond=clamp(p.bond-25); return `Mordi ${p.first}. Agora são dois lobos na família. ${p.first} me olha diferente.`; }
+    if(R.chance(.3)){ m.karma=clamp(m.karma-8); return 'Acordei num galinheiro destruído. O fazendeiro vai procurar uma onça que não existe.'; }
+    return 'Acordei pelad'+oa()+' num parque, sem lembrar de nada. Pelo menos não tinha sangue.'; }};
+EVENTS.cacador={show:()=>({k:'Maldição',t:'Caçador de monstros',x:`Um caçador de ${S.me.criatura==='vampiro'?'vampiros, com estacas e água benta,':'lobisomens, com balas de prata,'} descobriu quem eu sou e está na minha porta.`,ch:[['Lutar','l'],['Fugir da cidade','f'],['Pedir misericórdia','p']]}),
+  pick:k=>{ const m=S.me; if(!m.criatura) return '';
+    if(k==='l'){ if(R.chance(.5+(m.fight||0)/300)){ cnt('kills'); m.karma=clamp(m.karma-5); return 'Ele era bom. Eu fui melhor.'; } if(R.chance(.5)){ die(m.criatura==='vampiro'?'com uma estaca no coração':'com uma bala de prata no peito'); return 'O caçador venceu.'; } st('health',-30); return 'Escapei por pouco, muito ferid'+oa()+'.'; }
+    if(k==='f'){ m.money=Math.round(m.money*.8); st('happy',-8); return 'Juntei o que deu e me mudei de madrugada. Mais uma cidade, mais um nome.'; }
+    if(R.chance(.3)){ return 'Ele viu que eu nunca machuquei ninguém de propósito. Baixou a arma e foi embora.'; } die(m.criatura==='vampiro'?'com uma estaca no coração':'com uma bala de prata no peito'); return 'Ele não teve misericórdia.'; }};
+const CW=t=>m=>m.criatura===t&&!m.prison;
+pack({k:'Maldição',w:1.3,cd:8,min:14,when:CW('vampiro')},[
+  ['Sol da manhã','Você perdeu a hora e o sol nasceu com você na rua.',['Correr para a sombra|?hl hl-8|Cheguei em casa com bolhas no braço.|hl-25|Fiquei com queimaduras feias.','Se enrolar no casaco e andar devagar|hl-12 h-4|Fumaça saindo da manga. Ninguém entendeu nada.']],
+  ['Espelho','Uma criança percebe que você não aparece no espelho da loja.',['Dizer que é um truque de mágica|?50 h+4|Ela aplaudiu.|h-4|A mãe dela me olhou com pavor.','Sair correndo|h-2|Mais uma loja onde não posso voltar.']],
+  ['Jantar em família','Sua família insiste num jantar com macarronada ao alho.',['Comer mesmo assim|hl-15 h+2|Passei mal a noite toda. Mas comi.','Inventar uma alergia|h-2|Agora sou "a pessoa difícil" da família.']],
+  ['Velhos amigos envelhecendo','Um amigo de escola encontra você e não acredita que você não envelheceu nada.',['Dizer que é genética|?50 h+2|Ele quer saber o nome do creme.|h-4|Ele ficou desconfiado.','Contar a verdade|h+4 k+2|Ele riu, achando que era piada.']],
+  ['Outro vampiro','Um vampiro centenário convida você para um clã secreto.',['Entrar no clã|$+30000 k-6|Agora tenho aliados, dívidas e regras.','Recusar|h+0|Prefiro viver sozinh{o}.']],
+  ['Igreja','Você precisa entrar numa igreja para o casamento de um amigo.',['Entrar|hl-15 h-4|Senti cada passo queimar. Aguentei até o "sim".','Ficar do lado de fora|bond-4|Disse que estava passando mal.']],
+  ['Médico desconfiado','Seu médico diz que seu coração bate 4 vezes por minuto.',['Trocar de médico|h-2|O próximo nem vai medir.','Hipnotizar o médico|?50 h+4|Ele esqueceu tudo.|h-6|Ele chamou outros médicos.']],
+]);
+pack({k:'Maldição',w:1.3,cd:8,min:14,when:CW('lobisomem')},[
+  ['Cachorros','Todos os cachorros do bairro latem quando você passa.',['Rosnar de volta|h+4|Eles ficaram quietos na hora.','Mudar de caminho|h-2|Agora faço um desvio enorme para ir ao mercado.']],
+  ['Fome de carne','Você está com uma fome absurda de carne crua.',['Ir a uma churrascaria|$-300 h+8|Comi uns três quilos. O garçom pediu uma foto.','Resistir|h-6|Comi salada pensando em bife.']],
+  ['Raiva','Alguém fecha você no trânsito e o lobo quer sair.',['Respirar fundo|?will h+2|Contei até dez. Funcionou.|k-6 h-4|Arranquei o retrovisor dele com a mão.','Deixar sair um pouco|k-8 fight+3|O motorista fugiu correndo.']],
+  ['Força estranha','Você levanta um carro para tirar uma criança presa embaixo.',['Fazer de novo, sem pensar|k+8 f+3|Viralizou como "herói anônimo".','Disfarçar|k+4|Disse que foi a adrenalina.']],
+  ['Pelos','Os pelos crescem rápido demais: você se barbeia três vezes por dia.',['Aceitar o visual|lk-2 h+2|Assumi o estilo lenhador.','Gastar com depilação a laser|$-2000 h+2|Inútil, mas tentei.']],
+  ['Alcateia','Uma alcateia de lobisomens convida você para correr na lua cheia.',['Ir|h+8 fight+4|Pela primeira vez, não me senti um monstro sozinho.','Recusar|h-2|Prefiro minha corrente no porão.']],
+  ['Prata','Você ganha um anel de prata de presente.',['Usar mesmo assim|hl-10|Queimou o dedo. Disse que era alergia.','Guardar na gaveta|h-2|A pessoa perguntou por que nunca uso.']],
+]);
+pack({k:'Paranormal',w:1.1,cd:10,min:14,when:m=>!!m.para&&m.para.visitas>=2&&!m.prison},[
+  ['Canal de caça-fantasmas','Um canal famoso quer você como convidad{o} numa investigação ao vivo.',['Aceitar|f+4 $+3000|A live bateu recorde. Uma porta bateu sozinha ao vivo.','Recusar|h+0|Prefiro trabalhar sozinh{o}.']],
+  ['Médium','Uma médium diz que um espírito está grudado em você.',['Pagar o ritual de limpeza|$-1500 h+4|Me senti mais leve. Ou mais pobre.','Ignorar|h-2|De noite, ouvi passos no corredor.']],
+  ['Vizinhos','Os vizinhos acham você louc{o} por passar as noites em cemitérios.',['Explicar o que você faz|?50 h+2|Um vizinho pediu para ir junto.|h-4|Agora acham que sou satanista.','Ignorar|h-2|Não preciso da aprovação deles.']],
+  ['Livro antigo','Você acha num sebo um livro de 1700 sobre como identificar vampiros.',['Comprar|$-400 sm+3|Agora sei que eles odeiam contar grãos de arroz.','Deixar lá|h+0|Tenho medo do que vou descobrir.']],
+]);
+extTok=(o=>function(tok,d,out){ const mm=tok.match(/^fight([+-]\d+)$/); if(mm){ S.me.fight=clamp((S.me.fight||0)+ +mm[1]); return true; } return o(tok,d,out); })(extTok);
+extChance=(o=>function(key){ if(key==='will') return S.me.will; return o(key); })(extChance);
+
+// ===== Desistir desta vida: antes de confirmar, quem fica conta o que vai sentir =====
+const GIVEUP_RELS=['conjuge','noivo','namoro','filho','adot','neto','mae','pai','irmao','avo','amigo','pet'];
+function giveUpReaction(p){ const m=S.me, n=p.first, b=p.bond, o=p.gender==='F'?'a':'o', voce=m.first;
+  if(p.rel==='pet') return b>=50?R.pick([`${n} vai ficar deitad${o} na porta, esperando você voltar. Todo dia. Para sempre.`,`${n} vai dormir em cima da sua roupa até ela perder o seu cheiro.`]):`${n} vai estranhar a casa vazia por uns dias.`;
+  const kid=['filho','adot'].includes(p.rel), small=kid&&p.age<12, teen=kid&&p.age>=12&&p.age<18;
+  if(small) return R.pick([`${n}, de ${p.age} anos, vai perguntar todas as noites quando você volta. Ninguém vai ter coragem de responder.`,`${n} vai guardar seu último desenho embaixo do travesseiro e dormir abraçad${o} nele.`,`${n} vai parar de falar por meses. A professora vai ligar preocupada.`]);
+  if(teen) return b>=45?`${n} vai se culpar. Vai achar que, se tivesse feito alguma coisa diferente, você teria ficado.`:`${n} vai fingir que não liga. Vai chorar sozinh${o} no banheiro da escola.`;
+  if(b>=75) return {conjuge:`${n} vai acordar do seu lado da cama por anos, procurando você no escuro.`,noivo:`${n} vai guardar o vestido, o terno, o anel. O casamento que não aconteceu vai doer para sempre.`,namoro:`${n} vai reler suas mensagens até decorar cada uma.`,
+    mae:`${n} vai dizer que uma mãe não devia enterrar ${m.gender==='F'?'a filha':'o filho'}. Vai deixar seu quarto intocado.`,pai:`${n} vai envelhecer dez anos em um. Vai parar de sorrir nas fotos.`,irmao:`${n} vai perder a pessoa que sabia todos os segredos da infância.`,
+    avo:`${n} vai dizer que era para ser ao contrário. Que a ordem certa não era essa.`,neto:`${n} vai crescer com uma lembrança borrada de você e uma pergunta que ninguém vai responder.`,amigo:`${n} vai ficar com a última mensagem sua sem resposta, e vai se perguntar por que não percebeu.`,
+    filho:`${n} vai ter que contar para os próprios filhos o que aconteceu com você.`,adot:`${n} foi escolhid${o} por você um dia. Agora vai se sentir abandonad${o} de novo.`}[p.rel]||`${n} vai sentir sua falta todos os dias.`;
+  if(b>=45) return R.pick([`${n} vai chorar no enterro e depois ficar semanas sem conseguir falar de você.`,`${n} vai guardar uma foto sua na carteira.`,`${n} vai se perguntar se podia ter ajudado.`]);
+  if(b>=20) return R.pick([`${n} vai ficar em choque. Vocês estavam distantes, e agora não dá mais para consertar.`,`${n} vai se arrepender de cada briga.`,`${n} vai ficar com raiva de você. E depois com raiva de si mesm${o} por ficar com raiva.`]);
+  return R.pick([`${n} vai dizer que não se importa. Vai mentir.`,`${n} vai receber a notícia por mensagem e ficar parad${o} olhando para a tela.`]); }
+function giveUpFlow(){ const m=S.me; if(!m||!m.alive) return msg('Desistir','Essa vida já terminou.');
+  const rank=p=>({conjuge:9,filho:8,adot:8,noivo:7,namoro:6,mae:6,pai:6,neto:5,irmao:4,avo:3,amigo:2,pet:1}[p.rel]||0)*20+p.bond;
+  const close=S.people.filter(p=>p.alive&&GIVEUP_RELS.includes(p.rel)&&(p.bond>=15||['filho','adot','mae','pai','conjuge'].includes(p.rel))).sort((a,b)=>rank(b)-rank(a)).slice(0,7);
+  const used=new Set(), say=p=>{ let t=''; for(let i=0;i<8;i++){ t=giveUpReaction(p); if(!used.has(t)) break; } used.add(t); return t; };
+  const rows=close.map(p=>`<div style="display:flex;gap:10px;align-items:center;margin:8px 0">${faceSVG(p,44)}<div><p style="margin:0"><b>${esc(p.first)}</b> <span style="color:var(--muted);font-size:12px">${esc(relLabel(p)||p.species||'')}</span></p><p style="margin:0;font-size:13px">${esc(say(p))}</p></div></div>`).join('');
+  const html=close.length?`<div style="text-align:left;margin-top:6px">${rows}</div><p style="color:var(--muted);font-size:13px">${close.length===1?'Uma pessoa vai':close.length+' pessoas vão'} sentir isso.</p>`:'<p style="color:var(--muted)">Ninguém próximo. Ninguém vai saber direito o que aconteceu, e isso talvez seja o mais triste.</p>';
+  modal({t:`Antes de ${m.first} desistir…`,x:'É assim que quem fica vai receber a notícia.',html,ch:[{l:'Continuar vivendo',fn:()=>{ st('happy',3); log('Pensei em desistir de tudo. Mas lembrei de quem ficaria. Continuei.','good'); }},{l:'Desistir mesmo assim',cls:'danger',fn:()=>{ UI.close(); die('desistiu'); save(); render(); showDeath(); }}]}); }
 
 // ===== Modos fictícios (18+): aventuras contadas em dias, fora da vida normal =====
 // Enquanto a aventura dura, a vida real fica pausada: a tela vira a da aventura (local, grupo, mochila, ações e "próximo dia").
@@ -6742,7 +7080,7 @@ function heroYear(){ const sc=S.scen, m=S.me, d=SM(); hEnsure(sc);
   const ye=yearEvents, pend=S.pending; yearEvents=function(){}; S.pending=[]; try{ if(AGE0) AGE0(); } finally{ yearEvents=ye; S.pending=pend.concat(S.pending); }
   if(!m.alive||!S.scen) return;
   Object.assign(sc.log[sc.log.length-1],{age:m.age,yr:S.year});
-  scStat('san',-2); scStat('hl',rnd(12,22));
+  scStat('san',rnd(4,10)); scStat('hl',rnd(25,40));
   crew().forEach(c=>{ c.age++; if(c.bebe&&c.age>=16){ c.bebe=0; c.race=c.race&&/filh/i.test(c.race)?c.race:c.race; c.role=R.pick(Object.keys(d.roles)); } });
   d.upkeep(sc); if(!S.scen) return;
   sc.log[sc.log.length-1].pl=sc.loc.n;
@@ -6751,7 +7089,7 @@ function heroYear(){ const sc=S.scen, m=S.me, d=SM(); hEnsure(sc);
 scNextDay=(o=>function(){ const sc=S.scen; if(sc&&sc.id==='heroi'&&sc.v===SC_V) return heroYear(); return o.apply(this,arguments); })(scNextDay);
 // cair em combate não acaba a vida de herói: vai para o hospital (e a saúde de verdade sente)
 scCheck=(o=>function(){ const sc=S.scen, m=S.me; if(!sc||sc.id!=='heroi'||sc.winNow) return o.apply(this,arguments);
-  if(sc.hl<=0){ sc.hl=35; st('health',-rnd(10,22)); scStat('san',-8); scLog('Apaguei no meio da luta. Acordei na UTI, com tubos no braço e a máscara no bolso de alguém da equipe.','bad'); if(m.health<=0){ S.scen=null; die(`em combate como ${sc.codinome}`); UI.close(); return; } }
+  if(sc.hl<=0){ sc.hl=45; st('health',-rnd(3,8)); scStat('san',-8); scLog('Apaguei no meio da luta. Acordei na UTI, com tubos no braço e a máscara no bolso de alguém da equipe.','bad'); if(m.health<=0){ S.scen=null; die(`em combate como ${sc.codinome}`); UI.close(); return; } }
   if(sc.san<=0){ sc.san=30; st('happy',-15); scLog('Desabei. Passei semanas sem conseguir vestir o uniforme. Terapia, remédio e muito sono.','bad'); } })(scCheck);
 EVENTS.heroi_final={scen:'heroi',show:()=>({k:'Superpoderes',t:'O último confronto',x:`${S.scen?S.scen.inimigo:'O vilão'} está de joelhos, sem poderes, cercado pela polícia. A cidade inteira assiste ao vivo.`,ch:[['Entregar à justiça','j'],['Oferecer uma segunda chance','c'],['Acabar com isso de vez','m'],['Entregar e pendurar a capa','a']]}),
   pick:k=>{ const sc=S.scen, m=S.me; if(!sc) return ''; const old=sc.inimigo; m.fame=clamp(m.fame+8); scStat('rep',15);
@@ -6763,7 +7101,8 @@ EVENTS.heroi_final={scen:'heroi',show:()=>({k:'Superpoderes',t:'O último confro
     return `${t} Mas a paz durou pouco: um vilão novo apareceu nos jornais. ${sc.inimigo}.`; }};
 // prisão para super-humanos: os anos passam lá dentro, e a vida de herói continua quando sair
 function hPrisao(sc){ const m=S.me, n=rnd(1,3); let t=hFire(sc,'');
-  for(let i=0;i<n&&m.alive;i++){ sc.dia++; sc.log.push({d:sc.dia,pl:'Prisão de Contenção',lines:[],age:m.age+1,yr:S.year+1}); const ye=yearEvents, pend=S.pending; yearEvents=function(){}; S.pending=[]; try{ if(AGE0) AGE0(); } finally{ yearEvents=ye; S.pending=pend.concat(S.pending); } scLog('Mais um ano numa cela com algemas que anulam o poder.','bad'); crew().forEach(c=>c.age++); }
+  for(let i=0;i<n&&m.alive;i++){ sc.dia++; sc.log.push({d:sc.dia,pl:'Prisão de Contenção',lines:[],age:m.age+1,yr:S.year+1}); const ye=yearEvents, pend=S.pending; yearEvents=function(){}; S.pending=[]; try{ if(AGE0) AGE0(); } finally{ yearEvents=ye; S.pending=pend.concat(S.pending); } if(!S.scen||!m.alive) return 'Não saí viv'+oa()+' da Prisão de Contenção.'; scLog('Mais um ano numa cela com algemas que anulam o poder.','bad'); crew().forEach(c=>c.age++); }
+  if(!S.scen||!m.alive) return '';
   m.rec.conv++; m.c.prisonYrs=(m.c.prisonYrs||0)+n; sc.reg='sim'; sc.proc=0; sc.rep=Math.max(0,sc.rep-15); scStat('san',-15); famAll().forEach(p=>p.bond=clamp(p.bond-8));
   return `Fui condenad${oa()} a ${n} ano${n>1?'s':''} na Prisão de Contenção para Super-Humanos. Saí registrad${oa()} à força, com o nome na ficha. ${t}`.trim(); }
 // morrer de verdade (velhice, doença) encerra o modo junto com a vida
@@ -9654,6 +9993,23 @@ function selfTest(){
       S=JSON.parse(snap); S.scen=null; adv.push(`${id}: ${nev} eventos`); });
     adv.push(`${id}: ${win}/${n} vitórias, média ${(days/n).toFixed(1)} dias`); }
   lives.unshift('AVENTURAS: '+adv.join(' · '));
+  // vida normal: seita, polícia, golpe de Estado, paranormal e as reações ao desistir
+  const sweepNow=tag=>{ const snap=JSON.stringify(S); let n=0; for(const [id,ev] of Object.entries(EVENTS)){ if(ev.scen||!ev.w||!ev.prep) continue; S=JSON.parse(snap); let ok=false; try{ ok=!ev.when||ev.when(S.me); }catch(e){} if(!ok) continue; const d=ev.prep(S.me); if(d==null) continue; n++;
+      T('varre'+tag+':'+id,()=>{ const sh=ev.show(d); const c=R.pick(sh.ch); const r=ev.pick(c[1],d); [sh.t,sh.x,c[0],r].forEach(x=>{ if(/\{\w+\}|undefined|NaN/.test(String(x))) errs[`texto com lacuna em ${tag} ${id}: ${x}`]=1; }); }); } S=JSON.parse(snap); return n; };
+  T('varreNovos',()=>{ newLife({}); const m=S.me; m.age=32; m.alive=true; m.prison=null; m.money=5e5; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio');
+    seitaFundar('igreja','Teste'); revStart('Frente Teste'); m.para={prova:3,vistos:{},visitas:4}; takeJob({id:'poli',co:'Polícia Civil',size:'grande',mul:1}); m.criatura='vampiro'; sweepNow('vamp'); m.criatura='lobisomem'; sweepNow('lobo'); });
+  T('seita',()=>{ for(let k=0;k<6;k++){ newLife({}); const m=S.me; m.age=30; m.alive=true; m.prison=null; m.money=5e5; seitaFundar(R.pick(Object.keys(SEITA_TIPOS)),'Teste'); if(!m.seita) errs['seita: não fundou']=1;
+      for(let y=0;y<8&&m.alive&&m.seita;y++){ ['pregar','culto','dizimo','tv','templo','sacar','ritual','comunidade','profecia','caridade'].forEach(a=>{ if(m.seita&&!m.prison) seitaAcao(a); }); m.yr={}; S.pending=[]; seitaAno(); S.pending.forEach(e=>{ const ev=EVENTS[e.id]; const sh=ev.show(e.d); ev.pick(R.pick(sh.ch)[1],e.d); }); S.pending=[]; if(m.seita) V.seita().items.map(rowHtml).join(''); } } });
+  T('policia',()=>{ let ok=0, n=0; for(let k=0;k<30;k++){ newLife({}); const m=S.me; m.age=25; m.alive=true; m.prison=null; m.rec.conv=0; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); m.smarts=90; m.health=90; m.yr={}; policeExam(); if(!isCop()) continue; n++;
+      const c=novoCaso(); if(c.sus.filter(x=>x.culp).length!==1) errs['caso sem culpado único']=1; V.caso(c)().items.map(rowHtml).join(''); casoPasso(c,'per',0); casoPasso(c,'cam',0); casoPasso(c,'int',0); casoPasso(c,'rev',1); casoPasso(c,'per',0);
+      // dedução: quem tem as pistas da perícia e não foi descartado
+      const cand=c.sus.map((s,i)=>[s,i]).filter(([s,i])=>!c.achou['fora'+i]&&c.notas.every(t=>s.tr.includes(t))); const pick=(cand.find(([s,i])=>c.achou['prova'+i])||cand[0]||[null,0])[1]; casoAcusar(c,pick); if(c.sus[pick].culp) ok++; }
+    if(n<5) errs['polícia: quase ninguém passa no concurso ('+n+')']=1; if(n&&ok/n<.5) errs['polícia: dedução não funciona ('+ok+'/'+n+')']=1; });
+  T('golpe',()=>{ let win=0; for(let k=0;k<20;k++){ newLife({}); const m=S.me; m.age=35; m.alive=true; m.prison=null; m.money=1e6; revStart('Teste'); for(let y=0;y<3&&m.rev;y++){ ['panfleto','protesto','armas','general','hacker'].forEach(a=>{ if(m.rev&&m.alive) revAcao(a); }); m.yr={}; } if(m.rev&&m.alive){ V.rev().items.map(rowHtml).join(''); revGolpe(); if(m.office&&m.office.dit){ win++; if(!/Líder/.test(occupation())) errs['golpe: ocupação errada']=1; } } } if(!win) errs['golpe: nunca dá certo']=1; });
+  T('paranormal',()=>{ let vamp=0,lobo=0,mortos=0; for(let k=0;k<40;k++){ newLife({}); const m=S.me; m.age=25; m.alive=true; m.prison=null; for(let i=0;i<20&&m.alive;i++){ m.yr={}; paraVisita(R.pick(PARA_LUGARES)[0]); } if(!m.alive) mortos++; if(m.criatura==='vampiro') vamp++; if(m.criatura==='lobisomem') lobo++;
+      if(m.alive&&m.criatura){ const f=faceSVG(m,60); if(!f.includes('<svg')) errs['criatura sem rosto']=1; for(let y=0;y<3&&m.alive;y++){ S.pending=[]; ageUp(); S.pending.slice().forEach(e=>{ const ev=EVENTS[e.id]; if(!evValid(e)) return; const sh=ev.show(e.d); ev.pick(R.pick(sh.ch)[1],e.d); }); S.pending=[]; } } }
+    if(!vamp||!lobo) errs['paranormal: ninguém virou criatura ('+vamp+'/'+lobo+')']=1; if(!mortos) errs['paranormal: ninguém morre']=1; });
+  T('desistir',()=>{ for(let k=0;k<10;k++){ newLife({}); const m=S.me; m.age=R.int(5,80); S.people.filter(p=>p.alive).forEach(p=>{ const t=giveUpReaction(p); if(!t||/undefined|\{/.test(t)) errs['desistir: reação ruim '+p.rel]=1; }); } });
   // romance nos modos: namoro, parto de verdade e volta para a vida real com o par e o filho
   T('romance',()=>{ for(const id of ['zumbi','ilha','isekai','marte']){ newLife({}); const m=S.me; m.age=25; m.gender='F'; m.pref='M'; m.alive=true; S.pending=[]; scStart(id); if(id==='isekai') S.scen.cls='mago'; UI.close();
       const c=mkCrew({gender:'M',age:27}); c.am=90; romStart(c); if(!romPar()) errs['romance: sem par em '+id]=1; c.par='casado'; let tries=0; while(!S.scen.grav&&tries++<40) romGrav(c); if(!S.scen.grav){ errs['romance: sem gravidez '+id]=1; continue; }
@@ -9724,7 +10080,9 @@ function advDiag(){ const out=[];
     for(let k=0;k<40;k++){ newLife({}); const m=S.me; m.age=25; m.alive=true; m.prison=null; m.fight=40; S.pending=[]; MQ.length=0; scStart(id); if(id==='isekai'){ S.scen.cls=R.pick(Object.keys(CLASSES)); UI.close(); }
       const w0=m.c.scenWin||0; let g=0, last=null;
       while(S.scen&&g++<(id==="isekai"?160:id==="zumbi"?300:id==="heroi"?110:90)){ const sc=S.scen; last={hl:sc.hl,san:sc.san,fome:sc.fome,dia:sc.dia}; play(sc); scCheck(); if(!S.scen) break; scNextDay(); let e=0; while(S.scen&&S.pending.length&&e++<10){ const p=S.pending.shift(); const ev=EVENTS[p.id]; if(!evValid(p)) continue; const sh=ev.show(p.d); ev.pick(R.pick(sh.ch)[1],p.d); scCheck(); } if(S.scen&&sc.dia===8) snaps.push(`hl${Math.round(sc.hl)} san${Math.round(sc.san)} f${Math.round(sc.fome)}${sc.o2!=null?' o2'+Math.round(sc.o2):''}${sc.lvl?' lv'+sc.lvl:''}`); }
+      if(id==='heroi'&&!S.scen){ const why=!m.alive?String(m.cause).replace(/\d+/g,'#'):m.prison?'preso':'saiu vivo'; (advDiag.why=advDiag.why||{})[why]=(advDiag.why[why]||0)+1; }
       if(S.scen){ S.scen=null; other++; } days+=last?last.dia:0; if((m.c.scenWin||0)>w0) win++; else if(last&&last.hl<=last.san) hl++; else san++; }
+    if(id==='heroi'&&advDiag.why) out.push('herói, fins: '+Object.entries(advDiag.why).sort((a,b)=>b[1]-a[1]).map(([k,v])=>v+'× '+k).join(' · '));
     out.push(`${id}: vitórias ${win}/40 · média ${(days/40).toFixed(1)} dias · derrotas por saúde ${hl}, por sanidade ${san}, sem fim ${other}\n   dia 8: ${snaps.slice(0,6).join(' | ')}`); }
   const o=document.createElement('pre'); o.id='out'; o.textContent=out.join('\n'); o.style.cssText='position:fixed;inset:0;z-index:999;background:#fff;color:#000;overflow:auto;padding:10px;font-size:11px;white-space:pre-wrap'; document.body.appendChild(o); document.title='AVENTURA OK'; }
 // ===== Relatório de qualidade do texto (#qualidade): repetição, gênero, coerência de idade =====
