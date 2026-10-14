@@ -540,7 +540,7 @@ function showStart(){
   const has=S&&S.me&&S.me.alive;
   const c=COUNTRIES.map(c=>`<option value="${c.id}">${esc(c.n)}</option>`).join('');
   $('#start').innerHTML=`<div class="full-in">
-    <div class="faces">${[0,1,2,3,4,5].map(i=>{ const gd=i%2?'F':'M'; return faceSVG({id:i+1,gender:gd,age:[4,22,35,48,70,16][i],bond:R.int(40,95),genes:randGenes(gd)},56); }).join('')}</div><div class="logo">New<em>Life</em></div><p class="tag">Um simulador de vida. Cada ano é um sorteio.</p>
+    <div class="st-hero"><div class="st-faces">${[0,1,2,3,4,5].map(i=>{ const gd=i%2?'F':'M'; return `<span style="--i:${i}">${faceSVG({id:i+1,gender:gd,age:[4,22,35,48,70,16][i],bond:R.int(60,95),genes:randGenes(gd)},64)}</span>`; }).join('')}</div><div class="logo">New<em>Life</em></div><p class="tag">Um simulador de vida. Cada ano é um sorteio.</p></div>
     ${has?`<button class="btn sun" id="stCont">Continuar a vida de ${esc(S.me.first)} (${S.me.age} anos)</button>`:''}
     <button class="btn ${has?'alt':'sun'}" id="stRand">Vida completamente aleatória</button>
     <div class="card" style="display:flex;flex-direction:column;gap:10px">
@@ -553,13 +553,14 @@ function showStart(){
       ${godUnlocked()?'<label class="f" style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="fGod"> Abrir o Modo Deus ao nascer</label>':''}
       <button class="btn" id="stCustom">Nascer</button>
     </div>
-    <div class="chips"><button class="chip" id="stRib">Selos: ${Object.keys(META.ribbons).length}/${RIBBONS.length}</button><button class="chip" id="stCh">Desafios: ${Object.keys(META.ch||{}).length}/${CHALLENGES.length}</button><button class="chip" id="stGrave">Cemitério: ${META.grave.length}</button></div>
+    <div class="chips"><button class="chip" id="stConq">🏆 Conquistas: ${typeof conqGot==='function'?Object.keys(conqGot()).length:0}/${typeof CONQ!=='undefined'?CONQ.length:0}</button><button class="chip" id="stRib">Selos: ${Object.keys(META.ribbons).length}/${RIBBONS.length}</button><button class="chip" id="stCh">Desafios: ${Object.keys(META.ch||{}).length}/${CHALLENGES.length}</button><button class="chip" id="stGrave">Cemitério: ${META.grave.length}</button></div>
   </div>`;
   $('#start').hidden=false; $('#death').hidden=true;
   const go=(o,god)=>{ newLife(o); $('#start').hidden=true; MQ.length=0; render.jump=true; render(); pump(); if(god) UI.open(V.god); };
   if(has) $('#stCont').onclick=()=>{ $('#start').hidden=true; render(); pump(); };
   $('#stRand').onclick=()=>go({royal:R.chance(.01)});
   $('#stCustom').onclick=()=>{ go({first:$('#fFirst').value.trim()||undefined,last:$('#fLast').value.trim()||undefined,gender:$('#fGender').value||undefined,country:$('#fCountry').value||undefined,royal:R.chance(.01),diff:$('#fDiff').value},($('#fGod')||{}).checked); };
+  if($('#stConq')) $('#stConq').onclick=()=>{ UI.open(V.conquistas); };
   $('#stRib').onclick=()=>{ UI.open(V.ribbons); }; $('#stGrave').onclick=()=>{ UI.open(V.grave); }; $('#stCh').onclick=()=>{ UI.open(V.challenges); };
 }
 function showDeath(){

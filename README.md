@@ -17,9 +17,9 @@
 </p>
 
 <p align="center">
+  <img src="docs/img/inicio.png" width="230" alt="Tela inicial">
   <img src="docs/img/vida.png" width="230" alt="Diário da vida">
   <img src="docs/img/tema-escuro.png" width="230" alt="Tema escuro">
-  <img src="docs/img/idades.png" width="230" alt="A mesma pessoa em várias idades">
 </p>
 
 ---
@@ -58,6 +58,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Nota do vestibular** vem do histórico escolar inteiro, desde o 1º ano.
 - Faculdade **pública** (nota de corte) ou **particular** (família paga, bolsa por nota, bolsa de atleta, bolsa de música/arte, financiamento ou dinheiro próprio).
 - **Clubes e times** com posições (reserva → titular → capitão) que contam para a bolsa.
+- **Cada faculdade tem empregos próprios**: música vira maestro ou produtor musical, química vira perito criminal, computação vira cientista de dados, e assim por diante. Com diploma o salário é bem maior, e aparecem mais vagas da sua área.
 
 ### 💼 Trabalho e dinheiro
 - **Mais de 60 carreiras** com plano de carreira (quem sobe para quem), empresas de portes diferentes e promoções por desempenho.
@@ -66,9 +67,10 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Bicos** e meio período a partir dos 13. Antes dos 18, para comprar algo você **pede aos pais** (a chance depende do relacionamento) ou usa o próprio dinheiro.
 - Gastos anuais, dívidas com juros e **sobrecarga**: fazer coisas demais gera cansaço, depressão, burnout e até a morte.
 - 12 carreiras especiais (ator, músico, atleta, streamer…), política, realeza e empresa própria.
+- Passou na autoescola? Seus pais podem te dar **um carro de presente**: de um popular usado a um superesportivo, conforme o dinheiro da família.
 
 ### ❤️ Relações
-- Barras de **amor** e **amizade** para cada pessoa.
+- Barras de **amor** e **amizade** para cada pessoa. Quanto maior a amizade, mais fácil virar amigo de verdade.
 - Quem você conhece nos eventos vira uma pessoa de verdade na sua lista, com nome, rosto e gênero coerentes.
 - Namoro, casamento, filhos, divórcio, amigos, pets (cães e gatos por raça, exóticos e animais de fazenda).
 - Selo **Minha primeira vez**, ganho na hora (a partir dos 18 anos), com o nome da pessoa e a idade.
@@ -137,10 +139,12 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 
 ## Modos fictícios
 
-A partir dos 18 anos (Menu → Modos fictícios), você pode viver uma aventura contada **em dias**, fora da vida normal. Enquanto ela dura, a vida real fica pausada (carreira, bens e relações aparecem com cadeado) e você não envelhece. A tela vira a da aventura: **Local**, **Itens**, **Próximo dia**, **Grupo** e **Ações**.
+A partir dos 18 anos (Menu → Modos fictícios), você pode viver uma aventura contada **em dias**, fora da vida normal. Enquanto ela dura, você não envelhece e carreira, bens e relações aparecem com cadeado, mas **a vida real não para**: na volta pode ter demissão por abandono, notas baixas, matrícula cancelada, fim de namoro (ou divórcio por abandono do lar), contas atrasadas e a família desesperada. Quanto mais tempo longe, pior: depois de meses ou anos você pode ser declarado morto e encontrar seu amor com outra pessoa. A tela vira a da aventura: **Local**, **Itens**, **Próximo dia**, **Grupo** e **Ações**.
 
 - **3 de energia por dia**: cada ação e cada lugar só pode ser feito uma vez por dia.
 - **Grupo** com nome, rosto, arma, saúde e lealdade; **itens** como cartas com estado de 0 a 100% (comida estraga, armas quebram).
+- **Começos sorteados**: 28 histórias de início (o plantão no hospital, o cruzeiro que afundou, invocado pelos magos, a herança da avó heroína, clandestino na nave…), cada uma com itens, grupo, veículos e vantagens diferentes. O herói tem 18 poderes possíveis.
+- **Comerciantes** aparecem em alguns dias com até 4 itens à venda; cada mundo tem sua moeda (ouro, sucata, dinheiro, dados de pesquisa ou troca por comida).
 - **Eventos de escolha** próprios de cada modo, com consequências de verdade.
 - **Romance em todos os modos**: flertar, encontros com a cara de cada mundo, namoro, noivado, casamento e filhos. Se a aventura terminar bem, o par e os filhos voltam com você para a vida real.
 - **Não existe acordar**: se morrer num mundo alternativo, morre de verdade. Antes de ir, uma janela explica para onde você vai e como volta (resgate, portal, nave… ou nunca, no apocalipse zumbi). Venceu? Volta com recompensas. **O modo Superpoderes é diferente**: passa ano a ano, junto com a vida real, e só acaba quando você se aposenta.
@@ -285,6 +289,10 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   membros.js      membros aleatórios: gabinete, empresa, corte, heróis e moradores dos mundos paralelos
   romance.js      romance nos modos fictícios: namoro, casamento, filhos e volta para a vida real
   heroi.js        superpoderes: equipes como emprego, Lei de Registro, identidade, família e anos
+  cursos.js       empregos de cada faculdade e o carro que os pais dão na carteira
+  comerciantes.js comerciantes dos modos fictícios
+  volta.js        consequências na vida real ao voltar de um modo fictício
+  inicios.js      histórias de começo sorteadas e poderes novos
   zumbi.js        pesadelo zumbi: atributos, base, oficina, facções, estações e hordas
   isekai.js       isekai: atributos, magias e cidades para morar
   vila.js         isekai: a sua vila (recursos, construções, tecnologias, leis)

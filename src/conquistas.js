@@ -117,3 +117,13 @@ computeRibbon=(o=>function(){ const m=S.me, c=m.c||{}; const wins=['zumbi','ilha
 yearMoney=(o=>function(){ const r=o.apply(this,arguments); const s=S.me.seita; if(s&&!s.membro) S.me.c.maxFieis=Math.max(S.me.c.maxFieis||0,s.fieis); return r; })(yearMoney);
 if(/demo-conquistas/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ try{ MQ.length=0; const b=document.querySelector('#modalWrap'); if(b) b.hidden=true; modalOpen=false; UI.open(V.conquistas); }catch(e){} },3500));
 if(/demo-conqpop/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ try{ MQ.length=0; const b=document.querySelector('#modalWrap'); if(b) b.hidden=true; modalOpen=false; META.conq={}; S.me.age=Math.max(S.me.age,19); conqCheck(); pump(); }catch(e){ showErr(e); } },7000));
+if(/demo-inicio/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ try{ MQ.length=0; modalOpen=false; const b=document.querySelector('#modalWrap'); if(b) b.hidden=true; UI.close(); showStart(); }catch(e){ showErr(e); } },7000));
+// vitrine para as imagens do README (#demo-vitrine): uma vida bonita, sem mortes nem doenças no topo
+if(/demo-vitrine/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ try{ MQ.length=0; modalOpen=false; const b=document.querySelector('#modalWrap'); if(b) b.hidden=true; UI.close();
+  const m=S.me; if(m.gender!=='F'){ m.gender='F'; m.first=pickFirst(countryOf(m.country),'F'); delete m.look; } m.alive=true; m.cause=null; m.age=24; m.health=88; m.happy=82; m.smarts=74; m.looks=69; m.money=48300; m.prison=null; m.edu.cur=null; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio');
+  takeJob({id:'poli',co:'Polícia Civil',size:'grande',mul:1}); const y=S.year; S.log=[
+   {age:21,year:y-3,lines:[{t:'Passei no concurso da Polícia Civil!',c:'good'},'Fui a um show de rock e perdi a voz de tanto cantar.','Pescaria com meu pai: pegamos um peixe enorme e soltamos.']},
+   {age:22,year:y-2,lines:[{t:'Comecei a namorar Júlia Andrade.',c:'good'},'Adotei um gato de rua. Chama-se Paçoca.',{t:'Primeiro dia na delegacia → Fazer um discurso. Aplaudiram.',c:'choice'},'Aprendi a fazer pão de fermentação natural.']},
+   {age:23,year:y-1,lines:[{t:'🎖️ Resolvi o caso do roubo de joias. A delegacia inteira aplaudiu.',c:'good'},'Viajei para a praia com a Júlia.','Minha irmã teve um bebê. Agora sou tia!',{t:'Churrasco no quintal → Chamar todo mundo. Teve até karaokê.',c:'choice'}]},
+   {age:24,year:y,lines:[{t:'Fui promovida a cabo.',c:'good'},'Fechei o ano com $48.300 na conta.','Comecei a correr de manhã, e virou minha paixão.',{t:'Pedido no telhado → Aceitar. Estou noiva!',c:'good'}]}];
+  render.jump=true; render(); }catch(e){ showErr(e); } },7000));

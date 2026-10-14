@@ -313,3 +313,18 @@ button.row:active{transform:scale(.985)}
 #log::-webkit-scrollbar,.sheet-body::-webkit-scrollbar{width:6px}
 #log::-webkit-scrollbar-thumb,.sheet-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
 #stats{padding-bottom:30px} @media (max-width:420px){ #stats{padding-bottom:34px} }
+/* tela inicial */
+#start .full-in{padding-top:0;gap:14px}
+.st-hero{margin:0 -16px 4px;padding:34px 16px 30px;background:var(--brand-grad);border-radius:0 0 32px 32px;text-align:center;color:#fff;box-shadow:0 8px 24px rgba(20,28,60,.18);position:relative;overflow:hidden}
+.st-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--stripe)}
+.st-hero .logo{color:#fff;font-size:54px;margin-top:14px;text-shadow:0 3px 12px rgba(0,0,0,.18)}
+.st-hero .logo em{color:#FFD23F}
+.st-hero .tag{color:rgba(255,255,255,.88);margin:6px 0 0;font-size:15px}
+.st-faces{display:flex;justify-content:center;align-items:flex-end}
+.st-faces span{display:block;margin:0 -7px;border-radius:50%;box-shadow:0 0 0 4px rgba(255,255,255,.9),0 6px 14px rgba(0,0,0,.2);transform:translateY(calc((var(--i) - 2.5) * (var(--i) - 2.5) * 2px)) rotate(calc((var(--i) - 2.5) * 5deg));animation:faceIn .5s ease-out both;animation-delay:calc(var(--i) * .07s)}
+.st-faces span:nth-child(3),.st-faces span:nth-child(4){z-index:2}
+@keyframes faceIn{from{opacity:0;transform:translateY(20px) scale(.8)}}
+#start .btn{font-size:16px;padding:15px 16px}
+#start .chips{justify-content:center}
+#start .chip{padding:7px 13px;font-size:13px}
+@media (prefers-reduced-motion:reduce){.st-faces span{animation:none}}

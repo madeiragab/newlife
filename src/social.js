@@ -43,7 +43,7 @@ function drivingTest(){
   if(!canPay(1500)) return msg('Autoescola','Não tenho os $1.500 da autoescola.');
   use('lic'); m.money-=1500; const s=R.pick(SIGNS), ord=R.shuffle([0,1,2,3]);
   modal({top:`<div class="mtop">${s.svg}</div>`,k:'Prova teórica',t:'Autoescola',x:s.q,ch:ord.map(i=>({l:s.a[i],fn:()=>{
-    if(i===0){ m.lic=true; st('happy',8); log('Tirei minha carteira de motorista.','good'); MQ.unshift({t:'Autoescola',x:'Acertei a placa e passei no exame de direção! Carteira na mão.'}); }
+    if(i===0){ m.lic=true; st('happy',8); log('Tirei minha carteira de motorista.','good'); MQ.unshift({t:'Autoescola',x:'Acertei a placa e passei no exame de direção! Carteira na mão.'}); if(typeof parentCar==='function') parentCar(); }
     else { st('happy',-3); MQ.unshift({t:'Autoescola',x:`Errei. A resposta certa era "${s.a[0]}". Reprovad${oa()}.`}); }
     after(); }}))});
 }
