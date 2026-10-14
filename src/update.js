@@ -3,6 +3,7 @@
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.6.2',d:'14/10/2026',t:'Tela de atualização',itens:['Quando o app se atualiza, aparece um anel de progresso colorido com a música do jogo, notinhas subindo e dicas.','Ao terminar, o jogo abre sozinho na versão nova.']},
   {v:'1.6.1',d:'14/10/2026',t:'Novidades na tela',itens:['Depois de cada atualização, este quadro mostra o que mudou (uma vez só).','Menu → Novidades mostra o histórico de versões quando você quiser.']},
   {v:'1.6',d:'14/10/2026',t:'Atualização automática',itens:['O app procura uma versão nova sempre que abre e se atualiza sozinho, sem reinstalar.','Sem internet, abre a última versão baixada. O progresso nunca se perde.','A versão atual aparece no fim do menu.']},
   {v:'1.5.4',d:'14/10/2026',t:'Mais 300 eventos com os membros',itens:['Time e turma da escola, professores, colegas de trabalho, chefe, fiéis, gabinete, funcionários e corte.','Equipe de heróis, moradores da base zumbi, da vila e da cidade do isekai, colonos de Marte e náufragos da ilha.']},

@@ -46,7 +46,7 @@ public class MainActivity extends Activity {
         s.setDatabaseEnabled(true);
         s.setAllowFileAccess(true);
         s.setTextZoom(100);
-        s.setMediaPlaybackRequiresUserGesture(true);
+        s.setMediaPlaybackRequiresUserGesture(false); // a música da tela de atualização toca sozinha
         web.setWebViewClient(new WebViewClient());
         web.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
         setContentView(web);
@@ -92,7 +92,10 @@ public class MainActivity extends Activity {
                     if (!mv.find()) return;
                     final String remote = mv.group(1);
                     if (remote.compareTo(loadedVer) <= 0) return;
-                    String html = new String(get(SITE + "app.html?t=" + System.currentTimeMillis(), 60000), "UTF-8");
+                    Matcher ms = Pattern.compile("\"size\"\\s*:\\s*(\\d+)").matcher(json);
+                    final long size = ms.find() ? Long.parseLong(ms.group(1)) : 2500000L;
+                    progress(remote, 0);
+                    String html = new String(download(SITE + "app.html?t=" + System.currentTimeMillis(), remote, size), "UTF-8");
                     if (html.length() < 100000 || !html.contains("NL_VER='" + remote + "'")) return;
                     html = html.replace("<script>window.DESKTOP=1</script>", "");
                     File tmp = new File(getFilesDir(), "game.tmp");
@@ -114,6 +117,35 @@ public class MainActivity extends Activity {
                 } catch (Exception e) { /* sem internet: segue com a versão que já tem */ }
             }
         }).start();
+    }
+
+    /** Avisa a tela de atualização do jogo (anel de progresso) em que ponto está o download. */
+    private void progress(final String ver, final double p) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() { web.evaluateJavascript("window.nlUpdVer='" + ver + "';window.nlUpd&&nlUpd(" + p + ")", null); }
+        });
+    }
+
+    private byte[] download(String url, String ver, long size) throws Exception {
+        HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+        c.setConnectTimeout(15000);
+        c.setReadTimeout(60000);
+        c.setUseCaches(false);
+        try {
+            if (c.getResponseCode() != 200) throw new Exception("http " + c.getResponseCode());
+            InputStream in = c.getInputStream();
+            ByteArrayOutputStream b = new ByteArrayOutputStream();
+            byte[] buf = new byte[16384];
+            int n; long got = 0; long last = 0;
+            while ((n = in.read(buf)) > 0) {
+                b.write(buf, 0, n); got += n;
+                if (got - last > size / 40) { last = got; progress(ver, Math.min(0.99, (double) got / size)); }
+            }
+            in.close();
+            progress(ver, 1);
+            return b.toByteArray();
+        } finally { c.disconnect(); }
     }
 
     private static byte[] get(String url, int timeout) throws Exception {

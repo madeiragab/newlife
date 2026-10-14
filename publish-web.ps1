@@ -1,4 +1,4 @@
-# Atualiza a versão de navegador (GitHub Pages): monta o jogo e publica como index.html na branch gh-pages.
+﻿# Atualiza a versão de navegador (GitHub Pages): monta o jogo e publica como index.html na branch gh-pages.
 $ErrorActionPreference = 'Continue'
 $root = $PSScriptRoot
 & (Join-Path $root 'build.ps1') | Out-Null
@@ -10,7 +10,7 @@ Copy-Item (Join-Path $root 'outra-vida.html') (Join-Path $tmp 'index.html') -For
 # os apps (Android e Windows) baixam app.html quando version.json mostra uma versão mais nova que a deles
 Copy-Item (Join-Path $root 'desktop\outra-vida.html') (Join-Path $tmp 'app.html') -Force
 $nlv = [regex]::Match([IO.File]::ReadAllText((Join-Path $root 'outra-vida.html')), "NL_VER='(\d+)'").Groups[1].Value
-[IO.File]::WriteAllText((Join-Path $tmp 'version.json'), "{`"v`":`"$nlv`"}", (New-Object System.Text.UTF8Encoding $false))
+[IO.File]::WriteAllText((Join-Path $tmp 'version.json'), "{`"v`":`"$nlv`",`"size`":$((Get-Item (Join-Path $root 'desktop\outra-vida.html')).Length)}", (New-Object System.Text.UTF8Encoding $false))
 Push-Location $tmp
 git add -A
 $msg = Join-Path $env:TEMP 'newlife-msg.txt'

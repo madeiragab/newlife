@@ -83,7 +83,23 @@ def check_update(window, game_file, current):
         remote = str(info.get("v", ""))
         if not remote or remote <= current:
             return
-        html = fetch(SITE + "app.html?t=%d" % time.time(), 60).decode("utf-8")
+        size = int(info.get("size") or 2500000)
+        js = lambda p: window.evaluate_js("window.nlUpdVer='%s';window.nlUpd&&nlUpd(%.3f)" % (remote, p))
+        js(0)
+        req = urllib.request.Request(SITE + "app.html?t=%d" % time.time(), headers={"Cache-Control": "no-cache", "User-Agent": "NewLife"})
+        parts, got, last = [], 0, 0
+        with urllib.request.urlopen(req, timeout=60) as r:
+            while True:
+                chunk = r.read(32768)
+                if not chunk:
+                    break
+                parts.append(chunk)
+                got += len(chunk)
+                if got - last > size / 40:
+                    last = got
+                    js(min(0.99, got / size))
+        js(1)
+        html = b"".join(parts).decode("utf-8")
         if len(html) < 100000 or ("NL_VER='%s'" % remote) not in html:
             return
         os.makedirs(os.path.dirname(game_file), exist_ok=True)
@@ -95,12 +111,15 @@ def check_update(window, game_file, current):
             window.evaluate_js("try{save()}catch(e){}")
         except Exception:
             pass
+        time.sleep(1.2)  # deixa o anel mostrar o "pronto"
         window.load_url(page_url(game_file))
     except Exception:
         pass  # sem internet ou site fora do ar: segue com a versão que já tem
 
 
 def main():
+    # deixa a música da tela de atualização tocar sem precisar de um clique antes
+    os.environ.setdefault("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", "--autoplay-policy=no-user-gesture-required")
     profile = "OutraVida-teste" if "--perfil-teste" in sys.argv else "OutraVida"
     data_dir = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), profile)
     os.makedirs(data_dir, exist_ok=True)
