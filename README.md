@@ -108,6 +108,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 ### 👥 Membros das equipes
 - Clube ou time da escola, colegas de trabalho, banda, elenco, pelotão, equipe de heróis e o grupo religioso têm **gente de verdade**: veja quem está na equipe, converse e faça amizade.
 - A **equipe do trabalho** (chefe e colegas) fica no emprego, em "Membros da equipe".
+- **Eventos com os membros**: o passe decisivo do colega de time, a dupla do trabalho da escola, o professor exigente, o colega que rouba sua ideia, o chefe em crise, o herói da equipe que é traidor, o fiel que perde a fé, o assessor corrupto, o funcionário do mês, a intriga na corte e os moradores da base e da vila. Eles viram amigos, namorados, inimigos, vão embora ou entram para o seu grupo.
 - **Membros aleatórios em tudo**: equipe do gabinete (ou ministros e generais, se você der um golpe), funcionários da sua empresa, a corte da realeza, os heróis da sua equipe (cada um com codinome e poder) e, nos mundos paralelos, os moradores da base no apocalipse zumbi, da sua vila e da cidade no isekai. Dá para conversar e recrutar.
 - A **turma da escola** fica na própria escola, em "Membros da turma", junto com os professores de cada matéria.
 - **Passar um tempo com todos**: um churrasco, um almoço de domingo ou um fim de semana com a família e os amigos de uma vez.
@@ -127,7 +128,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 ### 🌍 E mais
 - **Autoescola** com prova de placas (22 placas desenhadas), passaporte (inclusive falsificado) e emigração.
 - **80 doenças**, com tratamentos, doenças crônicas e câncer.
-- **Mais de 3.700 eventos**: mais de 1.400 na vida normal, coerentes com idade, carreira e situação, e mais de 2.300 nos modos fictícios.
+- **Mais de 3.800 eventos**: mais de 1.400 na vida normal, coerentes com idade, carreira e situação, e mais de 2.300 nos modos fictícios.
 - Selos, cemitério, desafios, dificuldade, herdeiros (continue a vida com um filho).
 - **Sons e música** sintetizados (sem arquivos de áudio), tema claro e escuro, efeito de dano.
 - Segredos para quem zerar o jogo. 😉

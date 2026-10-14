@@ -85,6 +85,7 @@ function pack(gr,list){
         if(o.fant&&typeof fantNames==='function') Object.assign(d,fantNames());
         if(o.crew){ const all=typeof crew==='function'?crew():[], cs=o.crew==='par'?all.filter(c=>c.par):o.crew==='sol'?all.filter(c=>typeof romOK==='function'&&romOK(c)&&!c.par):all.filter(c=>!c.bebe&&!c.bicho); if(!cs.length) return null; const c=R.pick(cs); d.c=c.first; d.co=c.gender==='F'?'a':'o'; d.celn=c.gender==='F'?'ela':'ele'; d.cid=c.id; }
         if(o.who){ const p=WHO[o.who](); if(!p) return null; d.pid=p.id; d.p=p.first; d.ele=p.gender==='F'?'ela':'ele'; d.o2=p.gender==='F'?'a':'o'; d.idade=p.age; }
+        if(o.gente&&typeof scGenteFor==='function'){ const p=scGenteFor(o.gente); if(!p) return null; d.mor=p.first; d.mo=p.gender==='F'?'a':'o'; d.moeln=p.gender==='F'?'ela':'ele'; d.gid=p.id; d.gkey=o.gente; d.mprof=p.prof; }
         return d; },
       show:d=>({k:o.k,t:tp(title,d),x:tp(Array.isArray(text)?text[d.xi]:text,d),ch:choices.map((c,i)=>[tp(c.split('|')[0],d),String(i)])}),
       pick:(key,d)=>dslChoice(choices[+key],d)};
