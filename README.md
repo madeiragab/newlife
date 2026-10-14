@@ -228,6 +228,10 @@ Baixe a versão mais recente na aba **[Releases](../../releases)**:
 
 Toque em **Envelhecer** para passar um ano. Use **Carreira**, **Bens**, **Relações** e **Atividades** para viver a vida.
 
+
+### 🔄 Atualização automática
+Os apps de **Android** e **Windows** procuram uma versão nova sempre que abrem. Se existir, baixam o jogo novo e recarregam sozinhos, sem reinstalar e sem perder o progresso. Sem internet, abrem a última versão que tiverem. A versão atual aparece no fim do menu.
+
 ## Como compilar
 
 Tudo é feito por scripts PowerShell no Windows.

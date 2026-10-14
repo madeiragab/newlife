@@ -13,6 +13,9 @@ New-Item -ItemType Directory -Force "$O\gen","$O\classes","$O\dex","$O\assets" |
 & (Join-Path $root 'build.ps1') | Out-Null
 $html = [IO.File]::ReadAllText((Join-Path $root 'desktop\outra-vida.html'), [Text.Encoding]::UTF8).Replace('<script>window.DESKTOP=1</script>', '')
 [IO.File]::WriteAllText("$O\assets\index.html", $html, (New-Object Text.UTF8Encoding $false))
+# versão embutida: o app compara com o version.json do site para saber se precisa baixar o jogo novo
+$nlv = [regex]::Match($html, "NL_VER='(\d+)'").Groups[1].Value
+[IO.File]::WriteAllText("$O\assets\version.txt", $nlv, (New-Object Text.UTF8Encoding $false))
 
 # 2) ícones (mesmo desenho do .exe)
 $py = "$env:LOCALAPPDATA\Temp\outravida-build\env\Scripts\python.exe"

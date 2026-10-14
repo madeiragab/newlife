@@ -1,8 +1,8 @@
 package com.newlife.jogo;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.graphics.Color;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.Window;
 import android.webkit.ValueCallback;
@@ -10,9 +10,27 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-/** NewLife para Android: o jogo inteiro roda offline numa WebView; o progresso fica no armazenamento do app. */
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * NewLife para Android: o jogo inteiro roda numa WebView e funciona offline.
+ * Sempre que o app abre, ele confere no site se existe uma versão mais nova do jogo; se existir,
+ * baixa, guarda no armazenamento do app e recarrega. O progresso não muda de lugar: a página é
+ * sempre aberta com o mesmo endereço base, então o armazenamento local continua o mesmo.
+ */
 public class MainActivity extends Activity {
+    private static final String SITE = "https://madeiragab.github.io/newlife/";
+    private static final String BASE_URL = "file:///android_asset/index.html";
     private WebView web;
+    private String loadedVer = "";
 
     @Override
     protected void onCreate(Bundle state) {
@@ -32,16 +50,94 @@ public class MainActivity extends Activity {
         web.setWebViewClient(new WebViewClient());
         web.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
         setContentView(web);
-        if (state != null) web.restoreState(state);
-        else web.loadUrl("file:///android_asset/index.html");
+        loadGame();
+        checkUpdate();
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle out) {
-        super.onSaveInstanceState(out);
-        web.saveState(out);
+    // ---------- versão ----------
+    private File gameFile() { return new File(getFilesDir(), "game.html"); }
+    private SharedPreferences prefs() { return getSharedPreferences("newlife", MODE_PRIVATE); }
+
+    private String bundledVer() {
+        try {
+            return new String(readAll(getAssets().open("version.txt")), "UTF-8").trim();
+        } catch (Exception e) { return ""; }
     }
 
+    private String downloadedVer() { return gameFile().exists() ? prefs().getString("ver", "") : ""; }
+
+    /** Abre a versão mais nova que existir no aparelho: a baixada do site ou a que veio no app. */
+    private void loadGame() {
+        String b = bundledVer(), d = downloadedVer();
+        if (d.length() > 0 && d.compareTo(b) > 0) {
+            try {
+                String html = new String(readAll(new FileInputStream(gameFile())), "UTF-8");
+                loadedVer = d;
+                web.loadDataWithBaseURL(BASE_URL, html, "text/html", "UTF-8", null);
+                return;
+            } catch (Exception e) { /* arquivo estragado: usa a versão do app */ }
+        }
+        loadedVer = b;
+        web.loadUrl(BASE_URL);
+    }
+
+    // ---------- atualização automática ----------
+    private void checkUpdate() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    String json = new String(get(SITE + "version.json?t=" + System.currentTimeMillis(), 8000), "UTF-8");
+                    Matcher mv = Pattern.compile("\"v\"\\s*:\\s*\"(\\d+)\"").matcher(json);
+                    if (!mv.find()) return;
+                    final String remote = mv.group(1);
+                    if (remote.compareTo(loadedVer) <= 0) return;
+                    String html = new String(get(SITE + "app.html?t=" + System.currentTimeMillis(), 60000), "UTF-8");
+                    if (html.length() < 100000 || !html.contains("NL_VER='" + remote + "'")) return;
+                    html = html.replace("<script>window.DESKTOP=1</script>", "");
+                    File tmp = new File(getFilesDir(), "game.tmp");
+                    FileOutputStream out = new FileOutputStream(tmp);
+                    out.write(html.getBytes("UTF-8"));
+                    out.close();
+                    if (!tmp.renameTo(gameFile())) { gameFile().delete(); if (!tmp.renameTo(gameFile())) return; }
+                    prefs().edit().putString("ver", remote).apply();
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            // salva o jogo atual e abre a versão nova
+                            web.evaluateJavascript("try{save()}catch(e){}", new ValueCallback<String>() {
+                                @Override
+                                public void onReceiveValue(String v) { loadGame(); }
+                            });
+                        }
+                    });
+                } catch (Exception e) { /* sem internet: segue com a versão que já tem */ }
+            }
+        }).start();
+    }
+
+    private static byte[] get(String url, int timeout) throws Exception {
+        HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+        c.setConnectTimeout(timeout);
+        c.setReadTimeout(timeout);
+        c.setUseCaches(false);
+        c.setRequestProperty("Cache-Control", "no-cache");
+        try {
+            if (c.getResponseCode() != 200) throw new Exception("http " + c.getResponseCode());
+            return readAll(c.getInputStream());
+        } finally { c.disconnect(); }
+    }
+
+    private static byte[] readAll(InputStream in) throws Exception {
+        ByteArrayOutputStream b = new ByteArrayOutputStream();
+        byte[] buf = new byte[16384];
+        int n;
+        while ((n = in.read(buf)) > 0) b.write(buf, 0, n);
+        in.close();
+        return b.toByteArray();
+    }
+
+    // ---------- ciclo de vida ----------
     @Override
     protected void onPause() {
         super.onPause();

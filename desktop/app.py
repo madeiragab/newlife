@@ -2,17 +2,40 @@
 
 O progresso é gravado em arquivos em %LOCALAPPDATA%\\OutraVida\\saves (com cópia .bak do salvamento anterior),
 além do armazenamento interno do navegador.
+
+Sempre que abre, o app confere no site se existe uma versão mais nova do jogo. Se existir, baixa para
+%LOCALAPPDATA%\\OutraVida\\jogo e recarrega a janela; sem internet, usa a versão mais nova que já tiver.
 """
+import json
 import os
 import re
 import sys
+import time
+import urllib.request
 
 import webview
+
+SITE = "https://madeiragab.github.io/newlife/"
 
 
 def resource(name):
     base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base, name)
+
+
+def html_version(path):
+    """Lê o carimbo NL_VER do começo do arquivo (aaMMddHHmm)."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            head = f.read(6000)
+        m = re.search(r"NL_VER='(\d+)'", head)
+        return m.group(1) if m else ""
+    except OSError:
+        return ""
+
+
+def page_url(path):
+    return "file:///" + path.replace("\\", "/")
 
 
 class Api:
@@ -47,15 +70,51 @@ class Api:
         return out
 
 
+def fetch(url, timeout):
+    req = urllib.request.Request(url, headers={"Cache-Control": "no-cache", "User-Agent": "NewLife"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read()
+
+
+def check_update(window, game_file, current):
+    """Roda em segundo plano depois que a janela abre: baixa a versão nova e recarrega."""
+    try:
+        info = json.loads(fetch(SITE + "version.json?t=%d" % time.time(), 8).decode("utf-8"))
+        remote = str(info.get("v", ""))
+        if not remote or remote <= current:
+            return
+        html = fetch(SITE + "app.html?t=%d" % time.time(), 60).decode("utf-8")
+        if len(html) < 100000 or ("NL_VER='%s'" % remote) not in html:
+            return
+        os.makedirs(os.path.dirname(game_file), exist_ok=True)
+        tmp = game_file + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            f.write(html)
+        os.replace(tmp, game_file)
+        try:
+            window.evaluate_js("try{save()}catch(e){}")
+        except Exception:
+            pass
+        window.load_url(page_url(game_file))
+    except Exception:
+        pass  # sem internet ou site fora do ar: segue com a versão que já tem
+
+
 def main():
     profile = "OutraVida-teste" if "--perfil-teste" in sys.argv else "OutraVida"
     data_dir = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), profile)
     os.makedirs(data_dir, exist_ok=True)
-    page = "file:///" + resource("outra-vida.html").replace("\\", "/")
-    for flag in ("--teste", "--demo", "--autoano"):
-        if flag in sys.argv:
-            page += "#" + flag[2:]
-    webview.create_window(
+    bundled = resource("outra-vida.html")
+    game_file = os.path.join(data_dir, "jogo", "outra-vida.html")
+    flags = [f for f in ("--teste", "--demo", "--autoano") if f in sys.argv]
+    # usa a versão mais nova que existir no computador (a baixada do site ou a que veio no .exe)
+    use_downloaded = not flags and os.path.exists(game_file) and html_version(game_file) > html_version(bundled)
+    path = game_file if use_downloaded else bundled
+    current = html_version(path)
+    page = page_url(path)
+    for flag in flags:
+        page += "#" + flag[2:]
+    window = webview.create_window(
         "NewLife",
         url=page,
         width=500,
@@ -65,7 +124,10 @@ def main():
         text_select=False,
         js_api=Api(os.path.join(data_dir, "saves")),
     )
-    webview.start(gui="edgechromium", private_mode=False, storage_path=data_dir)
+    if flags:
+        webview.start(gui="edgechromium", private_mode=False, storage_path=data_dir)
+    else:
+        webview.start(check_update, (window, game_file, current), gui="edgechromium", private_mode=False, storage_path=data_dir)
 
 
 if __name__ == "__main__":
