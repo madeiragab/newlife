@@ -58,6 +58,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Nota do vestibular** vem do histórico escolar inteiro, desde o 1º ano.
 - Faculdade **pública** (nota de corte) ou **particular** (família paga, bolsa por nota, bolsa de atleta, bolsa de música/arte, financiamento ou dinheiro próprio).
 - **Clubes e times** com posições (reserva → titular → capitão) que contam para a bolsa.
+- **Cursos técnicos** (16, de radiologia a manutenção de aeronaves) com empregos que só pedem o técnico, e **pós-graduação** com especialização, MBA, mestrado, doutorado e residência. Há empregos que exigem pós (cientista de IA, auditor fiscal, astrofísico, dermatologista…), e a pós aumenta o salário: mestrado +10%, doutorado +15%.
 - **Cada faculdade tem empregos próprios**: música vira maestro ou produtor musical, química vira perito criminal, computação vira cientista de dados, e assim por diante. Com diploma o salário é bem maior, e aparecem mais vagas da sua área.
 
 ### 💼 Trabalho e dinheiro
@@ -143,6 +144,7 @@ A partir dos 18 anos (Menu → Modos fictícios), você pode viver uma aventura 
 
 - **3 de energia por dia**: cada ação e cada lugar só pode ser feito uma vez por dia.
 - **Grupo** com nome, rosto, arma, saúde e lealdade; **itens** como cartas com estado de 0 a 100% (comida estraga, armas quebram).
+- **A aventura chega aos poucos**: escolher um modo não te joga lá dentro. No zumbi, primeiro vêm as notícias, no ano seguinte as prateleiras vazias e só no terceiro ano o fim do mundo (dá para estocar, comprar arma, treinar e fugir com a família). Ilha e Marte começam com um convite: ir sozinho, levar o par, os filhos ou a família toda, ou recusar. Isekai começa com sonhos, e Superpoderes com um acidente estranho. Quem vai junto vive tudo com você e volta para casa, ou morre lá.
 - **Começos sorteados**: 28 histórias de início (o plantão no hospital, o cruzeiro que afundou, invocado pelos magos, a herança da avó heroína, clandestino na nave…), cada uma com itens, grupo, veículos e vantagens diferentes. O herói tem 18 poderes possíveis.
 - **Comerciantes** aparecem em alguns dias com até 4 itens à venda; cada mundo tem sua moeda (ouro, sucata, dinheiro, dados de pesquisa ou troca por comida).
 - **Eventos de escolha** próprios de cada modo, com consequências de verdade.
@@ -290,9 +292,11 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   romance.js      romance nos modos fictícios: namoro, casamento, filhos e volta para a vida real
   heroi.js        superpoderes: equipes como emprego, Lei de Registro, identidade, família e anos
   cursos.js       empregos de cada faculdade e o carro que os pais dão na carteira
+  formacao.js     cursos técnicos, especialização, empregos que pedem pós e bônus de salário
   comerciantes.js comerciantes dos modos fictícios
   volta.js        consequências na vida real ao voltar de um modo fictício
   inicios.js      histórias de começo sorteadas e poderes novos
+  prologo.js      a aventura chegando aos poucos na vida real (convites, notícias, quem vai junto)
   zumbi.js        pesadelo zumbi: atributos, base, oficina, facções, estações e hordas
   isekai.js       isekai: atributos, magias e cidades para morar
   vila.js         isekai: a sua vila (recursos, construções, tecnologias, leis)

@@ -1,7 +1,7 @@
 // ===== Voltar de um modo fictício tem preço: quanto mais tempo longe, mais a vida real sente =====
 const voltaTempo=d=>d<30?`${d} ${d===1?'dia':'dias'}`:d<365?`${Math.round(d/30)} ${Math.round(d/30)===1?'mês':'meses'}`:`${Math.round(d/365)} ${Math.round(d/365)===1?'ano':'anos'}`;
 const VOLTA_ONDE={zumbi:'no apocalipse',ilha:'na ilha',isekai:'em Eldoria',marte:'em Marte'};
-function voltaConseq(id,d,win){ const m=S.me, L=[], adult=m.age>=18, onde=VOLTA_ONDE[id]||'longe';
+function voltaConseq(id,d,win,junto){ junto=junto||[]; const m=S.me, L=[], adult=m.age>=18, onde=VOLTA_ONDE[id]||'longe';
   // trabalho
   if(m.job&&!m.job.hero){ const co=m.job.co||'a empresa'; m.job.perf=clamp(m.job.perf-Math.min(45,Math.round(d*1.3)));
     const fire=d>=180?1:Math.min(.92,Math.max(0,(d-7)/34)+(m.job.perf<25?.15:0));
@@ -19,7 +19,8 @@ function voltaConseq(id,d,win){ const m=S.me, L=[], adult=m.age>=18, onde=VOLTA_
   if(m.office){ m.office.appr=clamp(m.office.appr-Math.min(40,d)); if(d>=5) L.push(`🏛️ A imprensa descobriu que sumi por ${d} dias. Minha aprovação caiu.`); }
   // relacionamento
   const p=partner();
-  if(p){ const tempo=voltaTempo(d), casado=p.rel==='conjuge';
+  if(p&&junto.includes(p.id)) L.push(`❤️ ${p.first} viveu tudo isso comigo. Agora a gente tem uma história que ninguém mais acredita.`);
+  else if(p){ const tempo=voltaTempo(d), casado=p.rel==='conjuge';
     p.bond=clamp(p.bond-Math.min(60,Math.round(d*.8)));
     let ch=p.rel==='namoro'?(d-4)/40:p.rel==='noivo'?(d-6)/55:(d-10)/90; if(p.bond<30) ch+=.2; if(d>=365) ch=.95; ch=Math.max(0,Math.min(.97,ch));
     if(d>=4&&R.chance(ch)){ cnt('terminoMundo');
@@ -32,7 +33,8 @@ function voltaConseq(id,d,win){ const m=S.me, L=[], adult=m.age>=18, onde=VOLTA_
     else if(d>=5) L.push('❤️ '+R.pick([`${p.first} chorou, gritou e depois me abraçou por um tempão.`,`${p.first} me deu um gelo de uma semana. Justo.`,`${p.first} quer saber onde eu estava. Não sei como contar.`])); }
   // família
   const ps=parents();
-  if(ps.length&&d>=3){ ps.forEach(x=>x.bond=clamp(x.bond+(R.chance(.5)?5:-5)));
+  if(ps.length&&ps.every(x=>junto.includes(x.id))) L.push('👪 Minha família inteira voltou comigo. Os vizinhos olham para a gente como se fôssemos fantasmas.');
+  else if(ps.length&&d>=3){ ps.forEach(x=>x.bond=clamp(x.bond+(R.chance(.5)?5:-5)));
     L.push('👪 '+(m.age<18?R.pick(['Meus pais tinham colado cartazes com a minha foto pela cidade. Fiquei de castigo até não sei quando.','Minha mãe desmaiou quando me viu entrar pela porta. Depois veio o castigo.']):R.pick(['Meus pais tinham feito um boletim de ocorrência de desaparecimento.','Minha mãe acendeu velas na igreja todos os dias em que eu estive fora.','Meu pai envelheceu dez anos nesses dias. Me abraçou sem dizer nada.'])));
     if(d>=15){ m.fame=clamp(m.fame+3); L.push('📺 Meu sumiço tinha aparecido no jornal local.'); }
     if(d>=180) L.push(`⚰️ Fui declarad${oa()} mort${oa()}. Teve até velório com caixão vazio. Desfazer isso no cartório vai dar trabalho.`); }
@@ -47,6 +49,6 @@ function voltaConseq(id,d,win){ const m=S.me, L=[], adult=m.age>=18, onde=VOLTA_
   if(win&&R.chance(.6)) L.push('🗣️ '+R.pick(['Tentei contar a verdade. Riram de mim.','Contei tudo para um amigo. Ele me indicou um psicólogo.','Ninguém acredita onde eu estive. Às vezes nem eu.']));
   st('happy',-Math.min(10,Math.floor(d/6)));
   return L; }
-scenEnd=(o=>function(win,txt){ const sc=S.scen, id=sc&&sc.id, d=sc?sc.dia:0; const r=o.apply(this,arguments);
-  if(id&&id!=='heroi'&&!S.scen&&S.me.alive){ const L=voltaConseq(id,d,win); if(L.length) MQ.push({k:'Vida real',t:'De volta à vida real',x:`Passei ${voltaTempo(d)} ${VOLTA_ONDE[id]||'longe'}. A vida aqui não parou.\n\n${L.join('\n\n')}`}); }
+scenEnd=(o=>function(win,txt){ const sc=S.scen, id=sc&&sc.id, d=sc?sc.dia:0, junto=(sc&&sc.junto||[]).filter(pid=>sc.crew.some(c=>c.pid===pid)); const r=o.apply(this,arguments);
+  if(id&&id!=='heroi'&&!S.scen&&S.me.alive){ const L=voltaConseq(id,d,win,junto); if(junto.length) L.unshift(`🧳 Voltaram comigo: ${junto.map(P).filter(Boolean).map(p=>p.first).join(', ')}.`); if(L.length) MQ.push({k:'Vida real',t:'De volta à vida real',x:`Passei ${voltaTempo(d)} ${VOLTA_ONDE[id]||'longe'}. A vida aqui não parou.\n\n${L.join('\n\n')}`}); }
   return r; })(scenEnd);

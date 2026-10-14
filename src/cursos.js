@@ -59,3 +59,4 @@ function parentCar(){ const m=S.me, ps=parents(); if(!ps.length||S.flags.famBrok
     :R.pick([`${quem} me esperavam na porta com uma chave amarrada num laço. Lá fora: um ${nome} ${cor}!`,`Achei que era só um jantar de comemoração. Na saída do restaurante, ${quem.toLowerCase()} apontaram para um ${nome} ${cor} com laço vermelho.`]).replace(/^(Minha mãe|Meu pai) me esperavam/,'$1 me esperava').replace(/(minha mãe|meu pai) apontaram/,'$1 apontou');
   log(`Ganhei um ${nome} ${cor} de presente de ${ps.length>1?'meus pais':ps[0].rel==='mae'?'minha mãe':'meu pai'}.`,'good');
   MQ.splice(1,0,{k:'Presente',t:'Um carro de presente!',x:`${x}\n\nValor: ${fmt(v)}.`,top:typeof carSVG==='function'?`<div class="mkcar">${carSVG(c,cor,150)}</div>`:''}); }
+
