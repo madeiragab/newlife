@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610140532'</script>
+<title>NewLife</title><script>window.NL_VER='2610140538'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -338,6 +338,90 @@ input.in,select.in{font:inherit;color:var(--ink);background:var(--surface);borde
 /* aventura (modos fictícios) */
 #nav .scic{font-size:22px;line-height:24px;height:24px}
 .scy h3 span:last-child{max-width:62%;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ================= Visual 1.8: acabamento geral ================= */
+:root{ --r-card:16px; --r-row:14px; --shadow-sm:0 1px 2px rgba(20,28,60,.06),0 2px 8px rgba(20,28,60,.06); --shadow-md:0 4px 14px rgba(20,28,60,.12); --brand-grad:linear-gradient(135deg,#2E6BFF 0%,#4F86FF 55%,#6C5CE7 100%); --sun-grad:linear-gradient(145deg,#FFE27A 0%,#FFC83D 45%,#FF9F1C 100%); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --shadow-sm:none; --shadow-md:0 6px 20px rgba(0,0,0,.6); --brand-grad:linear-gradient(135deg,#0B0B10,#15151C); } }
+:root[data-theme="dark"]{ --shadow-sm:none; --shadow-md:0 6px 20px rgba(0,0,0,.6); --brand-grad:linear-gradient(135deg,#0B0B10,#15151C); }
+/* cabeçalho com degradê, avatar com anel e dinheiro em pílula */
+#hdr{background:var(--brand-grad);padding:12px 16px 16px;box-shadow:0 2px 10px rgba(20,28,60,.18);z-index:3}
+#hdr .avatar{box-shadow:0 0 0 3px rgba(255,255,255,.55),0 3px 10px rgba(0,0,0,.25);transition:transform .2s}
+#hdr .avatar:hover{transform:scale(1.05)}
+#hName{font-size:20px;letter-spacing:.01em}
+#hMoney{font-size:19px}
+#hdr .icon-btn{background:rgba(255,255,255,.16);backdrop-filter:blur(4px);transition:background .2s}
+#hdr .icon-btn:hover{background:rgba(255,255,255,.26)}
+/* diário: cartões mais leves e legíveis */
+#log{gap:14px;padding:14px 14px 22px;scroll-behavior:smooth}
+.yr{border-radius:var(--r-card);box-shadow:var(--shadow-sm);padding:0 16px 10px}
+.yr h3{margin:0 -16px 8px;padding:7px 16px;font-size:13.5px;border-radius:0}
+.yr p{margin:5px 0;line-height:1.5}
+.yr p.choice{font-style:italic;font-size:14px}
+.yr p.choice::before{content:"↳ ";font-style:normal;opacity:.6}
+.yr:last-child{box-shadow:var(--shadow-md);outline:2px solid color-mix(in srgb,var(--brand) 22%,transparent);outline-offset:-2px}
+/* atributos: cartão arredondado que encosta na barra de baixo */
+#stats{border-radius:18px 18px 0 0;box-shadow:0 -4px 16px rgba(20,28,60,.08);padding:14px 18px 10px;gap:8px 20px;z-index:2}
+#stats::before{border-radius:18px 18px 0 0;left:18px;right:18px;top:0;height:3px}
+.bar,.rbt{border-radius:99px}
+.bar i,.rbt i{border-radius:99px}
+.st b{font-size:12.5px}
+/* barra de navegação: o bolo de Envelhecer fica por cima de tudo, inteiro */
+#nav{position:relative;z-index:6;overflow:visible;padding-top:8px;box-shadow:0 -1px 0 var(--line)}
+#nav button{border-radius:12px;transition:color .15s,background .15s,transform .1s}
+#nav button:not(.age):hover{background:var(--surface2)}
+#nav button:not(.age):active{transform:scale(.94)}
+#nav .age{position:relative;z-index:7}
+#nav .age .plus{width:66px;height:66px;margin-top:-34px;background:var(--sun-grad);border:5px solid var(--surface);box-shadow:0 6px 16px rgba(255,159,28,.45),0 2px 4px rgba(0,0,0,.12);font-size:31px;transition:transform .15s ease,box-shadow .2s;position:relative}
+#nav .age .plus::after{content:"";position:absolute;inset:-5px;border-radius:50%;box-shadow:0 0 0 0 rgba(255,200,61,.55);animation:agePulse 2.6s ease-out infinite}
+@keyframes agePulse{0%{box-shadow:0 0 0 0 rgba(255,200,61,.5)}70%{box-shadow:0 0 0 12px rgba(255,200,61,0)}100%{box-shadow:0 0 0 0 rgba(255,200,61,0)}}
+#nav .age:hover .plus{transform:translateY(-2px) rotate(-6deg)}
+#nav .age:active .plus{transform:scale(.92)}
+#nav .age span{font-weight:800}
+@media (prefers-reduced-motion:reduce){#nav .age .plus::after{animation:none}}
+/* painéis: alça no topo, cantos mais redondos */
+.sheet{border-radius:24px 24px 0 0;box-shadow:0 -8px 30px rgba(10,14,30,.25)}
+.sheet::before{content:"";display:block;width:42px;height:5px;border-radius:99px;background:var(--line);margin:8px auto 0}
+.sheet-head{padding:8px 14px 12px}
+.sheet-head h2{font-size:20px}
+.sheet-body{gap:9px;padding:12px 14px calc(22px + env(safe-area-inset-bottom,0px))}
+.sec{display:flex;align-items:center;gap:8px;margin:12px 4px 2px;font-size:11.5px}
+.sec::before{content:"";width:4px;height:14px;border-radius:4px;background:currentColor;opacity:.85}
+/* linhas e cartões */
+.row,.card{border-radius:var(--r-row);box-shadow:var(--shadow-sm)}
+.row{padding:12px 14px;min-height:56px;transition:transform .12s ease,box-shadow .15s,border-color .15s}
+button.row:hover{transform:translateY(-1px);box-shadow:var(--shadow-md)}
+button.row:active{transform:scale(.985)}
+.row .l{font-size:15px}
+.row .s{margin-top:1px;line-height:1.35}
+.row.dis{opacity:.55;filter:saturate(.6)}
+.ic{border-radius:13px;background:linear-gradient(145deg,var(--surface2),color-mix(in srgb,var(--surface2) 70%,var(--brand) 12%))}
+.card{padding:14px 16px}
+.kv{padding:6px 0}
+/* botões */
+.btn{border-radius:14px;padding:13px 16px;transition:transform .1s,filter .15s,box-shadow .15s;box-shadow:0 3px 10px rgba(46,107,255,.25)}
+.btn:not(.alt):not(.sun):not(.danger){background:linear-gradient(135deg,#2E6BFF,#5B8CFF)}
+.btn:hover{filter:brightness(1.05)}
+.btn:active{transform:scale(.97)}
+.btn.alt{box-shadow:none;border:1px solid var(--line)}
+.btn.sun{background:var(--sun-grad);box-shadow:0 3px 10px rgba(255,159,28,.3)}
+.btn.danger{background:linear-gradient(135deg,#E2433A,#FF6B5E);box-shadow:0 3px 10px rgba(226,67,58,.3)}
+/* janelas de evento */
+.modal{border-radius:22px;padding:20px 18px 18px;box-shadow:0 20px 60px rgba(10,14,30,.35);animation:pop .22s cubic-bezier(.2,1.3,.4,1)}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
+.modal .kick{display:inline-block;background:var(--surface2);border-radius:99px;padding:3px 10px;font-size:11px;color:var(--brand)}
+.modal h2{font-size:22px;margin:8px 0 8px}
+.modal .txt{font-size:15.5px;line-height:1.55}
+.modal .choices{gap:9px;margin-top:16px}
+.mtop{margin:-2px 0 6px}
+.overlay{background:rgba(10,14,30,.55);backdrop-filter:blur(3px)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .modal .kick{color:var(--link)} }
+:root[data-theme="dark"] .modal .kick{color:var(--link)}
+/* detalhes */
+.chip{transition:background .15s}
+.ribbon{box-shadow:0 4px 12px rgba(255,159,28,.35)}
+#log::-webkit-scrollbar,.sheet-body::-webkit-scrollbar{width:6px}
+#log::-webkit-scrollbar-thumb,.sheet-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+#stats{padding-bottom:30px} @media (max-width:420px){ #stats{padding-bottom:34px} }
 
 </style>
 </head>
@@ -7201,7 +7285,7 @@ function scEvents(n){ const sc=S.scen, m=S.me; if(!sc) return;
   let elig=Object.entries(EVENTS).filter(([id,e])=>e.scen===sc.id&&e.w&&!(sc.ev[id]!=null&&sc.dia-sc.ev[id]<(e.cd||25))&&(()=>{ try{ return !e.when||e.when(m); }catch(err){ return false; } })());
   while(n-->0&&elig.length){ const id=R.wpick(elig.map(([id,e])=>[id,e.w/(1+2*(sc.evN[id]||0))])); elig=elig.filter(([x])=>x!==id);
     const ev=EVENTS[id]; let d; try{ d=ev.prep?ev.prep(m):{}; }catch(err){ d=null; } if(d==null) continue; queue(id,d); sc.ev[id]=sc.dia; sc.evN[id]=(sc.evN[id]||0)+1; } }
-function scNextDay(){ const sc=S.scen, d=SM(), m=S.me; if(!sc) return;
+function scNextDay(){ const sc=S.scen; if(!sc) return; const d=SM(), m=S.me;
   sc.dia++; sc.ap=3; sc.done={}; sc.log.push({d:sc.dia,pl:'',lines:[]});
   const hasF=d.stats.some(x=>x[0]==='fome'); if(hasF) scStat('fome',(sc.id==='marte'?8:10)); scStat('san',sc.id==='heroi'?-1:-2);
   // comida estraga e o grupo come
@@ -11666,6 +11750,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.8',d:'14/10/2026',t:'Visual novo',itens:['O botão de Envelhecer não fica mais cortado: o bolo aparece inteiro, com brilho pulsando.','Cabeçalho em degradê, cartões e painéis mais arredondados, janelas de evento com animação e botões novos.','Seções com marcador colorido e alça nos painéis para ficar com cara de app.']},
   {v:'1.7',d:'14/10/2026',t:'Conquistas e selos novos',itens:['73 conquistas, muitas zoeiras e várias secretas, que valem para todas as vidas. Veja em Menu → Conquistas.','Selos novos no fim da vida: Ditador, Filho da noite, Profeta, Detetive, Viajante de mundos, Fogo no rabo e Lobo solitário.','"Fazer amor" substitui "Tentar ter um filho" (a partir dos 18): dá felicidade e, sem proteção, pode vir um bebê.']},
   {v:'1.6.2',d:'14/10/2026',t:'Tela de atualização',itens:['Quando o app se atualiza, aparece um anel de progresso colorido com a música do jogo, notinhas subindo e dicas.','Ao terminar, o jogo abre sozinho na versão nova.']},
   {v:'1.6.1',d:'14/10/2026',t:'Novidades na tela',itens:['Depois de cada atualização, este quadro mostra o que mudou (uma vez só).','Menu → Novidades mostra o histórico de versões quando você quiser.']},
