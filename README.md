@@ -108,6 +108,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 ### 👥 Membros das equipes
 - Clube ou time da escola, colegas de trabalho, banda, elenco, pelotão, equipe de heróis e o grupo religioso têm **gente de verdade**: veja quem está na equipe, converse e faça amizade.
 - A **equipe do trabalho** (chefe e colegas) fica no emprego, em "Membros da equipe".
+- **Membros aleatórios em tudo**: equipe do gabinete (ou ministros e generais, se você der um golpe), funcionários da sua empresa, a corte da realeza, os heróis da sua equipe (cada um com codinome e poder) e, nos mundos paralelos, os moradores da base no apocalipse zumbi, da sua vila e da cidade no isekai. Dá para conversar e recrutar.
 - A **turma da escola** fica na própria escola, em "Membros da turma", junto com os professores de cada matéria.
 - **Passar um tempo com todos**: um churrasco, um almoço de domingo ou um fim de semana com a família e os amigos de uma vez.
 
@@ -274,6 +275,7 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   desistir.js     reações de quem fica ao desistir da vida
   seita2.js       seita: cargos, fé dos seguidores, revolta, denúncias e domínio
   equipes.js      membros das equipes (escola, trabalho, heróis, grupo religioso)
+  membros.js      membros aleatórios: gabinete, empresa, corte, heróis e moradores dos mundos paralelos
   romance.js      romance nos modos fictícios: namoro, casamento, filhos e volta para a vida real
   heroi.js        superpoderes: equipes como emprego, Lei de Registro, identidade, família e anos
   zumbi.js        pesadelo zumbi: atributos, base, oficina, facções, estações e hordas
