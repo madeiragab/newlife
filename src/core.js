@@ -20,8 +20,18 @@ let META={lives:0,ribbons:{},grave:[]};
 const DISK={q:{},t:null};
 const deskApi=()=>window.pywebview&&window.pywebview.api&&window.pywebview.api.save?window.pywebview.api:null;
 function flushDisk(){ const api=deskApi(); DISK.t=null; if(!api) return; const q=DISK.q; DISK.q={}; for(const k in q){ try{ api.save(k,q[k]); }catch(e){} } }
-function store(k,v){ if(window.NO_SAVE) return; const s=JSON.stringify(v); try{ localStorage.setItem(k,s); }catch(e){} if(deskApi()){ DISK.q[k]=s; if(!DISK.t) DISK.t=setTimeout(flushDisk,120); } }
-function loadKey(k){ try{ const s=localStorage.getItem(k); return s?JSON.parse(s):null; }catch(e){ return null; } }
+// cada salvamento guarda o anterior em "<chave>.bak": se o save principal estragar, o jogo abre a cópia
+let SAVE_RECOVERED=null;
+function store(k,v){ if(window.NO_SAVE) return; const s=JSON.stringify(v);
+  try{ const old=localStorage.getItem(k); if(old&&old!==s&&(k===SAVE_KEY||k===META_KEY)) localStorage.setItem(k+'.bak',old); }catch(e){}
+  try{ localStorage.setItem(k,s); }catch(e){ try{ localStorage.removeItem(k+'.bak'); localStorage.setItem(k,s); }catch(e2){} }   /* sem espaço: o save novo vale mais que a cópia */ if(deskApi()){ DISK.q[k]=s; if(!DISK.t) DISK.t=setTimeout(flushDisk,120); } }
+// um save só vale se abrir e tiver o formato certo
+function saveOk(k,str){ try{ const o=JSON.parse(str); if(!o||typeof o!=='object') return false; if(k===SAVE_KEY) return !!(o.me&&o.me.first&&Array.isArray(o.people)); return true; }catch(e){ return false; } }
+function loadKey(k){ let s=null; try{ s=localStorage.getItem(k); }catch(e){ return null; }
+  if(s&&saveOk(k,s)) return JSON.parse(s);
+  let b=null; try{ b=localStorage.getItem(k+'.bak'); }catch(e){}
+  if(b&&saveOk(k,b)){ if(s) SAVE_RECOVERED=k; return JSON.parse(b); }   // principal estragado: abre o último salvamento bom
+  return null; }
 function save(){ if(S) store(SAVE_KEY,S); store(META_KEY,META); }
 
 // ---------- genética ----------
@@ -293,7 +303,7 @@ function yearHealth(){
     const def=DISEASES[d.id]; d.y++;
     let dmg=def.dmg*(def.ctrl&&d.ctrl?.25:1)*(def.chronic?.45:1)*(.6+R.f()*.8);
     st('health',-dmg); if(def.hap) st('happy',-def.hap*(.5+R.f())); if(def.lk) st('looks',-def.lk*R.f()); if(def.sm) st('smarts',-def.sm*R.f());
-    if(def.cure==='auto'&&R.chance(.75)){ m.dis.splice(m.dis.indexOf(d),1); if(def.dmg>5||R.chance(.35)) log(def.dmg>5?`Me recuperei de ${dn(def.n)}.`:R.pick([`Me recuperei de ${dn(def.n)}.`,'Já estou cem por cento de novo.']),'good'); }
+    if(def.cure==='auto'&&R.chance(.75)){ m.dis.splice(m.dis.indexOf(d),1); if(def.dmg>5||R.chance(.35)) log(d.k===false?R.pick(['Aquele mal-estar passou sozinho.','Melhorei sem nem saber o que eu tinha.']):def.dmg>5?`Me recuperei de ${dn(def.n)}.`:R.pick([`Me recuperei de ${dn(def.n)}.`,'Já estou cem por cento de novo.']),'good'); }
     else if(def.id==='acne'&&m.age>22){ m.dis.splice(m.dis.indexOf(d),1); }
   }
   if(m.prison) return;

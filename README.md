@@ -109,6 +109,14 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Vampiros e lobisomens** podem matar você, ou morder. Aí é para sempre, na vida normal: o rosto muda, a sede de sangue ou a lua cheia aparecem todo ano, a família corre perigo e caçadores batem na porta. Existe uma cura, cara e difícil.
 - Mais de 200 eventos de caça-fantasmas, vida de vampiro e vida de lobisomem.
 
+### 📖 Histórias em cadeia
+- Mais de 600 eventos em sequência, em 115 histórias da infância à velhice: cada escolha decide o próximo capítulo e quando ele chega, às vezes anos depois.
+- Quem aparece numa história pode virar amigo, namorado, inimigo ou família de verdade, e uma história pode abrir outra.
+
+### 🩺 Saúde
+- A maioria das doenças aparece primeiro como sintoma ("acordei com bolinhas vermelhas"); só a consulta revela o nome.
+- Posto de saúde, clínica popular, médico particular e hospital: quanto mais barato, mais erra e menos cura. Medicina alternativa quase nunca funciona, mas às vezes acontece um milagre.
+
 ### 👥 Membros das equipes
 - Clube ou time da escola, colegas de trabalho, banda, elenco, pelotão, equipe de heróis e o grupo religioso têm **gente de verdade**: veja quem está na equipe, converse e faça amizade.
 - A **equipe do trabalho** (chefe e colegas) fica no emprego, em "Membros da equipe".

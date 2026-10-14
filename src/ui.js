@@ -109,8 +109,8 @@ function render(){
   if(!S) return; const m=S.me;
   $('#hName').textContent=`${m.first} ${m.last}`;
   $('#hSub').innerHTML=flagSVG(m.country,16)+' '+esc(`${m.age} ${m.age===1?'ano':'anos'} · ${occupation()} · ${m.city}`);
-  const minor=m.age<18&&parents().length; $('#hMoney').textContent=fmt(minor?famMoney():m.money); $('#hdr .lbl').textContent=minor?'Família':'Saldo';
-  $('#hMoney').style.color=''; $('#hMoney').classList.toggle('neg',!!(minor?S.flags.famBroke:m.money<0));
+  const minor=m.age<18&&parents().length; $('#hMoney').textContent=fmt(m.money); $('#hdr .lbl').textContent='Saldo';   // sempre o dinheiro do próprio personagem (a família continua tendo o dela)
+  $('#hMoney').style.color=''; $('#hMoney').classList.toggle('neg',m.money<0);
   $('#avatar').innerHTML=faceSVG(m,46);
   
   const html=S.log.map(y=>`<section class="yr ph${y.age<13?0:y.age<18?1:y.age<40?2:y.age<65?3:4}"><h3><span>${y.age} ${y.age===1?'ano':'anos'}</span><span>${y.year}</span></h3>${y.lines.map(l=>typeof l==='string'?`<p>${esc(l)}</p>`:`<p class="${l.c}">${esc(l.t)}</p>`).join('')||'<p class="s" style="color:var(--muted)">Um ano tranquilo.</p>'}</section>`).join('');
@@ -669,7 +669,7 @@ function boot(){
       if(hs.includes('desistir')){ if(!partner()){ const p=candidate(false); p.rel='conjuge'; p.bond=88; S.people.push(p); } if(!kids().length){ S.people.push(mkPerson({rel:'filho',age:7,last:m.last,bond:95})); } render(); giveUpFlow(); } }
     else if(hs.includes('idades')){ document.body.innerHTML=faceAges(); } else if(hs.includes('rostos')){ document.body.innerHTML=faceGallery(hs.includes('grande'),+(hs.match(/p(\d+)/)||[0,0])[1]); } if(hs.includes('garagem')){ document.body.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#fff\">'+CAR_MODELS.map((c,i)=>'<div style="text-align:center;font:10px sans-serif\">'+carSVG(c,Object.keys(PAINT)[i%10],110)+'<br>'+c.b+' '+c.m+'</div>').join('')+'</div>'; } },50); for(let i=0;i<24&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); if(r) log(sh.t.replace(/[!?.…]+$/,'')+': '+r); } } render.jump=true; render(); return; }
   const saved=loadKey(SAVE_KEY);
-  if(saved&&saved.me&&saved.v===1){ S=fixSave(saved); render.jump=true; render(); if(S.me.alive){ showStart(); } else showDeath(); }
+  if(saved&&saved.me&&saved.v===1){ S=fixSave(saved); render.jump=true; render(); if(SAVE_RECOVERED) setTimeout(()=>{ try{ modal({k:'NewLife',t:'Save recuperado',x:'O último salvamento estava danificado. Abri a cópia de segurança anterior: você pode ter perdido só a última ação.'}); }catch(e){} },900); if(S.me.alive){ showStart(); } else showDeath(); }
   else if(!META.lives){ newLife({royal:R.chance(.01)}); render.jump=true; render(); pump(); }
   else showStart();
 }

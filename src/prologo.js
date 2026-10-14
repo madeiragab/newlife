@@ -40,16 +40,17 @@ function prolCompCh(pr,max,next,verbo){ const g=prolGente(), ch=[], v=verbo||'Ir
   if(max===1&&!g.p){ const f=people('amigo')[0]; if(f) ch.push({l:`${v} com ${f.first}`,fn:()=>{ pr.junto=[f.id]; next(); }}); }
   return ch; }
 const prolAdv=pr=>()=>{ pr.fase++; };
+const prolPago=(v,o)=>S.me.money>=v?Object.assign(o,{l:`${o.l} (${fmt(v)})`}):null;
 function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; const id=pr.id, f=pr.fase, b=pr.b, adv=prolAdv(pr);
-  const Q=(t,x,ch)=>MQ.push({k:SCEN[id].n,t:prT(t),x:prT(x),ch});
+  const Q=(t,x,ch)=>MQ.push({k:SCEN[id].n,t:prT(t),x:prT(x),ch:ch.filter(Boolean)});
   if(id==='zumbi'){
     if(f===0) Q('Notícia de rodapé',`No jornal da noite, uma nota rápida: um surto de "raiva agressiva" num hospital de ${R.pick(['Manila','Lagos','Bucareste','Lima','Jacarta','Karachi'])}. Pacientes mordendo enfermeiros. O apresentador sorriu e passou para o futebol.`,[
       {l:'Mudar de canal',fn:()=>{ adv(); log('Vi no jornal uma notícia estranha sobre um surto de raiva num hospital do outro lado do mundo.','warn'); }},
       {l:'Pesquisar mais na internet',fn:()=>{ adv(); b.info=1; st('smarts',2); log('Passei a noite lendo sobre um surto estranho. Os vídeos sumiam da internet em minutos.','warn'); }},
-      {l:'Guardar uns enlatados, por via das dúvidas',fn:()=>{ adv(); b.com=(b.com||0)+3; m.money-=600; log('Comecei a guardar enlatados no armário. Minha família riu de mim.','warn'); }}]);
+      prolPago(600,{l:'Guardar uns enlatados, por via das dúvidas',fn:()=>{ adv(); b.com=(b.com||0)+3; m.money-=600; log('Comecei a guardar enlatados no armário. Minha família riu de mim.','warn'); }})]);
     else if(f===1) Q('As prateleiras vazias','Os casos se espalharam por vários países. Fronteiras fechadas, voos cancelados, aulas suspensas. No mercado, as prateleiras estão vazias e o arroz custa o triplo. Na internet, vídeos que ninguém consegue explicar.',[
-      {l:'Encarar a fila do mercado e estocar',fn:()=>{ adv(); b.com=(b.com||0)+4; b.agua=(b.agua||0)+3; m.money-=1800; log('Passei seis horas numa fila de mercado para comprar comida. Brigaram por papel higiênico.','warn'); }},
-      {l:'Comprar uma arma "por precaução"',fn:()=>{ adv(); b.arma=1; m.money-=4500; log('Comprei uma arma e munição. Nunca pensei que faria isso.','warn'); }},
+      prolPago(1800,{l:'Encarar a fila do mercado e estocar',fn:()=>{ adv(); b.com=(b.com||0)+4; b.agua=(b.agua||0)+3; m.money-=1800; log('Passei seis horas numa fila de mercado para comprar comida. Brigaram por papel higiênico.','warn'); }}),
+      prolPago(4500,{l:'Comprar uma arma "por precaução"',fn:()=>{ adv(); b.arma=1; m.money-=4500; log('Comprei uma arma e munição. Nunca pensei que faria isso.','warn'); }}),
       {l:'Fazer aulas de defesa pessoal',fn:()=>{ adv(); m.fight=clamp((m.fight||0)+8); log('Entrei numa academia de defesa pessoal. A turma lotou do dia para a noite.','warn'); }},
       {l:'Ajudar os vizinhos idosos',fn:()=>{ adv(); b.viz=1; m.karma=clamp(m.karma+5); log('Fiz compras para os vizinhos idosos do prédio. Eles não esquecem.','good'); }}]);
     else { const go=()=>prolGo(); Q('O dia em que o mundo acabou','A sirene da cidade tocou às três da manhã e não parou mais. Pela janela, gente correndo. Alguns correndo atrás dos outros. O rádio repete a mesma frase: "Permaneçam em casa". Ninguém permanece.',
@@ -60,7 +61,7 @@ function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; 
     else Q('O dia da viagem',d[2],[{l:'Nadar com tudo o que tenho',fn:()=>prolGo()},{l:'Agarrar o que der antes de pular',fn:()=>{ b.extra=1; prolGo(); }}]);
   }
   else if(id==='marte'){ const d=PROL_MARTE[pr.v]||PROL_MARTE.oficial;
-    if(f===0){ const base=d[2]?prolCompCh(pr,d[2],()=>{ adv(); log('Fui aceit'+oa()+' numa missão para Marte.','good'); },'Ir'):[{l:pr.v==='clandestino'?'Pagar o técnico ($8.000)':'Aceitar',fn:()=>{ if(pr.v==='clandestino') m.money-=8000; adv(); log(pr.v==='clandestino'?'Paguei para entrar escondid'+oa()+' na nave de carga para Marte.':'Aceitei ir para Marte.','warn'); }}];
+    if(f===0){ const base=d[2]?prolCompCh(pr,d[2],()=>{ adv(); log('Fui aceit'+oa()+' numa missão para Marte.','good'); },'Ir'):[pr.v==='clandestino'&&m.money<8000?null:{l:pr.v==='clandestino'?'Pagar o técnico ($8.000)':'Aceitar',fn:()=>{ if(pr.v==='clandestino') m.money-=8000; adv(); log(pr.v==='clandestino'?'Paguei para entrar escondid'+oa()+' na nave de carga para Marte.':'Aceitei ir para Marte.','warn'); }}];
       Q(d[0],d[1],base.concat([{l:'Desistir',cls:'alt',fn:()=>prolCancel('Desisti de ir para Marte. A Terra é boa o bastante.')}])); }
     else if(f===1) Q(pr.v==='clandestino'?'Preparando o esconderijo':'Um ano de treinamento',pr.v==='clandestino'?'Você passou o ano juntando garrafas de água, comida desidratada e coragem. O contêiner tem o tamanho de um armário.':'Centrífugas, simuladores de gravidade, aulas de botânica e de primeiros socorros. A equipe começa a virar família.',[
       {l:'Treinar sobrevivência',fn:()=>{ adv(); b.hl=1; st('health',4); log('Treinei para sobreviver em Marte.','good'); }},
@@ -73,7 +74,7 @@ function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; 
     if(f===0) Q('Sonhos com dois sóis','Toda noite o mesmo sonho: um campo com dois sóis, um castelo escuro no horizonte e uma voz dizendo o seu nome. Você acorda cansad{o}, como se tivesse andado a noite inteira.',[
       {l:'Anotar os sonhos num caderno',fn:()=>{ adv(); b.mapa=1; log('Comecei a anotar sonhos estranhos com um mundo de dois sóis.','warn'); }},
       {l:'Ignorar e seguir a vida',fn:()=>{ adv(); log('Tive sonhos estranhos o ano inteiro.','warn'); }},
-      {l:'Procurar um psicólogo',fn:()=>{ adv(); m.money-=1200; b.calma=1; log('Fui a um psicólogo por causa de uns sonhos. Ele também anotou tudo.','warn'); }}]);
+      prolPago(1200,{l:'Procurar um psicólogo',fn:()=>{ adv(); m.money-=1200; b.calma=1; log('Fui a um psicólogo por causa de uns sonhos. Ele também anotou tudo.','warn'); }})]);
     else { const g=prolGente(); const ch=[{l:'Seguir a luz',fn:()=>{ pr.junto=[]; prolGo(); }}];
       if(g.p) ch.push({l:`Segurar a mão de ${g.p.first}`,fn:()=>{ pr.junto=[g.p.id]; prolGo(); }});
       ch.push({l:'Resistir com todas as forças',cls:'alt',fn:()=>{ if(R.chance(.5)) prolCancel('Uma luz quase me levou para outro mundo. Resisti. Os sonhos pararam.'); else { MQ.unshift({t:'Não deu',x:'Você resistiu, mas a luz foi mais forte.'}); prolGo(); } }});
@@ -81,7 +82,7 @@ function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; 
   }
   else if(id==='heroi'){
     if(f===0) Q('Algo aconteceu',PROL_HEROI[pr.v]||PROL_HEROI.raio,[
-      {l:'Fazer todos os exames',fn:()=>{ adv(); m.money-=2000; log('Fiz uma bateria de exames depois de um acidente estranho. Tudo normal. Normal demais.','warn'); }},
+      prolPago(2000,{l:'Fazer todos os exames',fn:()=>{ adv(); m.money-=2000; log('Fiz uma bateria de exames depois de um acidente estranho. Tudo normal. Normal demais.','warn'); }}),
       {l:'Não contar para ninguém',fn:()=>{ adv(); b.seg=1; log('Guardei segredo sobre um acidente estranho.','warn'); }},
       {l:'Contar para a família',fn:()=>{ adv(); b.fam=1; log('Contei para a família sobre um acidente estranho. Ficaram preocupados.','warn'); }}]);
     else { pr.poder=pr.poder||R.pick(POWERS); Q('Os poderes acordaram',`Primeiro foram coisas pequenas. Depois, numa manhã qualquer, aconteceu de verdade: você conseguiu ${PODER_FRASE[pr.poder]||pr.poder}. O espelho mostra a mesma pessoa, mas nada mais é igual.`,[

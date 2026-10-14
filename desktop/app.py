@@ -59,14 +59,20 @@ class Api:
         return True
 
     def load_all(self):
+        """Lê os saves; se um arquivo estiver estragado, usa a cópia .bak do salvamento anterior."""
         out = {}
         for name in os.listdir(self.folder):
             if name.endswith(".json"):
-                try:
-                    with open(os.path.join(self.folder, name), encoding="utf-8") as f:
-                        out[name[:-5]] = f.read()
-                except OSError:
-                    pass
+                path = os.path.join(self.folder, name)
+                for cand in (path, path + ".bak"):
+                    try:
+                        with open(cand, encoding="utf-8") as f:
+                            data = f.read()
+                        json.loads(data)
+                        out[name[:-5]] = data
+                        break
+                    except (OSError, ValueError):
+                        continue
         return out
 
 

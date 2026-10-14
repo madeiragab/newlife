@@ -201,6 +201,20 @@ function selfTest(){
     S.pending=[{id:'p123',d:{}},{id:real,d:{}},{id:'p_naoexiste',d:{}}]; S.me.ev={p5:30,[real]:20}; S.me.c.ev_p9=1;
     fixSave(S); chkReg('fixSave não limpou a fila',S.pending.length===1&&S.pending[0].id===real); chkReg('fixSave não limpou os contadores',!('p5' in S.me.ev)&&(real in S.me.ev)&&!S.me.c.ev_p9);
     S=JSON.parse(snap); }
+  // cadeias de eventos: estrutura e cada escolha de cada etapa
+  { const au=cadAudit(); au.errs.forEach(e=>{ const k='cadeia: '+e; errs[k]=(errs[k]||0)+1; }); lives.unshift(`HISTÓRIAS EM CADEIA: ${au.chains} histórias, ${au.steps} etapas`);
+    const snap=JSON.stringify(S);
+    for(const [id,ch] of Object.entries(CHAINS)){ for(const sid of Object.keys(ch.steps)){ const nch=ch.steps[sid][2].length;
+      for(let ci=0;ci<nch;ci++){ T('cad:'+id+'.'+sid,()=>{ newLife({}); const m=S.me; m.age=Math.max(ch.o.min||18,Math.min(ch.o.max||40,30)); m.alive=true; m.prison=ch.o.jail?{left:3,total:3,behav:50}:null;
+          if(ch.o.who==='partner'||ch.o.who==='spouse'){ const pp=mkPerson({rel:'conjuge',gender:m.gender==='M'?'F':'M',age:m.age}); S.people.push(pp); }
+          if(['friend','colega','boss','classmate','kid','child','teen','adultkid','ex','sib','parent','pet','grandkid'].includes(ch.o.who)&&!WHO[ch.o.who]()){ const rel={friend:'amigo',colega:'colegaT',boss:'chefe',classmate:'colega',kid:'filho',child:'filho',teen:'filho',adultkid:'filho',ex:'ex',sib:'irmao',parent:'mae',pet:'pet',grandkid:'neto'}[ch.o.who];
+            const ag={child:8,teen:15,adultkid:25,kid:10,grandkid:4}[ch.o.who]; S.people.push(mkPerson({rel,age:ag||m.age,gender:R.chance(.5)?'M':'F'})); }
+          if(!cadStart(id,true)) return; const c=cadState().on[id]; c.s=sid; c.due=m.age; const ev=EVENTS[cadEv(id,sid)]; const d=ev.prep(m); const sh=ev.show(d); const r=ev.pick(String(ci),d);
+          [sh.t,sh.x,sh.ch[ci][0],r].forEach(x=>{ if(/\{\w+\}|undefined|NaN/.test(String(x))){ const k=`texto quebrado em cad:${id}.${sid}: ${String(x).slice(0,90)}`; errs[k]=(errs[k]||0)+1; } }); }); } } }
+    S=JSON.parse(snap); }
+  { const K='nlteste.save'; const ok=JSON.stringify({me:{first:'X'},people:[]}); try{ localStorage.setItem(K,'{"me":{"first":"X"'); localStorage.setItem(K+'.bak',ok); }catch(e){}
+    const r=(()=>{ const s0=localStorage.getItem(K); if(s0&&saveOk(SAVE_KEY,s0)) return 'principal'; const b=localStorage.getItem(K+'.bak'); return b&&saveOk(SAVE_KEY,b)?'bak':null; })();
+    chkReg('save estragado não cai na cópia',r==='bak'); chkReg('save bom reprovado',saveOk(SAVE_KEY,ok)); try{ localStorage.removeItem(K); localStorage.removeItem(K+'.bak'); }catch(e){} }
   const calm=[];
   for(let L=0;L<60;L++){ T('calmLife',()=>newLife({})); let g=0; while(S.me.alive&&g++<130){ T('ageUp',ageUp); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; T('ev',()=>{ const sh=EVENTS[e.id].show(e.d); EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); }); } if(S.me.alive&&S.me.age%3===0) T('calmDoc',()=>{ S.me.dis.forEach(d=>treat('hosp',d)); body('walk'); }); if(S.me.alive&&S.me.health<=0) die(causeFromHealth()); } calm.push(S.me.age); }
   lives.unshift(`VIDA CALMA (só envelhecer + médico): média ${(calm.reduce((a,b)=>a+b,0)/calm.length).toFixed(1)} · acima de 70: ${Math.round(calm.filter(a=>a>=70).length/calm.length*100)}% · acima de 90: ${Math.round(calm.filter(a=>a>=90).length/calm.length*100)}%`);

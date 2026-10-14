@@ -1,0 +1,89 @@
+// ===== Histórias em cadeia: adolescência =====
+chain('primeiro_amor',{k:'Amor',min:13,max:17,npc:1,date:1,gap:[1,2]},{
+ a:['Um bilhete','Achei um bilhete dobrado na minha mochila: "Você é a pessoa mais legal da sala. Ass: {p}".',['Responder com outro bilhete|h+6 >b@0|Escrevi três rascunhos antes do definitivo.','Mostrar para os amigos|h+2 k-3 >c|Todo mundo riu. Inclusive de {p}.','Fingir que não vi|>d@1|Mas li umas vinte vezes em casa.']],
+ b:['O primeiro encontro','{p} me chamou para tomar sorvete depois da aula.',['Ir, morrendo de vergonha|?lk+10 h+12 vira:namoro >e|Dividimos um sorvete de dois sabores. Começamos a namorar!|h-4 vira:amigo >d|Foi esquisito. Ficamos amigos.','Levar um amigo junto|h+3 vira:amigo >d|Virou um encontro de três. Nada romântico.']],
+ c:['A vergonha','{p} ficou sabendo que eu mostrei o bilhete para todo mundo. Passou a me evitar.',['Pedir desculpas de verdade|?k+10 k+4 >b@1|{p} aceitou as desculpas. Talvez ainda dê.|h-6|{p} não quis mais conversa.','Fingir que não importa|h-4 k-2|Importava.']],
+ d:['A amizade','Virei amig{o} de {p}. Às vezes fico pensando como teria sido se...',['Contar o que sinto|?40 h+12 vira:namoro >e@1|{Ele} sentia o mesmo!|h-5 >f@3-6|{p} disse que gosta de mim só como amig{o}.','Deixar assim|h+2 >f@3-6|Amizade também é bom.']],
+ e:['O primeiro amor','O namoro com {p} é cheio de mensagens à meia-noite e brigas por bobagem.',['Apresentar para os meus pais|?50 h+6 bond+8 >g|Meus pais adoraram {p}.|h-4 >g|Meu pai fez cara feia o jantar inteiro.','Esconder dos pais|h+3 >g|Namoro secreto é mais emocionante. E mais complicado.']],
+ g:['O fim do colegial','O colegial está acabando. {p} vai fazer faculdade em outra cidade.',['Tentar namoro a distância|?40 h+6 bond+10|Fizemos dar certo, mensagem por mensagem.|h-15 breakup >f@4-8|Não aguentamos a distância. Terminamos chorando numa rodoviária.','Terminar como amigos|h-10 breakup >f@4-8|Doeu, mas foi bonito.']],
+ f:['Reencontro','Anos depois, cruzei com {p} num casamento de amigos em comum.',['Puxar conversa|?45 h+10 vira:namoro|Saímos para jantar na semana seguinte. Algumas histórias têm segunda temporada.|h+4|Conversamos sobre o passado e seguimos cada um para o seu lado, em paz.','Só acenar|h+2|Um aceno, um sorriso. Tem coisas que ficam guardadas.']],
+});
+chain('festa_proibida',{k:'Adolescência',min:14,max:17,gap:[1,1]},{
+ a:['A festa do ano','Vai ter uma festa enorme na casa de um colega. Meus pais nunca deixariam.',['Pedir permissão|?40 h+6 >b@0|Deixaram, com hora para voltar!|h-3 >c@0|Não deixaram. Mas a festa continua lá.','Sair escondido pela janela|>c@0|O coração batendo mais alto que a música.','Ficar em casa|h-3|Vi tudo pelas fotos dos outros.']],
+ b:['Hora de voltar','A festa está ótima e já passou da hora combinada com meus pais.',['Voltar na hora|k+4 >e|Saí no auge. Meus pais ficaram impressionados.','Ficar mais um pouco|?40 h+8 >e|Voltei uma hora atrasad{o}. Ninguém percebeu.|h-6 >d|Meu pai estava me esperando no sofá.']],
+ c:['A noite clandestina','Na festa, alguém está passando um copo de bebida.',['Beber|add.alcool+6 ?50 h+8 >d|Dancei como nunca.|hl-5 h-8 >d|Passei mal no banheiro da casa dos outros.','Ficar no refrigerante|k+2 h+4 >d|Fui a pessoa mais lúcida da festa.']],
+ d:['Pego no flagra','Meus pais descobriram tudo.',['Contar a verdade|k+5 h-4 >e|Castigo de um mês, mas confiaram mais em mim depois.','Inventar uma história|?30 k-4 >e|Engoliram. Por pouco.|h-10 k-5 >f|A mentira desmoronou em dois minutos. Castigo de três meses.']],
+ e:['Confiança','Depois daquela noite, meus pais começaram a me dar mais liberdade.',['Não abusar|k+4 h+5|Ganhei a chave de casa.','Testar os limites de novo|h+3 >f@1|Até onde dá para ir?']],
+ f:['De castigo','Sem celular, sem saídas, só escola e casa.',['Aproveitar para estudar|sm+3 grade+8|Minhas notas nunca foram tão boas.','Fazer greve de silêncio|h-6|Ninguém lá em casa falou comigo por uma semana. Nem eu com eles.']],
+});
+chain('canal_video',{k:'Internet',min:13,max:22,gap:[1,2]},{
+ a:['Um canal de vídeos','Gravei um vídeo com o celular e postei por diversão.',['Fazer vídeos de humor|tal.comedy+3 >b|Meus amigos riram. Pelo menos eles.','Fazer vídeos de jogos|>b|Narrando partidas com a voz mais empolgada possível.','Apagar de vergonha|h-2|Melhor ninguém ver.']],
+ b:['Os primeiros cem','O canal chegou a cem inscritos. Metade é da família.',['Postar toda semana|follow+500 >c|Disciplina de canal grande.','Postar quando der|follow+100 >c|Sem pressão.']],
+ c:['Viral','Um vídeo meu viralizou do nada. Um milhão de visualizações em dois dias.',['Aproveitar a onda|f+8 follow+50000 h+12 >d|Meu celular não para de vibrar.','Ficar assustad{o}|f+4 follow+20000 >d|Gente que eu não conheço sabe meu nome.']],
+ d:['Os haters','Com a fama vieram os comentários maldosos.',['Ignorar e seguir|h-3 k+2 >e|Bloqueei e continuei postando.','Responder um por um|h-10 f+2 >e|Briguei com estranhos até as três da manhã.','Dar um tempo do canal|h+4 >f@2|Saúde mental primeiro.']],
+ e:['O patrocínio','Uma marca de {prod} quer patrocinar meu canal.',['Aceitar|$+8000 f+3 >g@1|Dinheiro de verdade! E muita propaganda.','Recusar se não for algo que eu uso|k+4 >g@1|O público respeitou.']],
+ f:['O retorno','Depois da pausa, voltei com um vídeo contando como foi ficar famos{o} de repente.',['Postar|?50 f+5 h+10 follow+30000 >g|Foi o vídeo mais sincero que eu já fiz. E o mais visto.|h+3 >g|Pouca gente viu, mas quem viu entendeu.','Deixar o canal para trás|h+5|Foi bom enquanto durou.']],
+ g:['Viver disso?','O canal está pagando quase um salário. Dá para viver de internet?',['Investir tudo no canal|?40 $+25000 f+6 h+10|Virei criador{a} de conteúdo em tempo integral.|$-3000 h-8|O algoritmo mudou e as visualizações despencaram.','Manter como renda extra|$+6000 h+4|O melhor dos dois mundos.']],
+});
+chain('professor_mentor',{k:'Escola',min:12,max:17,npc:1,age:[25,45],gap:[1,2],when:m=>!!m.edu.cur},{
+ a:['Aula diferente','{O2} professor{a2} {p}, de {materia}, me chamou depois da aula: "Você pode ir muito longe, sabia?"',['Ficar desconfiad{o}|>b|Ninguém nunca tinha dito isso.','Agradecer|h+5 >b|Saí da sala andando mais alto.']],
+ b:['Aulas extras','{O2} professor{a2} {p} se ofereceu para me dar aulas extras de graça, depois do horário.',['Aceitar|sm+4 grade+8 >c|{Ele} explica de um jeito que finalmente faz sentido.','Recusar|>d@2|Achei que não precisava.']],
+ c:['A olimpíada','{O2} professor{a2} {p} quer me inscrever na olimpíada estadual de {materia}.',['Encarar|?sm+5 f+3 h+12 grade+5 >e|Medalha de bronze! {Ele} chorou mais que eu.|h-3 >e|Não ganhei. {Ele} disse que estava orgulhos{o2} mesmo assim.','Achar que não sou capaz|h-3 >e|Ele ficou decepcionado. Eu também.']],
+ d:['A advertência','Minhas notas caíram. {O2} professor{a2} {p} me chamou de novo.',['Ouvir os conselhos|grade+6 >e|{Ele} não me deu bronca. Me deu um plano.','Dar de ombros|grade-5|Não era o momento.']],
+ e:['A carta de recomendação','{O2} professor{a2} {p} escreveu uma carta de recomendação para mim.',['Usar na faculdade|sm+2 k+2 >f@5-10|Na entrevista, leram a carta em voz alta.','Guardar como lembrança|h+4 >f@5-10|Leio quando duvido de mim.']],
+ f:['A notícia','Soube que {o2} professor{a2} {p} está doente e se aposentou mais cedo.',['Fazer uma visita|h+4 k+6 >g@1|{Ele} lembrava de mim. Lembrava até da minha nota na olimpíada.','Mandar uma mensagem|k+3 >g@1|{Ele} respondeu com um áudio emocionado.']],
+ g:['Gratidão','Os ex-alunos de {p} fizeram uma homenagem para ele.',['Fazer um discurso|?k f+2 h+10|Contei como uma frase mudou a minha vida.|h+6|Travei no microfone, mas {ele} entendeu.','Ajudar a organizar|k+5 h+8|Lotamos o auditório da escola.']],
+});
+chain('cola_prova',{k:'Escola',min:12,max:18,gap:[1,1],when:m=>!!m.edu.cur},{
+ a:['A prova impossível','Prova de {materia} amanhã e eu não estudei nada. Um colega está vendendo as respostas.',['Comprar as respostas|$-50 >b@0|Paguei com o dinheiro do lanche.','Virar a noite estudando|sm+2 hl-3 grade+4 >c|Café, apostila e olheiras.','Aceitar a nota baixa|grade-6|Aprendi que não dá para deixar para a última hora.']],
+ b:['Colando','Escrevi as respostas na borracha. O professor está andando pela sala.',['Usar a cola|?45 grade+10 >d|Tirei a maior nota da turma. Ninguém desconfiou.|grade-15 k-6 >e|O professor pegou a borracha. Zero.','Desistir no meio|k+3 grade-4|Joguei a borracha no lixo. Pelo menos é minha nota.']],
+ c:['A nota honesta','Tirei uma nota mediana, mas foi minha.',['Ficar satisfeit{o}|k+3 h+2|Orgulho honesto.','Prometer estudar antes da próxima|sm+2|Promessa feita. Cumprir é outra história.']],
+ d:['A desconfiança','A turma inteira tirou nota alta. O professor desconfiou e vai refazer a prova.',['Estudar de verdade para a nova prova|sm+3 grade+3 >c|Desta vez fui eu.','Tentar colar de novo|?30 grade+5|Deu certo de novo. Até quando?|grade-15 k-6 >e|Agora pegaram.']],
+ e:['Na diretoria','Fui pego colando. Meus pais foram chamados.',['Assumir o erro|k+5 h-4|Suspensão de dois dias. Lição aprendida.','Entregar quem vendeu as respostas|k-2 h-2|Ele foi expulso. Eu fiquei com fama de dedo-duro.']],
+});
+chain('primeiro_emprego',{k:'Trabalho',min:14,max:18,gap:[1,1],when:m=>!m.job},{
+ a:['Vaga na lanchonete','A lanchonete do bairro está contratando jovens para o fim de semana.',['Fazer a entrevista|?lk+10 $+600 >b|Fui contratad{o}! Uniforme feio, salário pouco, orgulho enorme.|h-3|Não me chamaram. Próxima.','Achar que é cedo para trabalhar|h+1|Ainda tenho tempo.']],
+ b:['O chefe','O gerente, seu Valdir, grita com todo mundo por qualquer coisa.',['Aguentar calad{o}|h-4 $+600 >c|Contei os minutos até o fim do expediente.','Responder à altura|?30 k+2 >c|Ele me respeitou depois daquilo.|h-6 >e|Fui mandad{o} embora no mesmo dia.']],
+ c:['O colega','Um colega está pegando dinheiro do caixa.',['Avisar o gerente|k+5 >d|O colega foi demitido. O gerente começou a confiar em mim.','Ficar quiet{o}|k-3 >d|Não é problema meu. Ou é?','Pedir para ele parar|k+3 >d|Ele parou. E me agradeceu meses depois.']],
+ d:['A promoção','O gerente quer me promover a chefe de turno nos fins de semana.',['Aceitar|$+1500 sm+2 h+6 >f@1|Primeira vez mandando em alguém. Mais difícil do que parece.','Recusar para estudar|grade+5|Os estudos vêm primeiro.']],
+ e:['A lição','Perdi o emprego, mas aprendi algo sobre chefes e sobre mim.',['Procurar outro|>f|Mais experiente, mais esperto.','Focar na escola|grade+4|Trabalhar pode esperar.']],
+ f:['O que ficou','Aquele primeiro emprego me ensinou o valor do dinheiro.',['Guardar o que ganhei|$+1000 k+2|Abri minha primeira conta corrente.','Comprar algo que sempre quis|h+8|Comprei {coisa} com meu dinheiro. Sabor diferente.']],
+});
+chain('rival_notas',{k:'Escola',min:12,max:17,npc:1,same:1,gap:[1,2],when:m=>!!m.edu.cur},{
+ a:['Rivalidade','{p} tirou nota maior que a minha em {materia} e fez questão de mostrar.',['Estudar para passar {ele}|sm+4 grade+6 >b|Começou a guerra.','Não ligar|h+1|Nota não é tudo.']],
+ b:['A disputa','A cada prova, eu e {p} trocamos de lugar no topo da turma.',['Continuar a competição|sm+3 grade+5 >c|Nunca estudei tanto na vida.','Propor estudarem juntos|vira:amigo sm+4 >d|{Ele} ficou surpres{o2}, mas topou.']],
+ c:['A final','A escola vai dar uma bolsa de intercâmbio para a maior média do ano.',['Dar tudo|?sm+5 sm+3 h+15 f+2 >e|Ganhei a bolsa por meio ponto!|h-8 >e|{p} ganhou por meio ponto.','Desistir da corrida|h-4|{p} levou.']],
+ d:['Parceria','Estudando juntos, eu e {p} viramos a melhor dupla da escola.',['Montar um grupo de estudos|k+5 sm+3 >e|Ajudamos a turma inteira a passar.','Manter só nós dois|sm+4 >e|Dupla imbatível.']],
+ e:['Anos depois','{p} me procurou anos depois. Montou uma empresa e quer alguém em quem confia.',['Ouvir a proposta|?50 $+20000 h+8 vira:amigo|Virei sóci{o} minoritári{o}. Quem diria.|h+2|O negócio não era para mim, mas foi bom reencontrar {p}.','Recusar|h+1|Cada um no seu caminho.']],
+});
+chain('cigarro_turma',{k:'Adolescência',min:13,max:18,gap:[1,2]},{
+ a:['O primeiro cigarro','A turma está fumando atrás da quadra. Me ofereceram um cigarro.',['Aceitar|add.cigarro+8 h+2 >b|Tossi até lacrimejar. Fingi que estava tudo bem.','Recusar|k+3 >c|Alguém me chamou de careta. Sobrevivi.']],
+ b:['Hábito','Agora fumo um por dia, às vezes dois. Escondo o cheiro com bala de menta.',['Parar agora|?will >d|Parei. Foi mais fácil do que eu pensava.|add.cigarro+6 >e|Não consegui parar.','Continuar|add.cigarro+10 hl-3 >e|Só mais um.']],
+ c:['Careta com orgulho','A turma parou de oferecer. Alguns até pararam de fumar também.',['Ficar feliz com isso|k+3 h+3|Influência positiva, quem diria.','Nem perceber|h+1|Nunca foi um grande assunto para mim.']],
+ d:['Livre','Hoje vejo os colegas fumando e não sinto vontade nenhuma.',['Seguir assim|hl+3 h+4|Pulmão agradece.','Ajudar um amigo a parar|k+5|Ele parou também.']],
+ e:['Meus pais descobriram','Minha mãe achou um maço na minha mochila.',['Prometer parar|?will add.cigarro-15 >d|Cumpri a promessa.|add.cigarro+5 k-3 >f@4-8|Prometi e não cumpri.','Dizer que não é meu|k-4 >f@4-8|Ela fingiu acreditar.']],
+ f:['O exame','Adulto, um exame de rotina mostrou que meu pulmão não está nada bem para a minha idade.',['Largar de vez|?will add.cigarro-40 hl+5 h+5|Larguei. Tosse e mau humor por um mês, depois liberdade.|hl-6|Larguei e voltei três vezes.','Diminuir|add.cigarro-10 hl-2|Diminuir já é alguma coisa.']],
+});
+chain('irmao_problema',{k:'Família',min:12,max:20,who:'sib',gap:[1,2]},{
+ a:['Andando com quem não deve','Minha família tem um problema: {p}, anda com uma turma que todo mundo no bairro evita.',['Conversar com {ele}|bond+5 >b|Disse que eu não entendo nada.','Contar para os pais|bond-5 >c|{p} me chamou de traidor{a}.','Não me meter|>d|Cada um sabe da própria vida.']],
+ b:['O pedido','{p} me pediu dinheiro emprestado e não quis dizer para quê.',['Emprestar|$-300 bond+5 >d|{Ele} prometeu devolver.','Negar|bond-5 >d|{Ele} saiu batendo a porta.']],
+ c:['A conversa em família','Meus pais tiveram uma conversa séria com {p}.',['Apoiar {p} na frente deles|bond+10 k+3 >e|{Ele} percebeu que eu estava do lado d{ele}.','Ficar quiet{o}|>d|O clima ficou pesado por semanas.']],
+ d:['A ligação da delegacia','Uma ligação de madrugada: {p} foi detid{o2} numa batida policial.',['Ir até a delegacia|k+5 bond+10 >e|Fiquei sentad{o} num banco duro até amanhecer.','Esperar meus pais resolverem|bond-5 >f|Não tive coragem de ir.']],
+ e:['A virada','Depois da delegacia, {p} decidiu mudar de vida.',['Ajudar {p} a arrumar um emprego|k+6 bond+12 >g@2|Indiquei {ele} para uma vaga. Funcionou.','Torcer de longe|bond+3 >g@2|Torço por {ele}.']],
+ f:['Distância','{p} se afastou da família depois de tudo.',['Procurar {ele}|?k bond+15 >e|Conversamos por horas. Pediu desculpas.|bond-5|{Ele} não quis me ver.','Deixar o tempo resolver|h-4|Às vezes o tempo resolve. Às vezes não.']],
+ g:['Irmãos','Anos depois, {p} me agradeceu num almoço de família, na frente de todo mundo.',['Abraçar {ele}|h+10 bond+10|Ninguém segurou o choro.','Fazer uma piada para disfarçar|h+8 bond+6|Rimos. Mas eu também chorei depois.']],
+});
+chain('grafite',{k:'Arte',min:13,max:20,gap:[1,2]},{
+ a:['Spray na mochila','Comecei a desenhar nos cadernos de um jeito que todo mundo para para ver. Um amigo me deu latas de spray.',['Grafitar um muro abandonado|tal.art+5 >b|Ficou incrível. E ilegal.','Treinar no papel primeiro|tal.art+3 >c|Encher cadernos inteiros.']],
+ b:['A polícia','Uma viatura parou enquanto eu terminava um desenho num viaduto.',['Explicar que é arte|?lk k+2 >c|O policial gostou do desenho e só me mandou embora.|$-500 k-3 >c|Levei uma multa e uma bronca.','Correr|?50 h+5 >c|Escapei. O coração quase saiu pela boca.|$-800 k-4 >c|Me pegaram. Meus pais tiveram que ir me buscar.']],
+ c:['O convite','O dono de uma loja pediu para eu grafitar a fachada inteira dele.',['Aceitar|$+700 tal.art+5 f+2 >d|Meu primeiro trabalho pago como artista!','Fazer de graça para ganhar nome|tal.art+4 f+3 >d|A rua inteira veio ver.']],
+ d:['A galeria','Uma galeria de arte viu meu trabalho e quer fazer uma exposição.',['Expor|?tal.art f+6 $+5000 h+12 >e@2|Vendi seis telas na primeira noite.|h-4 >e@2|Pouca gente apareceu, mas um crítico escreveu sobre mim.','Achar que arte de rua não é para galeria|k+3|Continuei nos muros.']],
+ e:['Artista','Meu nome começou a circular no meio artístico.',['Viver de arte|?tal.art $+20000 f+8 h+10|Sou artista de profissão.|$-2000 h-5|É difícil viver de arte. Arrumei um bico para pagar as contas.','Manter como paixão|h+6 tal.art+3|Pinto porque preciso.']],
+});
+chain('banda_igreja',{k:'Adolescência',min:13,max:18,npc:1,gap:[1,2]},{
+ a:['O coral','{p}, do coral do bairro, me ouviu cantando no banheiro da escola e me chamou para fazer um teste.',['Fazer o teste|?tal.musical vira:amigo tal.musical+4 >b|Passei! Primeira voz.|h-3 >b|Não passei, mas me chamaram para ajudar no som.','Morrer de vergonha|h-3|Fingi que não era eu.']],
+ b:['O ensaio','Os ensaios são todo sábado. {p} virou minha dupla de voz.',['Levar a sério|tal.musical+5 >c|Comecei a ter aulas de técnica vocal.','Ir só pela turma|h+5 >c|Os ensaios são metade música, metade fofoca.']],
+ c:['O solo','O maestro me deu um solo na apresentação de Natal.',['Cantar|?tal.musical h+15 f+2 >d|O público se levantou no final.|h-6 >d|Minha voz falhou na nota alta. {p} me abraçou depois.','Pedir para {p} cantar no meu lugar|bond+5 >d|{p} brilhou. Fiquei feliz por {ele}.']],
+ d:['A viagem do coral','O coral foi convidado para um festival em outra cidade.',['Ir|h+10 bond+8 >e@2|Primeira viagem sem os pais. Inesquecível.','Ficar|h-2|Vi tudo pelos stories.']],
+ e:['A voz','Anos depois, {p} me mandou um vídeo daquela apresentação de Natal.',['Voltar a cantar|tal.musical+4 h+8|Entrei num coral de adultos. Algumas coisas não se perdem.','Rir de nós dois|h+6|Que cabelos eram aqueles?']],
+});
