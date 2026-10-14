@@ -31,6 +31,8 @@ public class MainActivity extends Activity {
     private static final String BASE_URL = "file:///android_asset/index.html";
     private WebView web;
     private String loadedVer = "";
+    private boolean checked = false;
+    private long startedAt = 0;
 
     @Override
     protected void onCreate(Bundle state) {
@@ -47,11 +49,16 @@ public class MainActivity extends Activity {
         s.setAllowFileAccess(true);
         s.setTextZoom(100);
         s.setMediaPlaybackRequiresUserGesture(false); // a música da tela de atualização toca sozinha
-        web.setWebViewClient(new WebViewClient());
+        web.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageFinished(WebView v, String url) {
+                // só procura atualização depois que o jogo carregou: assim a rodinha de progresso aparece
+                if (!checked) { checked = true; checkUpdate(); }
+            }
+        });
         web.setOverScrollMode(WebView.OVER_SCROLL_NEVER);
         setContentView(web);
         loadGame();
-        checkUpdate();
     }
 
     // ---------- versão ----------
@@ -94,6 +101,7 @@ public class MainActivity extends Activity {
                     if (remote.compareTo(loadedVer) <= 0) return;
                     Matcher ms = Pattern.compile("\"size\"\\s*:\\s*(\\d+)").matcher(json);
                     final long size = ms.find() ? Long.parseLong(ms.group(1)) : 2500000L;
+                    startedAt = System.currentTimeMillis();
                     progress(remote, 0);
                     String html = new String(download(SITE + "app.html?t=" + System.currentTimeMillis(), remote, size), "UTF-8");
                     if (html.length() < 100000 || !html.contains("NL_VER='" + remote + "'")) return;
@@ -104,6 +112,9 @@ public class MainActivity extends Activity {
                     out.close();
                     if (!tmp.renameTo(gameFile())) { gameFile().delete(); if (!tmp.renameTo(gameFile())) return; }
                     prefs().edit().putString("ver", remote).apply();
+                    // a rodinha aparece girando pelo menos uma volta, mesmo com download rápido
+                    long wait = Math.max(1200, 2500 - (System.currentTimeMillis() - startedAt));
+                    try { Thread.sleep(wait); } catch (InterruptedException ie) { }
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {

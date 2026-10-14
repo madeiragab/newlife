@@ -47,6 +47,12 @@ function updOverlay(rv){ if(UPD) return UPD; const C=2*Math.PI*52;
       if(p>=1&&!el.classList.contains('ok')){ el.classList.add('ok'); pct.textContent='✓'; sub.textContent='pronto'; el.querySelector('h2').textContent='Prontinho!'; dica.textContent='Abrindo a versão nova…'; clearInterval(dt); try{ sfx('level'); }catch(e){} } },
     close(msg){ clearInterval(dt); el.style.transition='opacity .5s'; el.style.opacity=0; setTimeout(()=>el.remove(),500); UPD=null; if(msg) setTimeout(()=>{ try{ msg&&modal({k:'NewLife',t:'Atualização',x:msg}); }catch(e){} },600); }};
   return UPD; }
+// depois de atualizar: a rodinha gira pelo menos uma volta inteira até 100%, mesmo que o download tenha sido instantâneo
+function updFinale(v,then){ let u; try{ u=UPD||updOverlay(v); }catch(e){ then&&then(); return; }
+  u.el.classList.add('fast'); const st=document.createElement('style'); st.textContent='#nlUpd.fast .u-orb{animation-duration:1.9s}'; u.el.appendChild(st);
+  const sub=u.el.querySelector('.u-sub'); if(sub) sub.textContent='instalando';
+  const t0=performance.now(), dur=2000; const step=()=>{ const k=Math.min(1,(performance.now()-t0)/dur); u.set(k<1?k*.99:1); if(k<1) requestAnimationFrame(step); else setTimeout(()=>{ u.close(); setTimeout(()=>then&&then(),550); },1300); };
+  requestAnimationFrame(step); }
 // apps novos mandam o progresso real do download
 window.nlUpd=p=>{ const u=UPD||updOverlay(window.nlUpdVer||''); u.native=true; u.set(+p||0); };
 async function nlAppUpdateCheck(){ if(!nlIsApp()||/teste|aventura|demo|qualidade/.test(location.hash)) return;

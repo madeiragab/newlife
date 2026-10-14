@@ -78,6 +78,12 @@ def fetch(url, timeout):
 
 def check_update(window, game_file, current):
     """Roda em segundo plano depois que a janela abre: baixa a versão nova e recarrega."""
+    # espera a página do jogo carregar, senão a rodinha de progresso não tem onde aparecer
+    try:
+        window.events.loaded.wait(15)
+    except Exception:
+        time.sleep(3)
+    t_start = time.time()
     try:
         info = json.loads(fetch(SITE + "version.json?t=%d" % time.time(), 8).decode("utf-8"))
         remote = str(info.get("v", ""))
@@ -111,7 +117,7 @@ def check_update(window, game_file, current):
             window.evaluate_js("try{save()}catch(e){}")
         except Exception:
             pass
-        time.sleep(1.2)  # deixa o anel mostrar o "pronto"
+        time.sleep(max(1.2, 2.5 - (time.time() - t_start)))  # a rodinha aparece girando pelo menos uma volta
         window.load_url(page_url(game_file))
     except Exception:
         pass  # sem internet ou site fora do ar: segue com a versão que já tem

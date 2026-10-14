@@ -73,11 +73,20 @@ function dslChoice(c,d){
   if(chance!=null&&!R.chance(chance)){ const x=dslApply(fx2||'',d); return [tp(t2||'Não deu certo.',d),b,x].filter(Boolean).join(' '); }
   const x=dslApply(fx1,d); return [tp(t1,d),b,x].filter(Boolean).join(' ');
 }
-let PACKN=0;
+// ID estável: vem do conteúdo do evento (modo, grupo, título e começo do texto), não da ordem dos arquivos.
+// Assim, acrescentar eventos novos em qualquer lugar não troca o evento que um save antigo deixou na fila.
+function evKey(o,title,text){ const t=Array.isArray(text)?text[0]:text, s=[o.scen||'',o.k||'',o.who||'',o.crew||'',title,String(t||'').slice(0,80)].join('|');
+  let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0; let id='p_'+(h>>>0).toString(36), n=1; while(EVENTS[id+(n>1?'_'+n:'')]) n++; return id+(n>1?'_'+n:''); }
+// saves de versões antigas guardavam IDs por ordem ('p123'): esses saem da fila e dos contadores ao carregar
+function fixSave(s){ if(!s||!s.me) return s; const old=k=>/^p\d+$/.test(k);
+  const clean=o=>{ if(o) Object.keys(o).forEach(k=>{ if(old(k)||old(k.replace(/^ev_/,''))) delete o[k]; }); };
+  s.pending=(s.pending||[]).filter(e=>e&&!old(e.id)&&EVENTS[e.id]);
+  clean(s.me.ev); clean(s.me.evN); clean(s.me.c); if(s.scen){ clean(s.scen.ev); clean(s.scen.evN); }
+  s.evIds=2; return s; }
 function pack(gr,list){
   for(const e of list){
-    const [title,text,choices,op={}]=e; const id='p'+(++PACKN);
-    const o=Object.assign({},gr,op);
+    const [title,text,choices,op={}]=e;
+    const o=Object.assign({},gr,op); const id=evKey(o,title,text);
     EVENTS[id]={title,scen:o.scen,w:o.w??1.2,cd:o.cd??12,jail:o.jail,onceLife:o.once,
       when:m=>(o.min==null||m.age>=o.min)&&(o.max==null||m.age<=o.max)&&(!gr.when||gr.when(m))&&(!op.when||op.when(m))&&(!o.who||!!WHO[o.who]()),
       prep:m=>{ const v=o.v||[100,2000]; const d=Object.assign(strangers(m,o),{v:amt(v[0],v[1]),v2:amt(v[0]*4,v[1]*4),xi:R.int(0,(Array.isArray(text)?text.length:1)-1),

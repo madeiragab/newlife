@@ -1,0 +1,14 @@
+name: Testes
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  testes:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Simular centenas de vidas
+        shell: powershell
+        run: .\test.ps1 3000

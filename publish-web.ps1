@@ -1,6 +1,11 @@
 ﻿# Atualiza a versão de navegador (GitHub Pages): monta o jogo e publica como index.html na branch gh-pages.
 $ErrorActionPreference = 'Continue'
 $root = $PSScriptRoot
+# só publica se o teste automático passar (pule com $env:NL_TESTED='1' quando o teste já rodou nesta versão)
+if ($env:NL_TESTED -ne '1') {
+  & (Join-Path $root 'test.ps1') 400 | Out-Host
+  if ($LASTEXITCODE -ne 0) { "Publica$([char]0xE7)$([char]0xE3)o cancelada: o teste falhou."; exit 1 }
+}
 & (Join-Path $root 'build.ps1') | Out-Null
 $remote = (git -C $root remote get-url origin)
 $tmp = Join-Path $env:TEMP 'newlife-pages'

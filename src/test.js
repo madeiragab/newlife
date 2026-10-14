@@ -194,6 +194,13 @@ function selfTest(){
   lives.unshift('BRIGAS contra adulto comum (luta ~45%): '+fr.join(' · '));
   lives.unshift(`ATESTADOS: ${fired}/40 demitidos depois de pedir 8 atestados no mesmo ano`);
   T('save',()=>JSON.parse(JSON.stringify(S)));
+  // regressão: IDs de eventos estáveis e saves antigos
+  const chkReg=(nome,ok)=>{ if(!ok){ const k='regressão: '+nome; errs[k]=(errs[k]||0)+1; } };
+  chkReg('IDs sequenciais antigos ainda existem',!Object.keys(EVENTS).some(k=>/^p\d+$/.test(k)));
+  { const snap=JSON.stringify(S), real=Object.keys(EVENTS).find(k=>k.startsWith('p_'));
+    S.pending=[{id:'p123',d:{}},{id:real,d:{}},{id:'p_naoexiste',d:{}}]; S.me.ev={p5:30,[real]:20}; S.me.c.ev_p9=1;
+    fixSave(S); chkReg('fixSave não limpou a fila',S.pending.length===1&&S.pending[0].id===real); chkReg('fixSave não limpou os contadores',!('p5' in S.me.ev)&&(real in S.me.ev)&&!S.me.c.ev_p9);
+    S=JSON.parse(snap); }
   const calm=[];
   for(let L=0;L<60;L++){ T('calmLife',()=>newLife({})); let g=0; while(S.me.alive&&g++<130){ T('ageUp',ageUp); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; T('ev',()=>{ const sh=EVENTS[e.id].show(e.d); EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); }); } if(S.me.alive&&S.me.age%3===0) T('calmDoc',()=>{ S.me.dis.forEach(d=>treat('hosp',d)); body('walk'); }); if(S.me.alive&&S.me.health<=0) die(causeFromHealth()); } calm.push(S.me.age); }
   lives.unshift(`VIDA CALMA (só envelhecer + médico): média ${(calm.reduce((a,b)=>a+b,0)/calm.length).toFixed(1)} · acima de 70: ${Math.round(calm.filter(a=>a>=70).length/calm.length*100)}% · acima de 90: ${Math.round(calm.filter(a=>a>=90).length/calm.length*100)}%`);
@@ -201,7 +208,7 @@ function selfTest(){
   lives.unshift(`IDADE MÉDIA: ${(ages.reduce((a,b)=>a+b,0)/ages.length).toFixed(1)} · acima de 70: ${Math.round(ages.filter(a=>a>=70).length/ages.length*100)}% · abaixo de 30: ${Math.round(ages.filter(a=>a<30).length/ages.length*100)}%`);
   const o=document.createElement('pre'); o.id='out'; o.style.cssText='position:fixed;inset:0;z-index:999;background:#fff;color:#000;overflow:auto;padding:10px;font-size:11px;white-space:pre-wrap';
   o.textContent=`NOMES: ${Object.entries(NAME_DB).map(([c,d])=>c+' '+d.M.length+'/'+d.F.length+'/'+d.L.length).join(' · ')}\nEVENTOS: ${Object.keys(EVENTS).length} · TESTE: ${lives.length} vidas, ${years} anos, ${events} eventos, ${actions} ações, ${swept} eventos varridos\nERROS: ${Object.keys(errs).filter(k=>!k.endsWith(' @')).length}\n`+Object.entries(errs).map(([k,v])=>k.endsWith(' @')?'    '+v:`${v}x ${k}`).join('\n')+'\n\n'+lives.join('\n');
-  document.body.appendChild(o); document.title='TESTE OK';
+  document.body.appendChild(o); const nErr=Object.keys(errs).filter(k=>!k.endsWith(' @')).length; o.dataset.erros=nErr; document.title=nErr?'TESTE FALHOU':'TESTE OK';
 }
 
 // ===== Diagnóstico das aventuras (#aventura): um jogador razoável joga cada modo 40 vezes =====

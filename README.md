@@ -257,6 +257,10 @@ Rode `make-exe.ps1` antes do `make-apk.ps1`, porque ele gera o ícone usado pelo
 
 ## Testes automáticos
 
+[![Testes](https://github.com/madeiragab/newlife/actions/workflows/testes.yml/badge.svg)](https://github.com/madeiragab/newlife/actions/workflows/testes.yml)
+
+`test.ps1` termina com falha se houver qualquer erro, e o `publish-web.ps1` não publica nada nesse caso. O GitHub Actions roda o mesmo teste a cada push.
+
 | Comando | O que faz |
 |---|---|
 | `.\test.ps1` | Abre o jogo no Edge sem janela e simula dezenas de vidas inteiras, testando ações, telas, todos os eventos em várias idades, regras da prisão, equilíbrio das brigas e textos com lacunas. |

@@ -211,7 +211,7 @@ function newLife(o={}){
 const SNAP_KEY='outravida.snaps.v1'; let SNAPS=[];
 function storeSnaps(){ try{ localStorage.setItem(SNAP_KEY,JSON.stringify(SNAPS)); }catch(e){ SNAPS=SNAPS.slice(-2); try{ localStorage.setItem(SNAP_KEY,JSON.stringify(SNAPS)); }catch(e2){} } }
 function snap(){ SNAPS.push({age:S.me.age,year:S.year,s:JSON.stringify(S)}); if(SNAPS.length>6) SNAPS.shift(); storeSnaps(); }
-function timeTravel(i){ const sn=SNAPS[i]; if(!sn) return false; S=JSON.parse(sn.s); SNAPS=SNAPS.slice(0,i); storeSnaps(); cnt('timeTravel'); log(`Voltei no tempo para os meus ${S.me.age} anos.`,'warn'); save(); return true; }
+function timeTravel(i){ const sn=SNAPS[i]; if(!sn) return false; S=JSON.parse(sn.s); if(typeof fixSave==='function') fixSave(S); SNAPS=SNAPS.slice(0,i); storeSnaps(); cnt('timeTravel'); log(`Voltei no tempo para os meus ${S.me.age} anos.`,'warn'); save(); return true; }
 const DIFF={facil:{d:.6,$:1.3,n:'Fácil'},normal:{d:1,$:1,n:'Normal'},dificil:{d:1.7,$:.75,n:'Difícil'}};
 const diff=()=>DIFF[(S.flags&&S.flags.diff)||'normal'];
 
