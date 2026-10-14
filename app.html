@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610140741'</script>
+<title>NewLife</title><script>window.NL_VER='2610140805'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -424,6 +424,9 @@ button.row:active{transform:scale(.985)}
 #stats{padding-bottom:30px} @media (max-width:420px){ #stats{padding-bottom:34px} }
 /* tela inicial */
 #start .full-in{padding-top:0;gap:14px}
+/* a tela inicial rola em vez de espremer o topo: nada encolhe em celulares baixos ou estreitos */
+#start .full-in>*{flex-shrink:0}
+@media (max-width:380px){.st-hero{padding:28px 12px 24px}.st-hero .logo{font-size:46px}.st-faces span{margin:0 -9px}.st-faces span svg{width:58px;height:58px}}
 .st-hero{margin:0 -16px 4px;padding:34px 16px 30px;background:var(--brand-grad);border-radius:0 0 32px 32px;text-align:center;color:#fff;box-shadow:0 8px 24px rgba(20,28,60,.18);position:relative;overflow:hidden}
 .st-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--stripe)}
 .st-hero .logo{color:#fff;font-size:54px;margin-top:14px;text-shadow:0 3px 12px rgba(0,0,0,.18)}
@@ -12202,6 +12205,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.10.1',d:'14/10/2026',t:'Correção na tela inicial',itens:['Em celulares de tela pequena, o topo da tela inicial cortava o logo e a frase. Agora aparece tudo, e a tela rola quando não cabe.']},
   {v:'1.10',d:'14/10/2026',t:'Aventuras que chegam aos poucos, e formação que vale',itens:['Os modos fictícios não te jogam mais lá de uma vez: a história começa na vida real e vai crescendo ano a ano.','Zumbi: primeiro as notícias, no ano seguinte as prateleiras vazias e só no terceiro ano o fim do mundo. Dá para estocar comida, comprar arma, treinar e fugir com a família.','Ilha e Marte começam com um convite: ir sozinho, levar o par, os filhos ou a família toda, ou recusar. Marte tem um ano de treinamento antes do lançamento.','Isekai começa com sonhos; Superpoderes, com um acidente estranho um ano antes dos poderes. Quem vai junto vive tudo com você e volta para casa (ou morre lá).','10 cursos técnicos novos (radiologia, segurança do trabalho, edificações, química…) com empregos que só pedem o técnico.','Especialização nova na pós-graduação e 20 empregos que pedem especialização, mestrado, doutorado, MBA ou residência (cientista de IA, auditor fiscal, astrofísico, dermatologista…).','Pós-graduação aumenta o salário: mestrado +10%, doutorado +15%, MBA +8%, especialização +5%.']},
   {v:'1.9',d:'14/10/2026',t:'Faculdade vale a pena, mundos com consequência',itens:['Cada faculdade tem empregos próprios (34 profissões novas, de cientista de dados a maestro) que pagam bem mais do que os sem diploma, e quem tem diploma vê mais vagas da área.','Ao tirar a carteira, seus pais podem te dar um carro, de um popular usado a um superesportivo, conforme o dinheiro da família.','"Ser amigos" funciona mais vezes quanto maior a barra de amizade.','Modos fictícios: comerciantes aparecem em alguns dias oferecendo até 4 itens (ouro, sucata, dinheiro, pesquisa ou troca por comida).','Voltar de um mundo tem consequências: demissão por abandono, notas baixas, matrícula cancelada, contas atrasadas e família desesperada.','Sumir também acaba namoros: quanto mais tempo longe, maior a chance de levar um fora, de o noivado acabar ou de vir o divórcio por abandono do lar. Depois de meses ou anos, você pode ser declarado morto e encontrar seu amor casado com outra pessoa. Raramente, alguém espera.','Começos novos e maiores: 28 histórias sorteadas, cada uma com itens, grupo, veículos e vantagens diferentes. Herói ganhou 10 poderes e 5 vilões novos.','Tela inicial redesenhada.']},
   {v:'1.8',d:'14/10/2026',t:'Visual novo',itens:['O botão de Envelhecer não fica mais cortado: o bolo aparece inteiro, com brilho pulsando.','Cabeçalho em degradê, cartões e painéis mais arredondados, janelas de evento com animação e botões novos.','Seções com marcador colorido e alça nos painéis para ficar com cara de app.']},
