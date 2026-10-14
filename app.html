@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610140721'</script>
+<title>NewLife</title><script>window.NL_VER='2610140725'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -8457,13 +8457,14 @@ V.scLocal=(o=>()=>{ const r=o(), sc=S.scen; if(!sc||!sc.merc||sc.merc.dia!==sc.d
   r.items.splice(1,0,...add); return r; })(V.scLocal);
 
 // ===== Voltar de um modo fictício tem preço: quanto mais tempo longe, mais a vida real sente =====
+const voltaTempo=d=>d<30?`${d} ${d===1?'dia':'dias'}`:d<365?`${Math.round(d/30)} ${Math.round(d/30)===1?'mês':'meses'}`:`${Math.round(d/365)} ${Math.round(d/365)===1?'ano':'anos'}`;
 const VOLTA_ONDE={zumbi:'no apocalipse',ilha:'na ilha',isekai:'em Eldoria',marte:'em Marte'};
 function voltaConseq(id,d,win){ const m=S.me, L=[], adult=m.age>=18, onde=VOLTA_ONDE[id]||'longe';
   // trabalho
   if(m.job&&!m.job.hero){ const co=m.job.co||'a empresa'; m.job.perf=clamp(m.job.perf-Math.min(45,Math.round(d*1.3)));
-    const fire=Math.min(.92,Math.max(0,(d-7)/34)+(m.job.perf<25?.15:0));
+    const fire=d>=180?1:Math.min(.92,Math.max(0,(d-7)/34)+(m.job.perf<25?.15:0));
     if(R.chance(fire)){ let t='meu cargo'; try{ t=jobTitle(m.job)||t; }catch(e){} endJob(); st('happy',-10); cnt('demitidoMundo');
-      L.push('💼 '+R.pick([`Fui demitid${oa()} por abandono de emprego. ${d} dias sem aparecer e sem atestado.`,`Quando voltei, meu crachá não abria mais a catraca. ${co} me demitiu.`,`O RH me mandou ${R.int(9,40)} e-mails. O último dizia: "desligamento por justa causa".`,`Alguém já estava sentado na minha mesa. Perdi o cargo de ${t.toLowerCase()}.`]));
+      L.push('💼 '+R.pick([`Fui demitid${oa()} por abandono de emprego. ${voltaTempo(d)} sem aparecer e sem atestado.`,`Quando voltei, meu crachá não abria mais a catraca. ${co} me demitiu.`,`O RH me mandou ${R.int(9,40)} e-mails. O último dizia: "desligamento por justa causa".`,`Alguém já estava sentado na minha mesa. Perdi o cargo de ${t.toLowerCase()}.`]));
       log(`Perdi o emprego por ter passado ${d} dias ${onde}.`,'bad'); }
     else if(d>=4) L.push('💼 '+R.pick([`Meu chefe me deu uma advertência por escrito. Meu desempenho despencou.`,`Inventei uma doença rara para explicar o sumiço. Ninguém acreditou, mas não me demitiram.`,`Voltei ao trabalho com ${R.int(200,900)} e-mails não lidos e uma advertência.`]));
     else L.push('💼 Ninguém no trabalho percebeu que eu tinha sumido. Isso é bom ou ruim?'); }
@@ -8476,15 +8477,23 @@ function voltaConseq(id,d,win){ const m=S.me, L=[], adult=m.age>=18, onde=VOLTA_
   if(m.office){ m.office.appr=clamp(m.office.appr-Math.min(40,d)); if(d>=5) L.push(`🏛️ A imprensa descobriu que sumi por ${d} dias. Minha aprovação caiu.`); }
   // relacionamento
   const p=partner();
-  if(p){ p.bond=clamp(p.bond-Math.min(50,Math.round(d*.7)));
-    if(d>=20&&R.chance(Math.min(.75,d/110+(p.bond<30?.2:0)))){ if(p.rel==='conjuge') divorce(p,true); else { p.rel='ex'; st('happy',-15); log(`${p.first} terminou comigo enquanto eu estava ${onde}.`,'bad'); }
-      L.push('💔 '+R.pick([`${p.first} não me esperou. Achou que eu tinha ${R.pick(['fugido com alguém','morrido','ido embora de vez'])} e seguiu a vida.`,`Encontrei minhas coisas em caixas na porta. Um bilhete de ${p.first}: "Nem um recado em ${d} dias?"`,`${p.first} já estava com outra pessoa quando voltei.`])); }
-    else if(d>=5){ L.push('❤️ '+R.pick([`${p.first} chorou, gritou e depois me abraçou por um tempão.`,`${p.first} me deu um gelo de uma semana. Justo.`,`${p.first} quer saber onde eu estava. Não sei como contar.`])); } }
+  if(p){ const tempo=voltaTempo(d), casado=p.rel==='conjuge';
+    p.bond=clamp(p.bond-Math.min(60,Math.round(d*.8)));
+    let ch=p.rel==='namoro'?(d-4)/40:p.rel==='noivo'?(d-6)/55:(d-10)/90; if(p.bond<30) ch+=.2; if(d>=365) ch=.95; ch=Math.max(0,Math.min(.97,ch));
+    if(d>=4&&R.chance(ch)){ cnt('terminoMundo');
+      const txt=d<30?R.pick([`${p.first} terminou comigo por mensagem no terceiro dia sem resposta. Só li agora.`,`${p.first} achou que eu tinha ${R.pick(['fugido com alguém','me cansado','ido embora de vez'])}. Quando voltei, já era ex.`,`Encontrei minhas coisas em caixas na porta. Um bilhete de ${p.first}: "Nem um recado em ${tempo}?"`])
+        :d<180?R.pick([`${p.first} esperou um tempo, chorou outro tanto e seguiu a vida. Quando voltei, já estava com outra pessoa.`,`${p.first} se mudou de cidade e trocou de número. Ninguém quis me dar o endereço.`,`Fiquei ${tempo} sumid${oa()}. ${p.first} me olhou como se visse um fantasma e disse: "Agora não dá mais."`])
+        :R.pick([`Fiquei ${tempo} sumid${oa()}. ${p.first} achou que eu tinha morrido e ${casado?'casou de novo':'casou com outra pessoa'}. Tem até um bebê.`,`${p.first} guardou luto por mim. Depois refez a vida. Quando bati na porta, quem atendeu foi o novo amor de ${p.first}.`,`Para ${p.first}, eu estava mort${oa()}. Teve velório, teve choro, e depois teve outra pessoa.`]);
+      if(casado){ divorce(p,true); L.push('💔 '+txt+' O divórcio saiu por abandono do lar.'); }
+      else { p.rel='ex'; st('happy',-15); log(`${p.first} terminou comigo enquanto eu estava ${onde}.`,'bad'); L.push('💔 '+txt); } }
+    else if(d>=60){ p.bond=clamp(p.bond+15); L.push('❤️ '+R.pick([`${p.first} esperou ${tempo} sem desistir. Quando me viu, não disse nada: só me abraçou.`,`Todo mundo mandou ${p.first} seguir em frente. ${p.first} não seguiu. Esperou.`])); }
+    else if(d>=5) L.push('❤️ '+R.pick([`${p.first} chorou, gritou e depois me abraçou por um tempão.`,`${p.first} me deu um gelo de uma semana. Justo.`,`${p.first} quer saber onde eu estava. Não sei como contar.`])); }
   // família
   const ps=parents();
   if(ps.length&&d>=3){ ps.forEach(x=>x.bond=clamp(x.bond+(R.chance(.5)?5:-5)));
     L.push('👪 '+(m.age<18?R.pick(['Meus pais tinham colado cartazes com a minha foto pela cidade. Fiquei de castigo até não sei quando.','Minha mãe desmaiou quando me viu entrar pela porta. Depois veio o castigo.']):R.pick(['Meus pais tinham feito um boletim de ocorrência de desaparecimento.','Minha mãe acendeu velas na igreja todos os dias em que eu estive fora.','Meu pai envelheceu dez anos nesses dias. Me abraçou sem dizer nada.'])));
-    if(d>=15){ m.fame=clamp(m.fame+3); L.push('📺 Meu sumiço tinha aparecido no jornal local.'); } }
+    if(d>=15){ m.fame=clamp(m.fame+3); L.push('📺 Meu sumiço tinha aparecido no jornal local.'); }
+    if(d>=180) L.push(`⚰️ Fui declarad${oa()} mort${oa()}. Teve até velório com caixão vazio. Desfazer isso no cartório vai dar trabalho.`); }
   // amigos e bichos
   people('amigo').forEach(f=>{ f.bond=clamp(f.bond-Math.min(20,Math.round(d*.3))); });
   const pets=people('pet'); if(pets.length&&d>=12){ const pt=R.pick(pets);
@@ -8497,7 +8506,7 @@ function voltaConseq(id,d,win){ const m=S.me, L=[], adult=m.age>=18, onde=VOLTA_
   st('happy',-Math.min(10,Math.floor(d/6)));
   return L; }
 scenEnd=(o=>function(win,txt){ const sc=S.scen, id=sc&&sc.id, d=sc?sc.dia:0; const r=o.apply(this,arguments);
-  if(id&&id!=='heroi'&&!S.scen&&S.me.alive){ const L=voltaConseq(id,d,win); if(L.length) MQ.push({k:'Vida real',t:'De volta à vida real',x:`Passei ${d} ${d===1?'dia':'dias'} ${VOLTA_ONDE[id]||'longe'}. A vida aqui não parou.\n\n${L.join('\n\n')}`}); }
+  if(id&&id!=='heroi'&&!S.scen&&S.me.alive){ const L=voltaConseq(id,d,win); if(L.length) MQ.push({k:'Vida real',t:'De volta à vida real',x:`Passei ${voltaTempo(d)} ${VOLTA_ONDE[id]||'longe'}. A vida aqui não parou.\n\n${L.join('\n\n')}`}); }
   return r; })(scenEnd);
 
 // ===== Começos dos modos fictícios: histórias maiores e sorteadas, e cada uma muda o que você tem no começo =====
@@ -12004,7 +12013,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
-  {v:'1.9',d:'14/10/2026',t:'Faculdade vale a pena, mundos com consequência',itens:['Cada faculdade tem empregos próprios (34 profissões novas, de cientista de dados a maestro) que pagam bem mais do que os sem diploma, e quem tem diploma vê mais vagas da área.','Ao tirar a carteira, seus pais podem te dar um carro, de um popular usado a um superesportivo, conforme o dinheiro da família.','"Ser amigos" funciona mais vezes quanto maior a barra de amizade.','Modos fictícios: comerciantes aparecem em alguns dias oferecendo até 4 itens (ouro, sucata, dinheiro, pesquisa ou troca por comida).','Voltar de um mundo tem consequências: demissão por abandono, notas baixas, matrícula cancelada, namoro acabado, contas atrasadas e família desesperada.','Começos novos e maiores: 28 histórias sorteadas, cada uma com itens, grupo, veículos e vantagens diferentes. Herói ganhou 10 poderes e 5 vilões novos.','Tela inicial redesenhada.']},
+  {v:'1.9',d:'14/10/2026',t:'Faculdade vale a pena, mundos com consequência',itens:['Cada faculdade tem empregos próprios (34 profissões novas, de cientista de dados a maestro) que pagam bem mais do que os sem diploma, e quem tem diploma vê mais vagas da área.','Ao tirar a carteira, seus pais podem te dar um carro, de um popular usado a um superesportivo, conforme o dinheiro da família.','"Ser amigos" funciona mais vezes quanto maior a barra de amizade.','Modos fictícios: comerciantes aparecem em alguns dias oferecendo até 4 itens (ouro, sucata, dinheiro, pesquisa ou troca por comida).','Voltar de um mundo tem consequências: demissão por abandono, notas baixas, matrícula cancelada, contas atrasadas e família desesperada.','Sumir também acaba namoros: quanto mais tempo longe, maior a chance de levar um fora, de o noivado acabar ou de vir o divórcio por abandono do lar. Depois de meses ou anos, você pode ser declarado morto e encontrar seu amor casado com outra pessoa. Raramente, alguém espera.','Começos novos e maiores: 28 histórias sorteadas, cada uma com itens, grupo, veículos e vantagens diferentes. Herói ganhou 10 poderes e 5 vilões novos.','Tela inicial redesenhada.']},
   {v:'1.8',d:'14/10/2026',t:'Visual novo',itens:['O botão de Envelhecer não fica mais cortado: o bolo aparece inteiro, com brilho pulsando.','Cabeçalho em degradê, cartões e painéis mais arredondados, janelas de evento com animação e botões novos.','Seções com marcador colorido e alça nos painéis para ficar com cara de app.']},
   {v:'1.7',d:'14/10/2026',t:'Conquistas e selos novos',itens:['73 conquistas, muitas zoeiras e várias secretas, que valem para todas as vidas. Veja em Menu → Conquistas.','Selos novos no fim da vida: Ditador, Filho da noite, Profeta, Detetive, Viajante de mundos, Fogo no rabo e Lobo solitário.','"Fazer amor" substitui "Tentar ter um filho" (a partir dos 18): dá felicidade e, sem proteção, pode vir um bebê.']},
   {v:'1.6.2',d:'14/10/2026',t:'Tela de atualização',itens:['Quando o app se atualiza, aparece um anel de progresso colorido com a música do jogo, notinhas subindo e dicas.','Ao terminar, o jogo abre sozinho na versão nova.']},
