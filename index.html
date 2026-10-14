@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610140518'</script>
+<title>NewLife</title><script>window.NL_VER='2610140532'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -3625,6 +3625,11 @@ function interact(p,k,extra){
     case 'casar': { const [c,prenup]=extra; if(!canPay(c)) return 'Não tenho dinheiro para essa festa.'; m.money-=c; if(prenup){ S.flags['prenup'+p.id]=1; if(R.chance(.3)){ p.bond=clamp(p.bond-25); return `${nm} se ofendeu com o pacto antenupcial e adiou o casamento.`; } } p.rel='conjuge'; p.yrs=0; cnt('marriages'); st('happy',20); S.flags.movedOut=1; log(`Casei com ${fullName(p)}!`,'good'); return `Casei com ${nm}! ${c>30000?'A festa foi inesquecível.':''}`; }
     case 'terminar': p.rel='ex'; st('happy',-8); log(`Terminei com ${nm}.`); return `Terminei com ${nm}.`;
     case 'divorcio': divorce(p,false); return `Me divorciei de ${nm}.`;
+    case 'amor': { if(m.age<18||p.age<18) return 'Isso é coisa de adulto.'; if(tired) return `${nm} e eu já aproveitamos bastante este ano.`; const prot=!!extra; cnt('amor'); p.bond=clamp(p.bond+R.int(5,12)); st('happy',R.int(6,12)); primeiraVez(fullName(p));
+      let t=R.pick([`Uma noite só nossa, com ${nm}. Acordei sorrindo.`,`Desligamos o celular e o mundo lá fora. ${nm} riu de mim depois, de um jeito bom.`,`Foi intenso. ${nm} disse que eu sou a melhor parte do dia dele${p.gender==='F'?'a':''}.`.replace('dia delea','dia dela'),`Velas, música e ${nm}. Felicidade em estado puro.`]);
+      if(m.gender!==p.gender&&!S.births.length){ const fem=m.gender==='F'?m:p, fa=fem===m?m.age:p.age; const base=clamp((fem===m?m.fert:60)-(fa>35?(fa-35)*5:0),0,90)/100; const ch=prot?base*.03:base*.55;
+        if(fa<=50&&R.chance(ch)){ S.births.push({with:p.id}); t+=prot?' Semanas depois, a surpresa: a proteção falhou. Vem um bebê aí!':' Semanas depois, o teste deu positivo. Vem um bebê aí!'; } }
+      return t; }
     case 'noite': { if(tired) return `${nm} e eu já tivemos nossas noites este ano.`; p.bond=clamp(p.bond+R.int(5,12)); st('happy',R.int(4,9)); primeiraVez(fullName(p)); if(m.gender!==p.gender&&!S.births.length&&m.age<=50&&p.age<=50&&R.chance(.05)){ S.births.push({with:p.id}); return `Passamos a noite juntos. Semanas depois, a surpresa: vem um bebê aí.`; } return R.pick([`Passamos a noite juntos. Acordei com ${nm} roubando o cobertor.`,`Jantar, vinho e a noite inteira só nossa.`,`Desliguei o celular. A noite foi só de ${nm} e minha.`]); }
     case 'filho': { if(m.age>=18&&p.age>=18) primeiraVez(fullName(p)); if(use('tryKid')>2) return 'Já tentamos bastante este ano.'; const fem=m.gender==='F'?m:p; const fa=fem===m?m.age:p.age; if(m.gender===p.gender) return 'Para termos filhos juntos, precisamos adotar.'; const pr=clamp((fem===m?m.fert:60)-(fa>35?(fa-35)*5:0),0,90)/100*.6; if(S.births.length) return 'Já tem um bebê a caminho!'; if(R.chance(pr)){ S.births.push({with:p.id}); return 'Deu positivo! O bebê nasce no ano que vem.'; } return 'Ainda não foi desta vez.'; }
     case 'viagem': { const c=extra; if(!canPay(c)) return 'Não temos dinheiro para isso.'; m.money-=c; p.bond=clamp(p.bond+R.int(8,18)); st('happy',R.int(6,12)); cnt('trips'); return `Viajei com ${nm} para ${R.pick(TRIPS)}.`; }
@@ -4487,9 +4492,8 @@ V.person=p=>{
   A('flertar','Flertar',null,canFlirt);
   A('reatar','Tentar voltar',null,rel==='ex');
   if(love){
-    A('noite','Passar a noite juntos',null,a>=18&&p.age>=18);
+    if(a>=18&&p.age>=18) it.push({ic:'❤️‍🔥',l:'Fazer amor',s:'Felicidade · sem proteção pode vir um bebê',on:()=>modal({t:`Com ${p.first}`,x:'Como vai ser?',ch:[{l:'Com proteção',fn:()=>{ const r=interact(p,'amor',true); log(r); MQ.unshift({t:p.first,x:r}); }},{l:'Sem proteção',fn:()=>{ const r=interact(p,'amor',false); log(r); MQ.unshift({t:p.first,x:r}); }},{l:'Hoje não',cls:'alt'}]})});
     A('viagem','Viajar juntos',5000,a>=18,fmt(5000));
-    A('filho','Tentar ter um filho',null,a>=16&&a<=55&&p.age<=55);
     if(rel==='namoro'&&a>=16) it.push({l:'Pedir em casamento',on:()=>modal({t:'Qual anel?',ch:[[500,'Anel simples'],[5000,'Anel de ouro'],[40000,'Diamante enorme']].map(([c,l])=>({l:`${l} (${fmt(c)})`,fn:()=>{ const r=interact(p,'pedido',[c]); log(r); MQ.unshift({t:p.first,x:r}); }})).concat([{l:'Cancelar',cls:'alt'}])})});
     if(rel==='noivo') it.push({l:'Marcar o casamento',on:()=>modal({t:'Casamento',x:'Que tipo de cerimônia?',ch:[[800,'Só no cartório'],[25000,'Festa para os íntimos'],[150000,'Festão com 500 convidados']].flatMap(([c,l])=>[{l:`${l} (${fmt(c)})`,fn:()=>{ const r=interact(p,'casar',[c,false]); log(r); MQ.unshift({t:'Casamento',x:r}); }}]).concat([{l:'Com pacto antenupcial (protege meu dinheiro)',fn:()=>{ const r=interact(p,'casar',[800,true]); log(r); MQ.unshift({t:'Casamento',x:r}); }},{l:'Cancelar',cls:'alt'}])})});
     if(rel!=='conjuge') A('terminar','Terminar');
@@ -5587,7 +5591,7 @@ function casoPasso(c,k,i){ if(c.passos<=0||c.fim) return; c.passos--; const s=c.
 function casoAcusar(c,i){ const m=S.me, s=c.sus[i], j=m.job; c.fim=true; cnt('casos');
   if(s.culp){ m.c.casosOk=(m.c.casosOk||0)+1; if(j){ j.perf=clamp(j.perf+15); if(R.chance(.3)&&j.lvl<4){ j.lvl++; log(`Promovid${oa()} a ${jobTitle(j).toLowerCase()} depois de resolver um caso.`,'good'); } } m.fame=clamp(m.fame+2); m.karma=clamp(m.karma+3); st('happy',10);
     log(`Resolvi o caso: ${c.tp[0].toLowerCase()} de ${c.vit.n}. ${s.n} foi pres${s.g==='F'?'a':'o'}.`,'good'); return `${s.first} confessou na sala de interrogatório. Caso encerrado. A delegacia inteira aplaudiu.`; }
-  if(j) j.perf=clamp(j.perf-18); m.karma=clamp(m.karma-8); st('happy',-10); const real=c.sus.find(x=>x.culp);
+  m.c.casoErr=(m.c.casoErr||0)+1; if(j) j.perf=clamp(j.perf-18); m.karma=clamp(m.karma-8); st('happy',-10); const real=c.sus.find(x=>x.culp);
   log(`Errei no caso de ${c.vit.n}: ${s.n} foi pres${s.g==='F'?'a':'o'} injustamente.`,'bad');
   if(R.chance(.25)&&j){ return `${s.first} era inocente. Meses depois, ${real.first} foi pego por outro crime e confessou tudo. Fui afastad${oa()} do cargo. `+(endJob(),'Perdi o distintivo.'); }
   return `${s.first} foi pres${s.g==='F'?'a':'o'}. Mas eu tenho uma sensação ruim. ${R.chance(.5)?`Hoje vi ${real.first} sorrindo na rua.`:'O caso não fecha na minha cabeça.'}`; }
@@ -5632,7 +5636,7 @@ function revAcao(k){ const m=S.me, r=rev(); if(!r) return ''; if(use('rev_'+k)>2
   revFix(r); return t; }
 function revChance(r){ return Math.max(.03,Math.min(.9,r.apoio/250+r.mil/160+r.armas/300+(r.membros>500?.08:0)-.1)); }
 function revGolpe(){ const m=S.me, r=rev(); if(!r) return ''; const p=revChance(r); m.c.golpe=(m.c.golpe||0)+1;
-  if(R.chance(p)){ if(m.job) endJob(); m.office={id:'pres',yrs:0,appr:R.int(30,60),dit:1}; cnt('office_pres'); cnt('pres'); m.fame=clamp(m.fame+70); m.rev=null; st('happy',20);
+  if(R.chance(p)){ if(m.job) endJob(); m.office={id:'pres',yrs:0,appr:R.int(30,60),dit:1}; m.c.golpeOk=1; cnt('office_pres'); cnt('pres'); m.fame=clamp(m.fame+70); m.rev=null; st('happy',20);
     log(`Derrubei o governo. Agora sou ${m.gender==='F'?'a líder suprema':'o líder supremo'} do país.`,'good'); return `Tanques nas ruas, o palácio cercado, o presidente fugindo de helicóptero. Às 6 da manhã, falei em rede nacional: o país agora é meu.`; }
   const n=R.f(); m.rev=null; m.karma=clamp(m.karma-5);
   if(n<.2){ die('fuzilad'+oa()+' depois de um golpe de Estado fracassado'); return 'O golpe fracassou. O tribunal militar foi rápido.'; }
@@ -7871,8 +7875,11 @@ function romItems(c){ const sc=S.scen, it=[], rm=ROM[sc.id]||ROM.zumbi, once=k=>
   if(!c.par&&!other) it.push({ic:'💞',l:'Pedir em namoro',s:'Precisa de paixão',dis:(c.am||0)<35||once('n'),why:(c.am||0)<35?`Ainda é cedo. A paixão de ${c.first} está baixa.`:'Já pedi hoje.',on:()=>scAct(()=>{ sc.done['r'+c.id+'n']=1; if(pct(.25+(c.am||0)/110)){ const x=romStart(c); scStat('san',10); return `${c.first} disse sim! Estamos namorando.${x}`; } romAm(c,-8); scStat('san',-4); return `${c.first} disse que gosta de mim, mas não quer nada sério agora.`; },c.first)});
   if(c.par==='namoro') it.push({ic:'💍',l:'Pedir em casamento',s:'Precisa de muita paixão',dis:(c.am||0)<65||sc.dia-(c.parD||0)<4||once('p'),why:(c.am||0)<65?'Ainda não estamos tão firmes.':sc.dia-(c.parD||0)<4?'Começamos a namorar há pouco tempo.':'Já pedi hoje.',on:()=>scAct(()=>{ sc.done['r'+c.id+'p']=1; if(pct(.3+(c.am||0)/120)){ c.par='noivo'; romAm(c,8); scStat('san',12); return `Ajoelhei. ${c.first} chorou e disse sim. Estamos noivos!`; } romAm(c,-10); return `${c.first} disse que ainda não está pront${o}.`; },'Pedido')});
   if(c.par==='noivo') it.push({ic:'💒',l:'Casar',s:'Cerimônia com todo o grupo',ap:1,dis:sc.ap<1,why:'Sem energia hoje.',on:()=>scAct(()=>{ if(!spend(null,1)) return 'Sem energia.'; c.par='casado'; romAm(c,15); scStat('san',18); crew().forEach(x=>x.lv=Math.min(100,x.lv+6)); return `Casamos ${rm.casa}. Por um dia inteiro, o mundo lá fora não existiu.`; },'Casamento')});
-  if(c.par&&S.me.age>=18&&c.age>=18) it.push({ic:'🌙',l:'Passar a noite juntos',s:'Paixão e sanidade',dis:once('t'),why:'Hoje não.',on:()=>scAct(()=>{ sc.done['r'+c.id+'t']=1; romAm(c,rnd(6,12)); scStat('san',rnd(5,9)); primeiraVez(`${c.first} ${c.last}`); return R.pick([`Passamos a noite juntos, longe de tudo. ${ROM[sc.id]&&sc.id==='zumbi'?'Nem os gemidos lá fora atrapalharam.':'O mundo podia esperar.'}`,`Uma noite só nossa. Acordei com ${c.first} sorrindo para mim.`]); },c.first)});
-  if(c.par&&romCanBaby(c)&&!sc.grav) it.push({ic:'👶',l:'Tentar ter um filho',s:'Um bebê no meio de tudo isso?',dis:once('b')||(c.am||0)<50,why:(c.am||0)<50?'Precisamos estar mais firmes antes.':'Hoje não.',on:()=>scAct(()=>{ sc.done['r'+c.id+'b']=1; return romGrav(c)||'Não deu.'; },c.first)});
+  if(c.par&&S.me.age>=18&&c.age>=18) it.push({ic:'❤️‍🔥',l:'Fazer amor',s:romCanBaby(c)&&!sc.grav?'Paixão e sanidade · sem proteção pode vir um bebê':'Paixão e sanidade',dis:once('t'),why:'Hoje não.',on:()=>{ const vai=prot=>scAct(()=>{ sc.done['r'+c.id+'t']=1; romAm(c,rnd(6,12)); scStat('san',rnd(5,9)); cnt('amor'); primeiraVez(`${c.first} ${c.last}`);
+      let t=R.pick([`Uma noite só nossa, longe de tudo. ${sc.id==='zumbi'?'Nem os gemidos lá fora atrapalharam.':'O mundo podia esperar.'}`,`Acordei com ${c.first} sorrindo para mim.`,`Por algumas horas, só existia ${c.first}.`]);
+      if(romCanBaby(c)&&!sc.grav&&R.chance(prot?.03:.35)){ sc.grav={pid:c.id,due:sc.dia+(sc.id==='heroi'?1:rnd(5,8))}; t+=S.me.gender==='F'?' Dias depois, o enjoo: estou grávida!':` Dias depois, ${c.first} me contou: vem um bebê aí!`; }
+      return t; },c.first);
+    if(!romCanBaby(c)||sc.grav) return vai(true); modal({t:`Com ${c.first}`,x:'Como vai ser?',ch:[{l:'Com proteção',fn:()=>vai(true)},{l:'Sem proteção',fn:()=>vai(false)},{l:'Hoje não',cls:'alt'}]}); }});
   if(c.par&&!romCanBaby(c)&&c.gender===S.me.gender&&!sc.adot) it.push({ic:'🧸',l:'Adotar uma criança órfã',s:'Uma criança perdida no caminho',dis:(c.am||0)<50||sc.id==='marte'||sc.id==='ilha',why:sc.id==='marte'||sc.id==='ilha'?'Não tem crianças aqui.':'Precisamos estar mais firmes antes.',on:()=>scAct(()=>{ sc.adot=1; const k=mkCrew({age:rnd(4,10),last:S.me.last}); k.bebe=1; k.filho=1; k.lv=100; k.arma=null; k.race=k.gender==='F'?'Minha filha':'Meu filho'; cnt('kids'); return `Encontramos ${k.first}, de ${k.age} anos, sozinh${oaG(k.gender)}. Agora tem dois pais${c.gender==='F'?' (duas mães, no caso)':''} e um lugar no grupo.`; },'Adoção')});
   if(c.par) it.push({ic:'💔',l:'Terminar',tone:'bad',on:()=>confirmBox('Terminar?',`${c.first} vai ficar arrasad${o}.`,'Terminar',()=>{ romEnd(c); scStat('san',-6); scLog(`Terminei com ${c.first}.`,'warn'); if(R.chance(.3)) crewLeave(c,`${c.first} juntou as coisas e foi embora.`); UI.back(); after(); })});
   return it; }
@@ -8202,7 +8209,7 @@ interact=(o=>function(p,k,extra){ const was=p&&p.rel; const r=o.apply(this,argum
 // ---------- passar um tempo com todos ----------
 function tempoTodos(){ const m=S.me; if(use('tempoTodos')>1) return 'Já reuni todo mundo este ano.';
   const ps=people('mae','pai','irmao','avo','namoro','noivo','conjuge','filho','adot','neto','amigo').filter(p=>p.age>=1||p.rel!=='neto'); if(!ps.length) return 'Não tenho família nem amigos por perto.';
-  ps.forEach(p=>{ p.bond=clamp(p.bond+R.int(2,7)); p.yr.tempo=(p.yr.tempo||0)+1; }); st('happy',R.int(4,9)); cnt('actions');
+  ps.forEach(p=>{ p.bond=clamp(p.bond+R.int(2,7)); p.yr.tempo=(p.yr.tempo||0)+1; }); st('happy',R.int(4,9)); cnt('actions'); cnt('tempoTodos');
   const fam=ps.filter(p=>p.rel!=='amigo').length, am=ps.length-fam;
   return `${R.pick(['Fiz um churrasco no quintal','Organizei um almoço de domingo','Juntei todo mundo para um piquenique no parque','Fizemos uma noite de jogos de tabuleiro','Alugamos um sítio para o fim de semana'])} com ${fam?fam+(fam>1?' pessoas da família':' pessoa da família'):''}${fam&&am?' e ':''}${am?am+(am>1?' amigos':' amigo'):''}. ${R.pick(['Rimos até doer a barriga.','Teve briga por causa de política, mas acabou em abraço.','Foi o melhor dia do ano.','Alguém chorou de emoção no brinde.'])}`; }
 V.relations=(o=>()=>{ const r=o(); if(!r||!r.items||(S.scen&&S.scen.v===SC_V)) return r; if(S.me.prison) return r; r.items.splice(1,0,{ic:'🫂',l:'Passar um tempo com todos',s:'Família e amigos juntos · todo mundo fica mais próximo',on:()=>act(tempoTodos,'Família e amigos')}); return r; })(V.relations);
@@ -11559,6 +11566,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.7',d:'14/10/2026',t:'Conquistas e selos novos',itens:['73 conquistas, muitas zoeiras e várias secretas, que valem para todas as vidas. Veja em Menu → Conquistas.','Selos novos no fim da vida: Ditador, Filho da noite, Profeta, Detetive, Viajante de mundos, Fogo no rabo e Lobo solitário.','"Fazer amor" substitui "Tentar ter um filho" (a partir dos 18): dá felicidade e, sem proteção, pode vir um bebê.']},
   {v:'1.6.2',d:'14/10/2026',t:'Tela de atualização',itens:['Quando o app se atualiza, aparece um anel de progresso colorido com a música do jogo, notinhas subindo e dicas.','Ao terminar, o jogo abre sozinho na versão nova.']},
   {v:'1.6.1',d:'14/10/2026',t:'Novidades na tela',itens:['Depois de cada atualização, este quadro mostra o que mudou (uma vez só).','Menu → Novidades mostra o histórico de versões quando você quiser.']},
   {v:'1.6',d:'14/10/2026',t:'Atualização automática',itens:['O app procura uma versão nova sempre que abre e se atualiza sozinho, sem reinstalar.','Sem internet, abre a última versão baixada. O progresso nunca se perde.','A versão atual aparece no fim do menu.']},
@@ -11650,6 +11658,126 @@ async function nlAppUpdateCheck(){ if(!nlIsApp()||/teste|aventura|demo|qualidade
 window.addEventListener('load',()=>setTimeout(()=>{ nlAppUpdateCheck().catch(()=>{}); },700));
 // demonstração para conferir o visual (#demo-atualizando)
 if(/demo-atualizando/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ const u=updOverlay(NLV()||'2610141200'); let p=0; const t=setInterval(()=>{ p+=.07; u.set(Math.min(.62,p)); if(p>=.62) clearInterval(t); },120); },900));
+
+// ===== Conquistas: desbloqueadas na hora, guardadas para sempre (entre todas as vidas) =====
+// s: secreta (aparece como ??? até desbloquear)
+const C_=m=>m.c||{}, nPeople=(...r)=>people(...r).length;
+const CONQ=[
+  // começo e vida
+  {id:'nasceu',ic:'👶',n:'Bem-vindo ao mundo',d:'Começar uma vida.',ok:m=>true},
+  {id:'dez',ic:'🔟',n:'Dois dígitos',d:'Fazer 10 anos.',ok:m=>m.age>=10},
+  {id:'maior',ic:'🎂',n:'De maior',d:'Fazer 18 anos.',ok:m=>m.age>=18},
+  {id:'cinquenta',ic:'🧓',n:'Enta',d:'Fazer 50 anos.',ok:m=>m.age>=50},
+  {id:'cem',ic:'💯',n:'Fóssil vivo',d:'Fazer 100 anos.',ok:m=>m.age>=100},
+  {id:'speedrun',ic:'⏱️',n:'Speedrun da vida',d:'Morrer antes dos 18.',s:1,ok:(m,f)=>f.dead&&m.age<18},
+  {id:'ragequit',ic:'🎮',n:'Rage quit',d:'Desistir de uma vida.',s:1,ok:m=>!!C_(m).gaveUp},
+  {id:'vidas10',ic:'♻️',n:'Reencarnação profissional',d:'Viver 10 vidas.',ok:()=>(META.lives||0)>=10},
+  // dinheiro
+  {id:'mil',ic:'💵',n:'Primeiro milhão',d:'Ter $1 milhão na conta.',ok:m=>m.money>=1e6},
+  {id:'bi',ic:'🤑',n:'Tio Patinhas',d:'Ter $1 bilhão na conta.',ok:m=>m.money>=1e9},
+  {id:'vermelho',ic:'📉',n:'Nome no SPC',d:'Ficar devendo mais de $100.000.',s:1,ok:m=>m.money<=-100000},
+  {id:'loteria',ic:'🎟️',n:'Bilhete premiado',d:'Ganhar na loteria.',ok:m=>(C_(m).lotto||0)>0},
+  {id:'apostador',ic:'🎰',n:'A casa sempre ganha',d:'Apostar 50 vezes.',ok:m=>(C_(m).bets||0)>=50},
+  {id:'empresa',ic:'🦄',n:'Unicórnio',d:'Ter uma empresa de $100 milhões.',ok:m=>(C_(m).bizMax||0)>=1e8||(m.biz&&m.biz.value>=1e8)},
+  // amor e família
+  {id:'namoro',ic:'💘',n:'Contatinho',d:'Começar um namoro.',ok:m=>(C_(m).partners||0)>=1},
+  {id:'casou',ic:'💍',n:'Sim, aceito',d:'Casar.',ok:m=>(C_(m).marriages||0)>=1},
+  {id:'casou3',ic:'🔁',n:'Colecionador de alianças',d:'Casar três vezes.',ok:m=>(C_(m).marriages||0)>=3},
+  {id:'ricardao',ic:'🫣',n:'Pego no flagra',d:'Ser descoberto traindo.',s:1,ok:m=>(C_(m).cheats||0)>=1},
+  {id:'ex5',ic:'💔',n:'Coração de vidro',d:'Ter cinco ex ao mesmo tempo na lista.',ok:m=>nPeople('ex')>=5},
+  {id:'filho',ic:'🍼',n:'Fraldas e olheiras',d:'Ter um filho.',ok:m=>(C_(m).kids||0)>=1},
+  {id:'time',ic:'⚽',n:'Time de futebol',d:'Ter 11 filhos.',ok:m=>(C_(m).kids||0)>=11},
+  {id:'avo',ic:'👵',n:'Vô coruja',d:'Ter um neto.',ok:m=>nPeople('neto')>=1},
+  {id:'viuvo',ic:'🖤',n:'Até que a morte nos separe',d:'Ficar viúvo.',ok:m=>(C_(m).widow||0)>=1},
+  {id:'divorcio',ic:'📜',n:'Metade de tudo',d:'Se divorciar.',ok:m=>(C_(m).divorces||0)>=1},
+  {id:'amorsemfim',ic:'🔥',n:'Fogo no parquinho',d:'Fazer amor 20 vezes.',s:1,ok:m=>(C_(m).amor||0)>=20},
+  {id:'pets',ic:'🦜',n:'Arca de Noé',d:'Ter cinco bichos ao mesmo tempo.',ok:m=>nPeople('pet')>=5},
+  {id:'amigos',ic:'🎉',n:'Popular',d:'Ter dez amigos.',ok:m=>nPeople('amigo')>=10},
+  {id:'solitario',ic:'🐺',n:'Lobo solitário',d:'Chegar aos 40 sem nenhum amigo.',s:1,ok:m=>m.age>=40&&nPeople('amigo')===0},
+  {id:'todos',ic:'🫂',n:'Domingão em família',d:'Passar um tempo com todos.',ok:m=>!!(m.yr&&m.yr.tempoTodos)||(C_(m).tempoTodos||0)>0},
+  // corpo e mente
+  {id:'genio',ic:'🧠',n:'Cérebro galáctico',d:'Inteligência em 100%.',ok:m=>m.smarts>=100},
+  {id:'lindo',ic:'✨',n:'Capa de revista',d:'Aparência em 100%.',ok:m=>m.looks>=100},
+  {id:'feio',ic:'🥔',n:'Beleza interior',d:'Aparência abaixo de 5%.',s:1,ok:m=>m.age>=14&&m.looks<=5},
+  {id:'feliz',ic:'😁',n:'Good vibes',d:'Felicidade em 100%.',ok:m=>m.happy>=100},
+  {id:'triste',ic:'🌧️',n:'Fundo do poço',d:'Felicidade em 0%.',s:1,ok:m=>m.happy<=0},
+  {id:'lutador',ic:'🥊',n:'Bruce Lee de bairro',d:'Luta em 95%.',ok:m=>(m.fight||0)>=95},
+  {id:'pinguco',ic:'🍺',n:'Pinguço oficial',d:'Vício em álcool acima de 90%.',s:1,ok:m=>(m.add&&m.add.alcool||0)>=90},
+  {id:'plastica',ic:'🎭',n:'Mais plástico que boneca',d:'Fazer cinco cirurgias plásticas.',ok:m=>(C_(m).surg||0)>=5},
+  {id:'doutor',ic:'🎓',n:'Doutor em tudo',d:'Terminar um doutorado.',ok:m=>(m.edu.deg||[]).includes('post:dout')},
+  {id:'repetente',ic:'📚',n:'Repetente com orgulho',d:'Repetir de ano.',s:1,ok:m=>(C_(m).repetiu||0)>=1},
+  // trabalho e poder
+  {id:'emprego',ic:'💼',n:'Carteira assinada',d:'Arrumar o primeiro emprego.',ok:m=>!!m.job||(m.hist||[]).length>0},
+  {id:'nemnem',ic:'🛋️',n:'Nem-nem profissional',d:'Chegar aos 35 sem nunca ter trabalhado.',s:1,ok:m=>m.age>=35&&!m.job&&!(m.hist||[]).length},
+  {id:'policial',ic:'🚓',n:'Lei e ordem',d:'Entrar para a polícia.',ok:m=>!!C_(m).cop},
+  {id:'sherlock',ic:'🕵️',n:'Elementar',d:'Resolver cinco casos.',ok:m=>(C_(m).casosOk||0)>=5},
+  {id:'mordomo',ic:'🤦',n:'Prendi o mordomo errado',d:'Acusar um inocente numa investigação.',s:1,ok:m=>(C_(m).casoErr||0)>=1},
+  {id:'presidente',ic:'🏛️',n:'Excelentíssimo',d:'Virar presidente.',ok:m=>(C_(m).pres||0)>=1},
+  {id:'ditador',ic:'🪖',n:'Quem manda sou eu',d:'Dar um golpe de Estado e tomar o poder.',s:1,ok:m=>!!C_(m).golpeOk},
+  {id:'rei',ic:'👑',n:'Vossa Majestade',d:'Subir ao trono.',ok:m=>!!C_(m).reigned},
+  {id:'famoso',ic:'🌟',n:'Celebridade',d:'Fama acima de 90%.',ok:m=>m.fame>=90},
+  // crime
+  {id:'crime',ic:'🦹',n:'Primeiro delito',d:'Cometer um crime.',ok:m=>(C_(m).crimes||0)>=1},
+  {id:'preso',ic:'⛓️',n:'Sol quadrado',d:'Ser preso.',ok:m=>!!m.prison||(m.rec&&m.rec.conv>0)},
+  {id:'fuga',ic:'🏃',n:'Fuga de Alcatraz',d:'Fugir da prisão.',ok:m=>(C_(m).escapes||0)>=1},
+  {id:'assassino',ic:'🔪',n:'Mãos sujas',d:'Matar alguém.',s:1,ok:m=>(C_(m).kills||0)>=1},
+  {id:'serial',ic:'💀',n:'Ficha corrida',d:'Matar dez pessoas.',s:1,ok:m=>(C_(m).kills||0)>=10},
+  // seita
+  {id:'seita',ic:'🛐',n:'Pastor de si mesmo',d:'Fundar um grupo religioso.',ok:m=>!!m.seita&&!m.seita.membro},
+  {id:'profeta',ic:'📿',n:'Profeta do zap',d:'Ter 1.000 fiéis.',ok:m=>!!m.seita&&!m.seita.membro&&m.seita.fieis>=1000},
+  {id:'dominio',ic:'🗺️',n:'Teocracia',d:'Dominar o país com o seu grupo.',s:1,ok:m=>!!m.seita&&(m.seita.dom||[]).length>=4},
+  {id:'martir',ic:'🔥',n:'Pregou demais',d:'Morrer pelas mãos dos próprios seguidores.',s:1,ok:(m,f)=>f.dead&&/seguidores/.test(m.cause||'')},
+  // paranormal
+  {id:'fantasma',ic:'👻',n:'Quem você vai chamar?',d:'Juntar 10 provas do sobrenatural.',ok:m=>!!m.para&&(m.para.prova>=10||m.para.visitas>=10)},
+  {id:'vampiro',ic:'🧛',n:'Pescoço é a nova picanha',d:'Virar vampiro.',s:1,ok:m=>m.criatura==='vampiro'},
+  {id:'lobisomem',ic:'🐺',n:'Auuuuu',d:'Virar lobisomem.',s:1,ok:m=>m.criatura==='lobisomem'},
+  // mundos alternativos
+  {id:'zumbi',ic:'🧟',n:'The Walking Eu',d:'Sobreviver 30 dias no apocalipse zumbi.',ok:m=>(META.zrec||0)>=30||!!(S.scen&&S.scen.id==='zumbi'&&S.scen.dia>=30)},
+  {id:'isekai',ic:'🚚',n:'Caminhão-kun mandou bem',d:'Derrotar o Rei Demônio.',ok:m=>(C_(m).scenWin_isekai||0)>=1},
+  {id:'ilha',ic:'🏐',n:'Wilsooon!',d:'Ser resgatado da ilha deserta.',ok:m=>(C_(m).scenWin_ilha||0)>=1},
+  {id:'marte',ic:'🥔',n:'Fazendeiro de Marte',d:'Voltar de Marte.',ok:m=>(C_(m).scenWin_marte||0)>=1},
+  {id:'heroi',ic:'🦸',n:'Nem todo herói usa capa',d:'Pendurar a capa de super-herói.',ok:m=>(C_(m).scenWin_heroi||0)>=1},
+  {id:'casal_mundo',ic:'💞',n:'Amor de outro mundo',d:'Trazer um par de um mundo alternativo para a vida real.',s:1,ok:m=>!!C_(m).parMundo},
+  // zoeira pura
+  {id:'deus',ic:'⚡',n:'Modo Deus',d:'Usar o Modo Deus.',s:1,ok:m=>(C_(m).god||0)>=1},
+  {id:'tempo',ic:'⏳',n:'Marty McFly',d:'Usar a máquina do tempo.',s:1,ok:m=>(C_(m).timeTravel||0)>=1},
+  {id:'atestado',ic:'🤒',n:'Atestado de mentirinha',d:'Comprar um atestado falso.',s:1,ok:m=>(C_(m).fakeSick||0)>=1},
+  {id:'viajante',ic:'✈️',n:'Milhas infinitas',d:'Viajar 20 vezes.',ok:m=>(C_(m).trips||0)>=20},
+  {id:'emigrou',ic:'🌍',n:'Cidadão do mundo',d:'Emigrar três vezes.',ok:m=>(C_(m).emig||0)>=3},
+  {id:'velhinho_rico',ic:'🧓💰',n:'Herança disputada',d:'Ter mais de 80 anos e mais de $10 milhões.',ok:m=>m.age>=80&&m.money>=1e7},
+  {id:'bebe_feliz',ic:'👼',n:'Bebê mais feliz do mundo',d:'Ter felicidade em 100% antes dos 5 anos.',s:1,ok:m=>m.age<5&&m.happy>=100},
+];
+const conqGot=()=>META.conq||(META.conq={});
+function conqCheck(f={}){ if(!S||!S.me||/teste|aventura|qualidade/.test(location.hash)) return; const m=S.me, got=conqGot(), novas=[];
+  for(const c of CONQ){ if(got[c.id]) continue; let ok=false; try{ ok=!!c.ok(m,f); }catch(e){} if(ok){ got[c.id]=Date.now(); novas.push(c); } }
+  if(!novas.length) return; try{ save(); }catch(e){}
+  try{ sfx('level'); }catch(e){}
+  MQ.push({k:'Conquista',t:novas.length>1?`🏆 ${novas.length} conquistas desbloqueadas!`:`🏆 ${novas[0].n}`,html:`<div style="text-align:left;margin-top:6px">${novas.slice(0,6).map(c=>`<p style="margin:6px 0"><span style="font-size:20px">${c.ic}</span> <b>${esc(c.n)}</b><br><span style="color:var(--muted);font-size:13px">${esc(c.d)}</span></p>`).join('')}${novas.length>6?`<p style="font-size:13px">…e mais ${novas.length-6}. Veja em Menu → Conquistas.</p>`:''}<p style="color:var(--muted);font-size:12px;margin-top:8px">${Object.keys(got).length} de ${CONQ.length} conquistas</p></div>`}); }
+after=(o=>function(){ try{ conqCheck(); }catch(e){} return o.apply(this,arguments); })(after);
+die=(o=>function(){ const r=o.apply(this,arguments); try{ conqCheck({dead:1}); }catch(e){} return r; })(die);
+V.conquistas=()=>{ const got=conqGot(), it=[{html:`<div class="card">${bar('Conquistas',Math.round(Object.keys(got).length/CONQ.length*100))}<p style="color:var(--muted);font-size:13px">${Object.keys(got).length} de ${CONQ.length}. Valem para todas as vidas. As secretas aparecem como ??? até você conseguir.</p></div>`}];
+  const yes=CONQ.filter(c=>got[c.id]), no=CONQ.filter(c=>!got[c.id]);
+  if(yes.length){ it.push({sec:'Desbloqueadas'}); yes.forEach(c=>it.push({ic:c.ic,l:c.n,s:c.d,r:'✓',tone:'good'})); }
+  if(no.length){ it.push({sec:'Bloqueadas'}); no.forEach(c=>it.push(c.s?{ic:'❔',l:'???',s:'Conquista secreta',dis:true,why:'Segredo. Continue vivendo (ou morrendo) para descobrir.'}:{ic:c.ic,l:c.n,s:c.d,dis:true,why:c.d})); }
+  return {title:'Conquistas',items:it}; };
+V.menu=(o=>()=>{ const r=o(); if(r&&r.items){ const i=r.items.findIndex(x=>x.l==='Meus selos'); r.items.splice(i>=0?i+1:r.items.length,0,{ic:'🏆',l:'Conquistas',s:`${Object.keys(conqGot()).length} de ${CONQ.length}`,on:()=>UI.push(V.conquistas)}); } return r; })(V.menu);
+// contadores que as conquistas usam
+scenEnd=(o=>function(win,txt){ const sc=S.scen; if(sc&&win){ cnt('scenWin_'+sc.id); if(crew().some(c=>c.par)) S.me.c.parMundo=1; } return o.apply(this,arguments); })(scenEnd);
+// ---------- selos novos (no fim da vida) ----------
+RIBBONS.splice(RIBBONS.findIndex(r=>r.id==='coroado')+1,0,
+  {id:'ditador',n:'Ditador',d:'Tomou o poder num golpe de Estado.'},
+  {id:'criatura',n:'Filho da noite',d:'Virou vampiro ou lobisomem.'},
+  {id:'profeta',n:'Profeta',d:'Liderou um grupo religioso com mais de 1.000 fiéis.'},
+  {id:'detetive',n:'Detetive',d:'Resolveu cinco casos ou mais na polícia.'},
+  {id:'multiverso',n:'Viajante de mundos',d:'Venceu dois modos fictícios diferentes ou mais.'},
+  {id:'galinha',n:'Fogo no rabo',d:'Fez amor mais de 50 vezes na vida.'},
+  {id:'lobo',n:'Lobo solitário',d:'Viveu mais de 60 anos sem nenhum amigo.'});
+computeRibbon=(o=>function(){ const m=S.me, c=m.c||{}; const wins=['zumbi','ilha','isekai','heroi','marte'].filter(k=>c['scenWin_'+k]).length;
+  const tests=[['desistente',!!c.gaveUp],['coroado',!!c.reigned],['ditador',!!c.golpeOk],['criatura',!!c.criatura],['profeta',(c.maxFieis||0)>=1000],['detetive',(c.casosOk||0)>=5],['multiverso',wins>=2],['galinha',(c.amor||0)>50],['lobo',m.age>60&&people('amigo').length===0]];
+  for(const [id,ok] of tests) if(ok) return id; return o.apply(this,arguments); })(computeRibbon);
+yearMoney=(o=>function(){ const r=o.apply(this,arguments); const s=S.me.seita; if(s&&!s.membro) S.me.c.maxFieis=Math.max(S.me.c.maxFieis||0,s.fieis); return r; })(yearMoney);
+if(/demo-conquistas/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ try{ MQ.length=0; const b=document.querySelector('#modalWrap'); if(b) b.hidden=true; modalOpen=false; UI.open(V.conquistas); }catch(e){} },3500));
+if(/demo-conqpop/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ try{ MQ.length=0; const b=document.querySelector('#modalWrap'); if(b) b.hidden=true; modalOpen=false; META.conq={}; S.me.age=Math.max(S.me.age,19); conqCheck(); pump(); }catch(e){ showErr(e); } },7000));
 
 // ===== Teste automático (abre com #teste no endereço) =====
 function selfTest(){
@@ -11789,6 +11917,11 @@ function selfTest(){
     m.age=30; m.edu.club=null; m.edu.cur=null; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); takeJob({id:'poli',co:'Polícia Civil',size:'grande',mul:1}); grpAuto(); sweepNow('trab');
     m.job={spc:'atleta',lvl:1,perf:50,yrs:0,co:'Clube Teste'}; m.office={id:'pref',yrs:0,appr:50}; m.biz={n:'Empresa T',sector:'Tecnologia',value:1e6,emp:20,yrs:1}; seitaFundar('igreja','T'); m.royal={house:'Teste',pop:50}; grpAuto(); sweepNow('outros');
     if(!WHO.clube()&&!WHO.func()) errs['membros: grupos não se formaram']=1; });
+  T('conquistas',()=>{ for(let k=0;k<6;k++){ newLife({}); const m=S.me; m.age=R.int(1,90); CONQ.forEach(c=>{ try{ c.ok(m,{dead:k%2}); }catch(e){ errs['conquista quebrada: '+c.id+': '+e.message]=1; } }); }
+    V.conquistas().items.map(rowHtml).join(''); if(new Set(CONQ.map(c=>c.id)).size!==CONQ.length) errs['conquista com id repetido']=1;
+    newLife({}); const m=S.me; m.age=25; const p=mkPerson({rel:'namoro',age:25,gender:m.gender==='F'?'M':'F',bond:70}); S.people.push(p); for(let i=0;i<3;i++){ m.yr={}; p.yr={}; const r=interact(p,'amor',i%2===0); if(typeof r!=='string'||/undefined/.test(r)) errs['fazer amor: '+r]=1; }
+    m.age=16; const q=mkPerson({rel:'namoro',age:16,bond:70}); S.people.push(q); interact(q,'amor',false); if(S.births.some(b=>b.with===q.id)) errs['fazer amor liberado para menor']=1; if(V.person(q).items.some(x=>x.l==='Fazer amor')) errs['opção de fazer amor para menor']=1;
+    newLife({}); S.me.age=70; m.c.gaveUp=1; computeRibbon(); });
   T('varreNovos',()=>{ const base=()=>{ newLife({}); const m=S.me; m.age=32; m.alive=true; m.prison=null; m.money=5e5; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); return m; };
     let m=base(); seitaFundar('igreja','Teste'); m.seita.fieis=8; m.seita.devo=30; sweepNow('seitaPeq'); m.seita.fieis=900; sweepNow('seitaMed'); m.seita.fieis=6000; m.seita.dom=['o bairro']; m.seita.tipo='apoc'; sweepNow('seitaGde');
     ['natureza','guru','igreja'].forEach(t=>{ m.seita.tipo=t; sweepNow('seita'+t); });
