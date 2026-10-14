@@ -1,7 +1,7 @@
 // ===== Modos fictícios (18+): aventuras contadas em dias, fora da vida normal =====
 // Enquanto a aventura dura, a vida real fica pausada: a tela vira a da aventura (local, grupo, mochila, ações e "próximo dia").
 // Cada dia tem 3 pontos de energia; cada ação e cada ponto de interesse só podem ser feitos uma vez por dia.
-// Perder (saúde ou sanidade a zero) não mata de verdade: você acorda e a vida continua. Vencer dá recompensas.
+// Não existe acordar: morrer num mundo alternativo é morrer de verdade. Vencer dá recompensas.
 const SC_V=2;
 const rnd=(a,b)=>R.int(a,b);
 const pct=p=>R.chance(Math.max(.04,Math.min(.96,p)));
@@ -152,7 +152,7 @@ const MARTE_POI={hab_cozinha:['Cozinha','🍳',['liof','pasta'],0],hab_ginasio:[
   cn_caverna:['Tubo de lava','🕳️',['agua'],.2,'ciencia'],cn_fossil:['Marcas fossilizadas','🦠',[],.15,'vida'],cl_gelo:['Gelo polar','❄️',['agua','agua','o2'],.2]};
 
 const SCEN={
-  zumbi:{n:'Pesadelo zumbi',ic:'🧟',d:'Lidere um comboio de sobreviventes até o Porto Seguro. Cada dia é um destino novo: explore, junte suprimentos, cuide do grupo e dos carros. Se a sanidade ou a saúde zerarem, você acorda.',
+  zumbi:{n:'Pesadelo zumbi',ic:'🧟',d:'Lidere um comboio de sobreviventes até o Porto Seguro. Cada dia é um destino novo: explore, junte suprimentos, cuide do grupo e dos carros. Se a saúde zerar, você morre de verdade.',
     intro:'O alarme não tocou. O que tocou foi a sirene da cidade inteira. Em uma semana, o mundo acabou. Agora você lidera um pequeno comboio rumo ao Porto Seguro, uma ilha que, dizem, ainda está livre.',
     day:'Dia',goalN:22,bag:0,tabs:['Local','Comboio','Próximo dia','Grupo','Ações'],tabIc:['📍','🚙','🌅','👥','⚡'],
     stats:[['san','Sanidade','🧠'],['hl','Saúde','❤️'],['fome','Fome','🍗',1],['moral','Moral do grupo','🤝']],
@@ -176,7 +176,7 @@ const SCEN={
       descanso:{ic:'😴',l:'Descansar',s:'Saúde e sanidade',ap:1,fn:sc=>{ scStat('hl',rnd(9,15)); scStat('san',rnd(4,7)); return 'Dormi no banco de trás com o cutelo no colo. Melhor que nada.'; }},
     },
     pow:null,
-    win:'Sobrevivi ao pesadelo zumbi',lose:'Acordei de um pesadelo zumbi',reward:(m,sc)=>{ m.fight=clamp(m.fight+5); st('happy',8); },
+    win:'Sobrevivi ao pesadelo zumbi',lose:'Saí do apocalipse zumbi',reward:(m,sc)=>{ m.fight=clamp(m.fight+5); st('happy',8); },
   },
   ilha:{n:'Sobrevivência na ilha',ic:'🏝️',d:'Seu avião caiu no oceano. Explore a ilha, junte comida e água, mantenha o fogo e a cabeça no lugar até o resgate chegar ou a jangada ficar pronta.',
     intro:'O avião caiu no mar. Você nadou até uma praia deserta, agarrado a uma mala que não era sua. Não tem ninguém. Só você, a areia e o barulho das ondas.',
@@ -200,7 +200,7 @@ const SCEN={
       descanso:{ic:'😴',l:'Deitar na rede e ver o pôr do sol',s:'Saúde e sanidade',fn:sc=>{ scStat('hl',rnd(4,8)); scStat('san',rnd(6,10)); return 'O céu ficou laranja, depois roxo. Por um instante, foi bonito estar aqui.'; }},
       falar:{ic:'🏐',l:'Conversar com a bola',s:'Ela é ótima ouvinte',min:sc=>!!sc.bola,why:'Não tenho com quem conversar… ainda.',fn:sc=>{ scStat('san',rnd(6,10)); return R.pick(['Contei para a bola sobre minha infância. Ela não julgou.','A bola concordou comigo sobre tudo. Que amiga.','Brigamos. Fiz as pazes com a bola antes de dormir.']); }},
     },
-    win:'Fui resgatad{o} da ilha',lose:'Acordei de um sonho na ilha deserta',reward:(m,sc)=>{ m.money+=40000; m.fame=clamp(m.fame+10); st('happy',10); },
+    win:'Fui resgatad{o} da ilha',lose:'Saí da ilha deserta',reward:(m,sc)=>{ m.money+=40000; m.fame=clamp(m.fame+10); st('happy',10); },
   },
   isekai:{n:'Isekai',ic:'⚔️',d:'Um caminhão, uma luz branca, e você acorda em Eldoria. Suba de nível, monte um grupo e atravesse o reino até o Castelo do Rei Demônio. Atenção: em Eldoria não se acorda. Se morrer lá, morre de verdade. A única volta é o portal.',
     intro:'Um caminhão desgovernado. Uma luz branca. Quando você abriu os olhos, estava num campo com dois sóis no céu. Uma janela flutuante apareceu: "Bem-vind{o} a Eldoria".',
@@ -222,7 +222,7 @@ const SCEN={
       acampar:{ic:'⛺',l:'Acampar e descansar',s:'Vida e ânimo',fn:sc=>{ scStat('hl',rnd(10,18)); scStat('san',5); return 'Fogueira, estrelas desconhecidas e o grupo roncando. Descansei.'; }},
       cozinhar:{ic:'🍲',l:'Cozinhar para o grupo',s:'Ânimo de todos',fn:sc=>{ crew().forEach(c=>c.lv=Math.min(100,c.lv+rnd(4,8))); scStat('san',5); scStat('fome',-10); return R.pick(['Fiz um ensopado de cogumelo que brilhava no escuro. Ninguém morreu.','Ensinei o grupo a fazer pastel. Viraram fãs.','Tentei fazer pizza num forno de anões. Ficou incrível.']); }},
     },
-    win:'Derrotei o Rei Demônio em Eldoria',lose:'Acordei no hospital depois do atropelamento',reward:(m,sc)=>{ m.fight=clamp(m.fight+12); st('smarts',6); m.money+=sc.ouro*60; st('happy',10); },
+    win:'Derrotei o Rei Demônio em Eldoria',lose:'Voltei de Eldoria',reward:(m,sc)=>{ m.fight=clamp(m.fight+12); st('smarts',6); m.money+=sc.ouro*60; st('happy',10); },
   },
   heroi:{n:'Superpoderes',ic:'🦸',d:'Um raio, um laboratório e um poder novo. Patrulhe a cidade, atenda ocorrências, proteja sua identidade e derrote seu arqui-inimigo.',
     intro:'Um raio atingiu o laboratório onde você estava. Você acordou no hospital e, ao tentar levantar, percebeu que algo em você tinha mudado.',
@@ -273,7 +273,7 @@ const SCEN={
       exerc:{ic:'🏋️',l:'Exercícios contra a gravidade baixa',s:'Saúde',fn:sc=>{ scStat('hl',rnd(6,10)); return 'Duas horas na esteira presa por elásticos. Meus ossos agradecem.'; }},
       estudar:{ic:'🔬',l:'Analisar amostras',s:'Pesquisa',fn:sc=>{ const v=rnd(4,8)+Math.round(S.me.smarts/20)+(hasRole('geo')?4:0); scStat('ciencia',v); return `Microscópio, poeira vermelha e paciência: pesquisa ${sc.ciencia}%.`; }},
     },
-    win:'Voltei de Marte',lose:'Acordei: Marte era só um sonho',reward:(m,sc)=>{ m.fame=clamp(m.fame+20); m.money+=20000+sc.ciencia*500; st('smarts',5); st('happy',10); },
+    win:'Voltei de Marte',lose:'Voltei de Marte antes da hora',reward:(m,sc)=>{ m.fame=clamp(m.fame+20); m.money+=20000+sc.ciencia*500; st('smarts',5); st('happy',10); },
   },
 };
 // ---------- detalhes de cada modo ----------
@@ -301,7 +301,7 @@ function zUpkeep(sc){ const m=S.me;
   // ataque de madrugada
   if(!sc.zb&&R.chance(.08+sc.loc.thr*.05-(sc.vig?.08:0))){ const f=scFight(sc.loc.thr,'O ataque de madrugada'); scLog(f.ok?'Zumbis atacaram de madrugada. A vigia segurou.':f.t,f.ok?'warn':'bad'); }
   sc.vig=0;
-  if(sc.inf){ sc.inf++; if(sc.inf>=5){ scenEnd(false,'A febre da mordida venceu. A última coisa que vi foi o grupo se afastando de mim, devagar.'); return; } scLog('A mordida está queimando.','bad'); }
+  if(sc.inf){ sc.inf++; if(sc.inf>=5){ S.scen=null; S.pending=S.pending.filter(e=>!(EVENTS[e.id]&&EVENTS[e.id].scen)); die('transformad'+oa()+' em zumbi depois de uma mordida'); UI.close(); return; } scLog('A mordida está queimando.','bad'); }
   if(sc.etapa>=20&&!sc.fim) { sc.fim=1; queue('z_final',{}); } }
 function ilhaPoi(sc,p){ const d=ILHA_POI[p.k]; let t='';
   if(R.chance(d[3])){ const r=R.pick(['Pisei num ouriço.','Uma cobra deu o bote na minha perna.','Escorreguei numa pedra lisa.','Um caranguejo enorme não gostou de mim.']); scHurt(rnd(5,12)); t+=r+' '; }
@@ -389,18 +389,19 @@ function scNextDay(){ const sc=S.scen, d=SM(), m=S.me; if(!sc) return;
   if((!hasF||sc.fome<60)&&!(sc.sede!=null&&sc.sede>=70)) scStat('hl',sc.id==='isekai'?5:3);
   d.upkeep(sc); if(!S.scen) return;
   sc.log[sc.log.length-1].pl=sc.loc.n; scLog(`${sc.loc.ic} ${sc.loc.n}${sc.id==='zumbi'?` · ameaça zumbi: ${THREAT[sc.loc.thr].toLowerCase()}`:''}`);
-  if(sc.dia>=(d.maxDays||60)&&S.scen) { const w=d.capWin?d.capWin(sc):true; scenEnd(w,w?'Os dias viraram semanas, as semanas viraram rotina. Um dia, simplesmente acabou.':'O tempo passou e a missão ficou pela metade. Acordei com a sensação de que faltou alguma coisa.'); return; }
+  if(sc.dia>=(d.maxDays||60)&&S.scen) { const w=d.capWin?d.capWin(sc):true; scenEnd(w,w?'Os dias viraram semanas, as semanas viraram rotina. Um dia, simplesmente acabou.':'O tempo passou e a missão ficou pela metade. Voltei para casa com a sensação de que faltou alguma coisa.'); return; }
   scEvents(1+(R.chance(.55)?1:0)); }
 function scCheck(){ const sc=S.scen; if(!sc||sc.v!==SC_V) return; const d=SM();
   if(sc.winNow){ scenEnd(true,{zumbi:'Chegamos. Acabou.',ilha:'O barco chegou de verdade. Me enrolaram num cobertor e me deram um sanduíche. Acabou.',isekai:'A luz da deusa me envolveu. Acabou.',heroi:'A cidade está em paz. Acabou.',marte:'A nave decolou rumo à Terra. Acabou.'}[sc.id]); return; }
-  if(sc.hl<=0) scenEnd(false,{zumbi:'Tudo ficou escuro. Senti dentes, gritos, e então… acordei suando frio na minha cama.',ilha:'Desmaiei na areia quente. Quando abri os olhos, estava no meu quarto, com o ventilador ligado.',isekai:'A luz branca voltou. Acordei no hospital, com tubos no braço e uma enfermeira dizendo que eu tive sorte.',heroi:'Caí do alto de um prédio. Antes de bater no chão, acordei. Os poderes tinham sumido.',marte:'O alarme de despressurização foi a última coisa que ouvi. Acordei na Terra, ofegante.'}[sc.id]);
-  else if(sc.san<=0) scenEnd(false,'Minha cabeça não aguentou. Comecei a rir sozinh'+oa()+' e não parei mais. Até acordar.'); }
+  // não existe acordar: morrer num mundo alternativo é morrer de verdade
+  if(sc.hl<=0){ const cause={zumbi:'no apocalipse zumbi, cercad{o} por mortos-vivos',ilha:'numa ilha deserta, depois de um naufrágio',isekai:'em Eldoria, longe do próprio mundo',heroi:'em combate, como super-herói',marte:'em Marte, a 225 milhões de quilômetros de casa'}[sc.id]||'longe de casa'; S.scen=null; S.pending=S.pending.filter(e=>!(EVENTS[e.id]&&EVENTS[e.id].scen)); die(cause.replace(/\{o\}/g,oa())); UI.close(); }
+  else if(sc.san<=0){ sc.san=25; scHurt(25); scLog('Minha cabeça não aguentou. Passei dias sem falar, olhando para o nada. Voltei a mim, mas machucad'+oa()+'.','bad'); if(sc.hl<=0) scCheck(); } }
 function scenEnd(win,txt){ const sc=S.scen; if(!sc) return; const d=SCEN[sc.id], m=S.me, days=sc.dia;
   scLog(txt,win?'good':'bad'); S.scen=null; S.pending=S.pending.filter(e=>!(EVENTS[e.id]&&EVENTS[e.id].scen));
   const wl=fill((win?d.win:d.lose).replace(/\{o\}/g,oa()));
   log(`${d.ic} ${wl}: ${days} ${d.day.toLowerCase()}${days>1?'s':''} de aventura.`,win?'good':'warn');
   if(win){ cnt('scenWin'); d.reward(m,sc); } else st('happy',-3);
-  MQ.unshift({k:d.n,t:win?'Fim da aventura':'Você acordou',x:`${txt}\n\n${days} ${d.day.toLowerCase()}${days>1?'s':''} · ${sc.kills?sc.kills+' inimigos derrotados · ':''}${sc.crew.length} ${sc.crew.length===1?'pessoa':'pessoas'} no grupo no final.`});
+  MQ.unshift({k:d.n,t:win?'Fim da aventura':'A aventura acabou',x:`${txt}\n\n${days} ${d.day.toLowerCase()}${days>1?'s':''} · ${sc.kills?sc.kills+' inimigos derrotados · ':''}${sc.crew.length} ${sc.crew.length===1?'pessoa':'pessoas'} no grupo no final.`});
   UI.close(); }
 function bite(){ const sc=S.scen; if(!sc||sc.id!=='zumbi') return ''; if(sc.inf) return 'Por pouco não fui mordid'+oa()+' de novo.'; sc.inf=1; queue('zumbi_mordida',{}); return 'Um zumbi me mordeu no braço.'; }
 function lvlUp(){ const sc=S.scen; let t=''; while(sc&&sc.id==='isekai'&&sc.xp>=sc.lvl*100){ sc.xp-=sc.lvl*100; sc.lvl++; sc.hl=Math.min(100,sc.hl+15); t=` Subi para o nível ${sc.lvl}!`;
@@ -443,7 +444,7 @@ V.scActs=()=>{ const sc=S.scen, d=SM(), it=[{html:scStatusCard(sc)},{sec:'Açõe
     it.push({ic:a.ic,l:a.l,s:a.s,r:done?'✓':ap?'⚡'.repeat(ap):'',dis:lock||done||sc.ap<ap,why:lock?(a.why||'Ainda não dá.'):done?'Já fiz isso hoje. Amanhã de novo.':'Sem energia hoje. Passe para o próximo dia.',
       on:()=>scAct(()=>{ if(!spend(k,ap)) return 'Sem energia.'; return a.fn(sc,S.me)||''; },a.l)}); });
   if(sc.id==='isekai') it.push({ic:'🧙',l:'Minha classe',s:sc.cls?clsName(sc.cls):'Ainda não escolhi',dis:!!sc.cls,why:'Já escolhi minha classe.',on:()=>UI.push(V.scenClass)});
-  it.push({sec:'Vida real'},{ic:'🔒',l:'Carreira, bens, relações e atividades',s:'Pausadas enquanto durar a aventura',dis:true,why:'A vida real está pausada. Termine a aventura (ou acorde pelo menu) para voltar.'});
+  it.push({sec:'Vida real'},{ic:'🔒',l:'Carreira, bens, relações e atividades',s:'Pausadas enquanto durar a aventura',dis:true,why:'A vida real está pausada. Só volta quando a aventura terminar.'});
   return {title:d.tabs[4],items:it}; };
 V.scCrew=()=>{ const sc=S.scen, d=SM(), m=S.me, it=[];
   it.push({face:faceSVG(m,40),l:`${m.first} (eu)`,s:`${sc.id==='isekai'&&sc.cls?clsName(sc.cls)+' · ':''}Arma: ${sc.arma?itN(sc.arma.id)+' ('+sc.arma.hp+'%)':'nenhuma'} · Força do grupo: ${scPow()}`,on:()=>UI.push(V.scMe)});
@@ -476,8 +477,13 @@ V.scItems=()=>{ const sc=S.scen, d=SM(), it=[];
     it.push({ic:itIc(x.id),l:itN(x.id),s:`Estado ${x.hp}%${c==='comida'?' · mata a fome':c==='agua'?' · mata a sede':c==='remedio'?' · cura':c==='arma'?' · dano '+itV(x.id):''}`,bars:[['',x.hp,x.hp>=60?'#3BB273':x.hp>=30?'#F2A93B':'#E5484D']],
       on:()=>modal({t:itN(x.id),x:`Estado ${x.hp}%`,ch:[...(usable?[{l:c==='comida'?'Comer':c==='agua'?'Beber':'Usar',fn:()=>{ const r=scUse(x); scLog(r); MQ.unshift({t:itN(x.id),x:r}); }}]:[]),...(c==='arma'?[{l:'Equipar',fn:()=>{ sc.inv=sc.inv.filter(y=>y!==x); if(sc.arma) addItem(sc.arma.id,sc.arma.hp,true); sc.arma=x; }}]:[]),{l:'Descartar',cls:'danger',fn:()=>{ sc.inv=sc.inv.filter(y=>y!==x); }},{l:'Voltar',cls:'alt'}]})}); });
   return {title:d.tabs[1],items:it}; };
-V.scenPick=()=>({title:'Modos fictícios',items:[{html:'<div class="card"><p>Uma aventura contada em dias, fora da vida normal. Enquanto durar, a vida real fica pausada e não envelhece. Se der errado, você só acorda, menos no isekai: quem morre em Eldoria morre de verdade. Se der certo, volta com recompensas.</p></div>'}]
-  .concat(Object.entries(SCEN).map(([id,d])=>({ic:d.ic,l:d.n,s:fill(d.d.replace(/\{o\}/g,oa())),on:()=>confirmBox(d.n,'Começar a aventura agora?','Começar',()=>{ UI.close(); scStart(id); render.jump=true; after(); })})))});
+const SC_VOLTA={zumbi:'Não tem volta: o apocalipse não acaba. É sobreviver o máximo que der.',ilha:'A volta é o resgate: um navio, um avião ou a sua jangada.',isekai:'A única volta é o portal, depois de derrotar o Rei Demônio.',heroi:'Não é outro mundo: é a sua própria vida, com poderes, ano a ano, até você se aposentar.',marte:'A volta é a nave de resgate, que chega no sol 30.'};
+V.scenPick=()=>({title:'Modos fictícios',items:[{html:'<div class="card"><p>Mundos e vidas alternativas, contados em dias. Enquanto durar, a vida real fica pausada e você não envelhece (menos no modo herói). Não existe acordar: <b>se morrer lá, morre de verdade</b>. Se der certo, volta com recompensas.</p></div>'}]
+  .concat(Object.entries(SCEN).map(([id,d])=>({ic:d.ic,l:d.n,s:fill(d.d.replace(/\{o\}/g,oa())),on:()=>modal({t:`${d.ic} ${d.n}`,x:`${id==='heroi'?'Sua vida vai mudar para sempre.':'Você vai deixar a sua vida para trás e ir para outro mundo.'} Carreira, bens e relações ${id==='heroi'?'continuam, mas tudo passa a girar em torno da capa.':'ficam esperando enquanto durar a aventura.'}
+
+${SC_VOLTA[id]||''}
+
+Se morrer lá, morre de verdade. Tem certeza?`,ch:[{l:id==='heroi'?'Aceitar os poderes':`Ir para ${id==='zumbi'?'o apocalipse':id==='ilha'?'a ilha':id==='isekai'?'Eldoria':'Marte'}`,cls:'danger',fn:()=>{ UI.close(); scStart(id); render.jump=true; }},{l:'Ficar na minha vida',cls:'alt'}]})})))});
 V.scenClass=()=>({title:'Escolha sua classe',items:Object.entries(CLASSES).map(([k,c])=>({ic:c.ic,l:clsName(k),s:c.sk.join(' · '),on:()=>{ if(S.scen&&S.scen.id==='isekai'){ S.scen.cls=k; scLog(`Escolhi ser ${clsName(k).toLowerCase()} em Eldoria.`,'good'); if(k==='mago') addItem('cajado',90,true); if(k==='arqueiro') addItem('arco',90,true); if(k==='ladino') addItem('adaga',90,true); } UI.close(); after(); }}))});
 // ---------- tela principal durante a aventura ----------
 let NAV0=null;
@@ -502,7 +508,7 @@ V.career=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scLocal():orig())(V.career);
 V.activities=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scActs():orig())(V.activities);
 V.relations=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scCrew():orig())(V.relations);
 V.assets=(orig=>()=>S.scen&&S.scen.v===SC_V?V.scItems():orig())(V.assets);
-V.menu=(orig=>()=>{ const r=orig(); if(S&&S.scen&&S.scen.v===SC_V&&S.me.alive&&!['isekai','heroi'].includes(S.scen.id)) r.items.unshift({ic:'⏰',l:'Acordar',s:'Encerra a aventura e volta para a vida real',tone:'bad',on:()=>confirmBox('Acordar?','A aventura termina aqui.','Acordar',()=>{ scenEnd(false,'Belisquei o próprio braço com força. Funcionou.'); after(); })}); return r; })(V.menu);
+// não existe mais a opção de acordar
 occupation=(orig=>()=>S.scen&&S.scen.v===SC_V?SCEN[S.scen.id].n:orig())(occupation);
 function scenYear(){} function startScen(id){ scStart(id); }
 // ---------- eventos especiais ----------
@@ -522,7 +528,7 @@ EVENTS.z_final={scen:'zumbi',show:()=>({k:'Pesadelo zumbi',t:'O Porto Seguro',x:
   pick:k=>{ const sc=S.scen; if(!sc) return '';
     if(k==='f'){ if(R.chance(.35)){ scenEnd(true,'Furamos o bloqueio no susto. Os soldados nos perdoaram quando viram as crianças no banco de trás. Chegamos.'); return ''; } scHurt(45); return 'Tiros no para-brisa. Recuamos com um ferido.'; }
     if(k==='s'){ scenEnd(true,'Atravessei a ponte sozinh'+oa()+'. Convenci o capitão. Uma hora depois, o comboio inteiro entrou. Estamos a salvo.'); return ''; }
-    if(sc.inf){ scenEnd(false,'O exame no portão mostrou a mordida. Me levaram para uma sala branca. E eu acordei.'); return ''; }
+    if(sc.inf){ sc.etapa=Math.max(0,(sc.etapa||0)-3); return 'O exame no portão mostrou a mordida. Me barraram na ponte. Preciso curar isso antes de voltar.'; }
     scenEnd(true,'Exame de sangue, banho de mangueira e um prato de comida quente. Chegamos ao Porto Seguro.'); return ''; }};
 EVENTS.ilha_navio={scen:'ilha',show:()=>({k:'Ilha',t:'Um navio!',x:'Lá no horizonte, um navio. Pequeno, mas de verdade. Você tem segundos para chamar a atenção.',ch:[['Jogar folhas verdes na fogueira','f'],['Pular e gritar na praia','g'],['Nadar até ele','n']]}),
   pick:k=>{ const sc=S.scen; if(!sc) return ''; const p=k==='f'?(sc.fogo?.7:.15):k==='g'?.3:.45;
@@ -530,7 +536,7 @@ EVENTS.ilha_navio={scen:'ilha',show:()=>({k:'Ilha',t:'Um navio!',x:'Lá no horiz
     if(k==='n') scHurt(20); scStat('san',-12); return k==='f'&&!sc.fogo?'A fogueira estava apagada. O navio sumiu.':'O navio sumiu atrás do horizonte. Fiquei olhando o mar até escurecer.'; }};
 EVENTS.isekai_fim={scen:'isekai',show:()=>({k:'Eldoria',t:'O Rei Demônio caiu',x:'Uma luz se abre no céu. A deusa diz que você pode voltar para casa, ou ficar em Eldoria como herói.',ch:[['Voltar para casa','c'],['Ficar mais um tempo em Eldoria','f']]}),
   pick:k=>{ const sc=S.scen; if(!sc) return '';
-    if(k==='c'){ scenEnd(true,'Acordei no hospital, como se nada tivesse acontecido. Mas trouxe a força de Eldoria comigo, e um saco de moedas de ouro que ninguém sabe explicar.'); return ''; }
+    if(k==='c'){ scenEnd(true,'A luz do portal me devolveu ao meu mundo, como se nada tivesse acontecido. Mas trouxe a força de Eldoria comigo, e um saco de moedas de ouro que ninguém sabe explicar.'); return ''; }
     sc.hero=1; return 'Fiquei. Me deram um castelo e um título de nobreza. A volta pode esperar.'; }};
 EVENTS.heroi_final={scen:'heroi',show:()=>({k:'Superpoderes',t:'O último confronto',x:`${S.scen?S.scen.inimigo:'O vilão'} está de joelhos, sem poderes, cercado pela polícia. A cidade inteira assiste ao vivo.`,ch:[['Entregar à justiça','j'],['Oferecer uma segunda chance','c'],['Acabar com isso de vez','m']]}),
   pick:k=>{ const sc=S.scen, m=S.me; if(!sc) return '';

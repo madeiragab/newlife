@@ -62,3 +62,13 @@ pack({k:'Revolução',w:1.4,cd:6,min:18,when:RW2(()=>true)},[
   ['General arrependido','O general que você subornou quer desistir do acordo.',['Pagar mais|$-40000 mil+5|Ficou.','Ameaçar|?55 mil+5 k-5|Ele ficou, com medo.|mil-15 rsusp+15|Ele correu para o ministro.']],
 ]);
 extTok=(o=>function(tok,d,out){ const r=S.me&&S.me.rev; const mm=tok.match(/^(apoio|mil|armas|rsusp|membros)([+-]\d+)$/); if(mm){ if(r){ r[mm[1]==='rsusp'?'susp':mm[1]]+=+mm[2]; revFix(r); } return true; } return o(tok,d,out); })(extTok);
+// tokens da vida de ditador: contragolpe · exilio · renuncia · assassinado · tesouro+n (cofres públicos para o bolso)
+extTok=(o=>function(tok,d,out){ const m=S.me, of=m.office; let mm;
+  if(tok==='contragolpe'){ if(of&&of.dit) queue('rev_contragolpe',{}); return true; }
+  if(tok==='exilio'){ if(of&&of.dit){ m.office=null; m.c.fugitive=1; m.money=Math.round(m.money*.7); out.push('Fugi para o exílio.'); log('Deixei o poder e fugi para o exílio.','warn'); } return true; }
+  if(tok==='renuncia'){ if(of){ m.office=null; out.push('Deixei o poder.'); log('Renunciei ao governo.','warn'); } return true; }
+  if(tok==='assassinado'){ die('assassinad'+oa()+' no palácio do governo'); return true; }
+  if(mm=tok.match(/^tesouro\+(\d+)$/)){ m.money+= +mm[1]; m.karma=clamp(m.karma-3); m.c.desvio=(m.c.desvio||0)+ +mm[1]; return true; }
+  return o(tok,d,out); })(extTok);
+const DW=f=>m=>!!m.office&&!!m.office.dit&&!m.prison&&f(m.office,m), RV=f=>m=>!!m.rev&&!m.prison&&f(m.rev,m);
+extChance=(o=>function(key){ const r=S.me&&S.me.rev; if(r&&['apoio','mil','armas'].includes(key)) return r[key]; return o(key); })(extChance);

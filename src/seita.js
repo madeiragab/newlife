@@ -33,7 +33,7 @@ function seitaAno(){ const m=S.me, s=seita(); if(!s||!m.alive) return; s.anos++;
   if(m.prison){ s.devo-=10; s.fieis=Math.round(s.fieis*.8); }
   seitaFix(s); if(s.fieis<=0) return seitaFim('Não sobrou ninguém.');
   if(s.profecia&&S.year>=s.profecia){ s.profecia=0; queue('seita_profecia',{}); }
-  if(s.susp>=70&&R.chance((s.susp-55)/80)) queue('seita_policia',{}); }
+  if(!s.membro&&s.susp>=70&&R.chance((s.susp-55)/80)) queue('seita_policia',{}); }
 yearMoney=(o=>function(){ const r=o.apply(this,arguments); try{ seitaAno(); }catch(e){} return r; })(yearMoney);
 V.seita=()=>{ const m=S.me, s=seita(), it=[];
   if(!s){ it.push({html:'<div class="card"><p>Crie o seu próprio grupo religioso: escolha o tipo, dê um nome e conquiste fiéis. Dinheiro, poder e fé cega, até a polícia bater na porta.</p></div>'},{sec:'Fundar'});
@@ -64,7 +64,7 @@ EVENTS.seita_policia={show:()=>({k:'Religião',t:'Polícia no templo',x:`A Polí
 extTok=(o=>function(tok,d,out){ const s=S.me&&S.me.seita; let mm; if(mm=tok.match(/^(fieis|devo|susp|sfama|caixa)([+-]\d+)$/)){ if(s){ const k=mm[1]==='sfama'?'fama':mm[1]; s[k]=(s[k]||0)+ +mm[2]; seitaFix(s); } return true; }
   if(tok==='seitafim'){ if(s) out.push(seitaFim('')); return true; } return o(tok,d,out); })(extTok);
 extChance=(o=>function(key){ const s=S.me&&S.me.seita; if(key==='devo') return s?s.devo:30; if(key==='susp') return s?s.susp:10; return o(key); })(extChance);
-const SEW=f=>m=>!!m.seita&&!m.prison&&f(m.seita,m);
+const SEW=f=>m=>!!m.seita&&!m.seita.membro&&!m.prison&&f(m.seita,m);
 pack({k:'Religião',w:1.4,cd:6,min:18,when:SEW(()=>true)},[
   ['Fiel milionário','Uma viúva rica quer deixar toda a herança para {seita}.',['Aceitar|caixa+300000 susp+8 k-4|A família dela vai me processar, mas o dinheiro já caiu.','Recusar e mandar falar com a família|k+6 sfama+4 devo+4|Os fiéis acharam lindo.']],
   ['Ex-fiel no jornal','Um ex-fiel deu entrevista dizendo que {seita} é uma fraude.',['Processar|$-8000 ?50 sfama+3|Ganhei. Ele se retratou.|susp+10|Perdi, e o caso ganhou mais destaque.','Ignorar|fieis-5 susp+5|Alguns fiéis ficaram com dúvidas.','Convidar para voltar|?55 devo+6 fieis+1|Ele voltou, chorando.|susp+6|Ele gravou a conversa.']],

@@ -137,7 +137,6 @@ V.career=()=>{
       it.push({l:'Conversar com o professor',on:()=>act(talkTeacher,'Escola')});
       it.push({l:'Matar aula',on:()=>act(skipClass,'Escola')});
       it.push(m.edu.club?{ic:'🏅',l:'Meu clube: '+m.edu.club,s:'Treinar, faltar, disputar posição, sair',on:()=>UI.push(V.clubMenu)}:{l:'Entrar em um clube ou time',s:'Teatro, esporte, música, xadrez…',on:()=>UI.push(V.clubs)});
-      it.push({l:'Fazer amizade com a turma',on:()=>UI.push(()=>({title:'Turma',items:people('colega').map(p=>personRow(p))}))});
     }
     if(c.type!=='fund'&&(c.type!=='medio'||m.age>=16)) it.push({l:'Largar os estudos',tone:'bad',on:()=>confirmBox('Largar os estudos?',`Vou abandonar ${c.n}.`,'Largar',()=>act(dropOut,'Estudos'))});
   } else if(m.age>=17&&hasDeg('medio')){
@@ -300,7 +299,7 @@ V.invest=()=>{ const m=S.me; const row=(k,l,s)=>[{html:`<div class="card">${kv(l
 // ---------- relações ----------
 function personRow(p){ return {face:faceSVG(p,42),l:fullName(p),s:`${relLabel(p)} · ${p.age} ${p.age===1?'ano':'anos'}`,bars:relBars(p),on:()=>UI.push(()=>V.person(p))}; }
 V.relations=()=>{
-  const groups=[['Família',['mae','pai','irmao','avo']],['Amor',['namoro','noivo','conjuge']],['Filhos e netos',['filho','adot','neto']],['Amigos',['amigo']],['Escola',['colega','inimigo']],['Trabalho',['chefe','colegaT']],['Bichos',['pet']],['Ex',['ex']]];
+  const groups=[['Família',['mae','pai','irmao','avo']],['Amor',['namoro','noivo','conjuge']],['Filhos e netos',['filho','adot','neto']],['Amigos',['amigo']],['Desafetos',['inimigo']],['Trabalho',['chefe','colegaT']],['Bichos',['pet']],['Ex',['ex']]];
   const it=[{face:faceSVG(S.me,42),l:'Eu: '+S.me.first+' '+S.me.last,s:'Visual, genética, talentos e vícios',on:()=>UI.push(V.me)}];
   for(const [t,rels] of groups){ const ps=people(...rels); if(ps.length){ it.push({sec:t}); ps.forEach(p=>it.push(personRow(p))); } }
   const dead=S.people.filter(p=>!p.alive&&['mae','pai','irmao','avo','filho','conjuge','adot'].includes(p.rel));
@@ -367,7 +366,7 @@ V.person=p=>{
   A('visitar','Visitar',null,rel==='avo'||(fam&&S.flags.movedOut&&rel!=='filho'&&rel!=='neto'));
   A('ler','Ler uma história',null,['filho','adot','neto','irmao'].includes(rel)&&p.age<10&&a>=12);
   A('castigo','Deixar de castigo',null,['filho','adot'].includes(rel)&&p.age<18);
-  A('amizade','Chamar para ser amigo',null,['colega','colegaT','inimigo','ex'].includes(rel)&&!love);
+  A('amizade','Chamar para ser amigo',null,['colega','colegaT','inimigo','ex','equipe'].includes(rel)&&!love);
   A('perdao','Fazer as pazes',null,rel==='inimigo'||p.bond<25);
   A('puxar','Puxar o saco',null,rel==='chefe');
   const canFlirt=!fam&&!love&&a>=13&&Math.abs(p.age-a)<=(a<18?3:15)&&p.age>=(a<18?12:18)&&rel!=='ex'&&rel!=='chefe';
@@ -659,11 +658,13 @@ function boot(){
     else if(hs.includes('cadeia')){ const m=S.me; m.prison={crime:'roubo',left:6,total:8,served:2,behav:40,gang:{n:'Comando da Ala B',rank:1,rep:55}}; render(); UI.open(V.activities); }
     else if(hs.includes('emprego')){ const m=S.me; m.prison=null; if(!m.job){ const o={id:'adm',co:'Grupo Boreal',mul:1}; if(JOBS.find(x=>x.id==='adm')) takeJob(o); else takeJob(openings()[0]); } m.yr.load=7; UI.open(V.career); UI.push(V.jobMenu); }
     else if(hs.includes('clube')){ const m=S.me; m.age=15; m.prison=null; m.edu.cur={type:'medio',n:'Ensino Médio',len:3,yr:0,grade:66}; joinClub(CLUBS[0]); m.edu.clubLvl=1; m.edu.clubPerf=64; UI.open(V.career); UI.push(V.clubMenu); }
-    else if(hs.includes('prova')){ const m=S.me; m.age=11; m.edu.cur={type:'fund',n:'Ensino Fundamental',len:9,yr:5,grade:62}; m.prison=null; S.pending=[]; const d=EVENTS.prova_q.prep(m); if(hs.includes('prova2')) d.go=1; queue('prova_q',d); render(); pump(); } else if(hs.includes('faculdade')){ const m=S.me; m.edu.cur=null; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); m.edu.hist=[{t:'f1',g:72},{t:'f2',g:66},{t:'m',g:70}]; UI.open(V.uniList); UI.push(()=>V.uniList().items.length&&({title:COURSES[1].n,items:[]})); UI.back(); } else if(/seita|caso|golpe|paranormal|desistir/.test(hs)){ const m=S.me; m.prison=null; m.alive=true; if(m.age<26){ m.age=30; } m.money=Math.max(m.money,400000); S.pending=[]; MQ.length=0;
+    else if(hs.includes('prova')){ const m=S.me; m.age=11; m.edu.cur={type:'fund',n:'Ensino Fundamental',len:9,yr:5,grade:62}; m.prison=null; S.pending=[]; const d=EVENTS.prova_q.prep(m); if(hs.includes('prova2')) d.go=1; queue('prova_q',d); render(); pump(); } else if(hs.includes('faculdade')){ const m=S.me; m.edu.cur=null; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); m.edu.hist=[{t:'f1',g:72},{t:'f2',g:66},{t:'m',g:70}]; UI.open(V.uniList); UI.push(()=>V.uniList().items.length&&({title:COURSES[1].n,items:[]})); UI.back(); } else if(/turma|relacoes/.test(hs)){ const m=S.me; m.alive=true; m.prison=null; S.pending=[]; MQ.length=0; if(hs.includes('turma')){ m.age=16; m.edu.cur={type:'medio',n:'Ensino Médio',len:3,yr:1,grade:72,pub:1}; if(!people('colega').length) for(let i=0;i<6;i++) S.people.push(mkPerson({rel:'colega',age:16,bond:R.int(20,70)})); UI.open(V.career); UI.push(V.turma); } else { render(); UI.open(V.relations); } }
+    else if(/seita|caso|golpe|paranormal|desistir|equipe/.test(hs)){ const m=S.me; m.prison=null; m.alive=true; if(m.age<26){ m.age=30; } m.money=Math.max(m.money,400000); S.pending=[]; MQ.length=0;
       if(hs.includes('seita')){ seitaFundar('apoc','Filhos da Última Aurora'); const s=m.seita; s.fieis=342; s.devo=81; s.caixa=184000; s.susp=46; s.fama=38; s.templo=2; s.anos=4; UI.open(V.activities); UI.push(V.seita); }
       if(hs.includes('caso')){ if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); takeJob({id:'poli',co:'Polícia Civil',size:'grande',mul:1}); const c=novoCaso(); casoPasso(c,'per',0); casoPasso(c,'int',1); casoPasso(c,'cam',0); UI.open(V.activities); UI.push(V.caso(c)); }
       if(hs.includes('golpe')){ revStart('Frente Popular de Libertação'); Object.assign(m.rev,{apoio:58,mil:35,armas:44,susp:41,membros:12800}); UI.open(V.politics); UI.push(V.rev); }
       if(hs.includes('paranormal')){ m.criatura='vampiro'; para().prova=7; para().visitas=9; UI.open(V.activities); UI.push(V.paranormal); }
+      if(hs.includes('equipe')){ m.age=16; m.edu.club=CLUBS[0].n; m.edu.clubLvl=1; UI.open(V.clubMenu); const it=V.clubMenu().items.find(x=>x.l==='Membros da equipe'); const ms=grpMembers(clubKey()); if(ms[0]){ ms[0].rel='amigo'; ms[0].bond=80; } it.on(); }
       if(hs.includes('desistir')){ if(!partner()){ const p=candidate(false); p.rel='conjuge'; p.bond=88; S.people.push(p); } if(!kids().length){ S.people.push(mkPerson({rel:'filho',age:7,last:m.last,bond:95})); } render(); giveUpFlow(); } }
     else if(hs.includes('idades')){ document.body.innerHTML=faceAges(); } else if(hs.includes('rostos')){ document.body.innerHTML=faceGallery(hs.includes('grande'),+(hs.match(/p(\d+)/)||[0,0])[1]); } if(hs.includes('garagem')){ document.body.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#fff\">'+CAR_MODELS.map((c,i)=>'<div style="text-align:center;font:10px sans-serif\">'+carSVG(c,Object.keys(PAINT)[i%10],110)+'<br>'+c.b+' '+c.m+'</div>').join('')+'</div>'; } },50); for(let i=0;i<24&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); if(r) log(sh.t.replace(/[!?.…]+$/,'')+': '+r); } } render.jump=true; render(); return; }
   const saved=loadKey(SAVE_KEY);

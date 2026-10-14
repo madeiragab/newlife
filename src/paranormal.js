@@ -89,3 +89,14 @@ pack({k:'Paranormal',w:1.1,cd:10,min:14,when:m=>!!m.para&&m.para.visitas>=2&&!m.
 ]);
 extTok=(o=>function(tok,d,out){ const mm=tok.match(/^fight([+-]\d+)$/); if(mm){ S.me.fight=clamp((S.me.fight||0)+ +mm[1]); return true; } return o(tok,d,out); })(extTok);
 extChance=(o=>function(key){ if(key==='will') return S.me.will; return o(key); })(extChance);
+// tokens dos eventos paranormais: prova±n · virar:vampiro|lobisomem · cura · pvira (o {p} vira criatura como você) · pmorre (o {p} morre) · paramorte:vampiro|lobisomem
+extTok=(o=>function(tok,d,out){ const m=S.me; let mm;
+  if(mm=tok.match(/^prova([+-]\d+)$/)){ para().prova=Math.max(0,para().prova+ +mm[1]); return true; }
+  if(mm=tok.match(/^virar:(vampiro|lobisomem)$/)){ if(!m.criatura) out.push(virar(mm[1]).trim()); return true; }
+  if(tok==='cura'){ if(m.criatura){ const t=m.criatura; m.criatura=null; log(`Deixei de ser ${g(CRIATURA[t][0],m.gender).toLowerCase()}.`,'good'); out.push('A maldição foi embora.'); } return true; }
+  if(tok==='pvira'){ const p=d&&typeof d.pid==='number'?P(d.pid):null; if(p&&p.alive&&!p.criatura){ p.criatura=m.criatura||R.pick(['vampiro','lobisomem']); out.push(`${p.first} também virou ${g(CRIATURA[p.criatura][0],p.gender).toLowerCase()}.`); } return true; }
+  if(tok==='pmorre'){ const p=d&&typeof d.pid==='number'?P(d.pid):null; if(p&&p.alive){ p.alive=false; st('happy',-25); log(`${relLabel(p)} ${fullName(p)} morreu, aos ${p.age} anos.`,'bad'); } return true; }
+  if(mm=tok.match(/^paramorte:(vampiro|lobisomem|fantasma)$/)){ die({vampiro:'com o sangue drenado por um vampiro',lobisomem:'despedaçad'+oa()+' por um lobisomem',fantasma:'de susto, numa casa assombrada'}[mm[1]]); return true; }
+  return o(tok,d,out); })(extTok);
+extChance=(o=>function(key){ if(key==='prova') return Math.min(95,20+(S.me.para?S.me.para.prova*6:0)); return o(key); })(extChance);
+const PI=m=>!!m.para&&m.para.visitas>=1&&!m.prison, CC=m=>!!m.criatura&&!m.prison;

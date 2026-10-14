@@ -53,6 +53,6 @@ pack({k:'Polícia',w:1.3,cd:8,min:18,when:m=>isCop()&&!m.prison},[
   ['Criança perdida','Uma criança se perdeu num shopping lotado.',['Procurar pessoalmente|perf+6 k+6 h+6|Achei dormindo numa loja de colchões.','Passar pelo sistema de som|perf+2|A mãe apareceu em cinco minutos.']],
   ['Abordagem polêmica','Um vídeo seu numa abordagem viralizou e as pessoas discordam.',['Pedir desculpas|k+4 perf-2|Mais gente me entendeu.','Defender a abordagem|?50 perf+4|O comando me apoiou.|perf-10 f+2|Fui afastad{o} por uma semana.']],
   ['Delegado exige resultados','O delegado quer números: mais prisões neste mês.',['Trabalhar dobrado|perf+10 hl-4|Bati a meta.','Prender qualquer um|perf+6 k-12|Bati a meta do jeito errado.']],
-  ['Medalha','Você vai receber uma medalha por bravura.',['Ir à cerimônia|f+3 h+10 perf+4|Minha família assistiu da primeira fila.']],
+  ['Medalha','Você vai receber uma medalha por bravura.',['Ir à cerimônia|f+3 h+10 perf+4|Minha família assistiu da primeira fila.','Dedicar a medalha ao parceiro que morreu|k+6 h+4|A sala inteira ficou em silêncio.']],
   ['Disfarce','Te escalam para se infiltrar numa quadrilha.',['Aceitar|?sm perf+20 $+5000|Derrubei a quadrilha por dentro.|hl-20|Descobriram quem eu era.','Recusar|perf-4|Mandaram outro.']],
 ]);

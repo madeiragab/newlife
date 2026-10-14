@@ -85,19 +85,32 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 
 ### 🚓 Polícia e investigação
 - **Concurso para a polícia** (18 a 40 anos, ensino médio, ficha limpa) e carreira de policial a delegado.
+- Mais de 200 eventos de patrulha, investigação e delegacia.
 - **Investigue crimes** num minijogo de dedução: assassinato na mansão, roubo de joias, envenenamento, sequestro… Interrogue suspeitos, reviste casas, chame a perícia, cheque câmeras e acuse. Acertar dá promoção; errar põe um inocente na cadeia.
 
 ### 🛐 Seita ou grupo religioso
-- Funde uma igreja, uma seita apocalíptica, um culto à natureza ou um movimento espiritual, com o nome que quiser.
-- Fiéis, devoção, caixa do grupo, fama e **suspeita da polícia**. Pregue, faça cultos, peça o dízimo, construa templos, compre horário na TV… ou desvie o dinheiro, faça rituais secretos e profetize o fim do mundo (e aguente o dia seguinte).
+- **Entre num grupo** e suba de cargo: fiel, obreiro, diácono, pastor, bispo, braço direito do líder… e tente tomar a liderança.
+- **Ou funde o seu**: igreja, seita apocalíptica, culto à natureza ou movimento espiritual, com o nome que quiser. Você começa praticamente sem ninguém e precisa conquistar seguidores.
+- **Gerencie a fé** com cultos, discursos, livros sagrados, festas e milagres encenados. Fé baixa vira revolta, e numa revolta os próprios seguidores podem te matar.
+- Dízimo, templos, TV, **denúncias** e a polícia de olho. Com fiéis suficientes, dá para **dominar o bairro, a cidade, o estado e o país**.
+- Mais de 200 eventos.
 
 ### ✊ Derrubar o governo
 - Movimento clandestino com apoio do povo, armas, generais subornados e a polícia política no seu encalço.
+- Mais de 200 eventos: a conspiração, a vida de ditador (eleições, imprensa, sanções, atentados, contragolpes), a prisão política e o exílio.
 - **Golpe de Estado**: se der certo, você vira líder supremo do país (e tem que sobreviver aos contragolpes); se der errado, é prisão, exílio ou fuzilamento.
 
 ### 👻 Paranormal
 - Investigue cemitérios, castelos, florestas na lua cheia e hospitais abandonados, junte provas e lance um documentário (ou vire meme).
 - **Vampiros e lobisomens** podem matar você, ou morder. Aí é para sempre, na vida normal: o rosto muda, a sede de sangue ou a lua cheia aparecem todo ano, a família corre perigo e caçadores batem na porta. Existe uma cura, cara e difícil.
+- Mais de 200 eventos de caça-fantasmas, vida de vampiro e vida de lobisomem.
+
+### 👥 Membros das equipes
+- Clube ou time da escola, colegas de trabalho, banda, elenco, pelotão, equipe de heróis e o grupo religioso têm **gente de verdade**: veja quem está na equipe, converse e faça amizade.
+- A **turma da escola** fica na própria escola, em "Membros da turma", junto com os professores de cada matéria.
+- **Passar um tempo com todos**: um churrasco, um almoço de domingo ou um fim de semana com a família e os amigos de uma vez.
+
+<p align="center"><img src="docs/img/equipe.png" width="200" alt="Membros da equipe"></p>
 
 ### 🏳️ Desistir dói
 - Antes de desistir de uma vida, você vê como cada pessoa próxima vai receber a notícia, de acordo com o quanto ela te ama.
@@ -112,7 +125,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 ### 🌍 E mais
 - **Autoescola** com prova de placas (22 placas desenhadas), passaporte (inclusive falsificado) e emigração.
 - **80 doenças**, com tratamentos, doenças crônicas e câncer.
-- **Mais de 3.000 eventos**: quase 700 na vida normal, coerentes com idade, carreira e situação, e mais de 2.300 nos modos fictícios.
+- **Mais de 3.700 eventos**: mais de 1.400 na vida normal, coerentes com idade, carreira e situação, e mais de 2.300 nos modos fictícios.
 - Selos, cemitério, desafios, dificuldade, herdeiros (continue a vida com um filho).
 - **Sons e música** sintetizados (sem arquivos de áudio), tema claro e escuro, efeito de dano.
 - Segredos para quem zerar o jogo. 😉
@@ -125,7 +138,7 @@ A partir dos 18 anos (Menu → Modos fictícios), você pode viver uma aventura 
 - **Grupo** com nome, rosto, arma, saúde e lealdade; **itens** como cartas com estado de 0 a 100% (comida estraga, armas quebram).
 - **Eventos de escolha** próprios de cada modo, com consequências de verdade.
 - **Romance em todos os modos**: flertar, encontros com a cara de cada mundo, namoro, noivado, casamento e filhos. Se a aventura terminar bem, o par e os filhos voltam com você para a vida real.
-- Perdeu? Você **acorda** e a vida continua. Venceu? Volta com recompensas. **Exceção: no isekai, quem morre em Eldoria morre de verdade**; a única volta é o portal, depois de derrotar o Rei Demônio. **O modo Superpoderes é diferente**: passa ano a ano, junto com a vida real, e só acaba quando você se aposenta.
+- **Não existe acordar**: se morrer num mundo alternativo, morre de verdade. Antes de ir, uma janela explica para onde você vai e como volta (resgate, portal, nave… ou nunca, no apocalipse zumbi). Venceu? Volta com recompensas. **O modo Superpoderes é diferente**: passa ano a ano, junto com a vida real, e só acaba quando você se aposenta.
 
 | Modo | Resumo | Eventos |
 |---|---|:-:|
@@ -258,6 +271,8 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   golpe.js        movimento clandestino e golpe de Estado
   paranormal.js   fantasmas, vampiros e lobisomens
   desistir.js     reações de quem fica ao desistir da vida
+  seita2.js       seita: cargos, fé dos seguidores, revolta, denúncias e domínio
+  equipes.js      membros das equipes (escola, trabalho, heróis, grupo religioso)
   romance.js      romance nos modos fictícios: namoro, casamento, filhos e volta para a vida real
   heroi.js        superpoderes: equipes como emprego, Lei de Registro, identidade, família e anos
   zumbi.js        pesadelo zumbi: atributos, base, oficina, facções, estações e hordas
