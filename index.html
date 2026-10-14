@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610140538'</script>
+<title>NewLife</title><script>window.NL_VER='2610140721'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -322,6 +322,21 @@ button.row:active{transform:scale(.985)}
 #log::-webkit-scrollbar,.sheet-body::-webkit-scrollbar{width:6px}
 #log::-webkit-scrollbar-thumb,.sheet-body::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
 #stats{padding-bottom:30px} @media (max-width:420px){ #stats{padding-bottom:34px} }
+/* tela inicial */
+#start .full-in{padding-top:0;gap:14px}
+.st-hero{margin:0 -16px 4px;padding:34px 16px 30px;background:var(--brand-grad);border-radius:0 0 32px 32px;text-align:center;color:#fff;box-shadow:0 8px 24px rgba(20,28,60,.18);position:relative;overflow:hidden}
+.st-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--stripe)}
+.st-hero .logo{color:#fff;font-size:54px;margin-top:14px;text-shadow:0 3px 12px rgba(0,0,0,.18)}
+.st-hero .logo em{color:#FFD23F}
+.st-hero .tag{color:rgba(255,255,255,.88);margin:6px 0 0;font-size:15px}
+.st-faces{display:flex;justify-content:center;align-items:flex-end}
+.st-faces span{display:block;margin:0 -7px;border-radius:50%;box-shadow:0 0 0 4px rgba(255,255,255,.9),0 6px 14px rgba(0,0,0,.2);transform:translateY(calc((var(--i) - 2.5) * (var(--i) - 2.5) * 2px)) rotate(calc((var(--i) - 2.5) * 5deg));animation:faceIn .5s ease-out both;animation-delay:calc(var(--i) * .07s)}
+.st-faces span:nth-child(3),.st-faces span:nth-child(4){z-index:2}
+@keyframes faceIn{from{opacity:0;transform:translateY(20px) scale(.8)}}
+#start .btn{font-size:16px;padding:15px 16px}
+#start .chips{justify-content:center}
+#start .chip{padding:7px 13px;font-size:13px}
+@media (prefers-reduced-motion:reduce){.st-faces span{animation:none}}
 
 </style>
 </head>
@@ -3703,7 +3718,7 @@ function interact(p,k,extra){
     case 'abraco': p.bond=clamp(p.bond+(tired?0:R.int(2,6))); return `Dei um abraço apertado em ${nm}.`;
     case 'piada': if(R.chance(.6)){ p.bond=clamp(p.bond+R.int(1,5)); return `${nm} riu muito da minha piada.`; } p.bond=clamp(p.bond-2); return `${nm} não achou graça nenhuma.`;
     case 'pegadinha': if(R.chance(.5)){ p.bond=clamp(p.bond+3); return `${nm} caiu na pegadinha e riu.`; } p.bond=clamp(p.bond-8); return `${nm} ficou furios${a} com a pegadinha.`;
-    case 'amizade': if(R.chance(p.bond/100+.2)){ p.rel='amigo'; p.bond=clamp(p.bond+10); return `Agora ${nm} é ${p.gender==='F'?'minha amiga':'meu amigo'}!`; } p.bond=clamp(p.bond-3); return `${nm} não deu muita bola.`;
+    case 'amizade': if(R.chance(Math.min(.95,.08+frOf(p)/100*.9))){ p.fr=clamp(frOf(p)+8); p.rel='amigo'; p.bond=clamp(p.bond+10); return `Agora ${nm} é ${p.gender==='F'?'minha amiga':'meu amigo'}!`; } p.bond=clamp(p.bond-3); return `${nm} não deu muita bola.`;
     case 'flertar': { const okPref=m.pref==='A'||m.pref===p.gender; if(!okPref) return `Não sinto atração por ${nm}.`; if(R.chance(clamp(p.bond*.5+(m.looks-p.looks)/2+20,5,90)/100)){ const cur=partner(); p.rel='namoro'; p.bond=clamp(p.bond+15); cnt('partners'); if(cur){ cnt('cheats'); if(R.chance(.4)) cur.bond=clamp(cur.bond-40); } return `Rolou um clima. ${nm} e eu estamos ficando sério!`; } p.bond=clamp(p.bond-6); return `${nm} me deu um fora.`; }
     case 'pedido': { const [c]=extra; if(!canPay(c)) return 'Não tenho dinheiro para esse anel.'; m.money-=c; if(R.chance(clamp(p.bond+c/1000-30,5,97)/100)){ p.rel='noivo'; p.bond=clamp(p.bond+10); st('happy',15); log(`Fiquei ${m.gender==='F'?'noiva':'noivo'} de ${nm}.`,'good'); return `${nm} disse SIM!`; } p.bond=clamp(p.bond-20); st('happy',-12); return `${nm} disse que não está pront${a}.`; }
     case 'casar': { const [c,prenup]=extra; if(!canPay(c)) return 'Não tenho dinheiro para essa festa.'; m.money-=c; if(prenup){ S.flags['prenup'+p.id]=1; if(R.chance(.3)){ p.bond=clamp(p.bond-25); return `${nm} se ofendeu com o pacto antenupcial e adiou o casamento.`; } } p.rel='conjuge'; p.yrs=0; cnt('marriages'); st('happy',20); S.flags.movedOut=1; log(`Casei com ${fullName(p)}!`,'good'); return `Casei com ${nm}! ${c>30000?'A festa foi inesquecível.':''}`; }
@@ -4743,7 +4758,7 @@ function showStart(){
   const has=S&&S.me&&S.me.alive;
   const c=COUNTRIES.map(c=>`<option value="${c.id}">${esc(c.n)}</option>`).join('');
   $('#start').innerHTML=`<div class="full-in">
-    <div class="faces">${[0,1,2,3,4,5].map(i=>{ const gd=i%2?'F':'M'; return faceSVG({id:i+1,gender:gd,age:[4,22,35,48,70,16][i],bond:R.int(40,95),genes:randGenes(gd)},56); }).join('')}</div><div class="logo">New<em>Life</em></div><p class="tag">Um simulador de vida. Cada ano é um sorteio.</p>
+    <div class="st-hero"><div class="st-faces">${[0,1,2,3,4,5].map(i=>{ const gd=i%2?'F':'M'; return `<span style="--i:${i}">${faceSVG({id:i+1,gender:gd,age:[4,22,35,48,70,16][i],bond:R.int(60,95),genes:randGenes(gd)},64)}</span>`; }).join('')}</div><div class="logo">New<em>Life</em></div><p class="tag">Um simulador de vida. Cada ano é um sorteio.</p></div>
     ${has?`<button class="btn sun" id="stCont">Continuar a vida de ${esc(S.me.first)} (${S.me.age} anos)</button>`:''}
     <button class="btn ${has?'alt':'sun'}" id="stRand">Vida completamente aleatória</button>
     <div class="card" style="display:flex;flex-direction:column;gap:10px">
@@ -4756,13 +4771,14 @@ function showStart(){
       ${godUnlocked()?'<label class="f" style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="fGod"> Abrir o Modo Deus ao nascer</label>':''}
       <button class="btn" id="stCustom">Nascer</button>
     </div>
-    <div class="chips"><button class="chip" id="stRib">Selos: ${Object.keys(META.ribbons).length}/${RIBBONS.length}</button><button class="chip" id="stCh">Desafios: ${Object.keys(META.ch||{}).length}/${CHALLENGES.length}</button><button class="chip" id="stGrave">Cemitério: ${META.grave.length}</button></div>
+    <div class="chips"><button class="chip" id="stConq">🏆 Conquistas: ${typeof conqGot==='function'?Object.keys(conqGot()).length:0}/${typeof CONQ!=='undefined'?CONQ.length:0}</button><button class="chip" id="stRib">Selos: ${Object.keys(META.ribbons).length}/${RIBBONS.length}</button><button class="chip" id="stCh">Desafios: ${Object.keys(META.ch||{}).length}/${CHALLENGES.length}</button><button class="chip" id="stGrave">Cemitério: ${META.grave.length}</button></div>
   </div>`;
   $('#start').hidden=false; $('#death').hidden=true;
   const go=(o,god)=>{ newLife(o); $('#start').hidden=true; MQ.length=0; render.jump=true; render(); pump(); if(god) UI.open(V.god); };
   if(has) $('#stCont').onclick=()=>{ $('#start').hidden=true; render(); pump(); };
   $('#stRand').onclick=()=>go({royal:R.chance(.01)});
   $('#stCustom').onclick=()=>{ go({first:$('#fFirst').value.trim()||undefined,last:$('#fLast').value.trim()||undefined,gender:$('#fGender').value||undefined,country:$('#fCountry').value||undefined,royal:R.chance(.01),diff:$('#fDiff').value},($('#fGod')||{}).checked); };
+  if($('#stConq')) $('#stConq').onclick=()=>{ UI.open(V.conquistas); };
   $('#stRib').onclick=()=>{ UI.open(V.ribbons); }; $('#stGrave').onclick=()=>{ UI.open(V.grave); }; $('#stCh').onclick=()=>{ UI.open(V.challenges); };
 }
 function showDeath(){
@@ -5360,7 +5376,7 @@ function drivingTest(){
   if(!canPay(1500)) return msg('Autoescola','Não tenho os $1.500 da autoescola.');
   use('lic'); m.money-=1500; const s=R.pick(SIGNS), ord=R.shuffle([0,1,2,3]);
   modal({top:`<div class="mtop">${s.svg}</div>`,k:'Prova teórica',t:'Autoescola',x:s.q,ch:ord.map(i=>({l:s.a[i],fn:()=>{
-    if(i===0){ m.lic=true; st('happy',8); log('Tirei minha carteira de motorista.','good'); MQ.unshift({t:'Autoescola',x:'Acertei a placa e passei no exame de direção! Carteira na mão.'}); }
+    if(i===0){ m.lic=true; st('happy',8); log('Tirei minha carteira de motorista.','good'); MQ.unshift({t:'Autoescola',x:'Acertei a placa e passei no exame de direção! Carteira na mão.'}); if(typeof parentCar==='function') parentCar(); }
     else { st('happy',-3); MQ.unshift({t:'Autoescola',x:`Errei. A resposta certa era "${s.a[0]}". Reprovad${oa()}.`}); }
     after(); }}))});
 }
@@ -7287,8 +7303,8 @@ V.scItems=()=>{ const sc=S.scen, d=SM(), it=[];
       on:()=>modal({t:itN(x.id),x:`Estado ${x.hp}%`,ch:[...(usable?[{l:c==='comida'?'Comer':c==='agua'?'Beber':'Usar',fn:()=>{ const r=scUse(x); scLog(r); MQ.unshift({t:itN(x.id),x:r}); }}]:[]),...(c==='arma'?[{l:'Equipar',fn:()=>{ sc.inv=sc.inv.filter(y=>y!==x); if(sc.arma) addItem(sc.arma.id,sc.arma.hp,true); sc.arma=x; }}]:[]),{l:'Descartar',cls:'danger',fn:()=>{ sc.inv=sc.inv.filter(y=>y!==x); }},{l:'Voltar',cls:'alt'}]})}); });
   return {title:d.tabs[1],items:it}; };
 const SC_VOLTA={zumbi:'Não tem volta: o apocalipse não acaba. É sobreviver o máximo que der.',ilha:'A volta é o resgate: um navio, um avião ou a sua jangada.',isekai:'A única volta é o portal, depois de derrotar o Rei Demônio.',heroi:'Não é outro mundo: é a sua própria vida, com poderes, ano a ano, até você se aposentar.',marte:'A volta é a nave de resgate, que chega no sol 30.'};
-V.scenPick=()=>({title:'Modos fictícios',items:[{html:'<div class="card"><p>Mundos e vidas alternativas, contados em dias. Enquanto durar, a vida real fica pausada e você não envelhece (menos no modo herói). Não existe acordar: <b>se morrer lá, morre de verdade</b>. Se der certo, volta com recompensas.</p></div>'}]
-  .concat(Object.entries(SCEN).map(([id,d])=>({ic:d.ic,l:d.n,s:fill(d.d.replace(/\{o\}/g,oa())),on:()=>modal({t:`${d.ic} ${d.n}`,x:`${id==='heroi'?'Sua vida vai mudar para sempre.':'Você vai deixar a sua vida para trás e ir para outro mundo.'} Carreira, bens e relações ${id==='heroi'?'continuam, mas tudo passa a girar em torno da capa.':'ficam esperando enquanto durar a aventura.'}
+V.scenPick=()=>({title:'Modos fictícios',items:[{html:'<div class="card"><p>Mundos e vidas alternativas, contados em dias. Enquanto durar, você não envelhece (menos no modo herói), mas quem ficou sente a sua falta: na volta tem demissão, nota baixa, namoro em crise e conta atrasada. Não existe acordar: <b>se morrer lá, morre de verdade</b>. Se der certo, volta com recompensas.</p></div>'}]
+  .concat(Object.entries(SCEN).map(([id,d])=>({ic:d.ic,l:d.n,s:fill(d.d.replace(/\{o\}/g,oa())),on:()=>modal({t:`${d.ic} ${d.n}`,x:`${id==='heroi'?'Sua vida vai mudar para sempre.':'Você vai deixar a sua vida para trás e ir para outro mundo.'} Carreira, bens e relações ${id==='heroi'?'continuam, mas tudo passa a girar em torno da capa.':'ficam para trás. E a vida real não para: quanto mais dias longe, maior o estrago na volta (emprego, estudos, namoro, contas).'}
 
 ${SC_VOLTA[id]||''}
 
@@ -8232,6 +8248,244 @@ function hPrisao(sc){ const m=S.me, n=rnd(1,3); let t=hFire(sc,'');
 // morrer de verdade (velhice, doença) encerra o modo junto com a vida
 die=(o=>function(){ const r=o.apply(this,arguments); if(S&&S.scen&&S.me&&!S.me.alive) S.scen=null; return r; })(die);
 scStart=(o=>function(id){ const r=o.apply(this,arguments); const sc=S.scen; if(sc&&sc.id==='heroi'&&sc.log[0]) Object.assign(sc.log[0],{age:S.me.age,yr:S.year}); return r; })(scStart);
+
+// ===== Empregos de cada faculdade: todo curso tem saída própria, e com diploma o salário é bem maior =====
+JOBS.push(
+ {id:'desg',l:['Designer júnior|Designer júnior','Designer gráfico|Designer gráfica','Designer sênior','Diretor de arte|Diretora de arte'],sal:40000,edu:'uni:art,moda'},
+ {id:'cura',l:['Assistente de curadoria','Curador de museu|Curadora de museu','Curador-chefe|Curadora-chefe','Diretor de museu|Diretora de museu'],sal:45000,edu:'uni:art,his'},
+ {id:'ilus',l:['Ilustrador júnior|Ilustradora júnior','Ilustrador|Ilustradora','Ilustrador sênior|Ilustradora sênior','Diretor de animação|Diretora de animação'],sal:38000,edu:'uni:art'},
+ {id:'pmus',l:['Professor de música|Professora de música','Professor de conservatório|Professora de conservatório','Coordenador musical|Coordenadora musical','Diretor de conservatório|Diretora de conservatório'],sal:34000,edu:'uni:mus'},
+ {id:'prodm',l:['Assistente de estúdio','Produtor musical|Produtora musical','Produtor musical sênior|Produtora musical sênior','Dono de gravadora|Dona de gravadora'],sal:50000,edu:'uni:mus'},
+ {id:'orq',l:['Músico de orquestra|Musicista de orquestra','Primeiro violino','Spalla','Maestro|Maestrina'],sal:46000,edu:'uni:mus'},
+ {id:'hist',l:['Pesquisador de história|Pesquisadora de história','Historiador|Historiadora','Arqueólogo|Arqueóloga','Diretor de arquivo nacional|Diretora de arquivo nacional'],sal:44000,edu:'uni:his'},
+ {id:'quim',l:['Químico júnior|Química júnior','Químico industrial|Química industrial','Químico sênior|Química sênior','Diretor de laboratório|Diretora de laboratório'],sal:58000,edu:'uni:qui'},
+ {id:'peri',l:['Perito criminal|Perita criminal','Perito sênior|Perita sênior','Chefe da perícia','Diretor do instituto de criminalística|Diretora do instituto de criminalística'],sal:62000,edu:'uni:qui,bio,far'},
+ {id:'fisp',l:['Físico pesquisador|Física pesquisadora','Físico sênior|Física sênior','Líder de laboratório','Diretor científico|Diretora científica'],sal:60000,edu:'uni:fis'},
+ {id:'pedg',l:['Pedagogo|Pedagoga','Coordenador pedagógico|Coordenadora pedagógica','Vice-diretor de escola|Vice-diretora de escola','Diretor de escola|Diretora de escola'],sal:40000,edu:'uni:ped'},
+ {id:'trei',l:['Auxiliar técnico|Auxiliar técnica','Preparador físico|Preparadora física','Treinador|Treinadora','Técnico da seleção|Técnica da seleção'],sal:45000,edu:'uni:edf'},
+ {id:'psio',l:['Analista de RH','Psicólogo organizacional|Psicóloga organizacional','Gerente de pessoas','Diretor de RH|Diretora de RH'],sal:52000,edu:'uni:psi,adm'},
+ {id:'dado',l:['Analista de dados','Cientista de dados','Cientista de dados sênior','Diretor de dados|Diretora de dados'],sal:78000,edu:'uni:cc,eco,fis'},
+ {id:'game',l:['Desenvolvedor de jogos júnior|Desenvolvedora de jogos júnior','Desenvolvedor de jogos|Desenvolvedora de jogos','Game designer sênior','Diretor de estúdio|Diretora de estúdio'],sal:58000,edu:'uni:cc,art'},
+ {id:'sec',l:['Analista de segurança','Especialista em segurança','Hacker ético sênior|Hacker ética sênior','Chefe de segurança da informação'],sal:70000,edu:'uni:cc'},
+ {id:'petr',l:['Engenheiro de petróleo júnior|Engenheira de petróleo júnior','Engenheiro de petróleo|Engenheira de petróleo','Engenheiro sênior de plataforma|Engenheira sênior de plataforma','Diretor de exploração|Diretora de exploração'],sal:95000,edu:'uni:eng,qui'},
+ {id:'impr',l:['Assessor de imprensa|Assessora de imprensa','Coordenador de comunicação|Coordenadora de comunicação','Gerente de comunicação','Diretor de comunicação|Diretora de comunicação'],sal:44000,edu:'uni:jor,rel'},
+ {id:'rote',l:['Roteirista júnior','Roteirista','Roteirista-chefe','Showrunner'],sal:42000,edu:'uni:jor,art'},
+ {id:'cext',l:['Analista de comércio exterior','Especialista em comércio exterior','Gerente de exportação','Diretor internacional|Diretora internacional'],sal:58000,edu:'uni:rel,eco,adm'},
+ {id:'aeng',l:['Engenheiro aeronáutico júnior|Engenheira aeronáutica júnior','Engenheiro aeronáutico|Engenheira aeronáutica','Engenheiro de voo sênior|Engenheira de voo sênior','Diretor de projetos aeroespaciais|Diretora de projetos aeroespaciais'],sal:90000,edu:'uni:aer,eng'},
+ {id:'ctrl',l:['Controlador de tráfego aéreo|Controladora de tráfego aéreo','Controlador sênior|Controladora sênior','Supervisor de torre|Supervisora de torre','Chefe do controle aéreo'],sal:70000,edu:'uni:aer',sm:60},
+ {id:'somm',l:['Sommelier','Sommelier-chefe','Consultor de vinhos|Consultora de vinhos','Dono de vinícola|Dona de vinícola'],sal:40000,edu:'uni:gas'},
+ {id:'prmd',l:['Assistente de produção de moda','Produtor de moda|Produtora de moda','Editor de moda|Editora de moda','Diretor de revista de moda|Diretora de revista de moda'],sal:38000,edu:'uni:moda,jor'},
+ {id:'fari',l:['Farmacêutico industrial|Farmacêutica industrial','Pesquisador de medicamentos|Pesquisadora de medicamentos','Gerente de produção farmacêutica','Diretor de laboratório farmacêutico|Diretora de laboratório farmacêutico'],sal:60000,edu:'uni:far'},
+ {id:'orto',l:['Ortodontista','Ortodontista sênior','Dono de clínica|Dona de clínica','Rede de clínicas'],sal:95000,edu:'uni:odo'},
+ {id:'audi',l:['Auditor júnior|Auditora júnior','Auditor|Auditora','Auditor sênior|Auditora sênior','Sócio de auditoria|Sócia de auditoria'],sal:70000,edu:'uni:cont,eco'},
+ {id:'gproj',l:['Analista de projetos','Gerente de projetos','Gerente de portfólio','Diretor de operações|Diretora de operações'],sal:66000,edu:'uni:adm,eng'},
+ {id:'zoot',l:['Zootecnista','Veterinário de grandes animais|Veterinária de grandes animais','Consultor rural|Consultora rural','Dono de haras|Dona de haras'],sal:52000,edu:'uni:vet,bio'},
+ {id:'ambi',l:['Analista ambiental','Biólogo ambiental|Bióloga ambiental','Consultor ambiental sênior|Consultora ambiental sênior','Diretor de sustentabilidade|Diretora de sustentabilidade'],sal:50000,edu:'uni:bio,qui'},
+ {id:'enfu',l:['Enfermeiro de UTI|Enfermeira de UTI','Enfermeiro-chefe|Enfermeira-chefe','Supervisor de enfermagem|Supervisora de enfermagem','Diretor de enfermagem|Diretora de enfermagem'],sal:52000,edu:'uni:enf'},
+ {id:'urb',l:['Urbanista júnior','Urbanista','Urbanista sênior','Secretário de urbanismo|Secretária de urbanismo'],sal:56000,edu:'uni:arq'},
+ {id:'econ',l:['Economista júnior','Economista','Economista-chefe','Diretor do banco central|Diretora do banco central'],sal:72000,edu:'uni:eco'},
+ {id:'publ',l:['Redator publicitário|Redatora publicitária','Diretor de criação|Diretora de criação','Vice-presidente de criação','Dono de agência|Dona de agência'],sal:46000,edu:'uni:jor,adm,art'}
+);
+// quem tem diploma vê mais vagas da própria área (como no mercado de verdade)
+openings=(o=>function(){ const m=S.me, first=!m.yr.openings; const r=o.apply(this,arguments);
+  if(first&&m.age>=18&&m.edu.deg.some(d=>d.startsWith('uni:')||d.startsWith('post:'))){ const fit=JOBS.filter(j=>!j.pt&&j.edu&&j.edu!=='medio'&&eduOk(j.edu)&&!m.yr.openings.some(x=>x.id===j.id));
+    R.shuffle(fit).slice(0,4).forEach(j=>{ const size=pickSize(); m.yr.openings.push({id:j.id,co:companyName(),size,mul:(1+R.int(-8,18)/100)*SIZES[size].mul}); }); }
+  return r||m.yr.openings; })(openings);
+
+// ===== Carteira nova: os pais podem dar um carro, conforme o dinheiro da família =====
+function parentCar(){ const m=S.me, ps=parents(); if(!ps.length||S.flags.famBroke) return;
+  const cls=S.flags.cls||'media', fam=famMoney(), bond=ps.reduce((s,p)=>s+(p.bond||50),0)/ps.length;
+  let ch=({pobre:.05,media:.2,rica:.55,milionaria:.85,realeza:.95}[cls]||.2)+Math.min(.2,fam/2e6); if(bond<35) ch*=.35; if(m.karma<25) ch*=.7;
+  if(!R.chance(ch)) return;
+  const budget=Math.min(fam*.35,{pobre:30000,media:80000,rica:260000,milionaria:900000,realeza:3e6}[cls]||80000);
+  const ok=CAR_MODELS.filter(c=>!c.classic&&['Popular','Sedã','SUV','Picape','Elétrico','Conversível','Esportivo','Superesportivo'].includes(c.cat)), novos=ok.filter(c=>c.v<=budget), usados=ok.filter(c=>c.v*.45<=budget);
+  const used=!novos.length; const list=(used?usados:novos).sort((a,b)=>b.v-a.v).slice(0,7); if(!list.length) return;
+  const c=R.pick(list), age=used?R.int(4,12):0, v=Math.round(c.v*(used?Math.max(.25,.85-age*.05):1)/100)*100, cor=R.pick(CAR_COLORS);
+  let left=v; ps.slice().sort((a,b)=>(b.money||0)-(a.money||0)).forEach(p=>{ const t=Math.min(left,Math.max(0,p.money||0)); p.money-=t; left-=t; });
+  const nome=`${c.b} ${c.m}${used?' '+(S.year-age):' 0 km'}`;
+  m.assets.push({id:newId(),k:'carro',n:`${nome} ${cor}`,value:v,cond:used?R.int(55,85):100,buy:v,cor,model:nome});
+  ps.forEach(p=>p.bond=clamp((p.bond||50)+8)); st('happy',used?12:18); cnt('carroPais');
+  const quem=ps.length>1?'Meus pais':ps[0].rel==='mae'?'Minha mãe':'Meu pai';
+  const x=used?R.pick([`${quem} juntaram dinheiro escondido por anos. Na garagem, um ${nome} ${cor}, lavado e com cheirinho de pinho. Não é zero, mas é meu.`,`${quem} chegaram com um ${nome} ${cor} usado e um sorriso enorme. "Arranhado, mas é seu."`]).replace(/^(Minha mãe|Meu pai) juntaram/,'$1 juntou').replace(/^(Minha mãe|Meu pai) chegaram/,'$1 chegou')
+    :R.pick([`${quem} me esperavam na porta com uma chave amarrada num laço. Lá fora: um ${nome} ${cor}!`,`Achei que era só um jantar de comemoração. Na saída do restaurante, ${quem.toLowerCase()} apontaram para um ${nome} ${cor} com laço vermelho.`]).replace(/^(Minha mãe|Meu pai) me esperavam/,'$1 me esperava').replace(/(minha mãe|meu pai) apontaram/,'$1 apontou');
+  log(`Ganhei um ${nome} ${cor} de presente de ${ps.length>1?'meus pais':ps[0].rel==='mae'?'minha mãe':'meu pai'}.`,'good');
+  MQ.splice(1,0,{k:'Presente',t:'Um carro de presente!',x:`${x}\n\nValor: ${fmt(v)}.`,top:typeof carSVG==='function'?`<div class="mkcar">${carSVG(c,cor,150)}</div>`:''}); }
+
+// ===== Comerciantes nos modos fictícios: às vezes aparece alguém vendendo até 4 coisas; muda todo dia =====
+// moeda de cada mundo: isekai ouro · zumbi sucata · herói dinheiro de verdade · Marte dados de pesquisa · ilha escambo (comida)
+const MERC={
+  zumbi:{chance:.4,cur:'zmat',nomes:[['Mascate do carrinho de supermercado','🛒','Um velho empurra um carrinho cheio de tralha e assobia como se o mundo não tivesse acabado.'],
+      ['Contrabandista ex-militar','🎖️','Uniforme rasgado, olhar cansado e uma mochila que tilinta.'],['Família de mercadores nômades','🚐','Uma van pintada à mão para no acostamento. Três gerações vendendo o que acharam.'],
+      ['Freira que troca remédios','⛪','Ela diz que Deus provê. A sucata ajuda.'],['Garoto do skate','🛹','Não deve ter quinze anos, mas negocia como gente grande.']],
+    pool:[['lata',2],['arroz',3],['racao',4],['sardinha',2],['agua',1],['kit',4],['antib',4],['analg',2],['curativo',2],['calm',3],['gas',3],['muni',3],['reparo',4],['pilha',2],['lanterna',3],['radio',4],
+      ['faca',2],['machado',5],['pistola',8],['espingarda',11],['colete',9],['roupa',3],['livro',1],['baralho',1],['vacina',14],['molotov',4]]},
+  ilha:{chance:.3,cur:'troca',nomes:[['Pescador de passagem','🛶','Um bote encosta na praia. O pescador não fala português, mas entende muito bem de troca.'],
+      ['Náufrago do outro lado da ilha','🧔','Barba até o peito. Diz que está aqui há três anos e tem "uns achados".'],['Contrabandista de lancha','🚤','Não quer saber de resgate. Quer saber o que você tem para dar.'],
+      ['Velha da canoa','🛶','Ela rema sozinha entre as ilhas e troca coisas há décadas.']],
+    pool:[['isqueiro',3],['corda',2],['lona',3],['faca',2],['kit',3],['analg',1],['sinal',3],['aguaf',1],['peixe',1],['livro',1],['baralho',1],['lanterna',2],['arco',3],['antib',2]]},
+  isekai:{chance:.45,cur:'ouro',nomes:[['Mercador ambulante','🐫','Um camelo carregado até o pescoço e um mercador que sorri demais.'],
+      ['Anão com carroça','🧔','"Ferro bom, preço justo. Mais ou menos justo."'],['Elfa vendedora de poções','🧝‍♀️','Os frascos brilham em cores que você nem sabia que existiam.'],
+      ['Goblin do bazar suspeito','👺','Tudo "caiu da carroça". Literalmente.'],['Gato mercador falante','🐈','Usa chapéu, fala em rimas e aceita só moedas de ouro.'],['Bruxa da floresta','🧙‍♀️','Vende coisas úteis e outras que é melhor não perguntar.']],
+    pool:[['pocao',30],['mana',30],['paoelf',14],['carne',10],['queijo',9],['maca',12],['hidromel',4],['ervas',8],['espadaelf',150],['cajado',90],['arcoelf',140],['martelo',170],['adaga',110],['runica',380],['cristal',90],['calm',20]]},
+  heroi:{chance:.4,cur:'$',nomes:[['Camelô da esquina','🧺','"Tem de tudo, chefia. Até coisa de herói."'],['Inventor de garagem','🔧','Um senhor de jaleco manchado mostra protótipos que talvez funcionem.'],
+      ['Vendedor do mercado clandestino','🕶️','Ele te reconhece mesmo de máscara. Mau sinal. Ou bom negócio.'],['Loja de fantasias que fecha amanhã','🎭','Liquidação total. A dona jura que nunca vendeu para um herói de verdade.']],
+    pool:[['kit',800],['analg',200],['estim',600],['calm',300],['taser',1500],['bastao',1200],['gadget',6000],['radio',300],['lanterna',150],['livro',60],['binoculo',500]]},
+  marte:{chance:.3,cur:'ciencia',nomes:[['Colono da Base Sul','👩‍🚀','Um rover desconhecido estaciona na porta. A Base Sul quer trocar suprimentos por dados.'],
+      ['Drone de entrega da Terra','🛸','Um drone pousa com um contêiner e um painel: "Pague em dados de pesquisa".'],['Mineradora de asteroide de passagem','☄️','Uma nave de mineração faz escala. A tripulação quer amostras e dados.']],
+    pool:[['liof',3],['pasta',2],['batata',2],['o2',4],['kit',4],['remendo',3],['pecas',3],['analg',2],['calm',3],['livro',1],['baralho',1],['foto',2],['radio',2]]},
+};
+const mercCur=(cur,n)=>cur==='ouro'?`${n} moedas`:cur==='zmat'?`${n} de sucata`:cur==='$'?fmt(n):cur==='ciencia'?`${n}% de pesquisa`:`${n} de comida`;
+function mercHas(sc,cur){ return cur==='ouro'?sc.ouro||0:cur==='zmat'?sc.zmat||0:cur==='$'?S.me.money:cur==='ciencia'?sc.ciencia||0:countCat('comida'); }
+function mercPay(sc,cur,n){ if(cur==='ouro') sc.ouro-=n; else if(cur==='zmat') sc.zmat-=n; else if(cur==='$') S.me.money-=n; else if(cur==='ciencia') sc.ciencia-=n; else for(let i=0;i<n;i++) takeItem('@comida'); }
+function mercRoll(sc){ const M=MERC[sc.id]; sc.merc=null; if(!M||!R.chance(M.chance)) return;
+  const who=R.pick(M.nomes), n=rnd(1,4), lv=sc.id==='isekai'?(sc.rota||0):0;
+  const offers=R.shuffle(M.pool.slice()).slice(0,n).filter(([id])=>SCI[id]).map(([id,p])=>{ let v=Math.max(1,Math.round(p*(.8+R.f()*.45)*(1+lv*.08)));
+    if(M.cur==='$') v=Math.round(v/50)*50||50; return {id,v,hp:rnd(70,100),sold:0}; });
+  if(!offers.length) return;
+  sc.merc={n:who[0],ic:who[1],x:who[2],cur:M.cur,dia:sc.dia,offers};
+  scLog(`${who[1]} ${who[0]} apareceu oferecendo ${offers.length===1?'uma coisa':offers.length+' coisas'}. Só hoje.`,'good'); }
+scNextDay=(o=>function(){ const r=o.apply(this,arguments); const sc=S.scen; if(sc&&sc.v===SC_V&&S.me.alive) mercRoll(sc); return r; })(scNextDay);
+function mercBuy(sc,x){ const M=sc.merc; if(!M||x.sold) return 'Já vendido.';
+  if(mercHas(sc,M.cur)<x.v) return `Não tenho ${mercCur(M.cur,x.v)}.`;
+  if(sc.inv.length>=bagCap()) return 'Não tenho espaço para carregar mais nada.';
+  mercPay(sc,M.cur,x.v); addItem(x.id,x.hp,true); x.sold=1; cnt('mercCompras');
+  return R.pick([`Fechei negócio: ${itIc(x.id)} ${itN(x.id)} por ${mercCur(M.cur,x.v)}.`,`${M.n} embrulhou ${itN(x.id).toLowerCase()} com cuidado. Paguei ${mercCur(M.cur,x.v)}.`,`Pechinchei, perdi a pechincha e paguei ${mercCur(M.cur,x.v)} mesmo. Mas ${itN(x.id).toLowerCase()} é meu.`]); }
+V.scLocal=(o=>()=>{ const r=o(), sc=S.scen; if(!sc||!sc.merc||sc.merc.dia!==sc.dia) return r; const M=sc.merc;
+  const add=[{sec:`${M.ic} ${M.n}`},{html:`<div class="card"><p>${esc(M.x)}</p>${kv('Você tem',mercCur(M.cur,mercHas(sc,M.cur)))}<p style="color:var(--muted);font-size:12.5px">Comprar não gasta energia. Amanhã ele já foi embora.</p></div>`}];
+  M.offers.forEach(x=>add.push({ic:itIc(x.id),l:itN(x.id),s:x.sold?'Comprado':`Conservação ${x.hp}%`,r:x.sold?'✓':mercCur(M.cur,x.v),dis:!!x.sold||mercHas(sc,M.cur)<x.v,why:x.sold?'Já comprei.':`Preciso de ${mercCur(M.cur,x.v)}.`,
+    on:()=>scAct(()=>mercBuy(sc,x),M.n)}));
+  r.items.splice(1,0,...add); return r; })(V.scLocal);
+
+// ===== Voltar de um modo fictício tem preço: quanto mais tempo longe, mais a vida real sente =====
+const VOLTA_ONDE={zumbi:'no apocalipse',ilha:'na ilha',isekai:'em Eldoria',marte:'em Marte'};
+function voltaConseq(id,d,win){ const m=S.me, L=[], adult=m.age>=18, onde=VOLTA_ONDE[id]||'longe';
+  // trabalho
+  if(m.job&&!m.job.hero){ const co=m.job.co||'a empresa'; m.job.perf=clamp(m.job.perf-Math.min(45,Math.round(d*1.3)));
+    const fire=Math.min(.92,Math.max(0,(d-7)/34)+(m.job.perf<25?.15:0));
+    if(R.chance(fire)){ let t='meu cargo'; try{ t=jobTitle(m.job)||t; }catch(e){} endJob(); st('happy',-10); cnt('demitidoMundo');
+      L.push('💼 '+R.pick([`Fui demitid${oa()} por abandono de emprego. ${d} dias sem aparecer e sem atestado.`,`Quando voltei, meu crachá não abria mais a catraca. ${co} me demitiu.`,`O RH me mandou ${R.int(9,40)} e-mails. O último dizia: "desligamento por justa causa".`,`Alguém já estava sentado na minha mesa. Perdi o cargo de ${t.toLowerCase()}.`]));
+      log(`Perdi o emprego por ter passado ${d} dias ${onde}.`,'bad'); }
+    else if(d>=4) L.push('💼 '+R.pick([`Meu chefe me deu uma advertência por escrito. Meu desempenho despencou.`,`Inventei uma doença rara para explicar o sumiço. Ninguém acreditou, mas não me demitiram.`,`Voltei ao trabalho com ${R.int(200,900)} e-mails não lidos e uma advertência.`]));
+    else L.push('💼 Ninguém no trabalho percebeu que eu tinha sumido. Isso é bom ou ruim?'); }
+  // estudos
+  if(m.edu.cur){ const cur=m.edu.cur; cur.grade=clamp(cur.grade-Math.min(45,Math.round(d*1.2)));
+    if(d>=25&&!['fund','medio'].includes(cur.type)&&R.chance(Math.min(.6,(d-20)/60))){ m.edu.cur=null; st('happy',-8); L.push('🎓 A faculdade cancelou minha matrícula por abandono. Vou ter que começar de novo um dia.'); log('Perdi a vaga na faculdade por abandono.','bad'); }
+    else if(d>=10) L.push('🎓 '+R.pick(['Reprovei por falta em quase todas as matérias. Minhas notas foram para o chão.','A diretoria chamou meus responsáveis para explicar as faltas. Minhas notas despencaram.','Perdi todas as provas do bimestre. Vai ser difícil recuperar.']));
+    else if(d>=3) L.push('📚 Perdi umas aulas e minhas notas caíram um pouco.'); }
+  // cargo político
+  if(m.office){ m.office.appr=clamp(m.office.appr-Math.min(40,d)); if(d>=5) L.push(`🏛️ A imprensa descobriu que sumi por ${d} dias. Minha aprovação caiu.`); }
+  // relacionamento
+  const p=partner();
+  if(p){ p.bond=clamp(p.bond-Math.min(50,Math.round(d*.7)));
+    if(d>=20&&R.chance(Math.min(.75,d/110+(p.bond<30?.2:0)))){ if(p.rel==='conjuge') divorce(p,true); else { p.rel='ex'; st('happy',-15); log(`${p.first} terminou comigo enquanto eu estava ${onde}.`,'bad'); }
+      L.push('💔 '+R.pick([`${p.first} não me esperou. Achou que eu tinha ${R.pick(['fugido com alguém','morrido','ido embora de vez'])} e seguiu a vida.`,`Encontrei minhas coisas em caixas na porta. Um bilhete de ${p.first}: "Nem um recado em ${d} dias?"`,`${p.first} já estava com outra pessoa quando voltei.`])); }
+    else if(d>=5){ L.push('❤️ '+R.pick([`${p.first} chorou, gritou e depois me abraçou por um tempão.`,`${p.first} me deu um gelo de uma semana. Justo.`,`${p.first} quer saber onde eu estava. Não sei como contar.`])); } }
+  // família
+  const ps=parents();
+  if(ps.length&&d>=3){ ps.forEach(x=>x.bond=clamp(x.bond+(R.chance(.5)?5:-5)));
+    L.push('👪 '+(m.age<18?R.pick(['Meus pais tinham colado cartazes com a minha foto pela cidade. Fiquei de castigo até não sei quando.','Minha mãe desmaiou quando me viu entrar pela porta. Depois veio o castigo.']):R.pick(['Meus pais tinham feito um boletim de ocorrência de desaparecimento.','Minha mãe acendeu velas na igreja todos os dias em que eu estive fora.','Meu pai envelheceu dez anos nesses dias. Me abraçou sem dizer nada.'])));
+    if(d>=15){ m.fame=clamp(m.fame+3); L.push('📺 Meu sumiço tinha aparecido no jornal local.'); } }
+  // amigos e bichos
+  people('amigo').forEach(f=>{ f.bond=clamp(f.bond-Math.min(20,Math.round(d*.3))); });
+  const pets=people('pet'); if(pets.length&&d>=12){ const pt=R.pick(pets);
+    if(R.chance(Math.min(.5,d/80))&&!ps.length){ pt.alive=false; L.push(`🐾 ${pt.first} fugiu de casa enquanto eu estava fora. Nunca mais apareceu.`); log(`${pt.first} fugiu enquanto eu estava ${onde}.`,'bad'); st('happy',-10); }
+    else L.push(`🐾 ${pt.first} ${ps.length?'ficou com a minha família':'foi cuidado por um vizinho'} e quase não me reconheceu.`); }
+  // contas
+  if(adult&&d>=5){ const v=Math.round(d*R.int(40,110)/10)*10; m.money-=v; L.push(`🧾 Contas atrasadas, multa e juros: ${fmt(v)}.`); }
+  // ninguém acredita
+  if(win&&R.chance(.6)) L.push('🗣️ '+R.pick(['Tentei contar a verdade. Riram de mim.','Contei tudo para um amigo. Ele me indicou um psicólogo.','Ninguém acredita onde eu estive. Às vezes nem eu.']));
+  st('happy',-Math.min(10,Math.floor(d/6)));
+  return L; }
+scenEnd=(o=>function(win,txt){ const sc=S.scen, id=sc&&sc.id, d=sc?sc.dia:0; const r=o.apply(this,arguments);
+  if(id&&id!=='heroi'&&!S.scen&&S.me.alive){ const L=voltaConseq(id,d,win); if(L.length) MQ.push({k:'Vida real',t:'De volta à vida real',x:`Passei ${d} ${d===1?'dia':'dias'} ${VOLTA_ONDE[id]||'longe'}. A vida aqui não parou.\n\n${L.join('\n\n')}`}); }
+  return r; })(scenEnd);
+
+// ===== Começos dos modos fictícios: histórias maiores e sorteadas, e cada uma muda o que você tem no começo =====
+POWERS.push('controlar a eletricidade','regeneração','teletransporte','controlar plantas','grito sônico','elasticidade','controlar sombras','magnetismo','encolher','visão de raio X');
+Object.assign(CODI,{'controlar a eletricidade':['Voltagem','Curto-Circuito','Faísca Azul'],'regeneração':['Imortal','Fênix Cinzenta','Remendo'],'teletransporte':['Salto','Atalho','Piscar'],
+  'controlar plantas':['Ipê','Raiz','Hera'],'grito sônico':['Sirene','Trovão','Eco Vermelho'],'elasticidade':['Borracha','Mola','Estica'],'controlar sombras':['Breu','Eclipse','Penumbra'],
+  'magnetismo':['Ímã','Polo Norte','Ferrugem'],'encolher':['Formiga','Grão','Miúdo'],'visão de raio X':['Lupa','Olho de Vidro','Raio-X']});
+const VIL2=['Doutora Vespertina','O Cobrador','Senhor Fumaça','A Engenheira','Cabeça de Bronze'];
+VILOES.push(...VIL2);
+// cada começo: título, história, efeitos (itens, grupo, atributos)
+const INICIOS={
+ zumbi:[
+  {k:'hospital',tt:'O plantão que nunca acabou',t:'Você estava no hospital visitando alguém quando o primeiro paciente "morreu" e levantou da maca. Em vinte minutos, os corredores viraram um matadouro. Você se trancou na farmácia com uma enfermeira que não parava de rezar e um segurança com o braço quebrado. Três dias depois, a cidade estava em silêncio. Vocês saíram pela garagem numa ambulância, com a sirene desligada e os bolsos cheios de remédio.',
+   fx:sc=>{ sc.veh[1]={k:'ambulancia',hp:rnd(60,85)}; ['kit','antib','analg','calm'].forEach(i=>addItem(i,null,true)); mkCrew({role:'med'}); }},
+  {k:'quartel',tt:'O último pelotão',t:'O exército montou uma barreira na avenida e prometeu que estava tudo sob controle. Você estava na fila do abrigo quando a barreira caiu. No meio da correria, um sargento ferido te entregou a pistola dele e disse uma única palavra: "corre". Você correu. No pátio do quartel abandonado, achou um jipe com meio tanque, uma caixa de munição e dois soldados que tinham perdido a fé em tudo, menos em você.',
+   fx:sc=>{ sc.veh[1]={k:'jipe',hp:rnd(65,90)}; ['muni','muni','racao','colete'].forEach(i=>addItem(i,null,true)); sc.arma={id:'pistola',hp:rnd(60,85)}; mkCrew({role:'ati'}); }},
+  {k:'shopping',tt:'Fechados no shopping',t:'Era sábado e você só tinha ido comprar um tênis. Quando as portas de aço desceram, ninguém entendeu nada. Do lado de fora, as mãos batiam no vidro. Do lado de dentro, quarenta pessoas viraram vinte, depois dez, depois só o seu grupo. Vocês viveram duas semanas de praça de alimentação e loja de brinquedos até a comida acabar. A saída foi pelo estacionamento, numa picape do segurança, com o porta-malas cheio de doce.',
+   fx:sc=>{ ['doce','doce','salgadinho','violao','lanterna'].forEach(i=>addItem(i,null,true)); sc.arma={id:'taco',hp:rnd(60,90)}; }},
+  {k:'presidio',tt:'As grades abriram sozinhas',t:'Você estava preso por um erro, ou nem tão erro assim. Na noite em que a energia caiu, as celas destravaram e os guardas sumiram. Alguns presos fugiram rindo. Outros não chegaram ao portão. Você saiu com dois companheiros de cela que não confiam em ninguém, um estilete feito de escova de dente e uma regra simples: ninguém fica para trás, mas ninguém manda em você.',
+   fx:sc=>{ crew().forEach(c=>c.lv=Math.max(35,c.lv-12)); mkCrew({role:'bat',lv:60}); sc.arma={id:'estilete',hp:90}; addItem('faca',null,true); S.me.fight=clamp(S.me.fight+3); }},
+  {k:'casamento',tt:'O casamento que virou pesadelo',t:'Você era convidad{o} num casamento no interior. O padrinho chegou atrasado, pálido, com uma mordida no pescoço. Na hora da valsa, ele mordeu a noiva. A festa virou correria entre mesas de doce e o padre tocando o sino sem parar. Você fugiu na van do bufê com o fotógrafo, a cozinheira e um tio bêbado que, por incrível que pareça, sabia atirar.',
+   fx:sc=>{ sc.veh[1]={k:'van',hp:rnd(55,80)}; ['doce','arroz','lata','lata'].forEach(i=>addItem(i,null,true)); mkCrew({role:'coz'}); }},
+  {k:'escola',tt:'A escola virou fortaleza',t:'A escola foi o abrigo oficial do bairro por onze dias. Carteiras viraram barricadas, a quadra virou dormitório e a merendeira virou general. No décimo segundo dia, uma janela quebrou durante a madrugada. Você saiu na van escolar com quem conseguiu salvar, alguns livros da biblioteca e um mapa da cidade arrancado da parede da sala de geografia.',
+   fx:sc=>{ sc.veh[1]={k:'van',hp:rnd(55,80)}; ['livro','mapa','baralho','miojo'].forEach(i=>addItem(i,null,true)); mkCrew({role:'pro'}); }}],
+ ilha:[
+  {k:'aviao',tt:'O voo que não chegou',t:'O piloto anunciou turbulência e pediu calma. Depois, só o barulho do metal se partindo. Você acordou boiando, agarrad{o} a uma mala que não era sua, com gosto de sal e querosene na boca. A correnteza te levou até uma praia branca, sem pegadas, sem barulho de carro, sem ninguém. Na mala, roupas de outra pessoa e algumas coisas que talvez salvem sua vida.',
+   fx:sc=>{ ['isqueiro','livro'].forEach(i=>addItem(i,null,true)); }},
+  {k:'cruzeiro',tt:'O cruzeiro afundou',t:'Era para ser uma semana de bufê livre e show de mágica no navio. Na terceira noite, uma tempestade virou o casco como um brinquedo. Você pulou num bote salva-vidas com outras pessoas de pijama e ninguém sabia remar. Dois dias depois, o bote encalhou numa ilha. O resto do navio, e do mundo, ficou para trás.',
+   fx:sc=>{ mkCrew(); mkCrew(); ['biscoito','biscoito','kit','sinal'].forEach(i=>addItem(i,null,true)); }},
+  {k:'iate',tt:'A festa no iate',t:'Um amigo rico te chamou para uma festa num iate. Champanhe, música alta e ninguém olhando o radar. O iate bateu num recife de madrugada. Quando o sol nasceu, você estava sozinh{o} numa praia, ainda de roupa de festa, com uma garrafa vazia na mão e a caixa de emergência do barco ao seu lado, meio enterrada na areia.',
+   fx:sc=>{ ['kit','faca','shake','corda','sinal'].forEach(i=>addItem(i,null,true)); scStat('san',-8); }},
+  {k:'pesca',tt:'A pescaria que deu errado',t:'Você foi pescar em alto mar com um barqueiro que jurava conhecer aquelas águas. O motor morreu, o rádio também, e a correnteza fez o resto. Depois de três dias à deriva, o barco se partiu nas pedras de uma ilha. O barqueiro sobreviveu, resmungando. Ele sabe pescar com qualquer coisa, mas não sabe pedir desculpas.',
+   fx:sc=>{ mkCrew({role:'pes'}); ['corda','faca','peixe','peixe'].forEach(i=>addItem(i,null,true)); }},
+  {k:'reality',tt:'O reality show acabou de verdade',t:'Você foi selecionad{o} para um reality de sobrevivência: um mês numa ilha, câmeras escondidas e prêmio milionário. Na primeira noite, um furacão arrastou o barco da produção. As câmeras continuam piscando nas árvores, mas ninguém está assistindo. Você tem o kit do programa e um adversário que agora é o seu único colega.',
+   fx:sc=>{ mkCrew({role:'esc'}); ['lona','isqueiro','faca','agua'].forEach(i=>addItem(i,null,true)); }}],
+ isekai:[
+  {k:'caminhao',tt:'O caminhão de sempre',t:'Um caminhão desgovernado, uma luz branca e um silêncio enorme. Quando você abriu os olhos, estava num campo com dois sóis no céu e uma janela azul flutuando na sua frente: "Bem-vind{o} a Eldoria. Status: herói. Nível 1." Uma deusa entediada apareceu por três segundos, disse "boa sorte", e sumiu. Pelo menos ela deixou umas moedas.',
+   fx:sc=>{ sc.ouro+=30; }},
+  {k:'invocado',tt:'Invocad{o} pelos magos',t:'Você estava no banho quando o chão virou um círculo de luz. Caiu, molhad{o} e de toalha, no meio de um salão cheio de magos de túnica. "O herói da profecia!", gritou o mais velho. Eles te vestiram, te deram uma espada élfica e uma bolsa de ouro, e explicaram que o reino inteiro depende de você. Ninguém perguntou se você queria.',
+   fx:sc=>{ sc.arma={id:'espadaelf',hp:90}; sc.ouro+=120; scStat('san',-5); }},
+  {k:'metro',tt:'A porta errada do metrô',t:'Você desceu na estação de sempre, mas a porta do vagão abriu para uma floresta. Quando olhou para trás, o trem já tinha sumido. Você chegou em Eldoria com a mochila do trabalho: uma lanterna, um isqueiro e um livro pela metade. Os moradores acham que a lanterna é magia. Você não vai corrigir ninguém.',
+   fx:sc=>{ ['lanterna','isqueiro','livro'].forEach(i=>addItem(i,null,true)); sc.ouro+=10; }},
+  {k:'renascido',tt:'Renasci como filh{o} de mercador',t:'Você morreu dormindo, sem drama. Acordou num berço de Eldoria, com memórias de outra vida. Cresceu numa família de mercadores ricos, aprendeu a ler mapas antes de andar e a pechinchar antes de falar. Aos dezoito anos, pegou a herança, uma adaga da família e partiu atrás do Rei Demônio. Seus pais acham que é uma fase.',
+   fx:sc=>{ sc.ouro+=280; sc.arma={id:'adaga',hp:85}; if(sc.at) sc.at.agi+=2; }},
+  {k:'abencoado',tt:'A bênção da deusa',t:'Um raio. Uma luz dourada. Uma deusa de verdade, dessa vez preocupada: "O Rei Demônio está forte demais. Vou te dar um empurrão." Você acordou em Eldoria já sabendo lutar, com o corpo leve e a mana correndo nas veias. A janela de status piscava em dourado: "Abençoad{o}". Os sacerdotes do templo quase desmaiaram quando viram.',
+   fx:sc=>{ sc.lvl=3; sc.hl=100; sc.mana=100; if(sc.at){ sc.at.mag+=3; sc.at.vit+=2; } sc.pts=(sc.pts||0)+3; addItem('pocao',null,true); }},
+  {k:'gamer',tt:'Game over, game start',t:'Você estava há trinta horas jogando sem parar quando a tela ficou branca. Acordou dentro de um jogo que nunca tinha visto, mas que parecia estranhamente familiar. Você sabe exatamente onde ficam os baús escondidos, ou acha que sabe. Na primeira hora, já tinha achado um cristal de mana atrás de uma cachoeira.',
+   fx:sc=>{ addItem('cristal',null,true); addItem('mana',null,true); if(sc.at) sc.at.mag+=2; }}],
+ heroi:[
+  {k:'raio',tt:'O raio no laboratório',t:'Uma tempestade, um laboratório de física e um raio que entrou pela janela e atravessou você. Os médicos disseram que era impossível sobreviver. Três dias depois, você descobriu que podia {poder}. Ninguém sabe ainda, nem a sua família. Na cidade, {inimigo} começa a aparecer nos jornais, e você sente que um dia vocês vão se encontrar.',
+   fx:sc=>{ }},
+  {k:'meteorito',tt:'A pedra que caiu do céu',t:'Um meteorito do tamanho de uma bola de gude caiu no seu quintal. Você pegou com a mão. Doeu como fogo e depois parou. Na manhã seguinte, conseguia {poder}, e com uma força que te assustou. O poder veio forte demais e cedo demais. Do outro lado da cidade, {inimigo} também recebeu um pedaço daquela pedra.',
+   fx:sc=>{ scStat('pw',15); scStat('san',-8); }},
+  {k:'experimento',tt:'Cobaia do governo',t:'Era só um estudo clínico pago: duas semanas num laboratório do governo, comendo bem e assinando papéis. Ninguém leu os papéis. No décimo dia, você acordou capaz de {poder}. Fugiu pela janela do banheiro. O governo sabe quem você é e quer você de volta. A sua identidade secreta já nasce frágil.',
+   fx:sc=>{ scStat('pw',8); scStat('sec',-25); addItem('gadget',null,true); }},
+  {k:'heranca',tt:'O sótão da avó',t:'Depois do enterro da sua avó, você achou no sótão um traje antigo, remendado e dobrado com cuidado, e uma carta: "Agora é a sua vez". Na mesma noite, aprendeu a {poder}. Sua avó foi heroína por quarenta anos e ninguém da família sabia. Ela deixou um traje, alguns contatos e um inimigo que nunca foi preso: {inimigo}.',
+   fx:sc=>{ sc.traje=Math.max(sc.traje||0,1); scStat('rep',10); scStat('pista',15); }},
+  {k:'acidente',tt:'O caminhão-tanque',t:'Um caminhão-tanque com uma carga sem rótulo tombou na frente do seu ônibus. Você ajudou a tirar as pessoas antes da explosão e ficou ensopad{o} de um líquido verde. Virou notícia como "cidadão herói". Uma semana depois, descobriu que podia {poder}. A cidade já gosta de você, mas as câmeras também.',
+   fx:sc=>{ scStat('rep',20); scStat('sec',-10); S.me.fame=clamp(S.me.fame+5); }},
+  {k:'alien',tt:'Não é deste planeta',t:'Seus pais te contaram no seu aniversário, com a voz tremendo: você foi encontrad{o} bebê numa cápsula de metal num milharal. Você sempre achou estranho nunca ter ficado doente. Naquela noite, o poder acordou de vez: você pode {poder}. E, pela primeira vez, sentiu que alguém lá em cima estava procurando por você.',
+   fx:sc=>{ scStat('pw',12); sc.hl=100; }}],
+ marte:[
+  {k:'oficial',tt:'A missão oficial',t:'Você passou seis anos treinando para isso: centrífugas, simuladores, provas e mais provas. Foi escolhid{o} entre milhares. A decolagem foi a coisa mais barulhenta que você já ouviu; o pouso, a mais silenciosa. Agora são você, a equipe e um habitat inflável numa planície vermelha. A nave de resgate chega no sol 30. Até lá, tudo depende de vocês.',
+   fx:sc=>{ addItem('remendo',null,true); }},
+  {k:'turista',tt:'O pacote turístico mais caro do mundo',t:'Você ganhou num sorteio uma vaga de "turista espacial" numa missão de verdade. A equipe não ficou feliz: você ocupa o lugar de um cientista e não sabe nem fechar o traje sozinh{o}. No primeiro sol, você vomitou dentro do capacete. No segundo, descobriu que a nave de volta só vem em trinta. Vai ter que aprender rápido.',
+   fx:sc=>{ crew().forEach(c=>c.lv=Math.max(30,c.lv-15)); ['liof','liof','calm','foto'].forEach(i=>addItem(i,null,true)); }},
+  {k:'clandestino',tt:'Clandestin{o} na carga',t:'Você se escondeu num contêiner de carga, com três garrafas de água e muita coragem. Ninguém sabe como você sobreviveu à viagem. Quando abriram o contêiner em Marte, a equipe ficou dividida entre te abraçar e te jogar pela câmara de descompressão. Você come a comida deles e respira o oxigênio deles. Precisa provar que vale a pena.',
+   fx:sc=>{ crew().forEach(c=>c.lv=Math.max(25,c.lv-22)); scStat('o2',-15); ['agua','pecas'].forEach(i=>addItem(i,null,true)); }},
+  {k:'cientista',tt:'Cientista convidad{o}',t:'Você passou a vida estudando rochas marcianas por fotografia. Quando finalmente te convidaram para ir até lá, você chorou na frente da banca. Trouxe na bagagem um microscópio de mão, cadernos cheios de hipóteses e uma pergunta que te persegue desde criança: houve vida em Marte? Você tem trinta sóis para descobrir.',
+   fx:sc=>{ scStat('ciencia',12); S.me.smarts=clamp(S.me.smarts+3); addItem('livro',null,true); }},
+  {k:'reality',tt:'O reality de Marte',t:'Era um reality show: "Quem ficar mais tempo em Marte ganha". Bilhões de pessoas assistiam. No sol 3, o sinal com a Terra caiu e o programa saiu do ar. Agora não tem plateia, só uma equipe de desconhecidos que você conheceu num palco com fumaça colorida. O prêmio virou outro: voltar para casa.',
+   fx:sc=>{ S.me.fame=clamp(S.me.fame+8); mkCrew({age:rnd(22,35)}); scStat('san',-6); }}],
+};
+const PODER_FRASE={'superforça':'levantar um carro com uma mão só','invisibilidade':'ficar invisível','telecinese':'mover coisas com a mente','supervelocidade':'correr mais rápido que um carro','regeneração':'se curar de qualquer ferimento','teletransporte':'se teletransportar','grito sônico':'gritar tão alto que o concreto racha','elasticidade':'esticar o corpo como borracha','magnetismo':'controlar metais com a mente','encolher':'encolher até o tamanho de uma formiga','visão de raio X':'enxergar através das paredes'};
+const INI_TT=t=>t.replace(/\{o\}/g,oa()).replace(/\{a\}/g,S.me.gender==='F'?'a':'');
+scStart=(o=>function(id){ const vs=INICIOS[id], v=vs?R.pick(vs):null; const r=o.apply(this,arguments); const sc=S.scen; if(!v||!sc||sc.id!==id) return r;
+  try{ v.fx&&v.fx(sc); }catch(e){ console.error(e); }
+  sc.inicio=v.k;
+  const txt=INI_TT(v.t).replace(/\{poder\}/g,PODER_FRASE[sc.poder]||sc.poder||'').replace(/\{inimigo\}/g,sc.inimigo||'').replace(/\{codinome\}/g,sc.codinome||'');
+  if(sc.log[0]&&sc.log[0].lines.length) sc.log[0].lines[0]={t:txt,c:'warn'};
+  const inv=sc.inv.map(x=>itIc(x.id)+' '+itN(x.id)), extra=[];
+  if(sc.arma) extra.push(`Arma: ${itIc(sc.arma.id)} ${itN(sc.arma.id)}`);
+  if(id==='heroi') extra.push(`Poder: ${sc.poder} · domínio ${sc.pw}%`,`Codinome: ${sc.codinome}`,`Arqui-inimigo: ${sc.inimigo}`);
+  if(id==='isekai') extra.push(`Ouro: ${sc.ouro} moedas · nível ${sc.lvl}`);
+  if(crew().length) extra.push(`Grupo: ${crew().map(c=>c.first).join(', ')}`);
+  if(id==='zumbi'&&sc.veh.length) extra.push(`Veículos: ${sc.veh.map(x=>VEH[x.k][1]+' '+VEH[x.k][0]).join(', ')}`);
+  MQ.unshift({k:SCEN[id].n,t:INI_TT(v.tt),x:[txt,extra.concat(inv.length?[`Começo com: ${inv.join(', ')}`]:[]).join('\n')].filter(Boolean).join('\n\n')});
+  return r; })(scStart);
 
 // ===== Membros das equipes: clube ou time da escola, trabalho, carreira especial, equipe de heróis e grupo religioso =====
 // Cada equipe tem gente de verdade (rel 'equipe'): dá para conversar, fazer amizade, namorar ou brigar, como qualquer pessoa.
@@ -11650,6 +11904,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.9',d:'14/10/2026',t:'Faculdade vale a pena, mundos com consequência',itens:['Cada faculdade tem empregos próprios (34 profissões novas, de cientista de dados a maestro) que pagam bem mais do que os sem diploma, e quem tem diploma vê mais vagas da área.','Ao tirar a carteira, seus pais podem te dar um carro, de um popular usado a um superesportivo, conforme o dinheiro da família.','"Ser amigos" funciona mais vezes quanto maior a barra de amizade.','Modos fictícios: comerciantes aparecem em alguns dias oferecendo até 4 itens (ouro, sucata, dinheiro, pesquisa ou troca por comida).','Voltar de um mundo tem consequências: demissão por abandono, notas baixas, matrícula cancelada, namoro acabado, contas atrasadas e família desesperada.','Começos novos e maiores: 28 histórias sorteadas, cada uma com itens, grupo, veículos e vantagens diferentes. Herói ganhou 10 poderes e 5 vilões novos.','Tela inicial redesenhada.']},
   {v:'1.8',d:'14/10/2026',t:'Visual novo',itens:['O botão de Envelhecer não fica mais cortado: o bolo aparece inteiro, com brilho pulsando.','Cabeçalho em degradê, cartões e painéis mais arredondados, janelas de evento com animação e botões novos.','Seções com marcador colorido e alça nos painéis para ficar com cara de app.']},
   {v:'1.7',d:'14/10/2026',t:'Conquistas e selos novos',itens:['73 conquistas, muitas zoeiras e várias secretas, que valem para todas as vidas. Veja em Menu → Conquistas.','Selos novos no fim da vida: Ditador, Filho da noite, Profeta, Detetive, Viajante de mundos, Fogo no rabo e Lobo solitário.','"Fazer amor" substitui "Tentar ter um filho" (a partir dos 18): dá felicidade e, sem proteção, pode vir um bebê.']},
   {v:'1.6.2',d:'14/10/2026',t:'Tela de atualização',itens:['Quando o app se atualiza, aparece um anel de progresso colorido com a música do jogo, notinhas subindo e dicas.','Ao terminar, o jogo abre sozinho na versão nova.']},
@@ -11863,6 +12118,16 @@ computeRibbon=(o=>function(){ const m=S.me, c=m.c||{}; const wins=['zumbi','ilha
 yearMoney=(o=>function(){ const r=o.apply(this,arguments); const s=S.me.seita; if(s&&!s.membro) S.me.c.maxFieis=Math.max(S.me.c.maxFieis||0,s.fieis); return r; })(yearMoney);
 if(/demo-conquistas/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ try{ MQ.length=0; const b=document.querySelector('#modalWrap'); if(b) b.hidden=true; modalOpen=false; UI.open(V.conquistas); }catch(e){} },3500));
 if(/demo-conqpop/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ try{ MQ.length=0; const b=document.querySelector('#modalWrap'); if(b) b.hidden=true; modalOpen=false; META.conq={}; S.me.age=Math.max(S.me.age,19); conqCheck(); pump(); }catch(e){ showErr(e); } },7000));
+if(/demo-inicio/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ try{ MQ.length=0; modalOpen=false; const b=document.querySelector('#modalWrap'); if(b) b.hidden=true; UI.close(); showStart(); }catch(e){ showErr(e); } },7000));
+// vitrine para as imagens do README (#demo-vitrine): uma vida bonita, sem mortes nem doenças no topo
+if(/demo-vitrine/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ try{ MQ.length=0; modalOpen=false; const b=document.querySelector('#modalWrap'); if(b) b.hidden=true; UI.close();
+  const m=S.me; if(m.gender!=='F'){ m.gender='F'; m.first=pickFirst(countryOf(m.country),'F'); delete m.look; } m.alive=true; m.cause=null; m.age=24; m.health=88; m.happy=82; m.smarts=74; m.looks=69; m.money=48300; m.prison=null; m.edu.cur=null; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio');
+  takeJob({id:'poli',co:'Polícia Civil',size:'grande',mul:1}); const y=S.year; S.log=[
+   {age:21,year:y-3,lines:[{t:'Passei no concurso da Polícia Civil!',c:'good'},'Fui a um show de rock e perdi a voz de tanto cantar.','Pescaria com meu pai: pegamos um peixe enorme e soltamos.']},
+   {age:22,year:y-2,lines:[{t:'Comecei a namorar Júlia Andrade.',c:'good'},'Adotei um gato de rua. Chama-se Paçoca.',{t:'Primeiro dia na delegacia → Fazer um discurso. Aplaudiram.',c:'choice'},'Aprendi a fazer pão de fermentação natural.']},
+   {age:23,year:y-1,lines:[{t:'🎖️ Resolvi o caso do roubo de joias. A delegacia inteira aplaudiu.',c:'good'},'Viajei para a praia com a Júlia.','Minha irmã teve um bebê. Agora sou tia!',{t:'Churrasco no quintal → Chamar todo mundo. Teve até karaokê.',c:'choice'}]},
+   {age:24,year:y,lines:[{t:'Fui promovida a cabo.',c:'good'},'Fechei o ano com $48.300 na conta.','Comecei a correr de manhã, e virou minha paixão.',{t:'Pedido no telhado → Aceitar. Estou noiva!',c:'good'}]}];
+  render.jump=true; render(); }catch(e){ showErr(e); } },7000));
 
 // ===== Teste automático (abre com #teste no endereço) =====
 function selfTest(){
