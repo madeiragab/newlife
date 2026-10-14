@@ -230,7 +230,7 @@ Toque em **Envelhecer** para passar um ano. Use **Carreira**, **Bens**, **Relaç
 
 
 ### 🔄 Atualização automática
-Os apps de **Android** e **Windows** procuram uma versão nova sempre que abrem. Se existir, baixam o jogo novo e recarregam sozinhos, sem reinstalar e sem perder o progresso. Sem internet, abrem a última versão que tiverem. A versão atual aparece no fim do menu.
+Os apps de **Android** e **Windows** procuram uma versão nova sempre que abrem. Se existir, baixam o jogo novo e recarregam sozinhos, sem reinstalar e sem perder o progresso. Sem internet, abrem a última versão que tiverem. A versão atual aparece no fim do menu, e depois de cada atualização um quadro mostra as novidades (uma vez só). O histórico fica em Menu → Novidades.
 
 ## Como compilar
 
