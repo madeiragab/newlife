@@ -315,6 +315,9 @@ button.row:active{transform:scale(.985)}
 #stats{padding-bottom:30px} @media (max-width:420px){ #stats{padding-bottom:34px} }
 /* tela inicial */
 #start .full-in{padding-top:0;gap:14px}
+/* a tela inicial rola em vez de espremer o topo: nada encolhe em celulares baixos ou estreitos */
+#start .full-in>*{flex-shrink:0}
+@media (max-width:380px){.st-hero{padding:28px 12px 24px}.st-hero .logo{font-size:46px}.st-faces span{margin:0 -9px}.st-faces span svg{width:58px;height:58px}}
 .st-hero{margin:0 -16px 4px;padding:34px 16px 30px;background:var(--brand-grad);border-radius:0 0 32px 32px;text-align:center;color:#fff;box-shadow:0 8px 24px rgba(20,28,60,.18);position:relative;overflow:hidden}
 .st-hero::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--stripe)}
 .st-hero .logo{color:#fff;font-size:54px;margin-top:14px;text-shadow:0 3px 12px rgba(0,0,0,.18)}
