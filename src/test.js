@@ -209,6 +209,8 @@ function selfTest(){
           if(ch.o.who==='partner'||ch.o.who==='spouse'){ const pp=mkPerson({rel:'conjuge',gender:m.gender==='M'?'F':'M',age:m.age}); S.people.push(pp); }
           if(['friend','colega','boss','classmate','kid','child','teen','adultkid','ex','sib','parent','pet','grandkid'].includes(ch.o.who)&&!WHO[ch.o.who]()){ const rel={friend:'amigo',colega:'colegaT',boss:'chefe',classmate:'colega',kid:'filho',child:'filho',teen:'filho',adultkid:'filho',ex:'ex',sib:'irmao',parent:'mae',pet:'pet',grandkid:'neto'}[ch.o.who];
             const ag={child:8,teen:15,adultkid:25,kid:10,grandkid:4}[ch.o.who]; S.people.push(mkPerson({rel,age:ag||m.age,gender:R.chance(.5)?'M':'F'})); }
+          if(ch.o.who==='kidpara'&&!WHO.kidpara()){ const kk=mkPerson({rel:'filho',age:12}); kk.criatura='vampiro'; S.people.push(kk); }
+          if(ch.o.when&&/criatura/.test(String(ch.o.when))) m.criatura=/lobisomem/.test(String(ch.o.when))?'lobisomem':'vampiro';
           if(!cadStart(id,true)) return; const c=cadState().on[id]; c.s=sid; c.due=m.age; const ev=EVENTS[cadEv(id,sid)]; const d=ev.prep(m); const sh=ev.show(d); const r=ev.pick(String(ci),d);
           [sh.t,sh.x,sh.ch[ci][0],r].forEach(x=>{ if(/\{\w+\}|undefined|NaN/.test(String(x))){ const k=`texto quebrado em cad:${id}.${sid}: ${String(x).slice(0,90)}`; errs[k]=(errs[k]||0)+1; } }); }); } } }
     S=JSON.parse(snap); }

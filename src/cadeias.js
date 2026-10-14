@@ -20,7 +20,7 @@ function cadReg(id,sid,st){ const [title,text,choices,so={}]=st;
     pick:(key,d)=>cadPick(id,sid,choices[+key],d)};
 }
 // separa os efeitos próprios das cadeias (>etapa, vira:, +cad:) dos efeitos normais do pack
-function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
+function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$|separar$|pbond[+-]\d+$|caso[+-]$|curar$|morder$|virar:\w+$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
 function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me; const d=c?c.d:dPend;
   const parts=choice.split('|'); let fx1=parts[1]||'', t1=parts[2]||'', fx2=parts[3], t2=parts[4];
   const toks=fx1.trim().split(/\s+/); let chance=null, base='';
@@ -36,6 +36,12 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
     else if(mm=t.match(/^\+cad:(\w+)$/)){ cadStart(mm[1],true); }
     else if(mm=t.match(/^emprego:(\w+)$/)){ const j=JOBS.find(x=>x.id===mm[1]); if(j&&!(m.job&&m.job.id===j.id)&&m.age>=16){ takeJob({id:j.id,co:companyName(),size:'média',mul:1}); out.push(`Agora sou ${jobTitle(m.job).toLowerCase()}.`); } }
     else if(t==='noivar'||t==='casar'){ const p=d.pid&&P(d.pid); if(p&&p.alive&&['namoro','noivo'].includes(p.rel)&&(!partner()||partner()===p)){ if(t==='noivar'&&p.rel==='namoro'){ p.rel='noivo'; out.push(`Estou noiv${oa()} de ${p.first}!`); } else if(t==='casar'){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } } }
+    else if(t==='separar'){ const pp=partner(); if(pp){ if(pp.rel==='conjuge') divorce(pp,true); else { pp.rel='ex'; m.happy=clamp(m.happy-15); log(`${pp.first} terminou comigo.`,'bad'); } out.push(`${pp.first} foi embora.`); } }
+    else if(mm=t.match(/^pbond([+-]\d+)$/)){ const pp=partner(); if(pp) pp.bond=clamp(pp.bond+ +mm[1]); }
+    else if(t==='curar'){ if(m.criatura){ const tp0=m.criatura; m.criatura=null; m.fomeP=0; log(`Deixei de ser ${g(CRIATURA[tp0][0],m.gender).toLowerCase()}.`,'good'); } }
+    else if(t==='morder'){ const pp=d.pid&&P(d.pid); if(pp&&m.criatura){ pp.criatura=m.criatura; out.push(`${pp.first} agora também carrega a maldição.`); } }
+    else if(mm=t.match(/^virar:(\w+)$/)){ if(typeof virar==='function'&&!m.criatura&&CRIATURA[mm[1]]) out.push(virar(mm[1]).trim()); }
+    else if(t==='caso+'){ m.caso={pid:d.pid||null,n:d.p,ini:m.age}; } else if(t==='caso-'){ m.caso=null; }
     else if(t==='bebe'){ const par=partner(); if(m.age>=18&&m.age<=50){ const gd=R.chance(.5)?'M':'F'; const k=mkPerson({rel:'filho',gender:gd,age:0,last:m.last,bond:R.int(85,100),parentId:par?par.id:null,from:par?[m,par]:undefined}); uniqFirst(k); S.people.push(k); cnt('kids'); out.push(`Nasceu ${gd==='F'?'minha filha':'meu filho'} ${k.first}!`); } } });
   if(c){ if(next&&next!=='fim'&&CHAINS[id].steps[next]){ const g=CHAINS[id].o.gap||[1,3]; c.s=next; c.due=m.age+(delay!=null?delay:R.int(g[0],g[1])); c.n=(c.n||0)+1; }
     else { delete st.on[id]; st.done[id]=(st.done[id]||0)+1; cnt('historias'); } }

@@ -113,9 +113,17 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - 800 eventos em sequência, em 160 histórias da infância à velhice: cada escolha decide o próximo capítulo e quando ele chega, às vezes anos depois.
 - Quem aparece numa história pode virar amigo, namorado, inimigo ou família de verdade, e uma história pode abrir outra.
 
+### 💔 Traição e divórcio
+- Noite fora (boate, bar, boate adulta para maiores de 18), casos secretos que podem ser descobertos e um par que também pode trair.
+- Divórcio com filhos menores vai para a justiça: guarda, guarda compartilhada e pensão até os 18 anos.
+
 ### 🩺 Saúde
 - A maioria das doenças aparece primeiro como sintoma ("acordei com bolinhas vermelhas"); só a consulta revela o nome.
 - Posto de saúde, clínica popular, médico particular e hospital: quanto mais barato, mais erra e menos cura. Medicina alternativa quase nunca funciona, mas às vezes acontece um milagre.
+
+### 🧛 A fera no sangue
+- Vampiros têm barra de sede e lobisomens, de fome. Em 100%, a criatura toma o controle e pode atacar estranhos ou a própria família.
+- A maldição passa para os filhos, e a criatura briga diferente (mordida, garras, uivo).
 
 ### 👥 Membros das equipes
 - Clube ou time da escola, colegas de trabalho, banda, elenco, pelotão, equipe de heróis e o grupo religioso têm **gente de verdade**: veja quem está na equipe, converse e faça amizade.
