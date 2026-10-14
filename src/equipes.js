@@ -19,7 +19,8 @@ clubAct=(o=>function(k){ const r=o.apply(this,arguments); if(k==='sair') grpClea
 // ---------- trabalho ----------
 const SPC_ROLE={ator:['Colega de elenco','o elenco'],musico:['Colega de banda','a banda'],atleta:['Colega de time','o time'],modelo:['Colega de agência','a agência'],militar:['Colega de pelotão','o pelotão'],crime:['Comparsa','a quadrilha'],comedia:['Colega de palco','o elenco'],escritor:['Colega da editora','a editora'],artista:['Colega de ateliê','o ateliê'],streamer:['Colega de stream','o grupo de streamers'],dj:['Colega de festa','a equipe de som'],camelo:['Colega de banca','a feira']};
 V.jobMenu=(o=>()=>{ const r=o(); const m=S.me, j=m.job; if(!j||!r||!r.items) return r;
-  const i=r.items.findIndex(x=>x.l==='Colegas e chefe'); if(i>=0){ r.items[i]=Object.assign(r.items[i],{ic:'👥',l:'Membros da equipe',s:`${people('chefe','colegaT').length} pessoas · faça amizade com os colegas`}); }
+  const i=r.items.findIndex(x=>x.l==='Colegas e chefe'); if(i>=0) r.items.splice(i,1);
+  if(!j.spc&&!j.hero){ trabEnsure(); r.items.splice(Math.min(2,r.items.length),0,{ic:'👥',l:'Membros da equipe',s:`Chefe e ${people('colegaT').length} colegas · faça amizade`,on:()=>UI.push(V.trabalho)}); }
   if(j.spc&&SPC_ROLE[j.spc]){ const key='spc:'+j.spc+':'+j.co, sr=SPC_ROLE[j.spc]; grpClean('spc:',key);
     r.items.splice(Math.max(0,r.items.length-1),0,{ic:'👥',l:'Membros da equipe',s:`Conhecer ${sr[1]}`,on:()=>UI.push(V.grp(key,j.co,{size:R.int(5,8),n:j.co,role:sr[0],age:()=>clamp(m.age+R.int(-8,12),16,80),intro:`O pessoal de ${j.co}.`}))}); }
   return r; })(V.jobMenu);
@@ -61,3 +62,14 @@ function tempoTodos(){ const m=S.me; if(use('tempoTodos')>1) return 'Já reuni t
   const fam=ps.filter(p=>p.rel!=='amigo').length, am=ps.length-fam;
   return `${R.pick(['Fiz um churrasco no quintal','Organizei um almoço de domingo','Juntei todo mundo para um piquenique no parque','Fizemos uma noite de jogos de tabuleiro','Alugamos um sítio para o fim de semana'])} com ${fam?fam+(fam>1?' pessoas da família':' pessoa da família'):''}${fam&&am?' e ':''}${am?am+(am>1?' amigos':' amigo'):''}. ${R.pick(['Rimos até doer a barriga.','Teve briga por causa de política, mas acabou em abraço.','Foi o melhor dia do ano.','Alguém chorou de emoção no brinde.'])}`; }
 V.relations=(o=>()=>{ const r=o(); if(!r||!r.items||(S.scen&&S.scen.v===SC_V)) return r; if(S.me.prison) return r; r.items.splice(1,0,{ic:'🫂',l:'Passar um tempo com todos',s:'Família e amigos juntos · todo mundo fica mais próximo',on:()=>act(tempoTodos,'Família e amigos')}); return r; })(V.relations);
+// ---------- equipe do trabalho: chefe e colegas aparecem no emprego, não nas relações ----------
+function trabEnsure(){ const m=S.me, j=m.job; if(!j||j.spc||j.hero) return; S.flags.gn=S.flags.gn||{}; const key='trab:'+j.co+':'+j.id, want=S.flags.gn[key]??(S.flags.gn[key]=R.int(5,8));
+  for(let i=people('colegaT').length;i<want;i++) S.people.push(mkPerson({rel:'colegaT',age:clamp(m.age+R.int(-10,15),16,70),bond:R.int(25,55)}));
+  if(!people('chefe').length) S.people.push(mkPerson({rel:'chefe',age:clamp(m.age+R.int(3,25),25,75),bond:R.int(35,60)})); }
+V.trabalho=()=>{ const m=S.me, j=m.job; if(!j) return {title:'Equipe',items:[{html:'<div class="card"><p>Não tenho emprego.</p></div>'}]}; trabEnsure();
+  const it=[{html:`<div class="card"><p><b>${esc(j.co)}</b></p>${kv('Cargo',jobTitle(j))}${kv('Colegas',people('colegaT').length)}${kv('Amigos que vieram do trabalho',people('amigo').filter(p=>p.fromJob).length)}</div>`}];
+  const ch=people('chefe'); if(ch.length){ it.push({sec:ch.length>1?'Chefes':'Chefe'}); ch.forEach(p=>it.push(personRow(p))); }
+  it.push({sec:'Colegas de equipe'}); people('colegaT').sort((a,b)=>b.bond-a.bond).forEach(p=>it.push(personRow(p)));
+  const am=people('amigo').filter(p=>p.fromJob); if(am.length){ it.push({sec:'Viraram amigos'}); am.forEach(p=>it.push(personRow(p))); }
+  return {title:'Equipe do trabalho',items:it}; };
+interact=(o=>function(p,k,extra){ const was=p&&p.rel; const r=o.apply(this,arguments); if(p&&was==='colegaT'&&p.rel==='amigo') p.fromJob=1; return r; })(interact);

@@ -107,6 +107,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 
 ### 👥 Membros das equipes
 - Clube ou time da escola, colegas de trabalho, banda, elenco, pelotão, equipe de heróis e o grupo religioso têm **gente de verdade**: veja quem está na equipe, converse e faça amizade.
+- A **equipe do trabalho** (chefe e colegas) fica no emprego, em "Membros da equipe".
 - A **turma da escola** fica na própria escola, em "Membros da turma", junto com os professores de cada matéria.
 - **Passar um tempo com todos**: um churrasco, um almoço de domingo ou um fim de semana com a família e os amigos de uma vez.
 
