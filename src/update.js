@@ -3,6 +3,7 @@
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.8',d:'14/10/2026',t:'Visual novo',itens:['O botão de Envelhecer não fica mais cortado: o bolo aparece inteiro, com brilho pulsando.','Cabeçalho em degradê, cartões e painéis mais arredondados, janelas de evento com animação e botões novos.','Seções com marcador colorido e alça nos painéis para ficar com cara de app.']},
   {v:'1.7',d:'14/10/2026',t:'Conquistas e selos novos',itens:['73 conquistas, muitas zoeiras e várias secretas, que valem para todas as vidas. Veja em Menu → Conquistas.','Selos novos no fim da vida: Ditador, Filho da noite, Profeta, Detetive, Viajante de mundos, Fogo no rabo e Lobo solitário.','"Fazer amor" substitui "Tentar ter um filho" (a partir dos 18): dá felicidade e, sem proteção, pode vir um bebê.']},
   {v:'1.6.2',d:'14/10/2026',t:'Tela de atualização',itens:['Quando o app se atualiza, aparece um anel de progresso colorido com a música do jogo, notinhas subindo e dicas.','Ao terminar, o jogo abre sozinho na versão nova.']},
   {v:'1.6.1',d:'14/10/2026',t:'Novidades na tela',itens:['Depois de cada atualização, este quadro mostra o que mudou (uma vez só).','Menu → Novidades mostra o histórico de versões quando você quiser.']},

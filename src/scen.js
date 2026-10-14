@@ -376,7 +376,7 @@ function scEvents(n){ const sc=S.scen, m=S.me; if(!sc) return;
   let elig=Object.entries(EVENTS).filter(([id,e])=>e.scen===sc.id&&e.w&&!(sc.ev[id]!=null&&sc.dia-sc.ev[id]<(e.cd||25))&&(()=>{ try{ return !e.when||e.when(m); }catch(err){ return false; } })());
   while(n-->0&&elig.length){ const id=R.wpick(elig.map(([id,e])=>[id,e.w/(1+2*(sc.evN[id]||0))])); elig=elig.filter(([x])=>x!==id);
     const ev=EVENTS[id]; let d; try{ d=ev.prep?ev.prep(m):{}; }catch(err){ d=null; } if(d==null) continue; queue(id,d); sc.ev[id]=sc.dia; sc.evN[id]=(sc.evN[id]||0)+1; } }
-function scNextDay(){ const sc=S.scen, d=SM(), m=S.me; if(!sc) return;
+function scNextDay(){ const sc=S.scen; if(!sc) return; const d=SM(), m=S.me;
   sc.dia++; sc.ap=3; sc.done={}; sc.log.push({d:sc.dia,pl:'',lines:[]});
   const hasF=d.stats.some(x=>x[0]==='fome'); if(hasF) scStat('fome',(sc.id==='marte'?8:10)); scStat('san',sc.id==='heroi'?-1:-2);
   // comida estraga e o grupo come
