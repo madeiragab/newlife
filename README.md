@@ -110,7 +110,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - Mais de 200 eventos de caça-fantasmas, vida de vampiro e vida de lobisomem.
 
 ### 📖 Histórias em cadeia
-- Mais de 600 eventos em sequência, em 115 histórias da infância à velhice: cada escolha decide o próximo capítulo e quando ele chega, às vezes anos depois.
+- 800 eventos em sequência, em 160 histórias da infância à velhice: cada escolha decide o próximo capítulo e quando ele chega, às vezes anos depois.
 - Quem aparece numa história pode virar amigo, namorado, inimigo ou família de verdade, e uma história pode abrir outra.
 
 ### 🩺 Saúde
