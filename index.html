@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610140805'</script>
+<title>NewLife</title><script>window.NL_VER='2610140814'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -1303,7 +1303,7 @@ function newLife(o={}){
 const SNAP_KEY='outravida.snaps.v1'; let SNAPS=[];
 function storeSnaps(){ try{ localStorage.setItem(SNAP_KEY,JSON.stringify(SNAPS)); }catch(e){ SNAPS=SNAPS.slice(-2); try{ localStorage.setItem(SNAP_KEY,JSON.stringify(SNAPS)); }catch(e2){} } }
 function snap(){ SNAPS.push({age:S.me.age,year:S.year,s:JSON.stringify(S)}); if(SNAPS.length>6) SNAPS.shift(); storeSnaps(); }
-function timeTravel(i){ const sn=SNAPS[i]; if(!sn) return false; S=JSON.parse(sn.s); SNAPS=SNAPS.slice(0,i); storeSnaps(); cnt('timeTravel'); log(`Voltei no tempo para os meus ${S.me.age} anos.`,'warn'); save(); return true; }
+function timeTravel(i){ const sn=SNAPS[i]; if(!sn) return false; S=JSON.parse(sn.s); if(typeof fixSave==='function') fixSave(S); SNAPS=SNAPS.slice(0,i); storeSnaps(); cnt('timeTravel'); log(`Voltei no tempo para os meus ${S.me.age} anos.`,'warn'); save(); return true; }
 const DIFF={facil:{d:.6,$:1.3,n:'Fácil'},normal:{d:1,$:1,n:'Normal'},dificil:{d:1.7,$:.75,n:'Difícil'}};
 const diff=()=>DIFF[(S.flags&&S.flags.diff)||'normal'];
 
@@ -2544,11 +2544,20 @@ function dslChoice(c,d){
   if(chance!=null&&!R.chance(chance)){ const x=dslApply(fx2||'',d); return [tp(t2||'Não deu certo.',d),b,x].filter(Boolean).join(' '); }
   const x=dslApply(fx1,d); return [tp(t1,d),b,x].filter(Boolean).join(' ');
 }
-let PACKN=0;
+// ID estável: vem do conteúdo do evento (modo, grupo, título e começo do texto), não da ordem dos arquivos.
+// Assim, acrescentar eventos novos em qualquer lugar não troca o evento que um save antigo deixou na fila.
+function evKey(o,title,text){ const t=Array.isArray(text)?text[0]:text, s=[o.scen||'',o.k||'',o.who||'',o.crew||'',title,String(t||'').slice(0,80)].join('|');
+  let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0; let id='p_'+(h>>>0).toString(36), n=1; while(EVENTS[id+(n>1?'_'+n:'')]) n++; return id+(n>1?'_'+n:''); }
+// saves de versões antigas guardavam IDs por ordem ('p123'): esses saem da fila e dos contadores ao carregar
+function fixSave(s){ if(!s||!s.me) return s; const old=k=>/^p\d+$/.test(k);
+  const clean=o=>{ if(o) Object.keys(o).forEach(k=>{ if(old(k)||old(k.replace(/^ev_/,''))) delete o[k]; }); };
+  s.pending=(s.pending||[]).filter(e=>e&&!old(e.id)&&EVENTS[e.id]);
+  clean(s.me.ev); clean(s.me.evN); clean(s.me.c); if(s.scen){ clean(s.scen.ev); clean(s.scen.evN); }
+  s.evIds=2; return s; }
 function pack(gr,list){
   for(const e of list){
-    const [title,text,choices,op={}]=e; const id='p'+(++PACKN);
-    const o=Object.assign({},gr,op);
+    const [title,text,choices,op={}]=e;
+    const o=Object.assign({},gr,op); const id=evKey(o,title,text);
     EVENTS[id]={title,scen:o.scen,w:o.w??1.2,cd:o.cd??12,jail:o.jail,onceLife:o.once,
       when:m=>(o.min==null||m.age>=o.min)&&(o.max==null||m.age<=o.max)&&(!gr.when||gr.when(m))&&(!op.when||op.when(m))&&(!o.who||!!WHO[o.who]()),
       prep:m=>{ const v=o.v||[100,2000]; const d=Object.assign(strangers(m,o),{v:amt(v[0],v[1]),v2:amt(v[0]*4,v[1]*4),xi:R.int(0,(Array.isArray(text)?text.length:1)-1),
@@ -4864,7 +4873,7 @@ function boot(){
   });
   if(location.hash==='#aventura'){ try{ advDiag(); }catch(e){ const o=document.createElement('pre'); o.id='out'; o.textContent='ERRO '+e.message+' '+e.stack; document.body.appendChild(o); } return; }
   if(location.hash==='#teste'){ selfTest(); return; } if(location.hash.startsWith('#qualidade')){ try{ qualityReport(); }catch(e){ const o=document.createElement('pre'); o.id='out'; o.textContent='ERRO '+e.message+' '+e.stack; document.body.appendChild(o); } return; }
-  if(location.hash==='#autoano'){ const sv=loadKey(SAVE_KEY); if(sv&&sv.me) S=sv; else newLife({}); for(let i=0;i<3&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[0][1],e.d); log(sh.t+' → '+sh.ch[0][0]+(r?'. '+r:'.'),'choice'); } } save(); render.jump=true; render(); return; }
+  if(location.hash==='#autoano'){ const sv=loadKey(SAVE_KEY); if(sv&&sv.me) S=fixSave(sv); else newLife({}); for(let i=0;i<3&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[0][1],e.d); log(sh.t+' → '+sh.ch[0][0]+(r?'. '+r:'.'),'choice'); } } save(); render.jump=true; render(); return; }
   if(location.hash.startsWith('#demo')){ const hs=location.hash; newLife({}); setTimeout(()=>{ if(hs.includes('rel')) UI.open(V.relations); if(hs.includes('style')) UI.open(V.style); if(hs.includes('hair')){ UI.open(V.style); UI.push(V.styleHair); } if(hs.includes('act')) UI.open(V.activities); if(hs.includes('person')){ UI.open(V.relations); UI.push(()=>V.person(people('mae')[0]||people()[0])); } if(hs.includes('ev')){ queue('carteira',EVENTS.carteira.prep()); pump(); } if(hs.includes('death')){ die('de teste'); showDeath(); } if(hs.includes('start')) showStart(); if(hs.includes('cars')){ UI.open(V.assets); UI.push(V.cars); } if(hs.includes('pets')){ UI.open(V.activities); UI.push(V.pets); } if(hs.includes('shop')){ UI.open(V.assets); UI.push(V.shop); } if(hs.includes('vis')){ UI.open(V.style); } if(hs.includes('icone')){ document.documentElement.style.background='transparent'; document.body.style.cssText='margin:0;background:transparent'; document.body.innerHTML=appIconSVG(512); return; } if(hs.includes('cenarios')){ S.me.alive=true; S.me.prison=null; UI.open(V.scenPick); }
     else if(/zumbi|isekai|sc-\w+/.test(hs)){ const m=S.me; m.prison=null; while(m.age<20){ m.alive=true; m.health=Math.max(m.health,60); S.pending=[]; ageUp(); } S.pending=[]; m.alive=true; const id=(hs.match(/sc-(\w+)/)||[])[1]||(hs.includes('isekai')?'isekai':'zumbi'); scStart(id); if(id==='isekai'){ UI.close(); S.scen.cls='guerreiro'; } for(let i=0;i<3;i++){ S.pending=[]; scNextDay(); } S.pending=[]; MQ.length=0; render.jump=true; render(); const pane=(hs.match(/-(local|grupo|itens|acoes|vila|magia|ficha|base|oficina|faccoes|procurar|equipe|amor)$/)||[])[1]; if(id==='zumbi'&&pane){ const sc=S.scen; zEnsure(sc); sc.zmat=46; sc.zlv=4; sc.zpts=2; sc.dia=38; sc.rec=38; sc.nextHorde=45; Object.assign(sc.zat,{for:9,mir:7,fur:8,med:6,mec:10,lid:7}); if(['base','acoes','oficina','faccoes','procurar'].includes(pane)){ zFoundBase('Último Refúgio'); const b=sc.zb; b.pop=14; b.moral=72; b.com=36; b.agua=28; Object.assign(b.b,{muro:3,horta:2,poco:2,enfermaria:1,oficina:2,alojamento:3,torre:1,armadilhas:1}); sc.zf.merc.rep=42; sc.zf.corvos.rep=-38; sc.zf.guarda.rep=12; sc.zf.igreja.rep=-6; addItem('corda',90,true); addItem('pilha',90,true); addItem('taco',80,true); } UI.open({base:V.zBase,acoes:V.scActs,oficina:V.zCraft,faccoes:V.zFac,procurar:V.zScav,ficha:V.zMe,local:V.scLocal,grupo:V.scCrew,itens:V.scItems}[pane]); } if(id==='isekai'&&pane&&['vila','magia','ficha'].includes(pane)){ const sc=S.scen; sc.ouro=4200; sc.lvl=9; sc.cls='mago'; iskEnsure(sc); learnSpell(sc,true); learnSpell(sc,true); sc.pts=3; if(pane==='vila'){ vilaFound('Nova Aurora'); const v=sc.vila; v.pop=27; Object.assign(v.b,{casa:4,fazenda:3,tecelagem:2,serraria:2,mercado:1,escola:1,taverna:1,muralha:1}); v.tech=['agricultura','escrita','tear']; v.tier=2; v.res='moeda'; v.pqT=24; v.com=120; v.rou=34; v.man=41; v.fel=78; } } if(id==='heroi'&&pane){ const sc=S.scen; hEnsure(sc); sc.rep=62; sc.reg='nao'; sc.proc=38; m.job={hero:'sentinelas',lvl:1,perf:71,yrs:0,co:HTEAMS.sentinelas.n}; sc.hxp=3; if(!partner()){ const p=candidate(false); p.rel='namoro'; S.people.push(p); } sc.sab[partner().id]=1; mkCrew(); } if(pane==='amor'){ const c=crew().find(x=>romOK(x))||mkCrew({gender:S.me.gender==='F'?'M':'F',age:S.me.age}); c.gender=S.me.gender==='F'?'M':'F'; c.am=74; romStart(c); c.par='noivo'; S.scen.grav={pid:c.id,due:S.scen.dia+4}; UI.open(()=>V.scMember(c)); } if(pane==='equipe') UI.open(V.hTeam); if(pane&&id!=='zumbi'&&!['amor','equipe'].includes(pane)) UI.open({local:V.scLocal,grupo:V.scCrew,itens:V.scItems,acoes:V.scActs,vila:V.iskVila,magia:V.iskMagic,ficha:V.iskMe}[pane]); }
     else if(hs.includes('doencas')){ const L=[['catapora',8,'F'],['marcas',25,'F'],['cancer_mama',40,'F'],['leucemia',12,'M'],['volta',45,'M'],['vitiligo',30,'M'],['conjuntivite',22,'F'],['sarampo',6,'M'],['catarata',72,'F'],['psoriase',35,'M'],['acne',16,'M'],['verruga',50,'F']];
@@ -4890,7 +4899,7 @@ function boot(){
       if(hs.includes('desistir')){ if(!partner()){ const p=candidate(false); p.rel='conjuge'; p.bond=88; S.people.push(p); } if(!kids().length){ S.people.push(mkPerson({rel:'filho',age:7,last:m.last,bond:95})); } render(); giveUpFlow(); } }
     else if(hs.includes('idades')){ document.body.innerHTML=faceAges(); } else if(hs.includes('rostos')){ document.body.innerHTML=faceGallery(hs.includes('grande'),+(hs.match(/p(\d+)/)||[0,0])[1]); } if(hs.includes('garagem')){ document.body.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#fff\">'+CAR_MODELS.map((c,i)=>'<div style="text-align:center;font:10px sans-serif\">'+carSVG(c,Object.keys(PAINT)[i%10],110)+'<br>'+c.b+' '+c.m+'</div>').join('')+'</div>'; } },50); for(let i=0;i<24&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); if(r) log(sh.t.replace(/[!?.…]+$/,'')+': '+r); } } render.jump=true; render(); return; }
   const saved=loadKey(SAVE_KEY);
-  if(saved&&saved.me&&saved.v===1){ S=saved; render.jump=true; render(); if(S.me.alive){ showStart(); } else showDeath(); }
+  if(saved&&saved.me&&saved.v===1){ S=fixSave(saved); render.jump=true; render(); if(S.me.alive){ showStart(); } else showDeath(); }
   else if(!META.lives){ newLife({royal:R.chance(.01)}); render.jump=true; render(); pump(); }
   else showStart();
 }
@@ -12105,6 +12114,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.11',d:'14/10/2026',t:'Saves mais seguros e rodinha de atualização',itens:['Eventos agora têm identificação fixa: atualizar o jogo não troca mais o evento que estava esperando na sua vida.','Depois de cada atualização, a rodinha aparece girando até 100% (mesmo quando o download foi rápido) e só então mostra as novidades.','O jogo só é publicado se passar no teste automático de centenas de vidas.']},
   {v:'1.10.1',d:'14/10/2026',t:'Correção na tela inicial',itens:['Em celulares de tela pequena, o topo da tela inicial cortava o logo e a frase. Agora aparece tudo, e a tela rola quando não cabe.']},
   {v:'1.10',d:'14/10/2026',t:'Aventuras que chegam aos poucos, e formação que vale',itens:['Os modos fictícios não te jogam mais lá de uma vez: a história começa na vida real e vai crescendo ano a ano.','Zumbi: primeiro as notícias, no ano seguinte as prateleiras vazias e só no terceiro ano o fim do mundo. Dá para estocar comida, comprar arma, treinar e fugir com a família.','Ilha e Marte começam com um convite: ir sozinho, levar o par, os filhos ou a família toda, ou recusar. Marte tem um ano de treinamento antes do lançamento.','Isekai começa com sonhos; Superpoderes, com um acidente estranho um ano antes dos poderes. Quem vai junto vive tudo com você e volta para casa (ou morre lá).','10 cursos técnicos novos (radiologia, segurança do trabalho, edificações, química…) com empregos que só pedem o técnico.','Especialização nova na pós-graduação e 20 empregos que pedem especialização, mestrado, doutorado, MBA ou residência (cientista de IA, auditor fiscal, astrofísico, dermatologista…).','Pós-graduação aumenta o salário: mestrado +10%, doutorado +15%, MBA +8%, especialização +5%.']},
   {v:'1.9',d:'14/10/2026',t:'Faculdade vale a pena, mundos com consequência',itens:['Cada faculdade tem empregos próprios (34 profissões novas, de cientista de dados a maestro) que pagam bem mais do que os sem diploma, e quem tem diploma vê mais vagas da área.','Ao tirar a carteira, seus pais podem te dar um carro, de um popular usado a um superesportivo, conforme o dinheiro da família.','"Ser amigos" funciona mais vezes quanto maior a barra de amizade.','Modos fictícios: comerciantes aparecem em alguns dias oferecendo até 4 itens (ouro, sucata, dinheiro, pesquisa ou troca por comida).','Voltar de um mundo tem consequências: demissão por abandono, notas baixas, matrícula cancelada, contas atrasadas e família desesperada.','Sumir também acaba namoros: quanto mais tempo longe, maior a chance de levar um fora, de o noivado acabar ou de vir o divórcio por abandono do lar. Depois de meses ou anos, você pode ser declarado morto e encontrar seu amor casado com outra pessoa. Raramente, alguém espera.','Começos novos e maiores: 28 histórias sorteadas, cada uma com itens, grupo, veículos e vantagens diferentes. Herói ganhou 10 poderes e 5 vilões novos.','Tela inicial redesenhada.']},
@@ -12130,10 +12140,12 @@ function nlCheckUpdated(){ const v=NLV(); if(!v) return; let oldV=null, seen=nul
   if(!oldV||oldV===v) return;                       // primeira vez no app, ou nada mudou
   if(!seen) seen='1.6';                             // quem veio da 1.6 (antes de existir o changelog)
   const novos=CHANGELOG.filter(e=>verNum(e.v)>verNum(seen)).slice(0,4);
-  nlShowChangelog(novos.length?novos:[CHANGELOG[0]],'Jogo atualizado!'); }
+  const show=()=>nlShowChangelog(novos.length?novos:[CHANGELOG[0]],'Jogo atualizado!');
+  // nos apps, a rodinha aparece girando até 100% mesmo quando o download foi rápido demais para ser visto
+  if(typeof nlIsApp==='function'&&nlIsApp()&&typeof updFinale==='function') updFinale(v,show); else show(); }
 V.novidades=()=>({title:'Novidades',items:[{html:`<div class="card"><p style="color:var(--muted);font-size:13px">Versão instalada: ${esc(nlVerTxt(NLV()))}</p>${clHtml(CHANGELOG)}</div>`}]});
 V.menu=(o=>()=>{ const r=o(); if(r&&r.items){ r.items.push({ic:'📰',l:'Novidades',s:'O que mudou em cada versão',on:()=>UI.push(V.novidades)},{html:`<div class="card"><p style="color:var(--muted);font-size:12px;text-align:center">Versão ${esc(nlVerTxt(NLV()))} · o app procura atualizações sozinho sempre que abre</p></div>`}); } return r; })(V.menu);
-window.addEventListener('load',()=>setTimeout(()=>{ try{ nlCheckUpdated(); }catch(e){} },1800));
+window.addEventListener('load',()=>setTimeout(()=>{ try{ nlCheckUpdated(); }catch(e){} },500));
 if(/demo-changelog/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ try{ nlShowChangelog(CHANGELOG.slice(0,2),'Jogo atualizado!'); }catch(e){} },2500));
 
 // ===== Tela de atualização: anel de progresso com a música do jogo =====
@@ -12185,6 +12197,12 @@ function updOverlay(rv){ if(UPD) return UPD; const C=2*Math.PI*52;
       if(p>=1&&!el.classList.contains('ok')){ el.classList.add('ok'); pct.textContent='✓'; sub.textContent='pronto'; el.querySelector('h2').textContent='Prontinho!'; dica.textContent='Abrindo a versão nova…'; clearInterval(dt); try{ sfx('level'); }catch(e){} } },
     close(msg){ clearInterval(dt); el.style.transition='opacity .5s'; el.style.opacity=0; setTimeout(()=>el.remove(),500); UPD=null; if(msg) setTimeout(()=>{ try{ msg&&modal({k:'NewLife',t:'Atualização',x:msg}); }catch(e){} },600); }};
   return UPD; }
+// depois de atualizar: a rodinha gira pelo menos uma volta inteira até 100%, mesmo que o download tenha sido instantâneo
+function updFinale(v,then){ let u; try{ u=UPD||updOverlay(v); }catch(e){ then&&then(); return; }
+  u.el.classList.add('fast'); const st=document.createElement('style'); st.textContent='#nlUpd.fast .u-orb{animation-duration:1.9s}'; u.el.appendChild(st);
+  const sub=u.el.querySelector('.u-sub'); if(sub) sub.textContent='instalando';
+  const t0=performance.now(), dur=2000; const step=()=>{ const k=Math.min(1,(performance.now()-t0)/dur); u.set(k<1?k*.99:1); if(k<1) requestAnimationFrame(step); else setTimeout(()=>{ u.close(); setTimeout(()=>then&&then(),550); },1300); };
+  requestAnimationFrame(step); }
 // apps novos mandam o progresso real do download
 window.nlUpd=p=>{ const u=UPD||updOverlay(window.nlUpdVer||''); u.native=true; u.set(+p||0); };
 async function nlAppUpdateCheck(){ if(!nlIsApp()||/teste|aventura|demo|qualidade/.test(location.hash)) return;
@@ -12528,6 +12546,13 @@ function selfTest(){
   lives.unshift('BRIGAS contra adulto comum (luta ~45%): '+fr.join(' · '));
   lives.unshift(`ATESTADOS: ${fired}/40 demitidos depois de pedir 8 atestados no mesmo ano`);
   T('save',()=>JSON.parse(JSON.stringify(S)));
+  // regressão: IDs de eventos estáveis e saves antigos
+  const chkReg=(nome,ok)=>{ if(!ok){ const k='regressão: '+nome; errs[k]=(errs[k]||0)+1; } };
+  chkReg('IDs sequenciais antigos ainda existem',!Object.keys(EVENTS).some(k=>/^p\d+$/.test(k)));
+  { const snap=JSON.stringify(S), real=Object.keys(EVENTS).find(k=>k.startsWith('p_'));
+    S.pending=[{id:'p123',d:{}},{id:real,d:{}},{id:'p_naoexiste',d:{}}]; S.me.ev={p5:30,[real]:20}; S.me.c.ev_p9=1;
+    fixSave(S); chkReg('fixSave não limpou a fila',S.pending.length===1&&S.pending[0].id===real); chkReg('fixSave não limpou os contadores',!('p5' in S.me.ev)&&(real in S.me.ev)&&!S.me.c.ev_p9);
+    S=JSON.parse(snap); }
   const calm=[];
   for(let L=0;L<60;L++){ T('calmLife',()=>newLife({})); let g=0; while(S.me.alive&&g++<130){ T('ageUp',ageUp); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; T('ev',()=>{ const sh=EVENTS[e.id].show(e.d); EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); }); } if(S.me.alive&&S.me.age%3===0) T('calmDoc',()=>{ S.me.dis.forEach(d=>treat('hosp',d)); body('walk'); }); if(S.me.alive&&S.me.health<=0) die(causeFromHealth()); } calm.push(S.me.age); }
   lives.unshift(`VIDA CALMA (só envelhecer + médico): média ${(calm.reduce((a,b)=>a+b,0)/calm.length).toFixed(1)} · acima de 70: ${Math.round(calm.filter(a=>a>=70).length/calm.length*100)}% · acima de 90: ${Math.round(calm.filter(a=>a>=90).length/calm.length*100)}%`);
@@ -12535,7 +12560,7 @@ function selfTest(){
   lives.unshift(`IDADE MÉDIA: ${(ages.reduce((a,b)=>a+b,0)/ages.length).toFixed(1)} · acima de 70: ${Math.round(ages.filter(a=>a>=70).length/ages.length*100)}% · abaixo de 30: ${Math.round(ages.filter(a=>a<30).length/ages.length*100)}%`);
   const o=document.createElement('pre'); o.id='out'; o.style.cssText='position:fixed;inset:0;z-index:999;background:#fff;color:#000;overflow:auto;padding:10px;font-size:11px;white-space:pre-wrap';
   o.textContent=`NOMES: ${Object.entries(NAME_DB).map(([c,d])=>c+' '+d.M.length+'/'+d.F.length+'/'+d.L.length).join(' · ')}\nEVENTOS: ${Object.keys(EVENTS).length} · TESTE: ${lives.length} vidas, ${years} anos, ${events} eventos, ${actions} ações, ${swept} eventos varridos\nERROS: ${Object.keys(errs).filter(k=>!k.endsWith(' @')).length}\n`+Object.entries(errs).map(([k,v])=>k.endsWith(' @')?'    '+v:`${v}x ${k}`).join('\n')+'\n\n'+lives.join('\n');
-  document.body.appendChild(o); document.title='TESTE OK';
+  document.body.appendChild(o); const nErr=Object.keys(errs).filter(k=>!k.endsWith(' @')).length; o.dataset.erros=nErr; document.title=nErr?'TESTE FALHOU':'TESTE OK';
 }
 
 // ===== Diagnóstico das aventuras (#aventura): um jogador razoável joga cada modo 40 vezes =====
