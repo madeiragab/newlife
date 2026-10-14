@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610140814'</script>
+<title>NewLife</title><script>window.NL_VER='2610140910'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -1112,8 +1112,18 @@ let META={lives:0,ribbons:{},grave:[]};
 const DISK={q:{},t:null};
 const deskApi=()=>window.pywebview&&window.pywebview.api&&window.pywebview.api.save?window.pywebview.api:null;
 function flushDisk(){ const api=deskApi(); DISK.t=null; if(!api) return; const q=DISK.q; DISK.q={}; for(const k in q){ try{ api.save(k,q[k]); }catch(e){} } }
-function store(k,v){ if(window.NO_SAVE) return; const s=JSON.stringify(v); try{ localStorage.setItem(k,s); }catch(e){} if(deskApi()){ DISK.q[k]=s; if(!DISK.t) DISK.t=setTimeout(flushDisk,120); } }
-function loadKey(k){ try{ const s=localStorage.getItem(k); return s?JSON.parse(s):null; }catch(e){ return null; } }
+// cada salvamento guarda o anterior em "<chave>.bak": se o save principal estragar, o jogo abre a cópia
+let SAVE_RECOVERED=null;
+function store(k,v){ if(window.NO_SAVE) return; const s=JSON.stringify(v);
+  try{ const old=localStorage.getItem(k); if(old&&old!==s&&(k===SAVE_KEY||k===META_KEY)) localStorage.setItem(k+'.bak',old); }catch(e){}
+  try{ localStorage.setItem(k,s); }catch(e){ try{ localStorage.removeItem(k+'.bak'); localStorage.setItem(k,s); }catch(e2){} }   /* sem espaço: o save novo vale mais que a cópia */ if(deskApi()){ DISK.q[k]=s; if(!DISK.t) DISK.t=setTimeout(flushDisk,120); } }
+// um save só vale se abrir e tiver o formato certo
+function saveOk(k,str){ try{ const o=JSON.parse(str); if(!o||typeof o!=='object') return false; if(k===SAVE_KEY) return !!(o.me&&o.me.first&&Array.isArray(o.people)); return true; }catch(e){ return false; } }
+function loadKey(k){ let s=null; try{ s=localStorage.getItem(k); }catch(e){ return null; }
+  if(s&&saveOk(k,s)) return JSON.parse(s);
+  let b=null; try{ b=localStorage.getItem(k+'.bak'); }catch(e){}
+  if(b&&saveOk(k,b)){ if(s) SAVE_RECOVERED=k; return JSON.parse(b); }   // principal estragado: abre o último salvamento bom
+  return null; }
 function save(){ if(S) store(SAVE_KEY,S); store(META_KEY,META); }
 
 // ---------- genética ----------
@@ -1385,7 +1395,7 @@ function yearHealth(){
     const def=DISEASES[d.id]; d.y++;
     let dmg=def.dmg*(def.ctrl&&d.ctrl?.25:1)*(def.chronic?.45:1)*(.6+R.f()*.8);
     st('health',-dmg); if(def.hap) st('happy',-def.hap*(.5+R.f())); if(def.lk) st('looks',-def.lk*R.f()); if(def.sm) st('smarts',-def.sm*R.f());
-    if(def.cure==='auto'&&R.chance(.75)){ m.dis.splice(m.dis.indexOf(d),1); if(def.dmg>5||R.chance(.35)) log(def.dmg>5?`Me recuperei de ${dn(def.n)}.`:R.pick([`Me recuperei de ${dn(def.n)}.`,'Já estou cem por cento de novo.']),'good'); }
+    if(def.cure==='auto'&&R.chance(.75)){ m.dis.splice(m.dis.indexOf(d),1); if(def.dmg>5||R.chance(.35)) log(d.k===false?R.pick(['Aquele mal-estar passou sozinho.','Melhorei sem nem saber o que eu tinha.']):def.dmg>5?`Me recuperei de ${dn(def.n)}.`:R.pick([`Me recuperei de ${dn(def.n)}.`,'Já estou cem por cento de novo.']),'good'); }
     else if(def.id==='acne'&&m.age>22){ m.dis.splice(m.dis.indexOf(d),1); }
   }
   if(m.prison) return;
@@ -4339,8 +4349,8 @@ function render(){
   if(!S) return; const m=S.me;
   $('#hName').textContent=`${m.first} ${m.last}`;
   $('#hSub').innerHTML=flagSVG(m.country,16)+' '+esc(`${m.age} ${m.age===1?'ano':'anos'} · ${occupation()} · ${m.city}`);
-  const minor=m.age<18&&parents().length; $('#hMoney').textContent=fmt(minor?famMoney():m.money); $('#hdr .lbl').textContent=minor?'Família':'Saldo';
-  $('#hMoney').style.color=''; $('#hMoney').classList.toggle('neg',!!(minor?S.flags.famBroke:m.money<0));
+  const minor=m.age<18&&parents().length; $('#hMoney').textContent=fmt(m.money); $('#hdr .lbl').textContent='Saldo';   // sempre o dinheiro do próprio personagem (a família continua tendo o dela)
+  $('#hMoney').style.color=''; $('#hMoney').classList.toggle('neg',m.money<0);
   $('#avatar').innerHTML=faceSVG(m,46);
   
   const html=S.log.map(y=>`<section class="yr ph${y.age<13?0:y.age<18?1:y.age<40?2:y.age<65?3:4}"><h3><span>${y.age} ${y.age===1?'ano':'anos'}</span><span>${y.year}</span></h3>${y.lines.map(l=>typeof l==='string'?`<p>${esc(l)}</p>`:`<p class="${l.c}">${esc(l.t)}</p>`).join('')||'<p class="s" style="color:var(--muted)">Um ano tranquilo.</p>'}</section>`).join('');
@@ -4899,7 +4909,7 @@ function boot(){
       if(hs.includes('desistir')){ if(!partner()){ const p=candidate(false); p.rel='conjuge'; p.bond=88; S.people.push(p); } if(!kids().length){ S.people.push(mkPerson({rel:'filho',age:7,last:m.last,bond:95})); } render(); giveUpFlow(); } }
     else if(hs.includes('idades')){ document.body.innerHTML=faceAges(); } else if(hs.includes('rostos')){ document.body.innerHTML=faceGallery(hs.includes('grande'),+(hs.match(/p(\d+)/)||[0,0])[1]); } if(hs.includes('garagem')){ document.body.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#fff\">'+CAR_MODELS.map((c,i)=>'<div style="text-align:center;font:10px sans-serif\">'+carSVG(c,Object.keys(PAINT)[i%10],110)+'<br>'+c.b+' '+c.m+'</div>').join('')+'</div>'; } },50); for(let i=0;i<24&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); if(r) log(sh.t.replace(/[!?.…]+$/,'')+': '+r); } } render.jump=true; render(); return; }
   const saved=loadKey(SAVE_KEY);
-  if(saved&&saved.me&&saved.v===1){ S=fixSave(saved); render.jump=true; render(); if(S.me.alive){ showStart(); } else showDeath(); }
+  if(saved&&saved.me&&saved.v===1){ S=fixSave(saved); render.jump=true; render(); if(SAVE_RECOVERED) setTimeout(()=>{ try{ modal({k:'NewLife',t:'Save recuperado',x:'O último salvamento estava danificado. Abri a cópia de segurança anterior: você pode ter perdido só a última ação.'}); }catch(e){} },900); if(S.me.alive){ showStart(); } else showDeath(); }
   else if(!META.lives){ newLife({royal:R.chance(.01)}); render.jump=true; render(); pump(); }
   else showStart();
 }
@@ -8619,16 +8629,17 @@ function prolCompCh(pr,max,next,verbo){ const g=prolGente(), ch=[], v=verbo||'Ir
   if(max===1&&!g.p){ const f=people('amigo')[0]; if(f) ch.push({l:`${v} com ${f.first}`,fn:()=>{ pr.junto=[f.id]; next(); }}); }
   return ch; }
 const prolAdv=pr=>()=>{ pr.fase++; };
+const prolPago=(v,o)=>S.me.money>=v?Object.assign(o,{l:`${o.l} (${fmt(v)})`}):null;
 function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; const id=pr.id, f=pr.fase, b=pr.b, adv=prolAdv(pr);
-  const Q=(t,x,ch)=>MQ.push({k:SCEN[id].n,t:prT(t),x:prT(x),ch});
+  const Q=(t,x,ch)=>MQ.push({k:SCEN[id].n,t:prT(t),x:prT(x),ch:ch.filter(Boolean)});
   if(id==='zumbi'){
     if(f===0) Q('Notícia de rodapé',`No jornal da noite, uma nota rápida: um surto de "raiva agressiva" num hospital de ${R.pick(['Manila','Lagos','Bucareste','Lima','Jacarta','Karachi'])}. Pacientes mordendo enfermeiros. O apresentador sorriu e passou para o futebol.`,[
       {l:'Mudar de canal',fn:()=>{ adv(); log('Vi no jornal uma notícia estranha sobre um surto de raiva num hospital do outro lado do mundo.','warn'); }},
       {l:'Pesquisar mais na internet',fn:()=>{ adv(); b.info=1; st('smarts',2); log('Passei a noite lendo sobre um surto estranho. Os vídeos sumiam da internet em minutos.','warn'); }},
-      {l:'Guardar uns enlatados, por via das dúvidas',fn:()=>{ adv(); b.com=(b.com||0)+3; m.money-=600; log('Comecei a guardar enlatados no armário. Minha família riu de mim.','warn'); }}]);
+      prolPago(600,{l:'Guardar uns enlatados, por via das dúvidas',fn:()=>{ adv(); b.com=(b.com||0)+3; m.money-=600; log('Comecei a guardar enlatados no armário. Minha família riu de mim.','warn'); }})]);
     else if(f===1) Q('As prateleiras vazias','Os casos se espalharam por vários países. Fronteiras fechadas, voos cancelados, aulas suspensas. No mercado, as prateleiras estão vazias e o arroz custa o triplo. Na internet, vídeos que ninguém consegue explicar.',[
-      {l:'Encarar a fila do mercado e estocar',fn:()=>{ adv(); b.com=(b.com||0)+4; b.agua=(b.agua||0)+3; m.money-=1800; log('Passei seis horas numa fila de mercado para comprar comida. Brigaram por papel higiênico.','warn'); }},
-      {l:'Comprar uma arma "por precaução"',fn:()=>{ adv(); b.arma=1; m.money-=4500; log('Comprei uma arma e munição. Nunca pensei que faria isso.','warn'); }},
+      prolPago(1800,{l:'Encarar a fila do mercado e estocar',fn:()=>{ adv(); b.com=(b.com||0)+4; b.agua=(b.agua||0)+3; m.money-=1800; log('Passei seis horas numa fila de mercado para comprar comida. Brigaram por papel higiênico.','warn'); }}),
+      prolPago(4500,{l:'Comprar uma arma "por precaução"',fn:()=>{ adv(); b.arma=1; m.money-=4500; log('Comprei uma arma e munição. Nunca pensei que faria isso.','warn'); }}),
       {l:'Fazer aulas de defesa pessoal',fn:()=>{ adv(); m.fight=clamp((m.fight||0)+8); log('Entrei numa academia de defesa pessoal. A turma lotou do dia para a noite.','warn'); }},
       {l:'Ajudar os vizinhos idosos',fn:()=>{ adv(); b.viz=1; m.karma=clamp(m.karma+5); log('Fiz compras para os vizinhos idosos do prédio. Eles não esquecem.','good'); }}]);
     else { const go=()=>prolGo(); Q('O dia em que o mundo acabou','A sirene da cidade tocou às três da manhã e não parou mais. Pela janela, gente correndo. Alguns correndo atrás dos outros. O rádio repete a mesma frase: "Permaneçam em casa". Ninguém permanece.',
@@ -8639,7 +8650,7 @@ function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; 
     else Q('O dia da viagem',d[2],[{l:'Nadar com tudo o que tenho',fn:()=>prolGo()},{l:'Agarrar o que der antes de pular',fn:()=>{ b.extra=1; prolGo(); }}]);
   }
   else if(id==='marte'){ const d=PROL_MARTE[pr.v]||PROL_MARTE.oficial;
-    if(f===0){ const base=d[2]?prolCompCh(pr,d[2],()=>{ adv(); log('Fui aceit'+oa()+' numa missão para Marte.','good'); },'Ir'):[{l:pr.v==='clandestino'?'Pagar o técnico ($8.000)':'Aceitar',fn:()=>{ if(pr.v==='clandestino') m.money-=8000; adv(); log(pr.v==='clandestino'?'Paguei para entrar escondid'+oa()+' na nave de carga para Marte.':'Aceitei ir para Marte.','warn'); }}];
+    if(f===0){ const base=d[2]?prolCompCh(pr,d[2],()=>{ adv(); log('Fui aceit'+oa()+' numa missão para Marte.','good'); },'Ir'):[pr.v==='clandestino'&&m.money<8000?null:{l:pr.v==='clandestino'?'Pagar o técnico ($8.000)':'Aceitar',fn:()=>{ if(pr.v==='clandestino') m.money-=8000; adv(); log(pr.v==='clandestino'?'Paguei para entrar escondid'+oa()+' na nave de carga para Marte.':'Aceitei ir para Marte.','warn'); }}];
       Q(d[0],d[1],base.concat([{l:'Desistir',cls:'alt',fn:()=>prolCancel('Desisti de ir para Marte. A Terra é boa o bastante.')}])); }
     else if(f===1) Q(pr.v==='clandestino'?'Preparando o esconderijo':'Um ano de treinamento',pr.v==='clandestino'?'Você passou o ano juntando garrafas de água, comida desidratada e coragem. O contêiner tem o tamanho de um armário.':'Centrífugas, simuladores de gravidade, aulas de botânica e de primeiros socorros. A equipe começa a virar família.',[
       {l:'Treinar sobrevivência',fn:()=>{ adv(); b.hl=1; st('health',4); log('Treinei para sobreviver em Marte.','good'); }},
@@ -8652,7 +8663,7 @@ function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; 
     if(f===0) Q('Sonhos com dois sóis','Toda noite o mesmo sonho: um campo com dois sóis, um castelo escuro no horizonte e uma voz dizendo o seu nome. Você acorda cansad{o}, como se tivesse andado a noite inteira.',[
       {l:'Anotar os sonhos num caderno',fn:()=>{ adv(); b.mapa=1; log('Comecei a anotar sonhos estranhos com um mundo de dois sóis.','warn'); }},
       {l:'Ignorar e seguir a vida',fn:()=>{ adv(); log('Tive sonhos estranhos o ano inteiro.','warn'); }},
-      {l:'Procurar um psicólogo',fn:()=>{ adv(); m.money-=1200; b.calma=1; log('Fui a um psicólogo por causa de uns sonhos. Ele também anotou tudo.','warn'); }}]);
+      prolPago(1200,{l:'Procurar um psicólogo',fn:()=>{ adv(); m.money-=1200; b.calma=1; log('Fui a um psicólogo por causa de uns sonhos. Ele também anotou tudo.','warn'); }})]);
     else { const g=prolGente(); const ch=[{l:'Seguir a luz',fn:()=>{ pr.junto=[]; prolGo(); }}];
       if(g.p) ch.push({l:`Segurar a mão de ${g.p.first}`,fn:()=>{ pr.junto=[g.p.id]; prolGo(); }});
       ch.push({l:'Resistir com todas as forças',cls:'alt',fn:()=>{ if(R.chance(.5)) prolCancel('Uma luz quase me levou para outro mundo. Resisti. Os sonhos pararam.'); else { MQ.unshift({t:'Não deu',x:'Você resistiu, mas a luz foi mais forte.'}); prolGo(); } }});
@@ -8660,7 +8671,7 @@ function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; 
   }
   else if(id==='heroi'){
     if(f===0) Q('Algo aconteceu',PROL_HEROI[pr.v]||PROL_HEROI.raio,[
-      {l:'Fazer todos os exames',fn:()=>{ adv(); m.money-=2000; log('Fiz uma bateria de exames depois de um acidente estranho. Tudo normal. Normal demais.','warn'); }},
+      prolPago(2000,{l:'Fazer todos os exames',fn:()=>{ adv(); m.money-=2000; log('Fiz uma bateria de exames depois de um acidente estranho. Tudo normal. Normal demais.','warn'); }}),
       {l:'Não contar para ninguém',fn:()=>{ adv(); b.seg=1; log('Guardei segredo sobre um acidente estranho.','warn'); }},
       {l:'Contar para a família',fn:()=>{ adv(); b.fam=1; log('Contei para a família sobre um acidente estranho. Ficaram preocupados.','warn'); }}]);
     else { pr.poder=pr.poder||R.pick(POWERS); Q('Os poderes acordaram',`Primeiro foram coisas pequenas. Depois, numa manhã qualquer, aconteceu de verdade: você conseguiu ${PODER_FRASE[pr.poder]||pr.poder}. O espelho mostra a mesma pessoa, mas nada mais é igual.`,[
@@ -8696,6 +8707,1032 @@ V.scenPick=(o=>()=>{ const r=o(), m=S.me, pr=m.prol;
 ageUp=(o=>function(){ const r=o.apply(this,arguments); const m=S&&S.me; if(m&&m.alive&&m.prol&&!S.scen) prolStep(); return r; })(ageUp);
 // quem foi junto morre de verdade se morrer lá
 crewLeave=(o=>function(c,why,dead){ const r=o.apply(this,arguments); if(c&&c.pid){ const p=P(c.pid); if(p&&p.alive){ if(dead){ p.alive=false; p.cause='longe de casa, numa aventura que ninguém acredita'; log(`${p.first} morreu ao meu lado, longe de casa.`,'bad'); st('happy',-20); } else log(`${p.first} se separou de mim e encontrou o próprio caminho de volta para casa.`,'warn'); } } return r; })(crewLeave);
+
+// ===== Cadeias de eventos: histórias em etapas, em que cada decisão leva à próxima =====
+// chain(id, opções, { a:[título, texto|[variações], [escolhas], {when}], b:[...], ... })   a etapa 'a' abre a história
+// opções: k (selo do evento), min/max (idade para começar), when(m), w (peso), who (pessoa real: partner, friend, sib, parent,
+//         kid, boss, colega, classmate…), npc (alguém novo com nome; date:true = do gênero que o personagem gosta; gn:'F'|'M'),
+//         gap:[min,max] (anos entre etapas), rep (pode acontecer de novo na mesma vida), jail (só na prisão)
+// escolha: 'Rótulo|efeitos|texto' ou com chance 'Rótulo|?chance efeitos|texto|efeitos se falhar|texto se falhar' (igual ao pack)
+//   efeitos extras: >b (próxima etapa) · >b@3 (daqui a 3 anos) · >b@1-4 (entre 1 e 4 anos) · vira:amigo|namoro|inimigo|colegaT
+//   (o personagem da história vira uma pessoa da sua lista) · +cad:outra (começa outra história) · sem ">" a história termina
+// no texto: {p} nome do personagem da história · {pl} sobrenome · {o2} o/a dele(a) · {ele} ele/ela · e tudo do pack ({n}, {v}, {o}...)
+const CHAINS={};
+function chain(id,o,steps){ CHAINS[id]={id,o,steps}; Object.entries(steps).forEach(([sid,st])=>cadReg(id,sid,st)); }
+const cadEv=(id,sid)=>'cad_'+id+'_'+sid;
+const cadState=()=>{ const m=S.me; m.cad=m.cad||{on:{},done:{}}; return m.cad; };
+function cadPerson(d){ const p=d.pid&&P(d.pid); if(p){ d.p=p.first; d.pl=p.last; d.o2=p.gender==='F'?'a':'o'; d.ele=p.gender==='F'?'ela':'ele'; d.idade=p.age; } if(d.ele){ const f=d.ele==='ela'; d.Ele=f?'Ela':'Ele'; d.a2=f?'a':''; d.O2=f?'A':'O'; d.irmao=f?'irmã':'irmão'; d.dele=f?'dela':'dele'; } d.padrinho=S.me.gender==='F'?'madrinha':'padrinho'; return p; }
+function cadReg(id,sid,st){ const [title,text,choices,so={}]=st;
+  EVENTS[cadEv(id,sid)]={title,w:0,cad:id,cd:0,
+    when:m=>{ const c=cadState().on[id]; if(!c||c.s!==sid) return false; try{ return !so.when||so.when(m,c.d); }catch(e){ return false; } },
+    prep:m=>{ const c=cadState().on[id]; return c?Object.assign({},c.d):null; },
+    show:d=>{ const o=CHAINS[id].o; cadPerson(d); return {k:o.k||'História',t:tp(title,d),x:tp(Array.isArray(text)?text[(d.xi||0)%text.length]:text,d),ch:choices.map((c,i)=>[tp(c.split('|')[0],d),String(i)])}; },
+    pick:(key,d)=>cadPick(id,sid,choices[+key],d)};
+}
+// separa os efeitos próprios das cadeias (>etapa, vira:, +cad:) dos efeitos normais do pack
+function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
+function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me; const d=c?c.d:dPend;
+  const parts=choice.split('|'); let fx1=parts[1]||'', t1=parts[2]||'', fx2=parts[3], t2=parts[4];
+  const toks=fx1.trim().split(/\s+/); let chance=null, base='';
+  const qi=toks.findIndex(t=>t.startsWith('?'));
+  if(qi>=0){ const bm=toks[qi].match(/^\?(bond|will)([+-]\d+)?$/), pp=d.pid&&P(d.pid);   // ?bond = laço com a pessoa da história · ?will = força de vontade
+    chance=bm?Math.max(.03,Math.min(.97,((bm[1]==='bond'?(pp?pp.bond:50):(m.will||50))+ +(bm[2]||0))/100)):dslChance(toks[qi]); base=toks.slice(0,qi).join(' '); fx1=toks.slice(qi+1).join(' '); }
+  const ok=chance==null||R.chance(chance);
+  const b0=cadSplit(base), br=cadSplit(ok?fx1:(fx2||''));
+  const out=[]; let next=null, delay=null;
+  b0.own.concat(br.own).forEach(t=>{ let mm;
+    if(mm=t.match(/^>(\w+)(?:@(\d+)(?:-(\d+))?)?$/)){ next=mm[1]; if(mm[2]!=null) delay=mm[3]!=null?R.int(+mm[2],+mm[3]):+mm[2]; }
+    else if(mm=t.match(/^vira:(\w+)$/)){ if(!d.pid||!P(d.pid)){ const p=meetP(d,mm[1],'n'); if(p){ d.pid=p.id; if(mm[1]==='irmao'&&p.age<3) p.last=m.last; } } else { const p=P(d.pid); if(p&&p.rel!==mm[1]&&!['mae','pai','irmao','filho','conjuge'].includes(p.rel)) p.rel=mm[1]==='namoro'&&partner()&&partner()!==p?'amigo':mm[1]; } }
+    else if(mm=t.match(/^\+cad:(\w+)$/)){ cadStart(mm[1],true); }
+    else if(mm=t.match(/^emprego:(\w+)$/)){ const j=JOBS.find(x=>x.id===mm[1]); if(j&&!(m.job&&m.job.id===j.id)&&m.age>=16){ takeJob({id:j.id,co:companyName(),size:'média',mul:1}); out.push(`Agora sou ${jobTitle(m.job).toLowerCase()}.`); } }
+    else if(t==='noivar'||t==='casar'){ const p=d.pid&&P(d.pid); if(p&&p.alive&&['namoro','noivo'].includes(p.rel)&&(!partner()||partner()===p)){ if(t==='noivar'&&p.rel==='namoro'){ p.rel='noivo'; out.push(`Estou noiv${oa()} de ${p.first}!`); } else if(t==='casar'){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } } }
+    else if(t==='bebe'){ const par=partner(); if(m.age>=18&&m.age<=50){ const gd=R.chance(.5)?'M':'F'; const k=mkPerson({rel:'filho',gender:gd,age:0,last:m.last,bond:R.int(85,100),parentId:par?par.id:null,from:par?[m,par]:undefined}); uniqFirst(k); S.people.push(k); cnt('kids'); out.push(`Nasceu ${gd==='F'?'minha filha':'meu filho'} ${k.first}!`); } } });
+  if(c){ if(next&&next!=='fim'&&CHAINS[id].steps[next]){ const g=CHAINS[id].o.gap||[1,3]; c.s=next; c.due=m.age+(delay!=null?delay:R.int(g[0],g[1])); c.n=(c.n||0)+1; }
+    else { delete st.on[id]; st.done[id]=(st.done[id]||0)+1; cnt('historias'); } }
+  const r0=dslApply(b0.rest,d), r1=dslApply(br.rest,d);
+  cadPerson(d);
+  return [tp(ok?t1:(t2||'Não deu certo.'),d),r0,r1].concat(out).filter(Boolean).join(' '); }
+// pode começar esta história agora?
+function cadCan(id,m){ const ch=CHAINS[id], o=ch.o, st=cadState(); if(st.on[id]) return false; if(st.done[id]&&!o.rep) return false;
+  if(o.min!=null&&m.age<o.min) return false; if(o.max!=null&&m.age>o.max) return false; if(!!o.jail!==!!m.prison) return false;
+  try{ if(o.when&&!o.when(m)) return false; if(o.who&&!WHO[o.who]()) return false; }catch(e){ return false; } return true; }
+function cadStart(id,force){ const m=S.me, ch=CHAINS[id]; if(!ch) return false; if(!force&&!cadCan(id,m)) return false; if(cadState().on[id]) return false;
+  const o=ch.o; let d;
+  try{ d=Object.assign(strangers(m,o),{v:amt((o.v||[500,5000])[0],(o.v||[500,5000])[1]),xi:R.int(0,5),city:m.city,lugar:R.pick(TRIPS)}); }catch(e){ return false; }
+  d.v2=d.v*4;
+  // palavras sorteadas uma vez e mantidas na história inteira
+  Object.assign(d,{materia:R.pick(['matemática','física','química','biologia','história','português','geografia']),prod:R.pick(['roupas de brechó','fones de ouvido','cosméticos naturais','camisetas estampadas','plantas','doces caseiros']),
+    comida:R.pick(['pastel','hambúrguer artesanal','tapioca','churros','comida japonesa','acarajé']),coisa:R.pick(['um tênis caro','fones novos','um videogame','roupas','um celular usado','ingressos de show'])});
+  if(o.who){ const p=WHO[o.who](); if(!p) return false; d.pid=p.id; }
+  if(o.age) d.nAge=clamp(m.age+R.int(o.age[0],o.age[1]),1,99);
+  if(o.npc){ d.p=d.n; d.pl=d.nl; d.o2=d.nG==='F'?'a':'o'; d.ele=d.nG==='F'?'ela':'ele'; }
+  cadPerson(d);
+  cadState().on[id]={s:'a',due:force?m.age+R.int(1,2):m.age,d,ini:m.age}; return true; }
+// todo ano: as histórias em andamento avançam e, de vez em quando, começa uma nova
+function cadYear(){ const m=S.me; if(!m||!m.alive||S.scen||m.age<5) return; const st=cadState(); let n=0;
+  const pend=new Set(S.pending.map(e=>e.id));
+  for(const [id,c] of Object.entries(st.on).sort((a,b)=>a[1].due-b[1].due)){
+    if(!CHAINS[id]){ delete st.on[id]; continue; }
+    if(c.d.pid&&!(P(c.d.pid)&&P(c.d.pid).alive)){ delete st.on[id]; st.done[id]=(st.done[id]||0)+1; continue; }   // a pessoa da história morreu ou sumiu
+    if(c.due>m.age||n>=2||!!CHAINS[id].o.jail!==!!m.prison) continue;
+    if(m.age-c.due>12){ delete st.on[id]; st.done[id]=(st.done[id]||0)+1; continue; }                              // ficou parada tempo demais
+    const eid=cadEv(id,c.s), ev=EVENTS[eid]; if(!ev||pend.has(eid)) continue;
+    if(!ev.when(m)) continue;
+    queue(eid,ev.prep(m)); n++; }
+  const ativos=Object.keys(st.on).length;
+  if(n<2&&ativos<4&&R.chance(ativos?.45:.7)){ const el=Object.keys(CHAINS).filter(id=>cadCan(id,m));
+    if(el.length){ const id=R.wpick(el.map(id=>[id,CHAINS[id].o.w||1])); if(cadStart(id)){ const c=st.on[id], eid=cadEv(id,'a'); if(EVENTS[eid].when(m)) queue(eid,EVENTS[eid].prep(m)); } } } }
+yearEvents=(o=>function(){ const r=o.apply(this,arguments); try{ cadYear(); }catch(e){ console.error(e); } return r; })(yearEvents);
+// conferência para o teste: toda etapa citada existe e toda etapa é alcançável
+function cadAudit(){ const errs=[]; let steps=0;
+  for(const [id,ch] of Object.entries(CHAINS)){ const ss=ch.steps, reach=new Set(['a']); if(!ss.a) errs.push(id+': sem etapa a');
+    for(const [sid,st] of Object.entries(ss)){ steps++; const ch3=st[2]; if(!Array.isArray(ch3)||!ch3.length) errs.push(`${id}.${sid}: sem escolhas`);
+      (ch3||[]).forEach(c=>{ (c.match(/\+cad:(\w+)/g)||[]).forEach(t=>{ if(!CHAINS[t.slice(5)]) errs.push(`${id}.${sid}: história ${t.slice(5)} não existe`); }); (c.match(/(?:^|[\s|])>(\w+)/g)||[]).forEach(t=>{ t=t.replace(/^[\s|]+/,''); const x=t.slice(1); if(x!=='fim'&&!ss[x]) errs.push(`${id}.${sid}: etapa ${x} não existe`); reach.add(x); }); }); }
+    Object.keys(ss).forEach(sid=>{ if(!reach.has(sid)) errs.push(`${id}.${sid}: etapa inalcançável`); }); }
+  return {errs,steps,chains:Object.keys(CHAINS).length}; }
+
+// ===== Histórias em cadeia: infância =====
+chain('cao_rua',{k:'Infância',min:6,max:12,gap:[1,2]},{
+ a:['Um cachorro na chuva','Um vira-lata magro e encharcado começou a me seguir na volta da escola.',['Levar para casa|>b@0|Entrei em casa com o cachorro embaixo do braço e um sorriso amarelo.','Dar comida escondido|>c|Dividi meu lanche com ele atrás do muro.','Espantar|k-2|Ele foi embora com o rabo entre as pernas. Fiquei com aquilo na cabeça.']],
+ b:['Posso ficar com ele?','Meus pais olharam para o cachorro, depois para mim, depois para o tapete molhado.',['Prometer que vou cuidar de tudo|?k+20 h+10 pet >d|Deixaram! Ele ganhou nome, coleira e um canto na lavanderia.|h-6 >c|Disseram não. Ele voltou para a rua, mas eu sei onde encontrá-lo.','Chorar até deixarem|?40 h+6 pet >d|Funcionou. Não me orgulho.|h-5 >c|Fiquei de castigo e o cachorro voltou para a rua.']],
+ c:['O amigo do muro','Todo dia o cachorro me espera no mesmo lugar. Já até abana o rabo quando me vê.',['Pedir de novo para os meus pais|>b@0|Desta vez fui com um discurso preparado.','Montar uma casinha para ele no terreno baldio|k+4 h+4 >e|Caixa de papelão, cobertor velho e muito orgulho.','Avisar uma ONG de animais|k+5 >f|Uma moça da ONG veio buscar e prometeu achar um lar para ele.']],
+ d:['Responsabilidade','O cachorro destruiu o sofá novo enquanto todo mundo estava fora.',['Assumir a culpa e pagar com a mesada|$-150 k+5 >g|Fiquei meses sem mesada, mas o cachorro ficou.','Esconder o estrago com uma almofada|?30 >g|Ninguém percebeu. Por enquanto.|h-5 >g|Descobriram em dez minutos. Bronca dupla.']],
+ e:['A casinha sumiu','A prefeitura limpou o terreno e levou a casinha. O cachorro estava assustado e mancando.',['Levar ao veterinário com a ajuda de um vizinho|$-100 k+6 >b@0|O veterinário cuidou da pata. Agora preciso convencer meus pais.','Deixar ele se virar|k-4 h-4|Ele sumiu depois daquele dia. Nunca soube para onde foi.']],
+ f:['Uma foto da ONG','Meses depois, a ONG mandou uma foto: o cachorro numa casa com quintal e duas crianças.',['Ir visitar|h+8 >h@3|Ele me reconheceu na hora e pulou em cima de mim.','Ficar feliz de longe|h+5|Guardei a foto na gaveta. Fiz a coisa certa.']],
+ g:['Velhinho','Os anos passaram e meu cachorro ficou com o focinho branco e as patas cansadas.',['Dar uma vida tranquila até o fim|h-6 k+4 >h@2|Ele dormia no pé da minha cama todas as noites.','Levar para passear todo dia mesmo assim|hl+2 h+3 >h@2|Devagarinho, mas todo dia.']],
+ h:['A despedida','Chegou a hora de me despedir de um velho amigo de quatro patas.',['Estar junto até o último momento|h-12 k+3|Ele foi embora com a cabeça no meu colo. Foi a primeira grande perda da minha vida.','Plantar uma árvore em homenagem|h-8|Toda vez que olho para ela, lembro dele correndo atrás de mim na chuva.']],
+});
+chain('vizinho_oficina',{k:'Infância',min:7,max:12,npc:1,gn:'M',age:[50,65],gap:[1,2]},{
+ a:['A garagem do seu {p}','O vizinho, seu {p}, passa as tardes consertando bicicletas e rádios velhos na garagem.',['Ficar olhando de longe|>b|Ele percebeu e acenou.','Pedir para ajudar|>b@0|Ele me passou uma chave de fenda sem dizer nada. Entendi que era um sim.','Achar a garagem assustadora|h+0|Nunca entrei lá.']],
+ b:['Aprendiz de garagem','Seu {p} me ensinou a trocar a câmara de um pneu de bicicleta.',['Prestar atenção em tudo|sm+3 >c|Na terceira vez já fazia sozinh{o}.','Fazer bagunça com as ferramentas|?50 >c|Ele riu e me deu uma tarefa.|>c|Ele ficou bravo, mas me deixou voltar no dia seguinte.']],
+ c:['O rádio de válvula','Seu {p} quer consertar um rádio antigo da esposa que morreu. Disse que precisa de mãos pequenas.',['Ajudar com cuidado|?sm+10 sm+3 h+6 >d|O rádio tocou de novo. Ele chorou e fingiu que era poeira.|>d|Queimei um fio. Ele disse que acontecia com ele também.','Dizer que não tenho tempo|>e@2|Ele entendeu. Mas a garagem ficou mais silenciosa.']],
+ d:['Meu primeiro bico','Seu {p} disse que a molecada do bairro paga para consertar bicicleta. "Divide comigo meio a meio?"',['Topar e abrir a "oficina"|$+300 sm+2 >e@2|Ganhei meu primeiro dinheiro com as próprias mãos.','Fazer de graça para os amigos|k+5 h+4 >e@2|Virei herói da rua.']],
+ e:['A ambulância','Uma ambulância parou na casa do seu {p}. Ele caiu na garagem e ficou muito tempo sozinho no chão.',['Ir visitá-lo no hospital|k+6 h-4 >f|Ele perguntou primeiro das bicicletas, depois de mim.','Ficar com medo de ir|h-4 >f|Mandei um desenho pela minha mãe.']],
+ f:['As ferramentas','A família do seu {p} veio arrumar a casa. Ele deixou um recado: a caixa de ferramentas é minha.',['Guardar como um tesouro|h+5 item:caixa_de_ferramentas_antiga:300 >g@6-10|É pesada, cheira a graxa e é a coisa mais valiosa que eu tenho.','Usar todo dia|sm+3 item:caixa_de_ferramentas_antiga:300 >g@6-10|Consertei a bicicleta do bairro inteiro com ela.']],
+ g:['Mãos de mecânic{o}','Adulto, encontrei a velha caixa de ferramentas do seu {p} no fundo do armário. Ainda sei usar cada uma delas.',['Fazer disso uma profissão|?55 emprego:mecan h+8|Hoje tenho meu macacão. Ele ia gostar de ver.|h+2|Tentei, mas não era o momento. A caixa voltou para o armário.','Manter como hobby|h+6 sm+2|Aos domingos, conserto coisas para os vizinhos. Como ele fazia.']],
+});
+chain('valentao',{k:'Escola',min:7,max:13,npc:1,same:1,gap:[1,2]},{
+ a:['O valentão da turma','{p} começou a pegar meu lanche todo dia na hora do recreio.',['Enfrentar|?fight+10 k+2 >b|Empurrei de volta. {Ele} ficou surpres{o2}.|hl-4 h-6 >c|Levei um soco e perdi o lanche do mesmo jeito.','Contar para a professora|>d|A professora chamou nós dois na sala.','Dividir o lanche por conta própria|k+3 >e|{Ele} estranhou. Comeu calad{o2}.']],
+ b:['Respeito','Depois daquele dia, {p} parou de me incomodar. Mas começou a me olhar diferente.',['Puxar conversa|>e|Descobri que {ele} não tinha almoço em casa.','Ignorar para sempre|h+3|Cada um no seu canto. Paz armada.']],
+ c:['Tudo piorou','{p} agora me espera na saída da escola com dois amigos.',['Contar para os meus pais|>d|Meus pais foram falar com a diretora.','Mudar o caminho de casa|h-5 >f@1|Dou uma volta enorme todo dia. Mas pelo menos chego inteir{o}.','Treinar para revidar|tal.athletic+3 >b@1|Fiz aulas de judô o ano inteiro.']],
+ d:['Na sala da diretora','A diretora chamou os pais de {p}. Só apareceu a avó, cansada e envergonhada.',['Dizer que não precisa castigar|k+6 >e|A avó me olhou com gratidão. {p} também, de um jeito torto.','Exigir uma suspensão|h+2 >f|{p} foi suspens{o2} por três dias e voltou com raiva de mim.']],
+ e:['O outro lado','{p} contou que o pai foi embora e a mãe trabalha a noite toda. Só pegava meu lanche porque estava com fome.',['Levar dois lanches todo dia|k+8 h+4 vira:amigo >g@3-5|Viramos amigos de verdade.','Guardar o segredo dele|k+4 vira:amigo >g@3-5|Nunca contei para ninguém.']],
+ f:['O inimigo','{p} espalhou uma mentira sobre mim para a turma inteira.',['Desmentir na frente de todos|?k+10 h+4 >g@4-6|A turma acreditou em mim.|h-8 vira:inimigo >g@4-6|Ninguém acreditou. Virei piada por meses.','Deixar para lá|h-4 vira:inimigo >g@4-6|O tempo passa. As pessoas esquecem. Eu não.']],
+ g:['Anos depois','Encontrei {p} de novo, já adultos. Trabalha num mercado perto da minha casa.',['Cumprimentar como velho conhecido|k+3 h+3|Rimos daquela época. As pessoas mudam.','Fingir que não vi|h-1|{Ele} também fingiu. Alguns assuntos ficam no recreio.']],
+});
+chain('feira_ciencias',{k:'Escola',min:9,max:14,gap:[1,1]},{
+ a:['Feira de ciências','A escola vai fazer uma feira de ciências. O melhor projeto vai para a feira regional.',['Fazer um vulcão de bicarbonato|>b|Clássico. Seguro. Previsível.','Inventar algo original|?sm >c|Tive uma ideia que ninguém tinha tido: um filtro de água com garrafa pet e carvão.|>b|Não consegui fazer funcionar a tempo. Voltei para o vulcão.','Não participar|h+1|Fiquei olhando os projetos dos outros.']],
+ b:['O vulcão','Meu vulcão funcionou. Junto com o de outros nove alunos.',['Aprender com os outros projetos|sm+3|Anotei tudo. Ano que vem vou fazer melhor.','Ficar com inveja|h-3|Não ganhei nada. Nem menção honrosa.']],
+ c:['Primeiro lugar','O filtro de garrafa ganhou a feira da escola! Vou para a regional.',['Melhorar o projeto|sm+4 grade+5 >d|Passei as férias testando tipos de areia.','Apresentar do jeito que está|>d|Em time que está ganhando não se mexe.']],
+ d:['A feira regional','Na regional, tem projeto de escola particular com laboratório de verdade.',['Apresentar com confiança|?sm+5 f+2 h+10 >e|Uma juíza perguntou se eu tinha copiado da internet. Não tinha. Ganhei o segundo lugar!|h-4 >f|Não ganhei, mas um professor da universidade pegou meu contato.','Travar de nervoso|h-6 >f|Gaguejei, mas terminei a apresentação.']],
+ e:['Olimpíada de ciências','Fui convidad{o} para uma olimpíada estadual de ciências.',['Estudar todo dia|sm+5 grade+5 >g|Meus amigos acharam que eu tinha enlouquecido.','Ir sem estudar|?sm-10 f+3 >g|Fui bem mesmo assim.|>g|Fui mal. Mas aprendi o que preciso estudar.']],
+ f:['O professor da universidade','O professor da feira me convidou para conhecer o laboratório da universidade num sábado.',['Ir|sm+4 h+6 >g|Vi um microscópio eletrônico. Decidi o que quero ser.','Recusar por vergonha|h-2|Fiquei pensando nisso por anos.']],
+ g:['Uma bolsa de estudos','Por causa dos projetos de ciências, recebi uma bolsa de iniciação científica para estudantes.',['Aceitar|$+2400 sm+5 grade+5 f+2|Recebo para estudar. Minha mãe mostrou o certificado para a vizinhança inteira.','Recusar para ter mais tempo livre|h+3|Quero ser criança mais um pouco.']],
+});
+chain('amigo_infancia',{k:'Infância',min:6,max:10,npc:1,same:1,gap:[2,4]},{
+ a:['Amigo novo','{p} sentou do meu lado no primeiro dia de aula e me ofereceu metade da bolacha.',['Aceitar a bolacha|vira:amigo h+5 >b|Pronto. Melhores amigos para sempre.','Recusar, desconfiad{o}|>b|{p} insistiu no dia seguinte. E no outro.']],
+ b:['O pacto','{p} propôs um pacto: amigos para sempre, com direito a esconderijo secreto no terreno baldio.',['Construir o esconderijo|h+8 vira:amigo >c|Tábuas, lona e um aviso: "proibido adultos".','Achar bobagem|>c|Mesmo assim, ajudei a construir.']],
+ c:['A mudança','{p} vai se mudar para outra cidade. O pai arrumou emprego longe.',['Trocar endereços e prometer escrever|h-8 bond+5 >d|Chorei escondid{o} no banheiro.','Ficar bravo e não se despedir|h-10 bond-15 >e@4|Me arrependi no mesmo dia, mas o caminhão já tinha ido.']],
+ d:['Cartas e mensagens','{p} manda mensagens contando da escola nova. Já tem amigos novos lá.',['Responder sempre|bond+8 >f@4-7|Ficamos conversando por anos.','Ir respondendo cada vez menos|bond-10 >e@3|A vida foi levando cada um para um lado.']],
+ e:['Saudade','Encontrei uma foto do esconderijo secreto com {p}. Fazia anos que não falava com {ele}.',['Procurar nas redes sociais|>f|Achei. {p} respondeu em cinco minutos.','Deixar no passado|h-3|Algumas amizades são de uma época só.']],
+ f:['O reencontro','{p} voltou para a cidade, já adult{o2}. Marcamos de nos ver depois de tantos anos.',['Ir até o terreno do esconderijo|h+10 bond+15 >g@2-5|Virou um prédio. Rimos mesmo assim.','Encontrar num bar|h+8 bond+10 >g@2-5|Parecia que nunca tínhamos nos separado.']],
+ g:['Para sempre','{p} vai se casar e me chamou para ser {padrinho}.',['Aceitar e fazer um discurso|?k f+1 h+10 bond+10|Contei a história da bolacha. Ninguém segurou o choro.|h+5|Esqueci o discurso no meio, mas {p} me abraçou mesmo assim.','Aceitar e chorar mais que a noiva|h+8 bond+8|O fotógrafo me pegou em todos os ângulos.']],
+});
+chain('violao_velho',{k:'Infância',min:8,max:13,gap:[1,2]},{
+ a:['O violão no sótão','Achei um violão velho com duas cordas faltando no fundo do armário de casa.',['Pedir para consertar|$-80 >b|Coloquei cordas novas. Soava horrível. Eu adorei.','Usar como guitarra imaginária|h+3|Fiz shows para o espelho por semanas.']],
+ b:['As primeiras notas','Tentei aprender sozinh{o} com vídeos na internet. Meus dedos doem.',['Insistir todo dia|tal.musical+5 >c|Toquei minha primeira música inteira. Mal, mas inteira.','Pedir aulas|$-300 tal.musical+8 >c|A professora disse que eu tenho ouvido.','Desistir|h-2|Os dedos agradeceram.']],
+ c:['A apresentação da escola','Abriram inscrições para o show de talentos da escola.',['Me inscrever|?tal.musical h+12 f+2 >d|Aplaudiram de pé. Até o diretor.|h-8 >d|Errei o acorde no refrão. Riram, mas terminei.','Assistir da plateia|>d@2|Fiquei imaginando como seria estar lá em cima.']],
+ d:['A banda de garagem','Uns amigos querem montar uma banda e precisam de alguém no violão.',['Entrar na banda|tal.musical+5 h+8 >e@1-2|Ensaiamos na garagem de um deles. Os vizinhos odiaram.','Preferir tocar sozinh{o}|tal.musical+3|Toco no quarto. É o meu momento.']],
+ e:['O primeiro show pago','Um bar do bairro chamou a banda para tocar num sábado.',['Tocar|?tal.musical $+400 h+12 f+3 >f@2|Ganhamos dinheiro tocando música! Pouco, mas é dinheiro.|h-6 >f@2|O som deu problema e o público foi embora.','Achar que ainda não estamos prontos|h-2|A banda ficou chateada comigo.']],
+ f:['O festival','A banda foi selecionada para um festival de bandas novas da cidade.',['Ir com tudo|?tal.musical+5 f+8 h+15 $+2000|Ganhamos o festival! Uma rádio tocou nossa música.|h-6|Ficamos em quinto. Mas tocar para mil pessoas valeu.','A banda acabou antes|h-8|Brigamos por causa do nome. Clássico.']],
+});
+chain('cofrinho',{k:'Infância',min:7,max:12,gap:[1,2]},{
+ a:['O cofrinho','Ganhei um cofrinho de porquinho. Meu avô disse que quem guarda moeda nunca passa aperto.',['Guardar tudo o que ganhar|$+50 >b|O porquinho ficou pesado rápido.','Gastar tudo em doce|h+4 >c|Felicidade instantânea. Bolso vazio.']],
+ b:['A tentação','Saiu um videogame novo. Com o que tem no cofrinho, quase dá.',['Quebrar o cofrinho|$-50 h+8 >c|Joguei por um mês. Depois enjoei.','Continuar guardando|k+2 >d|Esperei. Doeu.']],
+ c:['O negócio de doces','Tive uma ideia: comprar doces no atacado e vender mais caro na escola.',['Montar o negócio|?sm $+250 h+6 >e|Virei o "doceiro" da escola. Lucro de verdade!|$-50 >e|Comi metade do estoque. Prejuízo.','Achar que vai dar problema|>d|Melhor não arriscar.']],
+ d:['A poupança','Meu avô me levou ao banco para abrir uma poupança no meu nome.',['Depositar tudo|$+100 sm+2 >f@3|Ganhei um extrato com meu nome. Me senti adult{o}.','Guardar só metade|$+50 >f@3|Metade no banco, metade no porquinho.']],
+ e:['A diretora descobriu','A diretora proibiu a venda de doces na escola. Tenho estoque para um mês.',['Vender escondido|?30 $+150 k-3 >f@3|Ninguém me pegou.|h-6 k-3 >f@3|Fui peg{o} com a mochila cheia de bala. Suspensão.','Doar para a turma|k+6 h+3 >f@3|Virei a pessoa mais querida da escola por um dia.']],
+ f:['O que ficou','Anos depois, percebi que aquele cofrinho me ensinou a pensar em dinheiro antes de todo mundo.',['Começar a investir cedo|$+800 sm+3|Peguei o hábito. Meu eu do futuro agradece.','Lembrar do avô com carinho|h+5|Ele tinha razão.']],
+});
+chain('arvore_avo',{k:'Infância',min:5,max:10,gap:[2,4],when:m=>people('avo').length>0||parents().length>0},{
+ a:['Uma muda de ipê','Meu avô me deu uma muda de ipê e disse: "Quando ela florir, você vai lembrar de mim."',['Plantar no quintal|h+4 >b|Cavei o buraco sozinh{o}, com a terra até os cotovelos.','Plantar na praça da rua|k+3 >b|Agora é uma árvore do bairro inteiro.']],
+ b:['Ela cresceu','A árvore já está mais alta do que eu. Ainda não floriu.',['Cuidar todo dia|k+2 >c|Rego, tiro as formigas, converso com ela.','Esquecer dela|>c|Ela cresceu sozinha mesmo assim.']],
+ c:['A primeira florada','O ipê floriu pela primeira vez, todo amarelo. Meu avô já não estava aqui para ver.',['Tirar uma foto e guardar|h+4 >d@3-6|Lembrei dele na hora, como ele disse.','Chorar embaixo dela|h-4 >d@3-6|Choro bom. De saudade.']],
+ d:['Vão cortar a árvore','A prefeitura quer cortar o ipê para alargar a calçada.',['Organizar um abaixo-assinado|?k+10 k+8 f+2 >e|Juntei trezentas assinaturas. A árvore ficou!|h-8 >e|Cortaram mesmo assim. Guardei um galho.','Aceitar|h-6 >e|Progresso, disseram.']],
+ e:['Raízes','Anos depois, plantei uma muda daquele ipê para alguém mais jovem.',['Repetir a frase do meu avô|h+8 k+5|"Quando ela florir, você vai lembrar de mim." Agora eu entendi.','Contar a história inteira|h+6|Algumas coisas a gente passa adiante.']],
+});
+chain('time_bairro',{k:'Esporte',min:8,max:13,gap:[1,2]},{
+ a:['Pelada no campinho','O time do bairro está precisando de um goleiro.',['Entrar no gol|tal.athletic+3 >b|Ninguém queria. Eu quis.','Jogar na linha|tal.athletic+2 >b|Corri o jogo inteiro e toquei na bola duas vezes.']],
+ b:['O campeonato do bairro','Vai ter campeonato entre os bairros da cidade.',['Treinar todos os dias|?tal.athletic+10 hl+3 h+10 >c|Fomos campeões! Fui o destaque da final.|h-4 >c|Perdemos nos pênaltis. Doeu.','Ir só nos jogos|h+3|Diversão garantida, sem compromisso.']],
+ c:['O olheiro','Um olheiro de um clube grande estava assistindo a final.',['Pedir para fazer um teste|?tal.athletic f+3 h+12 >d|Me chamaram para a peneira!|h-8 >e|Ele disse que eu era baixo demais.','Achar que é golpe|>e|Meu pai concordou comigo.']],
+ d:['A peneira','Trezentos garotos e garotas para doze vagas.',['Dar tudo|?tal.athletic-5 f+5 h+15 >f|Passei! Vou treinar na base do clube.|h-10 >e|Não passei. Chorei a volta inteira no ônibus.','Ficar nervos{o}|?20 h+12 >f|Mesmo tremendo, passei.|h-8 >e|Travei.']],
+ e:['Futebol de domingo','O sonho de ser profissional ficou para trás, mas o campinho continua lá.',['Jogar por diversão a vida toda|hl+4 h+6|Todo domingo. Até os joelhos pedirem arrego.','Virar técnico da molecada|k+6 h+8|Hoje sou eu quem procura goleiros.']],
+ f:['Na base do clube','Treinos todos os dias e escola à noite. Meus pais estão preocupados com as notas.',['Priorizar o futebol|tal.athletic+8 grade-10 >g@2|Viver de bola é o sonho.','Equilibrar os dois|tal.athletic+4 grade+2 >g@2|Durmo pouco, mas faço os dois.']],
+ g:['Contrato profissional','O clube quer me oferecer o primeiro contrato.',['Assinar|?tal.athletic $+15000 f+10 h+15|Sou jogador{a} profissional!|hl-15 h-15|Uma lesão no joelho apareceu nos exames. O contrato foi cancelado.','Escolher estudar|sm+4 h+2|Guardei a chuteira. Escolha difícil, mas minha.']],
+});
+chain('biblioteca',{k:'Infância',min:7,max:12,npc:1,gn:'F',age:[30,55],gap:[1,2]},{
+ a:['A bibliotecária','Dona {p}, a bibliotecária da escola, me viu sozinh{o} no recreio e me deu um livro de aventura.',['Ler naquela mesma tarde|sm+2 tal.writing+2 >b|Terminei antes do jantar.','Deixar na mochila|>b@2|Um dia, sem nada para fazer, abri.']],
+ b:['O clube do livro','Dona {p} criou um clube de leitura. Sou {o} primeir{o} da lista.',['Participar|sm+3 h+4 >c|Discutimos livros como gente grande.','Ir só pelo lanche|h+3 >c|O lanche era bom. Os livros também, no fim.']],
+ c:['A primeira história','Dona {p} sugeriu que eu escrevesse uma história minha.',['Escrever uma aventura|tal.writing+5 >d|Dez páginas à mão, com desenhos.','Escrever sobre a minha família|tal.writing+4 k+2 >d|Ficou bonito e um pouco triste.']],
+ d:['O concurso de redação','Ela me inscreveu escondido num concurso de redação da cidade.',['Ir à premiação|?tal.writing f+3 h+12 >e@3-6|Ganhei! Meu texto saiu no jornal da cidade.|h-3 >e@3-6|Menção honrosa. Dona {p} disse que menção honrosa é começo.','Ficar com vergonha de ir|h-2 >e@3-6|Ela foi buscar o certificado por mim.']],
+ e:['Uma carta','Anos depois, recebi uma carta de dona {p}. Ela se aposentou e lembrou de mim.',['Responder contando a minha vida|h+6 k+3 >f@2-4|Ela respondeu com outra carta e um livro de presente.','Visitá-la|h+8 k+4 >f@2-4|Tomamos café e falamos de livros por horas.']],
+ f:['O livro dedicado','Dona {p} faleceu. A família me entregou a primeira edição do livro de aventura que ela me emprestou, com uma dedicatória.',['Ler de novo|h-4 tal.writing+3|"Para quem ainda vai escrever muitas histórias." Vou.','Guardar na estante principal|h-2|O lugar mais bonito da casa.']],
+});
+chain('acampamento',{k:'Infância',min:8,max:13,npc:1,gap:[1,3]},{
+ a:['Acampamento de férias','Meus pais me inscreveram num acampamento de férias no interior.',['Ir animad{o}|h+6 >b|Barraca, fogueira e mosquitos.','Ir obrigad{o}|h-2 >b|Fui de cara feia. Durou até a primeira guerra de lama.']],
+ b:['A trilha noturna','Na trilha noturna, {p}, de outra cidade, ficou para trás e se perdeu.',['Voltar para buscar|?k+10 k+8 vira:amigo >c|Achei {p} chorando atrás de uma pedra. Voltamos juntos.|hl-4 >c|Me perdi também. Os monitores acharam os dois de madrugada.','Avisar os monitores|k+4 >c|Acharam {p} em dez minutos.']],
+ c:['Amizade de férias','No último dia, {p} me deu o endereço e prometeu que nos veríamos no próximo verão.',['Trocar contatos|vira:amigo h+5 >d@1|Mandamos mensagens o ano inteiro.','Despedir sem trocar contato|h-2|Amizades de acampamento são assim.']],
+ d:['O verão seguinte','Voltamos ao acampamento juntos. Agora somos veteranos.',['Virar monitor{a} júnior|k+4 sm+2 >e@4-6|Cuidei dos pequenos como cuidaram de mim.','Aprontar todas|h+8 >e@4-6|Fizemos uma guerra de travesseiros histórica.']],
+ e:['De volta ao acampamento','Adulto, recebi um convite: o acampamento procura monitores voluntários para o verão.',['Aceitar com {p}|h+10 k+6|Voltamos juntos, agora do outro lado das barracas.','Não ter mais tempo|h-2|A vida adulta engoliu os verões.']],
+});
+chain('briga_pais',{k:'Família',min:7,max:14,who:'parent',when:m=>parents().length>=2,gap:[1,2]},{
+ a:['Gritos na cozinha','Ouvi meus pais brigando feio depois que achavam que eu estava dormindo.',['Fingir que não ouvi|h-4 >b|No café da manhã, ninguém falou nada.','Perguntar o que está acontecendo|>c|Eles se olharam, sem saber o que dizer.']],
+ b:['O silêncio','A casa ficou silenciosa. Meus pais quase não se falam.',['Tentar animar todo mundo|k+3 h-2 >d|Fiz um jantar com miojo e velas. Eles riram pela primeira vez em semanas.','Me fechar no quarto|h-6 >d|Fone de ouvido no volume máximo.']],
+ c:['A conversa','Eles explicaram que estão passando por um momento difícil, mas que me amam.',['Acreditar|h+2 >d|Abracei os dois de uma vez.','Perguntar se vão se separar|h-4 >d|Ninguém respondeu direito.']],
+ d:['A decisão','Meus pais tomaram uma decisão sobre o casamento deles.',['Ouvir com calma|?50 h+8 bond+5 >e@2|Eles vão fazer terapia de casal e tentar de novo.|h-12 >f@1|Vão se separar. Vou morar com os dois, cada semana em uma casa.','Explodir de raiva|h-8 bond-8 >f@1|Disse coisas que não devia.']],
+ e:['Terapia de casal','Meus pais voltaram a rir juntos na cozinha.',['Agradecer a eles|h+8 bond+6|Às vezes, as famílias se consertam.','Fingir que não percebi|h+5|Mas percebi. E fiquei feliz.']],
+ f:['Duas casas','A vida em duas casas tem duas escovas de dente, duas camas e o dobro de presentes de aniversário.',['Aproveitar o lado bom|h+5|Duas casas, dois quartos, dois natais.','Sentir falta de como era|h-6 bond+3|Nunca mais vai ser como antes. Mas ainda é família.']],
+});
+
+// ===== Histórias em cadeia: adolescência =====
+chain('primeiro_amor',{k:'Amor',min:13,max:17,npc:1,date:1,gap:[1,2]},{
+ a:['Um bilhete','Achei um bilhete dobrado na minha mochila: "Você é a pessoa mais legal da sala. Ass: {p}".',['Responder com outro bilhete|h+6 >b@0|Escrevi três rascunhos antes do definitivo.','Mostrar para os amigos|h+2 k-3 >c|Todo mundo riu. Inclusive de {p}.','Fingir que não vi|>d@1|Mas li umas vinte vezes em casa.']],
+ b:['O primeiro encontro','{p} me chamou para tomar sorvete depois da aula.',['Ir, morrendo de vergonha|?lk+10 h+12 vira:namoro >e|Dividimos um sorvete de dois sabores. Começamos a namorar!|h-4 vira:amigo >d|Foi esquisito. Ficamos amigos.','Levar um amigo junto|h+3 vira:amigo >d|Virou um encontro de três. Nada romântico.']],
+ c:['A vergonha','{p} ficou sabendo que eu mostrei o bilhete para todo mundo. Passou a me evitar.',['Pedir desculpas de verdade|?k+10 k+4 >b@1|{p} aceitou as desculpas. Talvez ainda dê.|h-6|{p} não quis mais conversa.','Fingir que não importa|h-4 k-2|Importava.']],
+ d:['A amizade','Virei amig{o} de {p}. Às vezes fico pensando como teria sido se...',['Contar o que sinto|?40 h+12 vira:namoro >e@1|{Ele} sentia o mesmo!|h-5 >f@3-6|{p} disse que gosta de mim só como amig{o}.','Deixar assim|h+2 >f@3-6|Amizade também é bom.']],
+ e:['O primeiro amor','O namoro com {p} é cheio de mensagens à meia-noite e brigas por bobagem.',['Apresentar para os meus pais|?50 h+6 bond+8 >g|Meus pais adoraram {p}.|h-4 >g|Meu pai fez cara feia o jantar inteiro.','Esconder dos pais|h+3 >g|Namoro secreto é mais emocionante. E mais complicado.']],
+ g:['O fim do colegial','O colegial está acabando. {p} vai fazer faculdade em outra cidade.',['Tentar namoro a distância|?40 h+6 bond+10|Fizemos dar certo, mensagem por mensagem.|h-15 breakup >f@4-8|Não aguentamos a distância. Terminamos chorando numa rodoviária.','Terminar como amigos|h-10 breakup >f@4-8|Doeu, mas foi bonito.']],
+ f:['Reencontro','Anos depois, cruzei com {p} num casamento de amigos em comum.',['Puxar conversa|?45 h+10 vira:namoro|Saímos para jantar na semana seguinte. Algumas histórias têm segunda temporada.|h+4|Conversamos sobre o passado e seguimos cada um para o seu lado, em paz.','Só acenar|h+2|Um aceno, um sorriso. Tem coisas que ficam guardadas.']],
+});
+chain('festa_proibida',{k:'Adolescência',min:14,max:17,gap:[1,1]},{
+ a:['A festa do ano','Vai ter uma festa enorme na casa de um colega. Meus pais nunca deixariam.',['Pedir permissão|?40 h+6 >b@0|Deixaram, com hora para voltar!|h-3 >c@0|Não deixaram. Mas a festa continua lá.','Sair escondido pela janela|>c@0|O coração batendo mais alto que a música.','Ficar em casa|h-3|Vi tudo pelas fotos dos outros.']],
+ b:['Hora de voltar','A festa está ótima e já passou da hora combinada com meus pais.',['Voltar na hora|k+4 >e|Saí no auge. Meus pais ficaram impressionados.','Ficar mais um pouco|?40 h+8 >e|Voltei uma hora atrasad{o}. Ninguém percebeu.|h-6 >d|Meu pai estava me esperando no sofá.']],
+ c:['A noite clandestina','Na festa, alguém está passando um copo de bebida.',['Beber|add.alcool+6 ?50 h+8 >d|Dancei como nunca.|hl-5 h-8 >d|Passei mal no banheiro da casa dos outros.','Ficar no refrigerante|k+2 h+4 >d|Fui a pessoa mais lúcida da festa.']],
+ d:['Pego no flagra','Meus pais descobriram tudo.',['Contar a verdade|k+5 h-4 >e|Castigo de um mês, mas confiaram mais em mim depois.','Inventar uma história|?30 k-4 >e|Engoliram. Por pouco.|h-10 k-5 >f|A mentira desmoronou em dois minutos. Castigo de três meses.']],
+ e:['Confiança','Depois daquela noite, meus pais começaram a me dar mais liberdade.',['Não abusar|k+4 h+5|Ganhei a chave de casa.','Testar os limites de novo|h+3 >f@1|Até onde dá para ir?']],
+ f:['De castigo','Sem celular, sem saídas, só escola e casa.',['Aproveitar para estudar|sm+3 grade+8|Minhas notas nunca foram tão boas.','Fazer greve de silêncio|h-6|Ninguém lá em casa falou comigo por uma semana. Nem eu com eles.']],
+});
+chain('canal_video',{k:'Internet',min:13,max:22,gap:[1,2]},{
+ a:['Um canal de vídeos','Gravei um vídeo com o celular e postei por diversão.',['Fazer vídeos de humor|tal.comedy+3 >b|Meus amigos riram. Pelo menos eles.','Fazer vídeos de jogos|>b|Narrando partidas com a voz mais empolgada possível.','Apagar de vergonha|h-2|Melhor ninguém ver.']],
+ b:['Os primeiros cem','O canal chegou a cem inscritos. Metade é da família.',['Postar toda semana|follow+500 >c|Disciplina de canal grande.','Postar quando der|follow+100 >c|Sem pressão.']],
+ c:['Viral','Um vídeo meu viralizou do nada. Um milhão de visualizações em dois dias.',['Aproveitar a onda|f+8 follow+50000 h+12 >d|Meu celular não para de vibrar.','Ficar assustad{o}|f+4 follow+20000 >d|Gente que eu não conheço sabe meu nome.']],
+ d:['Os haters','Com a fama vieram os comentários maldosos.',['Ignorar e seguir|h-3 k+2 >e|Bloqueei e continuei postando.','Responder um por um|h-10 f+2 >e|Briguei com estranhos até as três da manhã.','Dar um tempo do canal|h+4 >f@2|Saúde mental primeiro.']],
+ e:['O patrocínio','Uma marca de {prod} quer patrocinar meu canal.',['Aceitar|$+8000 f+3 >g@1|Dinheiro de verdade! E muita propaganda.','Recusar se não for algo que eu uso|k+4 >g@1|O público respeitou.']],
+ f:['O retorno','Depois da pausa, voltei com um vídeo contando como foi ficar famos{o} de repente.',['Postar|?50 f+5 h+10 follow+30000 >g|Foi o vídeo mais sincero que eu já fiz. E o mais visto.|h+3 >g|Pouca gente viu, mas quem viu entendeu.','Deixar o canal para trás|h+5|Foi bom enquanto durou.']],
+ g:['Viver disso?','O canal está pagando quase um salário. Dá para viver de internet?',['Investir tudo no canal|?40 $+25000 f+6 h+10|Virei criador{a} de conteúdo em tempo integral.|$-3000 h-8|O algoritmo mudou e as visualizações despencaram.','Manter como renda extra|$+6000 h+4|O melhor dos dois mundos.']],
+});
+chain('professor_mentor',{k:'Escola',min:12,max:17,npc:1,age:[25,45],gap:[1,2],when:m=>!!m.edu.cur},{
+ a:['Aula diferente','{O2} professor{a2} {p}, de {materia}, me chamou depois da aula: "Você pode ir muito longe, sabia?"',['Ficar desconfiad{o}|>b|Ninguém nunca tinha dito isso.','Agradecer|h+5 >b|Saí da sala andando mais alto.']],
+ b:['Aulas extras','{O2} professor{a2} {p} se ofereceu para me dar aulas extras de graça, depois do horário.',['Aceitar|sm+4 grade+8 >c|{Ele} explica de um jeito que finalmente faz sentido.','Recusar|>d@2|Achei que não precisava.']],
+ c:['A olimpíada','{O2} professor{a2} {p} quer me inscrever na olimpíada estadual de {materia}.',['Encarar|?sm+5 f+3 h+12 grade+5 >e|Medalha de bronze! {Ele} chorou mais que eu.|h-3 >e|Não ganhei. {Ele} disse que estava orgulhos{o2} mesmo assim.','Achar que não sou capaz|h-3 >e|Ele ficou decepcionado. Eu também.']],
+ d:['A advertência','Minhas notas caíram. {O2} professor{a2} {p} me chamou de novo.',['Ouvir os conselhos|grade+6 >e|{Ele} não me deu bronca. Me deu um plano.','Dar de ombros|grade-5|Não era o momento.']],
+ e:['A carta de recomendação','{O2} professor{a2} {p} escreveu uma carta de recomendação para mim.',['Usar na faculdade|sm+2 k+2 >f@5-10|Na entrevista, leram a carta em voz alta.','Guardar como lembrança|h+4 >f@5-10|Leio quando duvido de mim.']],
+ f:['A notícia','Soube que {o2} professor{a2} {p} está doente e se aposentou mais cedo.',['Fazer uma visita|h+4 k+6 >g@1|{Ele} lembrava de mim. Lembrava até da minha nota na olimpíada.','Mandar uma mensagem|k+3 >g@1|{Ele} respondeu com um áudio emocionado.']],
+ g:['Gratidão','Os ex-alunos de {p} fizeram uma homenagem para ele.',['Fazer um discurso|?k f+2 h+10|Contei como uma frase mudou a minha vida.|h+6|Travei no microfone, mas {ele} entendeu.','Ajudar a organizar|k+5 h+8|Lotamos o auditório da escola.']],
+});
+chain('cola_prova',{k:'Escola',min:12,max:18,gap:[1,1],when:m=>!!m.edu.cur},{
+ a:['A prova impossível','Prova de {materia} amanhã e eu não estudei nada. Um colega está vendendo as respostas.',['Comprar as respostas|$-50 >b@0|Paguei com o dinheiro do lanche.','Virar a noite estudando|sm+2 hl-3 grade+4 >c|Café, apostila e olheiras.','Aceitar a nota baixa|grade-6|Aprendi que não dá para deixar para a última hora.']],
+ b:['Colando','Escrevi as respostas na borracha. O professor está andando pela sala.',['Usar a cola|?45 grade+10 >d|Tirei a maior nota da turma. Ninguém desconfiou.|grade-15 k-6 >e|O professor pegou a borracha. Zero.','Desistir no meio|k+3 grade-4|Joguei a borracha no lixo. Pelo menos é minha nota.']],
+ c:['A nota honesta','Tirei uma nota mediana, mas foi minha.',['Ficar satisfeit{o}|k+3 h+2|Orgulho honesto.','Prometer estudar antes da próxima|sm+2|Promessa feita. Cumprir é outra história.']],
+ d:['A desconfiança','A turma inteira tirou nota alta. O professor desconfiou e vai refazer a prova.',['Estudar de verdade para a nova prova|sm+3 grade+3 >c|Desta vez fui eu.','Tentar colar de novo|?30 grade+5|Deu certo de novo. Até quando?|grade-15 k-6 >e|Agora pegaram.']],
+ e:['Na diretoria','Fui pego colando. Meus pais foram chamados.',['Assumir o erro|k+5 h-4|Suspensão de dois dias. Lição aprendida.','Entregar quem vendeu as respostas|k-2 h-2|Ele foi expulso. Eu fiquei com fama de dedo-duro.']],
+});
+chain('primeiro_emprego',{k:'Trabalho',min:14,max:18,gap:[1,1],when:m=>!m.job},{
+ a:['Vaga na lanchonete','A lanchonete do bairro está contratando jovens para o fim de semana.',['Fazer a entrevista|?lk+10 $+600 >b|Fui contratad{o}! Uniforme feio, salário pouco, orgulho enorme.|h-3|Não me chamaram. Próxima.','Achar que é cedo para trabalhar|h+1|Ainda tenho tempo.']],
+ b:['O chefe','O gerente, seu Valdir, grita com todo mundo por qualquer coisa.',['Aguentar calad{o}|h-4 $+600 >c|Contei os minutos até o fim do expediente.','Responder à altura|?30 k+2 >c|Ele me respeitou depois daquilo.|h-6 >e|Fui mandad{o} embora no mesmo dia.']],
+ c:['O colega','Um colega está pegando dinheiro do caixa.',['Avisar o gerente|k+5 >d|O colega foi demitido. O gerente começou a confiar em mim.','Ficar quiet{o}|k-3 >d|Não é problema meu. Ou é?','Pedir para ele parar|k+3 >d|Ele parou. E me agradeceu meses depois.']],
+ d:['A promoção','O gerente quer me promover a chefe de turno nos fins de semana.',['Aceitar|$+1500 sm+2 h+6 >f@1|Primeira vez mandando em alguém. Mais difícil do que parece.','Recusar para estudar|grade+5|Os estudos vêm primeiro.']],
+ e:['A lição','Perdi o emprego, mas aprendi algo sobre chefes e sobre mim.',['Procurar outro|>f|Mais experiente, mais esperto.','Focar na escola|grade+4|Trabalhar pode esperar.']],
+ f:['O que ficou','Aquele primeiro emprego me ensinou o valor do dinheiro.',['Guardar o que ganhei|$+1000 k+2|Abri minha primeira conta corrente.','Comprar algo que sempre quis|h+8|Comprei {coisa} com meu dinheiro. Sabor diferente.']],
+});
+chain('rival_notas',{k:'Escola',min:12,max:17,npc:1,same:1,gap:[1,2],when:m=>!!m.edu.cur},{
+ a:['Rivalidade','{p} tirou nota maior que a minha em {materia} e fez questão de mostrar.',['Estudar para passar {ele}|sm+4 grade+6 >b|Começou a guerra.','Não ligar|h+1|Nota não é tudo.']],
+ b:['A disputa','A cada prova, eu e {p} trocamos de lugar no topo da turma.',['Continuar a competição|sm+3 grade+5 >c|Nunca estudei tanto na vida.','Propor estudarem juntos|vira:amigo sm+4 >d|{Ele} ficou surpres{o2}, mas topou.']],
+ c:['A final','A escola vai dar uma bolsa de intercâmbio para a maior média do ano.',['Dar tudo|?sm+5 sm+3 h+15 f+2 >e|Ganhei a bolsa por meio ponto!|h-8 >e|{p} ganhou por meio ponto.','Desistir da corrida|h-4|{p} levou.']],
+ d:['Parceria','Estudando juntos, eu e {p} viramos a melhor dupla da escola.',['Montar um grupo de estudos|k+5 sm+3 >e|Ajudamos a turma inteira a passar.','Manter só nós dois|sm+4 >e|Dupla imbatível.']],
+ e:['Anos depois','{p} me procurou anos depois. Montou uma empresa e quer alguém em quem confia.',['Ouvir a proposta|?50 $+20000 h+8 vira:amigo|Virei sóci{o} minoritári{o}. Quem diria.|h+2|O negócio não era para mim, mas foi bom reencontrar {p}.','Recusar|h+1|Cada um no seu caminho.']],
+});
+chain('cigarro_turma',{k:'Adolescência',min:13,max:18,gap:[1,2]},{
+ a:['O primeiro cigarro','A turma está fumando atrás da quadra. Me ofereceram um cigarro.',['Aceitar|add.cigarro+8 h+2 >b|Tossi até lacrimejar. Fingi que estava tudo bem.','Recusar|k+3 >c|Alguém me chamou de careta. Sobrevivi.']],
+ b:['Hábito','Agora fumo um por dia, às vezes dois. Escondo o cheiro com bala de menta.',['Parar agora|?will >d|Parei. Foi mais fácil do que eu pensava.|add.cigarro+6 >e|Não consegui parar.','Continuar|add.cigarro+10 hl-3 >e|Só mais um.']],
+ c:['Careta com orgulho','A turma parou de oferecer. Alguns até pararam de fumar também.',['Ficar feliz com isso|k+3 h+3|Influência positiva, quem diria.','Nem perceber|h+1|Nunca foi um grande assunto para mim.']],
+ d:['Livre','Hoje vejo os colegas fumando e não sinto vontade nenhuma.',['Seguir assim|hl+3 h+4|Pulmão agradece.','Ajudar um amigo a parar|k+5|Ele parou também.']],
+ e:['Meus pais descobriram','Minha mãe achou um maço na minha mochila.',['Prometer parar|?will add.cigarro-15 >d|Cumpri a promessa.|add.cigarro+5 k-3 >f@4-8|Prometi e não cumpri.','Dizer que não é meu|k-4 >f@4-8|Ela fingiu acreditar.']],
+ f:['O exame','Adulto, um exame de rotina mostrou que meu pulmão não está nada bem para a minha idade.',['Largar de vez|?will add.cigarro-40 hl+5 h+5|Larguei. Tosse e mau humor por um mês, depois liberdade.|hl-6|Larguei e voltei três vezes.','Diminuir|add.cigarro-10 hl-2|Diminuir já é alguma coisa.']],
+});
+chain('irmao_problema',{k:'Família',min:12,max:20,who:'sib',gap:[1,2]},{
+ a:['Andando com quem não deve','Minha família tem um problema: {p}, anda com uma turma que todo mundo no bairro evita.',['Conversar com {ele}|bond+5 >b|Disse que eu não entendo nada.','Contar para os pais|bond-5 >c|{p} me chamou de traidor{a}.','Não me meter|>d|Cada um sabe da própria vida.']],
+ b:['O pedido','{p} me pediu dinheiro emprestado e não quis dizer para quê.',['Emprestar|$-300 bond+5 >d|{Ele} prometeu devolver.','Negar|bond-5 >d|{Ele} saiu batendo a porta.']],
+ c:['A conversa em família','Meus pais tiveram uma conversa séria com {p}.',['Apoiar {p} na frente deles|bond+10 k+3 >e|{Ele} percebeu que eu estava do lado d{ele}.','Ficar quiet{o}|>d|O clima ficou pesado por semanas.']],
+ d:['A ligação da delegacia','Uma ligação de madrugada: {p} foi detid{o2} numa batida policial.',['Ir até a delegacia|k+5 bond+10 >e|Fiquei sentad{o} num banco duro até amanhecer.','Esperar meus pais resolverem|bond-5 >f|Não tive coragem de ir.']],
+ e:['A virada','Depois da delegacia, {p} decidiu mudar de vida.',['Ajudar {p} a arrumar um emprego|k+6 bond+12 >g@2|Indiquei {ele} para uma vaga. Funcionou.','Torcer de longe|bond+3 >g@2|Torço por {ele}.']],
+ f:['Distância','{p} se afastou da família depois de tudo.',['Procurar {ele}|?k bond+15 >e|Conversamos por horas. Pediu desculpas.|bond-5|{Ele} não quis me ver.','Deixar o tempo resolver|h-4|Às vezes o tempo resolve. Às vezes não.']],
+ g:['Irmãos','Anos depois, {p} me agradeceu num almoço de família, na frente de todo mundo.',['Abraçar {ele}|h+10 bond+10|Ninguém segurou o choro.','Fazer uma piada para disfarçar|h+8 bond+6|Rimos. Mas eu também chorei depois.']],
+});
+chain('grafite',{k:'Arte',min:13,max:20,gap:[1,2]},{
+ a:['Spray na mochila','Comecei a desenhar nos cadernos de um jeito que todo mundo para para ver. Um amigo me deu latas de spray.',['Grafitar um muro abandonado|tal.art+5 >b|Ficou incrível. E ilegal.','Treinar no papel primeiro|tal.art+3 >c|Encher cadernos inteiros.']],
+ b:['A polícia','Uma viatura parou enquanto eu terminava um desenho num viaduto.',['Explicar que é arte|?lk k+2 >c|O policial gostou do desenho e só me mandou embora.|$-500 k-3 >c|Levei uma multa e uma bronca.','Correr|?50 h+5 >c|Escapei. O coração quase saiu pela boca.|$-800 k-4 >c|Me pegaram. Meus pais tiveram que ir me buscar.']],
+ c:['O convite','O dono de uma loja pediu para eu grafitar a fachada inteira dele.',['Aceitar|$+700 tal.art+5 f+2 >d|Meu primeiro trabalho pago como artista!','Fazer de graça para ganhar nome|tal.art+4 f+3 >d|A rua inteira veio ver.']],
+ d:['A galeria','Uma galeria de arte viu meu trabalho e quer fazer uma exposição.',['Expor|?tal.art f+6 $+5000 h+12 >e@2|Vendi seis telas na primeira noite.|h-4 >e@2|Pouca gente apareceu, mas um crítico escreveu sobre mim.','Achar que arte de rua não é para galeria|k+3|Continuei nos muros.']],
+ e:['Artista','Meu nome começou a circular no meio artístico.',['Viver de arte|?tal.art $+20000 f+8 h+10|Sou artista de profissão.|$-2000 h-5|É difícil viver de arte. Arrumei um bico para pagar as contas.','Manter como paixão|h+6 tal.art+3|Pinto porque preciso.']],
+});
+chain('banda_igreja',{k:'Adolescência',min:13,max:18,npc:1,gap:[1,2]},{
+ a:['O coral','{p}, do coral do bairro, me ouviu cantando no banheiro da escola e me chamou para fazer um teste.',['Fazer o teste|?tal.musical vira:amigo tal.musical+4 >b|Passei! Primeira voz.|h-3 >b|Não passei, mas me chamaram para ajudar no som.','Morrer de vergonha|h-3|Fingi que não era eu.']],
+ b:['O ensaio','Os ensaios são todo sábado. {p} virou minha dupla de voz.',['Levar a sério|tal.musical+5 >c|Comecei a ter aulas de técnica vocal.','Ir só pela turma|h+5 >c|Os ensaios são metade música, metade fofoca.']],
+ c:['O solo','O maestro me deu um solo na apresentação de Natal.',['Cantar|?tal.musical h+15 f+2 >d|O público se levantou no final.|h-6 >d|Minha voz falhou na nota alta. {p} me abraçou depois.','Pedir para {p} cantar no meu lugar|bond+5 >d|{p} brilhou. Fiquei feliz por {ele}.']],
+ d:['A viagem do coral','O coral foi convidado para um festival em outra cidade.',['Ir|h+10 bond+8 >e@2|Primeira viagem sem os pais. Inesquecível.','Ficar|h-2|Vi tudo pelos stories.']],
+ e:['A voz','Anos depois, {p} me mandou um vídeo daquela apresentação de Natal.',['Voltar a cantar|tal.musical+4 h+8|Entrei num coral de adultos. Algumas coisas não se perdem.','Rir de nós dois|h+6|Que cabelos eram aqueles?']],
+});
+
+// ===== Histórias em cadeia: jovem adulto =====
+chain('republica',{k:'Moradia',min:18,max:28,npc:1,gap:[1,1]},{
+ a:['Dividir apartamento','Achei um anúncio: "{p} procura alguém para dividir apê perto do centro. Aluguel barato."',['Ir morar com {p}|$-2000 >b|Mudei com duas malas e um colchão.','Continuar onde estou|h+0|Melhor não arriscar com desconhecidos.']],
+ b:['As regras da casa','{p} colou uma tabela de tarefas na geladeira. Eu nunca lavo a louça no meu dia.',['Cumprir as tarefas|k+3 vira:amigo >c|{p} desenhou uma estrelinha do lado do meu nome.','Deixar a louça acumular|k-3 >d|A pilha virou um ser vivo.']],
+ c:['Amizade de apartamento','Eu e {p} viramos amigos de verdade. Noites de pizza, séries e conversas até tarde.',['Fazer uma festa no apê|h+8 >e|Os vizinhos reclamaram. Valeu a pena.','Manter a paz|h+4 >e|Rotina boa. Casa boa.']],
+ d:['A briga','{p} explodiu por causa da louça e disse que eu sou um péssimo colega de casa.',['Pedir desculpas e mudar|k+4 >c|Comprei uma esponja nova e um bolo de desculpas.','Brigar de volta|h-6 vira:inimigo >f|Paramos de nos falar dentro do mesmo apartamento.']],
+ e:['O aluguel sumiu','{p} sumiu no meio do mês. O dinheiro do aluguel, que estava na conta d{ele}, também.',['Ligar sem parar|?50 >g|{p} atendeu chorando: perdeu o emprego e tinha vergonha de contar.|$-1500 >f|Ninguém atendeu. Tive que pagar tudo sozinh{o}.','Procurar a polícia|$-1500 k+1 >f|Fiz um boletim de ocorrência. Paguei o aluguel do mesmo jeito.']],
+ f:['Morar sozinh{o}','Agora o apartamento é só meu. Silencioso demais.',['Gostar da liberdade|h+5|Danço de pijama na sala.','Arrumar outro colega|>b@0|Outro anúncio, outra aposta.']],
+ g:['O pacto','{p} prometeu pagar tudo de volta assim que arrumar outro emprego.',['Ajudar {ele} a procurar vaga|k+6 bond+15 >h@1|Revisei o currículo d{ele} três vezes.','Cobrar com firmeza|bond-5 >h@1|Amizade e dinheiro não se misturam.']],
+ h:['A dívida paga','{p} arrumou emprego e me devolveu tudo, com juros e um jantar.',['Aceitar o jantar|h+8 $+1800 bond+10|Amizade testada e aprovada.','Recusar os juros|k+5 $+1500 bond+12|"Amigo não cobra juros."']],
+});
+chain('startup',{k:'Negócios',min:20,max:35,who:'friend',v:[5000,30000],gap:[1,2]},{
+ a:['A ideia','{p} apareceu com uma ideia: um aplicativo de {prod} que ninguém fez ainda. Quer que eu seja sóci{o}.',['Entrar no negócio|$-v >b|Investimos as economias. Café, planilhas e madrugadas.','Recusar|bond-3|{p} seguiu sozinh{o2}. Fiquei curios{o} para sempre.']],
+ b:['O protótipo','O aplicativo está pronto, mas cheio de bugs.',['Lançar assim mesmo|?40 >c|Os primeiros usuários amaram!|h-6 >d|Os primeiros usuários odiaram. Avaliação de uma estrela.','Esperar ficar perfeito|$-3000 >c|Seis meses de atraso, mas lançamos bem.']],
+ c:['O investidor','Um investidor quer colocar dinheiro, mas quer 40% da empresa.',['Aceitar|$+30000 >e|Agora somos uma startup "de verdade".','Negociar|?sm >e|Fechamos com 25%. {p} me chamou de gênio.|>d|O investidor desistiu.','Recusar|>d|Vamos crescer sozinhos.']],
+ d:['Caixa vazio','O dinheiro está acabando. Faltam três meses para quebrar.',['Fazer uma última aposta de marketing|$-5000 ?35 >e|Viralizamos! Salvos no último minuto.|h-10 >f|Não funcionou.','Fechar a empresa|h-8 >f|Doeu desligar os servidores.']],
+ e:['Crescimento','A empresa cresceu. Agora temos funcionários e uma sala com pufe colorido.',['Continuar crescendo|$+20000 sm+3 >g@2|Trabalho dobrado, sonho dobrado.','Brigar com {p} pelo rumo da empresa|bond-15 >h|Discordamos em tudo.']],
+ f:['O fracasso','A startup fechou. Perdi dinheiro, mas aprendi mais que em qualquer faculdade.',['Tentar de novo um dia|sm+4 h-2|Anotei cada erro num caderno.','Voltar para um emprego normal|h+2|Salário fixo no fim do mês. Que delícia.']],
+ g:['A proposta de compra','Uma empresa gigante quer comprar nossa startup.',['Vender|$+250000 h+15 f+4|Fiquei ric{o} da noite para o dia!','Não vender|?30 $+100000 f+6|Crescemos e valemos o triplo dois anos depois.|h-10|Recusamos e um concorrente copiou tudo.']],
+ h:['A separação','Eu e {p} decidimos que não dá mais para tocar a empresa juntos.',['Comprar a parte d{ele}|$-15000 bond-10 >g@1|A empresa é minha agora.','Vender minha parte|$+25000 bond-5|Saí com dinheiro no bolso e uma amizade arranhada.']],
+});
+chain('mochilao',{k:'Viagem',min:18,max:30,npc:1,date:1,gap:[1,2]},{
+ a:['O mochilão','Juntei dinheiro para um mochilão de um mês por {lugar}.',['Ir|$-6000 h+10 >b@0|Uma mochila, um mapa e nenhum plano.','Gastar o dinheiro com outra coisa|h+2|Fica para outra vida.']],
+ b:['Albergue','No albergue, {p}, que também estava viajando sozinh{o2}, me convidou para um passeio.',['Ir junto|h+8 >c|Passamos o dia rindo de tudo.','Seguir meu roteiro|h+3|Viagem é para conhecer lugares, não pessoas. Ou não?']],
+ c:['Romance de viagem','Eu e {p} viajamos juntos pelo resto do mês.',['Me apaixonar|h+12 vira:namoro >d|Foi o mês mais bonito da minha vida.','Manter como amizade de viagem|vira:amigo h+6 >e@1|Amizade de mochila.']],
+ d:['A despedida no aeroporto','A viagem acabou. {p} mora do outro lado do oceano.',['Tentar namoro a distância|?40 bond+10 >f|Mensagens todos os dias, fuso horário maluco.|h-12 breakup >e@1|Não aguentamos. Terminamos por videochamada.','Terminar com carinho|h-10 breakup >e@1|Tem amores que são de um lugar só.']],
+ e:['Saudade da estrada','Às vezes abro as fotos daquela viagem e sinto o cheiro da estrada.',['Planejar outra|$-5000 h+8|Já comprei a passagem.','Guardar a lembrança|h+3|Algumas viagens acontecem uma vez só.']],
+ f:['Mudar de país?','{p} me convidou para morar com {ele} no exterior.',['Ir|?45 h+15 bond+15|Mudei de país por amor. Vida nova.|h-10 breakup|Não deu certo lá. Voltei sozinh{o}.','Pedir para {p} vir|?40 h+12 bond+10|{Ele} veio!|h-8 breakup|{Ele} não quis deixar a família.']],
+});
+chain('divida_cartao',{k:'Dinheiro',min:18,max:40,gap:[1,1]},{
+ a:['O cartão de crédito','O banco me ofereceu um cartão de crédito com limite alto.',['Aceitar e usar com cuidado|k+2 >b|Só para emergências. Promessa.','Aceitar e gastar|h+8 $-4000 >c|Celular novo, roupas, jantares.','Recusar|h+0|Melhor não.']],
+ b:['A emergência','O carro quebrou, o celular quebrou e o aluguel venceu no mesmo mês.',['Passar no cartão|$-3000 >c|Resolveu o mês. Criou um problema para o próximo.','Pedir ajuda para a família|?50 h-2|Me ajudaram, com sermão incluso.|$-2000 >c|Ninguém podia ajudar. Cartão.']],
+ c:['A fatura','A fatura veio com juros que eu nem sabia que existiam.',['Pagar o mínimo|$-500 h-4 >d|Alívio de um mês. Bola de neve.','Pagar tudo com sacrifício|$-4000 h-6 k+3 >f|Fiquei sem dinheiro até o fim do mês, mas livre.']],
+ d:['Bola de neve','A dívida dobrou. Ligações de cobrança todos os dias.',['Negociar com o banco|?sm $-3000 >f|Consegui um desconto de 60% para pagar à vista.|$-6000 >e|O banco não quis acordo.','Ignorar as ligações|h-8 >e|Bloqueei o número. Eles têm outros.']],
+ e:['Nome sujo','Meu nome foi para a lista de devedores. Não consigo nem fazer crediário.',['Fazer um plano para quitar|$-5000 sm+2 >f@1|Planilha, cortes e paciência.','Arrumar um bico extra|$+2000 hl-3 >f@1|Fim de semana trabalhando.']],
+ f:['Livre','Paguei tudo. Cortei o cartão em pedacinhos.',['Comemorar|h+12|A melhor sensação do mundo: não dever nada.','Aprender a investir|sm+4 $+500|Agora o dinheiro trabalha para mim.']],
+});
+chain('academia',{k:'Saúde',min:16,max:40,gap:[1,1]},{
+ a:['Primeiro dia de academia','Fiz a matrícula numa academia. O instrutor me olhou de cima a baixo.',['Seguir o treino certinho|hl+4 lk+2 >b|Saí sem conseguir levantar os braços.','Treinar do meu jeito|?50 hl+2 >b|Fui me virando.|hl-5 >c|Me machuquei no primeiro dia.']],
+ b:['Rotina','Faz três meses que vou todo dia. Comecei a ver diferença no espelho.',['Aumentar a carga|?hl lk+4 hl+4 >d|Nunca estive tão em forma.|hl-8 >c|Distendi um músculo.','Manter o ritmo|hl+3 lk+2 >d|Constância é tudo.']],
+ c:['A lesão','Uma lesão me tirou da academia por um mês.',['Fazer fisioterapia|$-800 hl+5 >b@1|Voltei mais cuidados{o}.','Desistir da academia|h-4|O sofá me venceu.']],
+ d:['A competição','O instrutor me sugeriu competir numa prova de corrida ou de força.',['Competir|?tal.athletic f+2 h+12 tal.athletic+4 >e|Fiquei entre os primeiros!|h-3 >e|Fiquei lá atrás, mas terminei.','Treinar só para mim|hl+3 h+4|Não preciso de medalha.']],
+ e:['Estilo de vida','O treino virou parte de quem eu sou.',['Virar personal trainer|?40 emprego:pers h+8|Agora ensino o que aprendi.|h+2|Fica como hobby mesmo.','Seguir treinando|hl+5 lk+3|Corpo e cabeça agradecem.']],
+});
+chain('padrinho_casamento',{k:'Amizade',min:22,max:40,who:'friend',gap:[1,1]},{
+ a:['O convite','{p} vai se casar e me chamou para ser {padrinho}.',['Aceitar|h+8 bond+8 >b|Roupa de gala alugada e um nervosismo enorme.','Recusar|bond-15 h-2|{p} ficou magoad{o2}.']],
+ b:['A despedida de solteiro','Fiquei responsável por organizar a despedida de solteir{o2} de {p}.',['Fazer algo tranquilo|bond+5 >c|Churrasco, cerveja e histórias antigas.','Fazer uma festa épica|$-1500 ?50 h+10 bond+8 >c|Foi lendária.|bond-8 >c|Saiu do controle. Teve até polícia.']],
+ c:['O discurso','No dia do casamento, chegou a hora do meu discurso no altar.',['Fazer um discurso emocionante|?k bond+10 h+8 f+1|Todo mundo chorou. Até o garçom.|h-4|Contei uma história constrangedora sem querer. Silêncio total.','Improvisar|?40 bond+6 h+6|Arranquei gargalhadas.|h-5|Gaguejei e passei o microfone.']],
+});
+chain('golpe_internet',{k:'Dinheiro',min:18,max:70,v:[1000,8000],gap:[1,1]},{
+ a:['Investimento milagroso','Um anúncio promete dobrar o dinheiro em trinta dias com "inteligência artificial".',['Investir {v}|$-v >b|O site parecia muito profissional.','Desconfiar|sm+2 k+1|Promessa boa demais.']],
+ b:['Lucro na tela','Na primeira semana, a tela mostrava um lucro enorme.',['Investir mais|$-v >c|Coloquei mais dinheiro. Os números subiram mais ainda.','Tentar sacar|?20 $+v2 >e|Saquei! E fugi correndo.|>c|O saque ficou "em análise".']],
+ c:['O site sumiu','O site saiu do ar. O telefone de suporte não existe mais.',['Ir à polícia|>d|O delegado suspirou: "Mais um."','Expor nas redes|f+2 >d|Muita gente comentou: "Eu também caí".']],
+ d:['A investigação','A polícia encontrou o grupo responsável.',['Entrar no processo coletivo|?40 $+v >e@2|Recuperei uma parte do dinheiro anos depois.|h-4|Nunca vi um centavo de volta.','Seguir em frente|h-3|Considerei o prejuízo uma aula cara.']],
+ e:['Lição','Agora desconfio de qualquer promessa fácil de dinheiro.',['Alertar a família|k+4|Expliquei o golpe para minha mãe. Ela quase caiu num igual na semana seguinte.','Guardar para mim|sm+2|Lição aprendida.']],
+});
+chain('vizinho_barulhento',{k:'Vizinhança',min:18,max:70,npc:1,gap:[1,1]},{
+ a:['Festa toda noite','O vizinho novo, {p}, faz festa até as três da manhã todo dia.',['Bater na porta para conversar|?k >b|{p} pediu desculpas e baixou o som.|>c|{p} bateu a porta na minha cara.','Chamar a polícia|>c|A polícia veio. A guerra começou.','Comprar protetor de ouvido|h-3|Dormir é um direito. Ou deveria ser.']],
+ b:['Trégua','{p} me convidou para a próxima festa, como pedido de desculpas.',['Ir|vira:amigo h+8 >d|Descobri que {p} é a pessoa mais divertida do prédio.','Agradecer e não ir|h+2|Paz é o que importa.']],
+ c:['Guerra fria','{p} agora estaciona na minha vaga e deixa o lixo na minha porta.',['Revidar|k-4 h-3 >e|Coloquei o lixo d{ele} de volta. Com bilhete.','Levar para o síndico|>e|Reunião de condomínio marcada.','Tentar conversar de novo|?k+15 >b|{p} cedeu.|h-4 >e|Não adiantou.']],
+ d:['Amizade de prédio','{p} cuida das minhas plantas quando viajo e eu dos gatos d{ele}.',['Retribuir com um jantar|h+6 bond+8|Amizade de porta com porta.','Apresentar {p} para meus amigos|h+5|{p} virou parte da turma.']],
+ e:['A reunião de condomínio','A reunião virou um tribunal. Metade do prédio contra {p}, metade contra mim.',['Propor um acordo|k+5 >b|Fizemos as pazes na frente de todo mundo.','Insistir na multa|vira:inimigo h+2|{p} foi multad{o2}. Nunca mais me cumprimentou.']],
+});
+chain('carro_velho',{k:'Bens',min:18,max:40,npc:1,gn:'M',age:[10,30],gap:[1,1]},{
+ a:['Um carro velho','Comprei um carro velho por um preço que parecia bom demais.',['Ficar feliz|$-6000 h+8 >b|Meu primeiro carro! Barulhento, mas meu.','Desistir na hora de pagar|h+0|Melhor juntar mais um pouco.']],
+ b:['Pifou','O carro morreu no meio da avenida em horário de pico.',['Procurar uma oficina de bairro|>c|Achei a oficina do seu {p}.','Chamar o guincho do seguro|$-500 >d|Guincho, concessionária e um orçamento assustador.']],
+ c:['O mecânico honesto','Seu {p} consertou o carro cobrando só a peça.',['Virar cliente fiel|vira:amigo $-300 >e|Desde então, só confio nele.','Pagar e sumir|$-300|Resolvido.']],
+ d:['O orçamento','A concessionária quer cobrar metade do valor do carro no conserto.',['Pagar|$-3000 >e|Doeu, mas funcionou.','Vender o carro como está|$+1500 h-4|Adeus, primeiro carro.']],
+ e:['O carro de estimação','O carro velho já tem nome, apelido e um adesivo engraçado no vidro.',['Ficar com ele para sempre|h+6|Quando morrer, vai ser enterrado com honras.','Trocar por um mais novo|$-8000 h+6|Chorei na hora de entregar a chave.']],
+});
+chain('ex_volta',{k:'Amor',min:20,max:50,who:'ex',gap:[1,2]},{
+ a:['Uma mensagem','{p}, meu ex-amor, mandou uma mensagem depois de muito tempo: "Tô com saudade."',['Responder|>b|O coração acelerou.','Ignorar|h+2|Passado é passado.','Bloquear|h+3|Fechei a porta de vez.']],
+ b:['Um café','{p} quer tomar um café para conversar.',['Ir|?50 h+8 >c|A conversa fluiu como antigamente.|h-4 >d|Lembrei por que terminamos.','Recusar com educação|h+2|Algumas portas devem ficar fechadas.']],
+ c:['Segunda chance?','{p} disse que mudou e quer tentar de novo.',['Dar uma segunda chance|?45 vira:namoro h+12 >e@1|Voltamos! Desta vez, com mais maturidade.|h-10 >d|Tentamos por um mês e brigamos pelos mesmos motivos.','Ficar só na amizade|vira:amigo h+4|Amizade com quem já foi amor. Estranho, mas bom.']],
+ d:['Fechando o ciclo','Percebi que acabou de verdade. E tudo bem.',['Desejar o melhor para {p}|k+4 h+5|Fiquei em paz.','Chorar uma última vez|h-3|E depois dormi muito bem.']],
+ e:['Pedido','{p} quer oficializar de vez.',['Noivar|noivar h+12 bond+10|Desta vez é para valer.','Ir com calma|h+4 bond+3|Sem pressa agora.']],
+});
+chain('concurso',{k:'Carreira',min:20,max:45,gap:[1,1],when:m=>m.edu.deg.includes('medio')},{
+ a:['Concurso público','Abriu um concurso público com salário bom e estabilidade.',['Estudar a sério|$-600 sm+3 >b|Comprei apostilas e montei um cronograma.','Fazer sem estudar|?15 >d|Passei de primeira, por milagre!|h-2|Não passei, claro.']],
+ b:['A rotina de concurseir{o}','Seis horas de estudo por dia, além do trabalho.',['Manter o ritmo|sm+4 hl-3 >c|Sonho com questões de múltipla escolha.','Diminuir o ritmo|h+3 >c|Precisava respirar.']],
+ c:['O dia da prova','Quatro horas de prova e cem questões.',['Fazer com calma|?sm >d|Fiquei bem colocad{o}!|h-8 >e|Faltaram três pontos.','Chutar as difíceis|?35 >d|Os chutes foram certeiros.|h-8 >e|Errei os chutes.']],
+ d:['Aprovad{o}!','Meu nome saiu na lista de aprovados.',['Assumir o cargo|emprego:aux raise+40 h+15|Estabilidade, enfim! Comecei como servidor{a}.','Continuar onde estou|h+4|Foi bom saber que eu consigo.']],
+ e:['Reprovad{o}','Não passei desta vez.',['Tentar o próximo|sm+2 >b@1|Desistir não é opção.','Desistir de concurso|h-3|Não era para mim.']],
+});
+chain('pet_adulto',{k:'Bichos',min:20,max:60,gap:[1,3]},{
+ a:['A feira de adoção','Passei por uma feira de adoção de animais no parque.',['Adotar|pet h+10 >b|Um par de olhos me escolheu. Não teve como resistir.','Só fazer carinho|h+3|Saí de coração partido.']],
+ b:['Adaptação','O bicho novo destruiu um chinelo, dois cabos e meu coração (de amor).',['Fazer adestramento|$-600 >c|Agora atende pelo nome. Às vezes.','Deixar livre|h+3 >c|Caos feliz.']],
+ c:['O susto','O bichinho comeu algo que não devia e passou muito mal.',['Correr para o veterinário|$-1500 h-2 >d|Salvo por pouco.','Esperar melhorar sozinho|?50 h+2 >d|Melhorou.|h-15 >e|Não resistiu. Nunca vou me perdoar.']],
+ d:['Companheiro','Anos de companhia. Nas piores fases, era quem me esperava na porta.',['Agradecer com um petisco especial|h+8|Ele não entende de gratidão. Entende de petisco.','Tirar uma foto juntos|h+6|Foto na parede da sala.']],
+ e:['Luto','A casa ficou silenciosa demais.',['Adotar outro, com o tempo|pet h+6|Não substitui. Mas ajuda.','Ficar um tempo sozinh{o}|h-4|Cada um no seu tempo.']],
+});
+chain('intercambio_trabalho',{k:'Viagem',min:19,max:30,npc:1,gap:[1,1]},{
+ a:['Trabalhar fora','Uma agência oferece temporadas de trabalho no exterior: hotel, fazenda ou restaurante.',['Ir trabalhar em {lugar}|$-3000 h+8 >b|Mala, inglês travado e coragem.','Não ir|h+0|Fica para depois.']],
+ b:['O choque','O trabalho é pesado, o frio é cortante e a saudade aperta.',['Aguentar|$+6000 >c|Lavei pratos o suficiente para uma vida inteira.','Voltar antes|h-6 $-1000|Não era para mim.']],
+ c:['Amizade internacional','Fiz amizade com {p}, que veio do outro lado do mundo trabalhar no mesmo lugar.',['Fazer planos juntos|vira:amigo h+8 >d|Viajamos nas folgas.','Manter distância|>d|Foco no trabalho.']],
+ d:['A volta','A temporada acabou. Voltei com dinheiro, sotaque e histórias.',['Guardar o dinheiro|$+3000 sm+3|Volta com bagagem de verdade.','Gastar na viagem de volta|h+10|Mais uma aventura antes de voltar.']],
+});
+chain('tatuagem',{k:'Estilo',min:18,max:40,gap:[1,3]},{
+ a:['A primeira tatuagem','Decidi fazer uma tatuagem.',['Algo significativo|$-600 h+6 >b|Uma data importante, no lugar certo.','Algo por impulso|$-400 ?50 h+6 >b|Ficou ótima!|h-6 >c|Ficou horrível.']],
+ b:['Gostei','Agora quero outra.',['Fechar o braço|$-3000 lk+2 h+8|Arte na pele.','Parar por aqui|h+2|Uma basta.']],
+ c:['O arrependimento','A tatuagem impulsiva ficou feia de verdade.',['Fazer uma cobertura|$-1200 h+6|Agora é um tigre. Ninguém sabe o que tinha embaixo.','Remover a laser|$-3000 hl-2|Doeu mais que fazer.','Assumir com humor|h+4|Virou história para contar.']],
+});
+
+// ===== Histórias em cadeia: trabalho e carreira =====
+const TRAB=m=>!!m.job&&!m.job.hero&&!m.job.pt;
+chain('chefe_abusivo',{k:'Trabalho',min:18,max:65,who:'boss',when:TRAB,gap:[1,1]},{
+ a:['O chefe','Meu chefe, {p}, me humilhou na frente da equipe inteira por um erro que nem foi meu.',['Engolir calad{o}|h-6 >b|Fui ao banheiro e respirei fundo.','Responder na hora|?k bond-10 >c|A equipe ficou do meu lado.|bond-15 perf-8 >c|Foi pior. Agora estou marcad{o}.','Falar com {ele} depois, em particular|?50 bond+8 >e|{p} pediu desculpas, sem jeito.|bond-5 >b|{Ele} disse que eu estava exagerando.']],
+ b:['De novo','{p} continua gritando com todo mundo. A equipe está adoecendo.',['Juntar provas|sm+2 >c|Gravações, e-mails e testemunhas.','Pedir transferência de setor|?50 h+6|Mudei de setor. Paz.|h-4 >d|Negaram a transferência.']],
+ c:['O RH','Levei o caso para o RH.',['Apresentar as provas|?55 k+5 h+10 >e|Abriram uma investigação. {p} foi afastad{o2}.|h-8 perf-5 >d|O RH arquivou. Agora {p} sabe.','Desistir no último minuto|h-4 >d|Medo de perder o emprego.']],
+ d:['Esgotamento','Acordo com o estômago embrulhado só de pensar no trabalho.',['Pedir demissão|fire h+8 >f|Saí pela porta da frente, com a cabeça erguida.','Procurar terapia e aguentar|$-1600 h+4 >e@1|A terapia me ajudou a colocar limites.','Ignorar os sinais|?40 >e@1|Aguentei.|dis:burnout h-10 >f|Meu corpo parou. Burnout.']],
+ e:['A virada','A empresa mudou a gestão. {p} foi substituíd{o2}.',['Me candidatar à vaga|?perf promo h+12|Agora quem coordena a equipe sou eu. Prometi nunca ser como {p}.|h+3|Não fui escolhid{o}, mas o clima melhorou muito.','Só aproveitar a paz|h+8|O escritório até ficou mais silencioso.']],
+ f:['Recomeço','Longe daquele ambiente, percebi o tamanho do peso que eu carregava.',['Procurar um lugar melhor|h+6 sm+2|Agora pergunto sobre a cultura da empresa na entrevista.','Tirar um tempo para mim|h+10 $-3000|Viajei, dormi e voltei a sorrir.']],
+});
+chain('fraude_empresa',{k:'Trabalho',min:22,max:65,when:TRAB,v:[20000,80000],gap:[1,1]},{
+ a:['Os números não batem','Revisando uma planilha, percebi que alguém da diretoria está desviando dinheiro da empresa.',['Investigar mais|sm+2 >b|Copiei os arquivos num pen drive.','Fingir que não vi|k-3 >e@2|Melhor não me envolver.']],
+ b:['A prova','Achei a prova: contratos falsos assinados por um diretor.',['Denunciar ao conselho|>c|Marquei uma reunião com o presidente do conselho.','Denunciar anonimamente à polícia|k+6 >d|Mandei tudo por um canal de denúncia.','Usar para chantagear o diretor|k-15 ?40 $+v >f|Ele pagou para eu ficar quiet{o}.|arrest:extorsão:1:4|Ele me denunciou primeiro.']],
+ c:['A reunião','O presidente do conselho ouviu tudo em silêncio.',['Mostrar as provas|?55 k+8 f+3 promo >g|O diretor foi demitido. Fui promovid{o}!|fire k+5 h-10 >g|O diretor era amigo do presidente. Fui eu que saí.']],
+ d:['A operação','A polícia fez uma operação na empresa. Saiu no jornal.',['Depor como testemunha|k+5 f+2 >g|Contei tudo. O diretor foi preso.','Ficar no anonimato|k+3 >g|Ninguém soube que fui eu.']],
+ e:['O escândalo','Dois anos depois, o desvio estourou nos jornais. A empresa está quebrando.',['Sair antes de afundar|?50 h+4|Arrumei outro emprego a tempo.|fire h-8|A empresa fechou e fiquei sem nada.','Ficar até o fim|fire h-6 k+2|Apaguei a luz do escritório na última noite.']],
+ f:['Dinheiro sujo','O dinheiro da chantagem pesa na consciência.',['Gastar sem pensar|h+6 k-4|Viagem cara para esquecer.','Doar parte para caridade|k+6 $-5000|Tentei limpar a consciência.']],
+ g:['Integridade','Ganhei fama de pessoa íntegra no mercado.',['Usar a fama a meu favor|raise+15 h+6|Recebi propostas melhores.','Seguir discret{o}|k+3 h+4|Fiz o certo. Isso basta.']],
+});
+chain('headhunter',{k:'Carreira',min:23,max:60,when:TRAB,gap:[1,1]},{
+ a:['A proposta','Uma recrutadora me ligou: uma concorrente quer me contratar ganhando 30% a mais.',['Aceitar a entrevista|>b|Marquei no horário do almoço, escondid{o}.','Recusar de cara|k+2|Estou feliz onde estou.']],
+ b:['A oferta','A concorrente fez a oferta por escrito.',['Usar para pedir aumento onde estou|?perf raise+20 h+8|Meu chefe cobriu a oferta.|perf-6 >c|Meu chefe ficou ofendido.','Aceitar a oferta|raise+30 h+8 >d|Pedi demissão e mudei de empresa.']],
+ c:['Clima ruim','Depois que meu chefe soube da proposta, me tratam como traidor{a}.',['Ir para a concorrente|raise+30 >d|Ainda dava tempo.','Ficar e recuperar a confiança|perf+8 k+3|Trabalhei dobrado por meses.']],
+ d:['Empresa nova','A empresa nova paga melhor, mas cobra o dobro.',['Mostrar serviço|perf+10 >e@1|Primeiro a chegar, último a sair.','Ir no meu ritmo|h+4 >e@1|Ganhar mais não significa viver para o trabalho.']],
+ e:['Valeu a pena?','Um ano depois da troca, faço o balanço.',['Valeu|?perf promo h+8|Fui promovid{o} no primeiro ano.|h+4|Ganho mais e aprendi muito.','Sinto falta da antiga|h-4|Às vezes o dinheiro não compensa.']],
+});
+chain('romance_trabalho',{k:'Amor',min:20,max:55,who:'colega',when:m=>TRAB(m)&&!partner(),gap:[1,1]},{
+ a:['Olhares no escritório','Comecei a perceber que {p}, do trabalho, sempre aparece na copa quando eu chego.',['Puxar conversa no café|bond+8 >b|Falamos de tudo, menos de trabalho.','Manter o profissionalismo|>e|Trabalho é trabalho.']],
+ b:['O happy hour','Fomos ao happy hour da equipe e acabamos conversando sozinhos até o bar fechar.',['Chamar para sair de verdade|?lk vira:namoro h+12 >c|Começamos a namorar, em segredo.|bond-5 >e|{p} disse que não mistura trabalho e amor.','Deixar acontecer naturalmente|bond+6 >c@0|Sem pressa.']],
+ c:['Segredo de escritório','Ninguém na empresa sabe do nosso namoro. Ainda.',['Contar para o chefe|?50 h+6 >d|Ele riu: "Todo mundo já sabia."|perf-6 >d|A empresa não gostou. Tivemos que mudar de setor.','Continuar escondendo|?40 h+4 >d|Sobrevivemos a uma festa de fim de ano inteira sem sermos descobertos.|h-6 >d|Fomos flagrados no estacionamento.']],
+ d:['Casal de escritório','Agora somos o casal oficial da empresa.',['Pensar em algo sério|noivar h+10 bond+10|O pedido foi na sala de reuniões. Brega e perfeito.','Manter leve|h+5 bond+5|Um dia de cada vez.']],
+ e:['Só colegas','Seguimos colegas. Às vezes fico imaginando.',['Seguir em frente|h+2|Profissionalismo acima de tudo.','Tentar de novo no futuro|>b@2|Quem sabe.']],
+});
+chain('greve',{k:'Trabalho',min:18,max:65,when:TRAB,gap:[1,1]},{
+ a:['A greve','O sindicato convocou greve por reajuste salarial.',['Aderir|k+3 >b|Fui para a porta da empresa com um cartaz.','Furar a greve|perf+6 k-4 >c|Fui trabalhar. Fui xingad{o} na entrada.','Ficar em casa sem tomar partido|h+2 >b|Neutralidade. Ou covardia?']],
+ b:['Uma semana parados','A empresa ameaça descontar os dias parados.',['Continuar firme|?50 raise+10 h+8 >d|A empresa cedeu! Reajuste conquistado.|$-2000 h-6 >d|Cortaram o ponto. A greve acabou sem nada.','Voltar ao trabalho|>c|Precisava do dinheiro.']],
+ c:['Fura-greve','Os colegas que fizeram greve me olham torto.',['Pedir desculpas|k+3 >d|Alguns entenderam.','Não ligar|h-3 >d|Paguei minhas contas. É o que importa.']],
+ d:['Depois da greve','A empresa voltou ao normal, mas as relações mudaram.',['Entrar para o sindicato|k+4 >e@1|Agora sou eu que organizo as assembleias.','Seguir como antes|h+2|Página virada.']],
+ e:['Liderança sindical','Os colegas querem que eu seja representante dos trabalhadores.',['Aceitar|f+3 k+5 perf-4|Agora negocio diretamente com a diretoria.','Recusar|h+2|Não tenho perfil para isso.']],
+});
+chain('erro_grave',{k:'Trabalho',min:20,max:65,when:TRAB,v:[5000,30000],gap:[1,1]},{
+ a:['O erro','Cometi um erro grave no trabalho. A empresa perdeu {v} por minha causa.',['Assumir na hora|k+6 perf-8 >b|Fui direto à sala do chefe.','Tentar consertar escondido|?40 >c|Consegui consertar antes de alguém perceber.|perf-15 k-6 >d|Descobriram. E descobriram que eu escondi.']],
+ b:['A conversa','Meu chefe ficou em silêncio por um minuto inteiro.',['Propor um plano para recuperar o prejuízo|?sm perf+10 >e|A chefia gostou da atitude.|perf-5 >e|Não convenci.','Pedir desculpas e esperar|perf-3 >e|A espera foi a pior parte.']],
+ c:['O segredo','Ninguém soube do erro. Mas eu sei.',['Contar mesmo assim|k+8 perf-3 >e|Me respeitaram ainda mais.','Guardar para sempre|k-3 h-4|Às vezes ainda sonho com aquilo.']],
+ d:['Demissão por justa causa?','O RH está avaliando o meu caso.',['Lutar para ficar|?k perf-10 >e|Fiquei, com advertência.|fire h-12|Fui demitid{o}.','Pedir demissão antes|fire h-6|Saí antes de ser mandad{o} embora.']],
+ e:['Aprendizado','Aquele erro me ensinou mais do que muitos acertos.',['Criar um processo para ninguém repetir|perf+8 sm+3|Virou um protocolo oficial na empresa.','Seguir em frente|h+3|Errar faz parte.']],
+});
+chain('estagiario',{k:'Trabalho',min:26,max:60,npc:1,age:[-10,-4],when:TRAB,gap:[1,2]},{
+ a:['Gente nova','A empresa contratou {p} como estagiári{o2} e me deixou responsável pelo treinamento.',['Ensinar tudo com paciência|k+5 >b|{p} anota tudo num caderninho.','Delegar o trabalho chato|perf+3 k-2 >c|Afinal, para que serve estagiário?']],
+ b:['O talento','{p} é brilhante. Em seis meses já resolve coisas que eu levaria semanas.',['Defender a contratação|k+4 vira:colegaT >d|{p} foi efetivad{o2}!','Ficar com medo de ser superad{o}|h-4 >c|E se {ele} pegar o meu lugar?']],
+ c:['O ressentimento','{p} pediu para trocar de mentor.',['Pedir desculpas|k+4 >b|Recomeçamos do jeito certo.','Deixar {ele} ir|h-2|{p} foi para outra equipe.']],
+ d:['Os anos passaram','{p} cresceu rápido na empresa. Muito rápido.',['Torcer|k+3 >e@2|Gosto de ver alguém que eu ensinei voar.','Competir|perf+6 >e@2|Ninguém passa por cima de mim.']],
+ e:['O novo chefe','{p} foi promovid{o2} e agora é meu chefe.',['Aceitar com elegância|?k h+6 raise+10|{p} lembrou de quem ensinou e me deu um aumento.|h-2|Estranho receber ordens de quem eu ensinei.','Pedir demissão|fire h-4|Não consegui engolir.']],
+});
+chain('negocio_lado',{k:'Negócios',min:22,max:60,when:TRAB,v:[2000,10000],gap:[1,1]},{
+ a:['Renda extra','Comecei a vender {prod} pela internet nas horas vagas.',['Investir {v}|$-v >b|Estoque na sala de casa.','Começar pequeno|$-500 >b|Devagar e sempre.']],
+ b:['As vendas','As vendas estão crescendo. Mais do que meu salário em alguns meses.',['Fazer no horário do trabalho|?40 $+v perf-6 >c|Ninguém percebeu.|perf-12 >d|Meu chefe me pegou respondendo cliente.','Separar bem as coisas|$+2000 hl-3 >c|Trabalho de dia, negócio de noite.']],
+ c:['A decisão','O negócio pode crescer muito se eu me dedicar só a ele.',['Pedir demissão e empreender|fire ?50 $+v2 h+12 >e|Melhor decisão da minha vida!|$-v h-10 >e|Os primeiros meses foram desesperadores.','Manter os dois|$+3000 >e|Segurança primeiro.']],
+ d:['Advertência','Levei uma advertência por cuidar do negócio no expediente.',['Parar com o negócio|h-4|Emprego primeiro.','Sair da empresa|fire >c@0|Hora de apostar.']],
+ e:['Patrão de si mesm{o}','O negócio virou minha principal fonte de renda.',['Contratar alguém|$+5000 sm+2 h+6|Primeiro funcionário. Agora sou chefe.','Continuar sozinh{o}|$+3000 hl-3|Faço tudo. Durmo pouco.']],
+});
+chain('viagem_negocios',{k:'Trabalho',min:23,max:60,when:TRAB,npc:1,gap:[1,1]},{
+ a:['Viagem a trabalho','A empresa vai me mandar para uma feira internacional em {lugar}.',['Ir|h+6 >b|Primeira viagem paga pela empresa. Hotel com café da manhã.','Mandar outra pessoa|perf-3|Perdi a chance.']],
+ b:['O cliente difícil','Na feira, um cliente enorme está prestes a fechar com a concorrência.',['Apresentar nossa proposta com tudo|?sm perf+12 >c|Fechei o maior contrato do ano!|perf-3 >d|Não deu.','Convidar {p}, o comprador, para jantar|$-800 ?lk perf+10 vira:amigo >c|O jantar selou o negócio.|>d|Foi agradável, mas não fechou.']],
+ c:['Herói da empresa','Voltei como herói. O presidente mandou um e-mail para todo mundo me elogiando.',['Pedir um aumento agora|?perf raise+15 h+8|Aumento aprovado na hora.|h+3|Disseram que vão "avaliar".','Curtir o momento|h+8 f+1|Saboreei cada parabéns.']],
+ d:['Volta de mãos vazias','Voltei sem o contrato, mas com muitos contatos.',['Seguir os contatos|?40 perf+8|Um dos contatos virou cliente meses depois.|h+1|Nenhum deu em nada.','Aprender com o erro|sm+3|Na próxima feira vou mais preparad{o}.']],
+});
+chain('demissao_massa',{k:'Trabalho',min:20,max:65,when:TRAB,gap:[1,1]},{
+ a:['Rumores','Rumores de que a empresa vai cortar um terço dos funcionários.',['Trabalhar dobrado para mostrar serviço|perf+10 hl-3 >b|Primeir{o} a chegar, últim{o} a sair.','Atualizar o currículo em segredo|sm+1 >c|Melhor prevenir.','Não acreditar|>b|Sempre tem esse boato.']],
+ b:['A lista','Saiu a lista dos demitidos.',['Abrir o e-mail|?perf h+8 >d|Meu nome não estava lá. Alívio e culpa ao mesmo tempo.|fire h-12 $+8000 >e|Meu nome estava. Recebi a rescisão.']],
+ c:['Entrevistas','Fiz algumas entrevistas em segredo.',['Aceitar uma vaga antes do corte|raise+5 h+6|Mudei de emprego antes da tempestade.','Esperar para ver|>b|Vai que não sou cortad{o}.']],
+ d:['Os que ficaram','Fiquei, mas agora faço o trabalho de três pessoas.',['Pedir aumento|?perf raise+12|Conseguiram me dar um pouco.|h-4|Disseram que "não é o momento".','Aguentar|hl-3 perf+6|Pelo menos tenho emprego.']],
+ e:['Recomeço forçado','Com a rescisão no bolso, preciso decidir o que fazer.',['Procurar emprego já|sm+2 h+2|Mandei cinquenta currículos.','Tirar um tempo e fazer um curso|sm+5 h+6|Voltei ao mercado mais qualificad{o}.','Abrir um negócio com a rescisão|+cad:food_truck h+5|Hora de ser meu próprio chefe.']],
+});
+chain('mentor_carreira',{k:'Carreira',min:22,max:40,npc:1,age:[15,30],when:TRAB,gap:[1,2]},{
+ a:['Um conselho','{p}, uma pessoa experiente da empresa, me viu apresentando e disse que eu tenho futuro.',['Pedir para {ele} me orientar|>b|{p} aceitou: almoço a cada quinze dias.','Agradecer e seguir|h+2|Elogio guardado.']],
+ b:['As lições','{p} me ensinou a negociar, a ouvir e a não aceitar a primeira proposta.',['Colocar tudo em prática|sm+4 perf+6 >c|Comecei a ser notad{o}.','Achar tudo muito teórico|>c|Ouvi, mas não apliquei.']],
+ c:['A indicação','{p} me indicou para liderar um projeto importante.',['Aceitar o desafio|?perf promo h+10 >d|O projeto foi um sucesso!|perf-6 >d|Atrasou. Aprendi muito.','Recusar por insegurança|h-4 >d|{p} ficou decepcionad{o2}.']],
+ d:['A aposentadoria de {p}','{p} vai se aposentar e me chamou para um último almoço.',['Agradecer de coração|h+6 k+3 vira:amigo|Prometi fazer pelos outros o que {ele} fez por mim.','Pedir um último conselho|sm+3 vira:amigo|"Nunca pare de aprender." Clichê, mas verdadeiro.']],
+});
+chain('acidente_trabalho',{k:'Trabalho',min:18,max:65,when:TRAB,gap:[1,1]},{
+ a:['O acidente','Escorreguei numa área molhada sem sinalização no trabalho e machuquei as costas.',['Ir ao médico da empresa|hl-6 >b|Atestado de uma semana.','Continuar trabalhando|hl-10 perf+3 >c|Tomei um analgésico e voltei para a mesa.']],
+ b:['O processo','Um advogado disse que eu tenho direito a indenização.',['Processar a empresa|?50 $+15000 perf-10 >d|Ganhei a causa.|perf-12 >d|Perdi a causa e o clima ficou péssimo.','Deixar para lá|k+2|Não quero confusão.']],
+ c:['Piorou','A dor nas costas ficou crônica.',['Fazer fisioterapia|$-2000 hl+6|Melhorei bastante.','Ignorar|hl-8|Agora dói até para dormir.']],
+ d:['As mudanças','Depois do meu caso, a empresa colocou sinalização em todo lugar.',['Sentir orgulho|k+4|Pelo menos ninguém mais vai cair ali.','Pedir para sair|fire h+3|Não dava mais para ficar.']],
+});
+chain('promocao_disputa',{k:'Carreira',min:22,max:60,who:'colega',when:TRAB,gap:[1,1]},{
+ a:['A vaga de coordenação','Abriu uma vaga de coordenação. Eu e {p} somos os favoritos.',['Competir limpo|perf+6 >b|Que vença o melhor.','Fazer acordo com {p}|bond+8 >c|Combinamos: quem ganhar ajuda o outro.','Sabotar {p}|k-10 ?50 perf+6 >b|Ninguém soube.|k-6 vira:inimigo >d|{p} descobriu.']],
+ b:['A decisão','A diretoria anunciou quem ficou com a vaga.',['Ouvir o anúncio|?perf promo h+12 >e|Fui eu!|h-8 >f|Foi {p}.']],
+ c:['O pacto','A diretoria escolheu.',['Ouvir o anúncio|?perf promo h+12 bond+5 >e|Fui eu. Cumpri o pacto e trouxe {p} para perto.|h-4 bond+8 >f|Foi {p}. {Ele} cumpriu o pacto e me deu os melhores projetos.']],
+ d:['Inimigos','{p} agora faz de tudo para me prejudicar.',['Pedir desculpas|?k bond+10 k+4|Fizemos as pazes.|h-4|Não aceitou.','Revidar|k-4 perf-4 h-4|Guerra fria no escritório.']],
+ e:['Coordenador{a}','Agora coordeno a equipe, incluindo {p}.',['Ser justo com {ele}|k+5 bond+6|Viramos uma ótima dupla.','Mostrar quem manda|bond-10 h+2|O poder subiu à cabeça.']],
+ f:['A derrota','Ver {p} na cadeira que eu queria dói.',['Dar parabéns de verdade|k+5 bond+8|{p} ficou emocionad{o2}.','Procurar emprego em outro lugar|+cad:headhunter h-2|Talvez minha vez seja em outra empresa.']],
+});
+
+// ===== Histórias em cadeia: amor e casamento =====
+const SOLTEIR=m=>!partner();
+chain('app_namoro',{k:'Amor',min:18,max:60,npc:1,date:1,when:SOLTEIR,gap:[1,1]},{
+ a:['Deu match','Instalei um aplicativo de namoro. Deu match com {p}, que tem um perfil divertido e fotos com cachorro.',['Mandar uma mensagem engraçada|?lk h+5 >b|{p} respondeu com três emojis rindo.|h-2 >c|Visualizou e não respondeu.','Esperar {ele} falar primeiro|?40 >b|{p} mandou um "oi" tímido.|>c|Ninguém falou nada.']],
+ b:['Conversa boa','Faz duas semanas que eu e {p} conversamos todo dia.',['Marcar um encontro|>d|Um café num sábado à tarde.','Pedir uma videochamada antes|?70 >d|Era a pessoa das fotos mesmo.|>e|A câmera "estava quebrada". Estranho.']],
+ c:['Desânimo','O aplicativo virou uma sequência de conversas que não dão em nada.',['Apagar o aplicativo|h+3|Vou conhecer gente do jeito antigo.','Insistir mais um pouco|>a@1|Mais uma chance.']],
+ d:['O primeiro encontro','{p} chegou na hora, mais bonit{o2} pessoalmente.',['Ser eu mesm{o}|?lk+5 h+10 vira:namoro >f|Ficamos até o café fechar. Começamos a namorar.|h-3 >c|Faltou química.','Tentar impressionar|?35 h+8 vira:namoro >f|Funcionou!|h-5 >c|Falei demais de mim.']],
+ e:['O perfil falso','A pessoa das fotos não existia. Era um golpe.',['Denunciar o perfil|k+3 h-4|Bloqueado e denunciado.','Contar para os amigos|h+2|Viramos piada juntos. Melhor que chorar sozinh{o}.']],
+ f:['Namoro de aplicativo','O namoro com {p} está ficando sério.',['Conhecer a família d{ele}|?50 bond+10 h+6 >g|A família me adorou.|bond-3 >g|A sogra me olhou de cima a baixo.','Manter só entre nós|bond+4 >g|Sem pressão.']],
+ g:['Contar como se conheceram','Num jantar, alguém perguntou como eu e {p} nos conhecemos.',['Contar a verdade: aplicativo|h+5 bond+5|Hoje em dia todo mundo se conhece assim.','Inventar uma história romântica|h+6 bond+6|"Foi numa livraria, numa tarde de chuva..." Combinamos de contar sempre assim.']],
+});
+chain('pedido',{k:'Amor',min:22,max:55,who:'partner',when:m=>{ const p=partner(); return !!p&&p.rel==='namoro'; },gap:[1,1]},{
+ a:['Pensar no futuro','Faz tempo que eu e {p} estamos juntos. Comecei a pensar em casamento.',['Comprar uma aliança|$-3000 >b|Escondi a caixinha numa meia velha.','Conversar sobre o assunto|>c|Perguntei, de leve, o que {ele} pensa de casamento.','Não é a hora|h+0|Ainda não.']],
+ b:['O pedido','Chegou o dia. A aliança está no bolso e o coração na boca.',['Pedir num restaurante|?bond noivar h+15 >d|{p} disse sim chorando!|h-15 bond-10 >e|{p} disse que não está pront{o2}.','Pedir num lugar especial para nós dois|?bond+10 noivar h+15 >d|SIM!|h-12 >e|{p} pediu um tempo para pensar.']],
+ c:['A conversa séria','{p} disse que pensa em casar, mas não agora.',['Respeitar o tempo d{ele}|k+3 bond+5 >b@1-2|Esperei. Valeu a pena esperar.','Dar um ultimato|?40 bond-5 >b@0|{p} entendeu o recado.|breakup h-15|Terminamos.']],
+ d:['Os preparativos','Noivado anunciado. Agora vem a parte difícil: o casamento.',['Festa grande|$-25000 >f|Duzentos convidados, banda e buffet.','Cerimônia pequena|$-5000 >f|Só quem importa.','Casar no cartório e viajar|$-8000 >f|Assinamos e fugimos para a praia.']],
+ e:['O não','O "não" doeu. Mas a gente continua junto.',['Tentar de novo no futuro|bond+3 >b@2|Um dia vai ser sim.','Terminar|breakup h-12|Queríamos coisas diferentes.']],
+ f:['O grande dia','O dia do casamento chegou.',['Dizer sim|casar h+20 bond+15 >g@1|Casei com {p}! A festa foi até de manhã.','Fugir do altar|breakup h-20 k-10|Saí correndo. Não me pergunte por quê.']],
+ g:['Recém-casados','O primeiro ano de casados tem muita alegria e algumas brigas por causa da toalha molhada.',['Fazer um acordo das tarefas|bond+8 k+3|Tabela na geladeira. Funciona.','Deixar a toalha na cama mesmo|bond-3 h+2|Algumas batalhas não valem a pena.']],
+});
+chain('sogra',{k:'Família',min:20,max:65,who:'partner',gap:[1,1]},{
+ a:['A sogra','A mãe de {p} decidiu passar "uns dias" lá em casa. Já faz três semanas.',['Ser gentil|k+4 >b|Fiz o café do jeito que ela gosta.','Reclamar com {p}|bond-5 >c|{p} ficou entre a cruz e a espada.','Insinuar que é hora de ir|?40 >d|Ela entendeu e foi embora no dia seguinte.|bond-8 >c|Ela ficou ofendida.']],
+ b:['Conquista','A sogra elogiou minha comida na frente de toda a família.',['Agradecer|h+6 bond+5 >d|Até {p} se emocionou.','Pedir a receita do bolo dela em troca|h+5 >d|Ela me ensinou o segredo de família.']],
+ c:['A briga','A sogra criticou a forma como eu cuido da casa. Explodi.',['Pedir desculpas|k+4 bond+5 >d|Ela também pediu.','Exigir que {p} escolha um lado|bond-12 >e|Pior pedido que eu já fiz.']],
+ d:['Paz','Eu e a sogra chegamos a um acordo silencioso de respeito mútuo.',['Convidar para o almoço de domingo|h+4 bond+6|Agora é tradição.','Manter visitas curtas|h+3|Amor de longe.']],
+ e:['A crise','{p} ficou do lado da mãe. Dormi no sofá.',['Conversar com calma depois|?k bond+10 >d|Nos entendemos.|bond-10 h-8|A crise durou meses.','Ir para a casa de um amigo|h-6 bond-6 >d@1|Precisava de espaço.']],
+});
+chain('crise_casamento',{k:'Família',min:28,max:70,who:'spouse',gap:[1,1]},{
+ a:['A rotina','Eu e {p} quase não conversamos mais. Cada um no seu celular.',['Propor uma viagem a dois|$-4000 bond+10 h+8 >b|Redescobrimos a gente.','Sugerir terapia de casal|$-1200 >c|{p} aceitou, desconfiad{o2}.','Deixar como está|bond-6 >d|A distância cresceu.']],
+ b:['Lua de mel de novo','A viagem nos lembrou por que nos apaixonamos.',['Manter um encontro por semana|bond+10 h+8|Toda sexta é nossa.','Voltar à rotina|bond+2 >d@2|Foi bom enquanto durou.']],
+ c:['Na terapia','A terapeuta fez perguntas que nunca tínhamos feito um ao outro.',['Ser sincer{o}|?k bond+12 h+6 >e|Choramos, rimos e nos entendemos.|bond-6 >d|Algumas verdades machucaram.','Ficar na defensiva|bond-4 >d|Não adiantou muito.']],
+ d:['A desconfiança','Achei mensagens estranhas no celular de {p}.',['Confrontar|?50 bond-5 >e|Era uma surpresa para o meu aniversário. Fiquei com vergonha.|bond-20 h-15 >f|Era o que eu temia.','Fingir que não vi|h-8 >f|O silêncio ficou mais pesado.']],
+ e:['Mais fortes','Passamos pela crise e saímos mais unidos.',['Renovar os votos|$-3000 bond+15 h+12|Festinha no quintal, com os mesmos amigos de antes.','Só seguir juntos|bond+8 h+6|Amor maduro é escolher todo dia.']],
+ f:['A decisão','Precisamos decidir o futuro do nosso casamento.',['Tentar mais uma vez|?45 bond+8 >e|Recomeçamos.|breakup h-15|Não teve jeito. Divórcio.','Separar|breakup h-12|Acabou. Com mais tristeza que raiva.']],
+});
+chain('bebe_planejado',{k:'Família',min:22,max:42,who:'partner',when:m=>kids().length<3,gap:[1,1]},{
+ a:['Um filho?','{p} me perguntou num domingo à tarde: "E se a gente tivesse um filho?"',['Topar|bond+8 >b|Ficamos rindo de nervoso o resto do dia.','Pedir tempo|>c@1|Ainda tenho medo.','Dizer que não quero|bond-8 h-2|Conversa difícil.']],
+ b:['Tentando','Faz meses que estamos tentando.',['Continuar tentando com calma|?55 >d|Duas listras no teste!|>e|Ainda nada.','Procurar um médico|$-2000 ?65 >d|O médico ajudou. Positivo!|>e|O médico pediu mais exames.']],
+ c:['O medo','Medo de não dar conta, de não ter dinheiro, de errar.',['Conversar com amigos que já são pais|h+4 >b|"Ninguém está pronto." Isso me acalmou.','Desistir da ideia|bond-5|Não é para mim.']],
+ d:['Grávidos','Vai nascer um bebê!',['Montar o quarto juntos|$-3000 bond+10 h+10 >f|Pintamos a parede de amarelo.','Fazer chá revelação|$-800 h+8 >f|O balão estourou com confete.']],
+ e:['A espera','Os meses passam e o teste continua negativo.',['Tentar tratamento|$-12000 ?50 >d|Funcionou!|h-10 >g|Não funcionou.','Pensar em adoção|>g|Existe mais de um jeito de ser família.']],
+ f:['O nascimento','Chegou a hora. Corremos para a maternidade de madrugada.',['Segurar o bebê pela primeira vez|bebe h+25 bond+15|Nada no mundo se compara.','Desmaiar na sala de parto|bebe h+20 bond+10|Acordei com todo mundo rindo de mim. E um bebê lindo.']],
+ g:['Adoção','Entramos na fila de adoção.',['Esperar com paciência|h+4 >h@1-3|A fila é longa, mas a gente espera.','Desistir|h-6|Talvez não seja para nós.']],
+ h:['A ligação','O telefone tocou: tem uma criança esperando por nós.',['Ir conhecer|bebe h+25 bond+10|Foi amor no primeiro olhar.','Pedir mais um tempo|h-4|Ainda não estávamos prontos.']],
+});
+chain('amor_antigo',{k:'Amor',min:38,max:75,npc:1,date:1,when:SOLTEIR,gap:[1,2]},{
+ a:['Um rosto conhecido','No mercado, reconheci {p}, meu primeiro amor da escola. Faz mais de vinte anos.',['Ir falar com {ele}|>b|{p} me reconheceu na hora.','Me esconder atrás das prateleiras|h-2 >c@1|Coração de adolescente.']],
+ b:['Café atrasado em vinte anos','Marcamos um café. {p} se divorciou há pouco tempo.',['Falar do passado|h+8 >d|Rimos das bobagens da escola.','Falar do presente|h+6 >d|A vida nos levou para lugares diferentes.']],
+ c:['Arrependimento','Fiquei pensando em {p} a semana inteira.',['Procurar nas redes sociais|>b@0|Mandei uma mensagem.','Deixar para lá|h-3|Passado é passado.']],
+ d:['Segunda chance','{p} confessou que sempre pensou em mim.',['Tentar de novo|vira:namoro h+15 >e|Começamos a namorar depois dos quarenta. Melhor do que aos dezesseis.','Ficar só na amizade|vira:amigo h+5|Amigos de uma vida inteira.']],
+ e:['Para valer','Desta vez não vamos deixar nada nos separar.',['Morar juntos|bond+12 h+10 >f@1|Juntamos duas casas cheias de lembranças.','Casar|casar h+15 bond+15|Casamos com a turma da escola na festa.']],
+ f:['A vida a dois','Envelhecer junto de quem me conhece desde sempre.',['Agradecer ao destino|h+10 bond+8|Algumas histórias só terminam bem depois.','Fazer uma viagem que planejávamos aos dezesseis|$-6000 h+12|Fomos até a praia que prometemos conhecer juntos.']],
+});
+chain('amizade_rachada',{k:'Amizade',min:18,max:70,who:'friend',v:[2000,15000],gap:[1,1]},{
+ a:['O empréstimo','{p}, meu amigo de anos, pediu {v} emprestados para uma emergência.',['Emprestar|$-v bond+10 >b|"Te devolvo em três meses."','Emprestar só metade|bond-2 >b|O que eu podia.','Negar|bond-12 >e|{p} ficou magoad{o2}.']],
+ b:['Os meses passam','Já faz um ano e {p} nunca mais tocou no assunto. Postou fotos de uma viagem.',['Cobrar com jeito|?50 $+v bond+3 >c|{p} pediu desculpas e pagou.|bond-10 >d|{p} ficou ofendid{o2} com a cobrança.','Esquecer o dinheiro|k+4 h-4 >c|Amizade vale mais.']],
+ c:['Amizade salva','A amizade sobreviveu ao dinheiro.',['Combinar de nunca mais misturar|h+5 bond+5|Regra sagrada.','Seguir como antes|h+4|Amigos são para essas coisas.']],
+ d:['A briga','{p} me chamou de mesquinh{o} por cobrar.',['Desabafar tudo|bond-15 h-6 >e|Falamos coisas que doeram.','Deixar o tempo passar|bond-5 >e|Silêncio.']],
+ e:['O afastamento','Eu e {p} paramos de nos falar.',['Mandar uma mensagem de paz|?k bond+15 >f|{p} respondeu na hora: "Eu também sinto falta."|h-4|Visualizou e não respondeu.','Seguir a vida|h-3|Algumas amizades acabam.']],
+ f:['Reconciliação','Encontrei {p} num aniversário. Nos abraçamos como se nada tivesse acontecido.',['Rir de tudo|h+10 bond+10|Amizade de verdade sobrevive a tudo.','Conversar a sério|h+8 bond+12|Prometemos nunca mais deixar algo assim nos separar.']],
+});
+chain('filho_adolescente',{k:'Família',min:30,max:65,who:'teen',gap:[1,1]},{
+ a:['A porta fechada','{p} vive trancad{o2} no quarto. Responde tudo com monossílabos.',['Bater na porta para conversar|?bond >b|{p} deixou eu entrar.|bond-3 >c|"Sai do meu quarto."','Respeitar o espaço|bond+2 >c|Fase.','Tirar o celular|bond-10 >d|Guerra declarada.']],
+ b:['A conversa','{p} contou que está sofrendo por causa de alguém da escola.',['Ouvir sem julgar|bond+12 k+3 >e|{p} me abraçou no final.','Dar um sermão|bond-5 >c|{p} se arrependeu de ter contado.']],
+ c:['As notas','O boletim de {p} chegou cheio de notas vermelhas.',['Contratar um professor particular|$-2000 bond+3 >e|As notas melhoraram.','Colocar de castigo|bond-6 >d|Não melhorou nada.','Perguntar o que está acontecendo|?bond bond+8 >b|Tinha algo por trás.|bond-3 >d|{p} não quis falar.']],
+ d:['A fuga','{p} saiu de casa de madrugada e não voltou até de manhã.',['Esperar acordad{o} e conversar|bond+5 >e|Combinamos regras novas, juntos.','Explodir|bond-12 >e|Brigamos feio.']],
+ e:['Crescendo','{p} está virando adult{o2}. Às vezes vejo um pouco de mim ali.',['Dizer que tenho orgulho|bond+10 h+8|{p} ficou sem graça, mas sorriu.','Lembrar da minha própria adolescência|h+5|Meus pais também sofreram.']],
+});
+chain('filho_volta',{k:'Família',min:45,max:80,who:'adultkid',gap:[1,1]},{
+ a:['De volta para casa','{p} perdeu o emprego e pediu para voltar a morar comigo por um tempo.',['Aceitar de braços abertos|bond+10 >b|O quarto de infância voltou a ter dono.','Aceitar com regras|bond+4 >b|Contas divididas e louça lavada.','Negar|bond-15 h-4|{p} foi morar com um amigo.']],
+ b:['Convivência','Morar com um filho adulto é diferente. Ninguém sabe bem quem manda.',['Tratar como adulto|bond+6 >c|Conversas de igual para igual.','Voltar a tratar como criança|bond-6 >c|"Já sou adulto!"']],
+ c:['O emprego novo','{p} arrumou um emprego e vai se mudar de novo.',['Ajudar com a mudança|bond+8 h+5 >d|Carreguei caixas e segurei o choro.','Pedir para ficar mais um pouco|bond+3 >d|A casa ficou tão viva.']],
+ d:['Ninho vazio, de novo','A casa ficou silenciosa outra vez.',['Transformar o quarto num escritório|h+4|Finalmente um escritório.','Deixar o quarto do jeito que está|h+2|Vai que {p} volta.']],
+});
+chain('cuidar_pai',{k:'Família',min:35,max:70,who:'parent',when:m=>parents().some(p=>p.age>=68),gap:[1,1]},{
+ a:['O tombo','{p} caiu em casa e ficou horas no chão até alguém chegar.',['Levar para morar comigo|bond+12 h-4 >b|A casa ficou cheia de remédios e histórias antigas.','Contratar uma cuidadora|$-6000 >c|Alguém para ficar com {ele} durante o dia.','Sugerir um lar de idosos|bond-8 >d|{p} chorou.']],
+ b:['A rotina de cuidar','Cuidar de {p} cansa, mas também aproxima.',['Ouvir as histórias de {p}|bond+10 h+3 >e|Descobri coisas da família que eu nunca soube.','Dividir com os irmãos|>f|Nem todo mundo ajudou do mesmo jeito.']],
+ c:['A cuidadora','A cuidadora é ótima. {p} até voltou a sorrir.',['Visitar todo fim de semana|bond+8 >e|Almoço de domingo garantido.','Ligar todo dia|bond+5 >e|A voz de {p} melhora quando eu ligo.']],
+ d:['O lar de idosos','{p} fez amigos no lar. Até arrumou namorad{o2}.',['Visitar sempre|bond+10 h+5 >e|O lugar é mais alegre do que eu imaginava.','Visitar pouco|bond-6 h-4 >e|A culpa pesa.']],
+ e:['A despedida','{p} foi embora numa madrugada tranquila.',['Organizar uma despedida bonita|h-15 k+3 >g|Lotou a igreja de gente que {ele} ajudou.','Ficar em silêncio|h-18 >g|Ainda não caiu a ficha.']],
+ f:['A briga dos irmãos','Discutimos sobre quem cuida mais de {p}.',['Fazer uma escala justa|k+4 >e|Funcionou.','Assumir tudo sozinh{o}|hl-5 bond+8 >e|Cansei, mas não me arrependo.']],
+ g:['A herança','Chegou a hora de dividir as coisas que {p} deixou.',['Dividir com justiça|$+20000 k+5|Ninguém brigou. {p} ia gostar.','Brigar pela casa|$+40000 k-8 h-8|Ganhei a casa e perdi os irmãos.']],
+});
+chain('irmao_divida',{k:'Família',min:22,max:70,who:'sib',v:[3000,20000],gap:[1,1]},{
+ a:['O pedido','{p} me ligou chorando: precisa de {v} para não perder a casa.',['Ajudar|$-v bond+12 >b|{Ele} disse que eu salvei a vida d{ele}.','Ajudar com metade|bond+3 >b|Ajudei no que pude.','Negar|bond-15 >c|{Ele} desligou na minha cara.']],
+ b:['Um ano depois','{p} conseguiu se reerguer.',['Esperar {ele} pagar|?50 $+v bond+5|{Ele} pagou cada centavo.|bond-4|{Ele} nunca mais falou no assunto.','Dizer que foi um presente|k+6 bond+10|Família é família.']],
+ c:['A mágoa','{p} perdeu a casa e não fala mais comigo.',['Pedir desculpas|?k bond+10|{Ele} aceitou, devagar.|h-4|Não me perdoou.','Explicar meus motivos|bond+3|{Ele} entendeu, pelo menos em parte.']],
+});
+chain('segredo_familia',{k:'Família',min:25,max:70,npc:1,gap:[1,2]},{
+ a:['O teste de DNA','Fiz um teste de DNA por curiosidade. Apareceu um "parente próximo" que eu não conheço: {p}.',['Mandar mensagem|>b|{p} respondeu no mesmo dia.','Ignorar|h-2 >c@2|Fiquei com aquilo na cabeça.']],
+ b:['A revelação','{p} é meio-{irmao} meu. Fruto de um relacionamento antigo de um dos meus pais.',['Conhecer {p} pessoalmente|>d|Temos o mesmo sorriso.','Confrontar meus pais primeiro|>e|A conversa mais difícil da minha vida.']],
+ c:['A curiosidade','Abri o resultado do DNA de novo.',['Mandar a mensagem|>b@0|Coragem.','Apagar a conta|h+2|Não quero saber.']],
+ d:['Família nova','{p} quer fazer parte da minha vida.',['Abrir as portas|vira:irmao h+10|Ganhei mais família depois de adult{o}.','Manter distância|h-2|Ainda é muito para processar.']],
+ e:['Meus pais','Meus pais confirmaram tudo, entre lágrimas.',['Perdoar|k+6 h+3 >d|Eles também erraram, como todo mundo.','Ficar com raiva|h-10 >d|Precisei de um tempo longe.']],
+});
+
+// ===== Histórias em cadeia: dinheiro, negócios e encrencas =====
+chain('food_truck',{k:'Negócios',min:20,max:60,v:[15000,40000],gap:[1,1]},{
+ a:['O food truck','Vi um food truck usado à venda e tive uma ideia: vender {comida} na porta das festas.',['Comprar o food truck|$-v >b|Pintei com as cores que eu sempre quis.','Alugar um por um mês para testar|$-3000 >b|Teste antes de apostar.','Desistir|h-1|Fica o sonho.']],
+ b:['A fiscalização','A fiscalização da prefeitura apareceu no primeiro fim de semana.',['Mostrar os papéis em dia|?55 >c|Tudo certo. Pode vender.|$-2000 >c|Faltava um alvará. Multa.','Oferecer um "cafezinho" ao fiscal|k-8 ?50 >c|Ele aceitou.|arrest:corrupção_ativa:0:2|Ele era honesto.']],
+ c:['A primeira noite cheia','Uma festa enorme no bairro. Fila na porta do food truck.',['Dar conta da fila sozinh{o}|?hl $+3000 h+10 >d|Vendi tudo em três horas!|hl-6 $+1500 >d|Queimei a mão, mas vendi metade.','Chamar um amigo para ajudar|$+2500 h+8 >d|Dividimos o lucro e as risadas.']],
+ d:['O concorrente','Um food truck de hambúrguer estacionou do lado do meu, com preço mais baixo.',['Baixar o preço também|$-1000 >e|Guerra de preços.','Melhorar a qualidade|$-800 sm+2 >f|Ingredientes melhores, clientes fiéis.','Propor uma parceria|?k >f|Combo: o dele mais o meu. Todo mundo ganhou.|>e|Ele riu da minha cara.']],
+ e:['Mês ruim','O dinheiro está curto e o caminhão precisa de conserto.',['Vender o food truck|$+10000 h-6|Foi bom enquanto durou.','Aguentar mais um pouco|?40 >f|O movimento voltou!|$-4000 h-6|Afundei mais.']],
+ f:['Clientes fiéis','O food truck ficou famoso no bairro. Tem gente que atravessa a cidade para comer.',['Abrir uma loja fixa|$-20000 ?55 $+40000 h+12 f+3 >g|A loja lotou na inauguração.|h-8|A loja não pegou. Voltei para o caminhão.','Comprar um segundo food truck|$-15000 $+25000 h+8 >g|Agora são dois!']],
+ g:['Empresári{o}','Hoje tenho funcionários, fornecedores e um contador.',['Pensar em franquia|?sm $+80000 f+5 h+10|Virou franquia em três cidades!|$+10000|Continuo crescendo devagar.','Manter do tamanho que está|h+8|Não preciso de mais. Tenho paz.']],
+});
+chain('agiota',{k:'Encrenca',min:18,max:65,v:[3000,15000],when:m=>m.money<5000,gap:[1,1]},{
+ a:['Dinheiro rápido','Um conhecido apresentou um homem que empresta dinheiro "sem burocracia".',['Pegar {v} emprestados|$+v >b|Juros de 20% ao mês. "Tranquilo", ele disse.','Recusar|k+2|Sei como essas histórias terminam.']],
+ b:['O primeiro vencimento','O agiota mandou mensagem lembrando do pagamento. Com uma foto da minha casa.',['Pagar os juros|$-2000 >c|Paguei só os juros. A dívida continua.','Pagar tudo de uma vez|?40 $-v2 k+2|Consegui juntar e quitei. Nunca mais.|>c|Não tenho o dinheiro.']],
+ c:['A visita','Dois homens apareceram na minha porta "só para conversar".',['Prometer pagar em uma semana|h-8 >d|Eles sorriram. Não foi um sorriso bom.','Ir à polícia|>e|Contei tudo para um delegado.','Fugir para a casa de parentes|h-10 >d|Me escondi por um mês.']],
+ d:['O prazo','O prazo acabou.',['Vender o que tenho para pagar|$-v2 h-6 >f|Fiquei sem carro, sem televisão, mas livre.','Pedir ajuda à família|?50 h-3 >f|Minha família pagou. Vergonha eterna.|hl-20 h-15 >f|Ninguém pôde ajudar. Me pegaram na saída do trabalho.']],
+ e:['A operação','A polícia prendeu o agiota numa operação. Minha dívida virou prova num processo.',['Depor contra ele|k+6 h+6 >f|Meu depoimento ajudou a prender a quadrilha.','Ficar quiet{o} com medo|h+2 >f|Pelo menos a dívida sumiu.']],
+ f:['Nunca mais','Aprendi da pior forma que dinheiro fácil sai caro.',['Fazer uma reserva de emergência|$+1000 sm+3|Todo mês, um pouquinho guardado.','Contar a história para alguém que precisa ouvir|k+5|Livrei um amigo de cair no mesmo golpe.']],
+});
+chain('carteira_achada',{k:'Dilema',min:12,max:80,v:[500,5000],gap:[1,1]},{
+ a:['A carteira','Achei uma carteira na calçada com {v} em dinheiro e os documentos de alguém.',['Devolver tudo|k+10 >b|Procurei o endereço nos documentos.','Ficar com o dinheiro e devolver os documentos|k-6 $+v >c|Deixei a carteira numa caixa de correio.','Ficar com tudo|k-12 $+v >d|Ninguém vai saber.']],
+ b:['O dono','O dono da carteira era um senhor que ia pagar a cirurgia da esposa com aquele dinheiro.',['Recusar recompensa|k+8 h+10 >e|Ele me abraçou chorando.','Aceitar uma recompensa|$+500 h+6 >e|Ele insistiu.']],
+ c:['A consciência','Não consigo parar de pensar no dono daquela carteira.',['Procurar e devolver o dinheiro|k+8 $-v >b|Antes tarde do que nunca.','Gastar logo para esquecer|h-4|Não esqueci.']],
+ d:['A câmera','Uma câmera de segurança gravou quando eu peguei a carteira.',['Devolver antes que me achem|k+3 $-v >b|Disse que ia devolver. Meio verdade.','Torcer para não me acharem|?50 h-4|Não me acharam.|arrest:furto:0:1 k-5|A polícia bateu na minha porta.']],
+ e:['Boa ação','Uma boa ação puxou outra.',['Contar a história nas redes|f+3 h+4|Virou notícia: "Pessoa honesta devolve carteira".','Guardar para mim|k+3 h+5|Não precisa de plateia.']],
+});
+chain('loteria',{k:'Sorte',min:18,max:85,gap:[1,1]},{
+ a:['O bilhete da semana','Comecei a apostar na loteria toda semana, sempre nos mesmos números.',['Apostar pouco|$-100 >b|Só para sonhar.','Apostar muito|$-1000 add.jogo+6 >c|Quanto mais aposta, mais chance. Certo?']],
+ b:['Quase','Acertei quatro números. Ganhei um pouquinho.',['Comemorar com uma pizza|$+800 h+6 >d@1-3|Pizza paga pela sorte.','Apostar tudo de novo|$-800 add.jogo+4 >c|Agora vai!']],
+ c:['O vício','A aposta virou obrigação. Escondo os recibos da família.',['Parar de vez|?will h+4 >d|Rasguei os bilhetes. Liberdade.|add.jogo+8 $-3000 >e|Não consegui parar.','Diminuir|add.jogo-5 >d|Uma aposta por mês.']],
+ d:['Os números de sempre','Continuei jogando os mesmos números por anos, por superstição.',['Conferir o resultado|?3 $+500000 h+30 f+5|ACERTEI TUDO! Fiquei milionári{o}!|h+0|Nada de novo. Mas um dia...','Esquecer de apostar justo hoje|h-4|E se fosse hoje?']],
+ e:['Fundo do poço','Perdi um dinheiro que não tinha.',['Procurar ajuda para o vício|$-2000 add.jogo-30 h+6|Grupo de apoio toda quinta. Funciona.','Esconder da família|h-10 add.jogo+5|A mentira pesa.']],
+});
+chain('piramide',{k:'Dinheiro',min:20,max:75,who:'friend',v:[3000,20000],gap:[1,1]},{
+ a:['A oportunidade de ouro','{p} me apresentou uma "oportunidade de negócio": é só colocar dinheiro e chamar mais gente.',['Entrar com {v}|$-v >b|{p} disse que em seis meses eu estaria ric{o}.','Perguntar como o dinheiro é gerado|sm+2 >e|{p} não soube explicar.','Recusar|bond-3|Pirâmide tem nome.']],
+ b:['Os primeiros ganhos','Recebi meus primeiros "lucros". Me pediram para chamar amigos.',['Chamar a família|k-6 >c|Minha tia entrou com as economias dela.','Não chamar ninguém|>c|Fico só eu.','Sacar tudo agora|?50 $+v >e|Saí no lucro.|>c|O saque está "bloqueado temporariamente".']],
+ c:['O colapso','A empresa sumiu. Milhares de pessoas perderam dinheiro.',['Juntar as vítimas num processo|>d|Somos muitos.','Culpar {p}|bond-20 h-6 >d|{p} também perdeu tudo.']],
+ d:['As consequências','Minha família me olha diferente agora.',['Devolver o dinheiro da minha tia|$-v k+8|Demorei dois anos, mas devolvi.','Pedir desculpas|k+3 h-4|Ela me perdoou. Eu ainda não me perdoei.']],
+ e:['Escapei','Saí antes do desastre.',['Avisar {p} para sair também|k+5 bond+6|{p} saiu a tempo, graças a mim.','Ficar quiet{o}|k-3|Cada um com suas escolhas.']],
+});
+chain('testemunha',{k:'Crime',min:16,max:80,gap:[1,1]},{
+ a:['O assalto','Vi um assalto violento a uma farmácia. Vi o rosto do assaltante.',['Ligar para a polícia|k+5 >b|Dei a descrição completa.','Ir embora sem dizer nada|k-4 >e@1|Não quero problema.']],
+ b:['O reconhecimento','A polícia me chamou para reconhecer o suspeito.',['Reconhecer|k+5 >c|Era ele. Tenho certeza.','Dizer que não tenho certeza|>e|Fiquei com medo.']],
+ c:['As ameaças','Recebi um bilhete na caixa de correio: "Esquece o que viu".',['Contar à polícia|>d|Me colocaram no programa de proteção.','Retirar o depoimento|k-6 h-4 >e|Não tenho coragem.']],
+ d:['O julgamento','No tribunal, olhei o assaltante nos olhos e contei tudo.',['Depor com firmeza|k+8 f+2 h+6|Ele foi condenado. A farmacêutica me agradeceu.','Tremer, mas depor|k+6 h+3|Fiz o certo, mesmo com medo.']],
+ e:['A culpa','Soube que o mesmo assaltante atacou de novo.',['Procurar a polícia agora|k+6 >d|Antes tarde.','Tentar esquecer|h-6 k-2|Não esqueci.']],
+});
+chain('heranca_tio',{k:'Família',min:22,max:75,v:[50000,300000],gap:[1,1]},{
+ a:['O advogado','Um advogado me ligou: um tio-avô que eu mal conhecia me deixou uma herança.',['Ir ao escritório|>b|Achei que era golpe até ver o papel timbrado.','Achar que é golpe e desligar|>c@1|Ele ligou de novo.']],
+ b:['O testamento','O testamento me deixa uma casa no interior, cheia de coisas antigas.',['Visitar a casa|>d|A casa tem cheiro de passado.','Vender sem ver|$+v h+8|Dinheiro na conta.']],
+ c:['A insistência','O advogado mandou uma carta registrada com o testamento.',['Ler a carta|>b|Era verdade.','Rasgar|h+0|Nunca saberei.']],
+ d:['O baú','No sótão, um baú com cartas, fotos e um diário do meu tio-avô.',['Ler o diário|h+6 sm+2 >e|Ele foi um aventureiro. Ninguém da família sabia.','Doar tudo para um museu|k+5 f+2|O museu da cidade montou uma exposição.']],
+ e:['A revelação','O diário fala de uma coleção de moedas raras escondida na casa.',['Procurar|?50 $+v2 h+15|Encontrei atrás da parede da lareira!|h-2|Nada. Talvez fosse só uma história.','Deixar a lenda em paz|h+4|Algumas coisas devem continuar mistério.']],
+});
+chain('imovel',{k:'Dinheiro',min:25,max:70,v:[40000,120000],gap:[1,2]},{
+ a:['A casa em leilão','Um amigo corretor disse que uma casa vai a leilão pela metade do preço.',['Dar um lance|?45 $-v >b|Arrematei!|h-3|Alguém deu um lance maior.','Não arriscar|h+0|Leilão me dá medo.']],
+ b:['O problema','A casa tinha moradores que não querem sair.',['Negociar com calma|$-5000 k+4 >c|Ajudei a família a encontrar outro lugar.','Entrar na justiça|$-3000 >c|Um ano de processo.']],
+ c:['A reforma','A casa precisa de uma reforma inteira.',['Reformar com profissionais|$-30000 >d|Ficou linda.','Fazer eu mesm{o}|$-10000 hl-5 sm+3 >d|Aprendi a assentar azulejo.']],
+ d:['Vender ou alugar?','A casa está pronta.',['Vender|$+v2 h+12|Lucro de verdade!','Alugar|$+2000 >e@2|Renda todo mês.','Morar nela|h+10|Minha casa, do meu jeito.']],
+ e:['O inquilino','O inquilino parou de pagar o aluguel.',['Negociar|?50 $+3000|Ele voltou a pagar.|$-2000 h-4|Tive que despejar.','Vender a casa de vez|$+v h+6|Chega de dor de cabeça.']],
+});
+chain('bico_entrega',{k:'Trabalho',min:18,max:60,when:m=>!m.job,gap:[1,1]},{
+ a:['Entregas por aplicativo','Sem emprego, comecei a fazer entregas de bicicleta por aplicativo.',['Trabalhar de manhã à noite|$+3000 hl+2 >b|As pernas doem, mas a conta fecha.','Só nos horários de pico|$+1500 >b|O suficiente para o básico.']],
+ b:['A chuva','Uma tempestade no meio de uma entrega de comida.',['Entregar mesmo assim|?hl $+200 k+3 >c|A cliente me deu uma gorjeta enorme.|hl-6 >c|Caí da bicicleta.','Esperar a chuva passar|>c|A comida chegou fria. Avaliação ruim.']],
+ c:['Os colegas','Os entregadores do bairro se reúnem numa praça entre uma entrega e outra.',['Me juntar à turma|h+6 >d|Fiz amigos de verdade.','Ficar na minha|h+0 >d|Foco no trabalho.']],
+ d:['O protesto','Os entregadores vão parar um dia para pedir melhores taxas.',['Participar|?50 $+500 k+4 >e|O aplicativo aumentou as taxas.|$-200 >e|Nada mudou.','Trabalhar no dia do protesto|$+800 k-3 >e|Ganhei mais naquele dia.']],
+ e:['Próximo passo','A bicicleta me trouxe até aqui, mas quero mais.',['Comprar uma moto para entregas|$-6000 $+8000 h+6|Mais rápido, mais dinheiro.','Procurar emprego fixo|sm+2 h+3|Com carteira assinada, de preferência.']],
+});
+chain('cripto',{k:'Dinheiro',min:18,max:70,v:[2000,15000],gap:[1,1]},{
+ a:['A moeda nova','Um colega jura que uma criptomoeda nova vai multiplicar por cem.',['Investir {v}|$-v >b|Comprei. Agora é esperar.','Estudar antes|sm+3 >c|Li tudo sobre blockchain.','Ignorar|h+0|Moeda que não existe não me convence.']],
+ b:['A montanha-russa','A moeda subiu 300% em uma semana. Depois caiu 80% em um dia.',['Vender na alta|?40 $+v2 h+12|Vendi no topo! Sorte pura.|>d|Não vendi a tempo.','Segurar|?20 $+v2 h+15|Segurei e explodiu!|>d|Caiu mais.']],
+ c:['Diversificar','Coloquei só uma pequena parte do dinheiro em cripto.',['Esperar com calma|?50 $+v h+5|Dobrou em dois anos.|$-1000|Perdi um pouco. Nada grave.']],
+ d:['O prejuízo','Perdi quase tudo que coloquei.',['Aprender a lição|sm+3 h-4|Nunca mais invisto o que não posso perder.','Colocar mais para recuperar|$-v ?20 $+v2|Recuperei tudo!|h-10|Perdi mais ainda.']],
+});
+
+// ===== Histórias em cadeia: comunidade, sonhos e saúde =====
+chain('horta',{k:'Bairro',min:16,max:85,npc:1,age:[20,40],gap:[1,1]},{
+ a:['O terreno baldio','O terreno baldio da rua virou depósito de lixo. {p}, que mora no fim da rua, quer transformar aquilo numa horta comunitária.',['Ajudar|k+5 >b|Peguei uma enxada pela primeira vez na vida.','Achar que não vai dar certo|>e@1|Vamos ver.']],
+ b:['Mutirão','Vinte vizinhos tiraram o lixo do terreno num sábado.',['Plantar tomates|k+3 h+6 >c|Terra, sol e conversa boa.','Organizar o grupo de mensagens|sm+2 vira:amigo >c|Virei a pessoa da planilha da horta.']],
+ c:['A primeira colheita','A horta deu alface, tomate e couve para a rua inteira.',['Fazer um almoço coletivo|k+6 h+10 >d|Mesa comprida no meio da rua.','Doar para a creche do bairro|k+8 f+1 >d|As crianças vieram ajudar a colher.']],
+ d:['A construtora','Uma construtora comprou o terreno e quer erguer um prédio.',['Organizar um protesto|?k f+3 k+6 h+10|A prefeitura transformou a horta em praça oficial!|h-10|O prédio subiu. Guardamos as sementes.','Negociar com a construtora|?sm k+4 h+6|Eles mantiveram a horta no térreo do prédio.|h-6|Não quiseram nem ouvir.']],
+ e:['Deu certo','A horta de {p} deu certo sem mim. Hoje é a coisa mais bonita da rua.',['Pedir para participar|k+4 h+5 >c@0|Nunca é tarde.','Admirar de longe|h+2|Às vezes eu passo por lá só para olhar.']],
+});
+chain('abrigo',{k:'Bichos',min:14,max:80,gap:[1,1]},{
+ a:['O abrigo de animais','O abrigo de animais do bairro está pedindo voluntários.',['Ser voluntári{o} aos sábados|k+5 h+6 >b|Banho em cachorro, limpeza de baia e muito amor.','Doar ração|$-200 k+3|Fiz minha parte.']],
+ b:['O cão que ninguém quer','Tem um cachorro velho e cego no abrigo há três anos. Ninguém adota.',['Adotar|pet k+8 h+10 >c|Ele dormiu no meu pé na primeira noite.','Fazer uma campanha para ele|?k f+2 k+5 >c|Uma família adotou depois de ver o vídeo!|h-2 >c|Ninguém adotou ainda.']],
+ c:['A crise','O abrigo vai fechar por falta de dinheiro.',['Organizar uma feira beneficente|?k $+0 k+8 f+3 h+10 >d|Arrecadamos o suficiente para um ano!|h-6 >d|Não deu. Os animais foram redistribuídos.','Doar do próprio bolso|$-3000 k+8 >d|Ajudei a pagar o aluguel do mês.']],
+ d:['Coordenação','Me convidaram para coordenar os voluntários.',['Aceitar|k+5 h+6|Agora tenho uma equipe de trinta pessoas e duzentos bichos.','Continuar só nos sábados|h+4|É o meu jeito de ajudar.']],
+});
+chain('maratona',{k:'Saúde',min:18,max:65,gap:[1,1]},{
+ a:['Primeiro quilômetro','Comecei a correr no parque. Morri no primeiro quilômetro.',['Insistir todo dia|hl+3 >b|No fim do mês, corri três quilômetros sem parar.','Desistir|h-1|Correr não é para mim.']],
+ b:['Os 5 km','Me inscrevi numa corrida de 5 km.',['Correr|?hl hl+3 h+10 >c|Cruzei a linha de chegada sorrindo.|hl-3 >c|Caminhei metade, mas terminei.','Desistir na largada|h-3|Fiquei olhando os outros correrem.']],
+ c:['A meia maratona','Um grupo de corrida me convidou para treinar para uma meia maratona.',['Entrar no grupo|hl+4 h+6 >d|Treinos às seis da manhã, com sol nascendo.','Treinar sozinh{o}|hl+3 >d|Fone de ouvido e asfalto.']],
+ d:['A lesão','Senti uma dor forte no joelho no meio do treino.',['Parar e tratar|$-1500 >e@1|Fisioterapia por três meses.','Continuar correndo|?40 >e|A dor passou.|hl-12 h-8|Lesão séria. Fim da corrida por um bom tempo.']],
+ e:['A maratona','Chegou o dia da maratona: 42 quilômetros.',['Correr no meu ritmo|?hl f+2 h+20 hl+5|Terminei a maratona. Chorei na chegada.|h+5|Parei no quilômetro 30, mas fui mais longe do que imaginava.','Tentar bater um recorde|?hl-15 h+20 f+3|Tempo incrível!|hl-8|Quebrei no meio da prova.']],
+});
+chain('livro',{k:'Sonhos',min:18,max:80,gap:[1,2]},{
+ a:['A história na gaveta','Tenho uma história na cabeça há anos. Decidi escrever um livro.',['Escrever todas as noites|tal.writing+5 >b|Uma página por dia.','Esperar a inspiração|>b@2|Ela demorou.']],
+ b:['O manuscrito','O livro está pronto: 300 páginas e muito café.',['Mandar para editoras|>c|Mandei para vinte editoras.','Mostrar para amigos primeiro|?50 h+5 >c|Eles amaram!|h-4 >c|Eles foram educados demais.']],
+ c:['As rejeições','Dezoito editoras recusaram. Duas não responderam.',['Reescrever|tal.writing+5 >d|O livro ficou muito melhor.','Publicar de forma independente|$-3000 >e|Eu mesm{o} faço.','Desistir|h-8|Talvez não seja para mim.']],
+ d:['O sim','Uma editora pequena aceitou o livro!',['Assinar o contrato|$+3000 h+15 f+3 >f|Vou ser autor{a} publicad{o}!','Esperar uma editora maior|?20 $+15000 f+6 h+15 >f|Uma editora grande aceitou!|h-6|Nenhuma maior apareceu.']],
+ e:['Independente','Publiquei por conta própria e divulguei nas redes sociais.',['Vender nas redes|?tal.writing $+5000 f+4 h+10 >f|O livro viralizou!|$+300 h+2|Vendi cinquenta exemplares, quase todos para conhecidos.']],
+ f:['O lançamento','Tarde de autógrafos numa livraria.',['Autografar com o coração|h+12 f+2 >g@1-3|Uma leitora disse que meu livro salvou o ano dela.','Ficar nervos{o}|h+6 >g@1-3|Errei o nome de três pessoas na dedicatória.']],
+ g:['O segundo livro','Os leitores pedem uma continuação.',['Escrever|?tal.writing $+20000 f+5 h+10|O segundo vendeu mais que o primeiro!|h+4|Não fez tanto sucesso, mas eu fiz o que amo.','Encerrar a história|h+5|Um livro é suficiente.']],
+});
+chain('exame_alerta',{k:'Saúde',min:30,max:80,gap:[1,1]},{
+ a:['O exame alterado','Um exame de rotina mostrou pressão e colesterol altos.',['Mudar a alimentação|hl+3 >b|Menos sal, mais verdura.','Ignorar|hl-3 >c@1|Vida que segue.']],
+ b:['A dieta','Mudei os hábitos. Sinto falta do torresmo.',['Manter firme|hl+5 lk+2 >d|Perdi peso e ganhei disposição.','Escorregar no fim de semana|hl+1 >d|Ninguém é de ferro.']],
+ c:['O susto','Senti uma pressão no peito subindo uma escada.',['Correr para o hospital|$-2000 hl+4 >b|Foi um aviso. Hora de mudar.','Achar que é cansaço|?40 hl-5 >b@1|Passou. Por enquanto.|dis:cardiaca hl-15|Era o coração.']],
+ d:['Os novos exames','Seis meses depois, novos exames.',['Abrir os resultados|?hl hl+6 h+10|Tudo normal! O médico me deu parabéns.|hl+2 h+3|Melhorou, mas ainda tem trabalho.']],
+});
+chain('associacao',{k:'Bairro',min:22,max:80,gap:[1,1]},{
+ a:['A associação de moradores','A associação de moradores do bairro está abandonada. Ninguém quer ser presidente.',['Me candidatar|f+1 >b|Ganhei por falta de concorrente.','Ajudar sem cargo|k+3|Faço o que dá.']],
+ b:['A primeira reunião','Na primeira reunião, todo mundo reclamou de tudo ao mesmo tempo.',['Fazer uma lista de prioridades|sm+3 k+3 >c|Iluminação, buracos e a praça.','Prometer resolver tudo|>c|Promessa é dívida.']],
+ c:['A prefeitura','Levei as reivindicações à prefeitura.',['Insistir até ser ouvid{o}|?k f+3 k+5 >d|Trocaram as lâmpadas da rua inteira!|h-6 >d|Me fizeram esperar quatro horas para nada.','Fazer barulho na imprensa|?40 f+5 >d|Uma reportagem pressionou e funcionou.|h-4 >d|A reportagem nunca saiu.']],
+ d:['Liderança','O bairro começou a me reconhecer como liderança.',['Candidatar-me a vereador{a}|?f f+6 h+10|Fui eleit{o} vereador{a}!|h-6|Não fui eleit{o}, mas tive muitos votos no bairro.','Continuar no bairro|k+5 h+6|Meu lugar é aqui.']],
+});
+chain('incendio',{k:'Bairro',min:16,max:75,npc:1,gap:[1,2]},{
+ a:['Fumaça','Vi fumaça saindo da casa de {p}, vizinh{o2} de duas casas para lá.',['Correr para ajudar|?hl k+10 f+4 >b|Tirei {p} de lá antes do fogo se espalhar.|hl-12 k+8 >b|Tirei {p} de lá, mas me queimei.','Chamar os bombeiros|k+5 >c|Os bombeiros chegaram em dez minutos.']],
+ b:['Herói do bairro','O jornal local fez uma matéria sobre mim.',['Dar entrevista|f+3 h+6 vira:amigo >d|{p} chorou ao vivo me agradecendo.','Recusar a fama|k+3 vira:amigo >d|Fiz o que qualquer um faria.']],
+ c:['A casa perdida','A casa de {p} ficou destruída.',['Organizar uma vaquinha|k+8 >d|O bairro inteiro ajudou.','Oferecer um quarto por um tempo|k+10 vira:amigo >d|{p} ficou dois meses lá em casa.']],
+ d:['Reconstrução','A casa de {p} foi reconstruída com ajuda de todo mundo.',['Ir à festa de reinauguração|h+10 bond+10|{p} fez um discurso agradecendo a rua inteira.','Ajudar a pintar a última parede|k+4 h+6|Deixei minha mão marcada no muro.']],
+});
+chain('coral_adulto',{k:'Sonhos',min:25,max:85,gap:[1,1]},{
+ a:['Aulas de canto','Sempre quis cantar. Me matriculei num coral para adultos.',['Ir sem vergonha|tal.musical+4 h+6 >b|Desafinei e ninguém morreu.','Ficar no fundo, cantando baixinho|tal.musical+2 >b|Um passo de cada vez.']],
+ b:['A apresentação','O coral vai se apresentar no teatro da cidade.',['Cantar com tudo|?tal.musical h+12 f+2 >c|O teatro aplaudiu de pé.|h-3 >c|Esqueci uma parte da letra.','Desistir na véspera|h-6|O nervosismo venceu.']],
+ c:['O convite','O maestro me convidou para um pequeno solo no concerto de Natal.',['Aceitar|?tal.musical h+15 f+3|Minha voz encheu o teatro.|h-2|Falhei na nota alta. Rimos depois.','Recusar|h+2|O coro já me basta.']],
+});
+chain('voluntario_hospital',{k:'Bondade',min:16,max:85,npc:1,age:[-10,10],gap:[1,1]},{
+ a:['Contador de histórias','Um hospital infantil procura voluntários para ler histórias para as crianças internadas.',['Ir|k+6 h+6 >b|Uma menina riu tanto que a enfermeira veio ver o que era.','Doar livros|$-200 k+3|Mandei uma caixa cheia.']],
+ b:['O menino da sala 4','Um menino de oito anos espera minha visita toda semana.',['Levar um livro novo toda semana|k+5 h+6 >c|Ele lê mais rápido que eu.','Ensinar truques de mágica|k+4 h+8 >c|Agora ele faz mágica para as enfermeiras.']],
+ c:['A notícia','O menino da sala 4 vai receber alta. Está curado.',['Ir à despedida|h+15 k+5 >d@3-6|Ele me deu um desenho de nós dois.','Mandar um presente|h+10 k+3 >d@3-6|Um livro com dedicatória.']],
+ d:['A carta','Anos depois, recebi uma carta: o menino da sala 4 vai fazer faculdade de medicina.',['Responder|h+15 k+4|"Você me mostrou que hospital também tem riso."','Guardar a carta|h+12|Na gaveta das coisas mais importantes.']],
+});
+chain('mudar_cidade',{k:'Vida',min:22,max:65,gap:[1,1]},{
+ a:['Vontade de mudar','Ando cansad{o} da cidade. Trânsito, barulho, pressa.',['Pesquisar cidades menores|>b|Montei uma lista com prós e contras.','Fazer uma viagem para pensar|$-2000 h+6 >b|Voltei com mais dúvidas.','Deixar a ideia de lado|h-2|Talvez um dia.']],
+ b:['A decisão','Achei uma cidade pequena perto do mar.',['Mudar|$-8000 h+12 >c|Caminhão de mudança e coração acelerado.','Desistir de última hora|h-4|Medo do desconhecido.']],
+ c:['Vida nova','Na cidade nova, todo mundo sabe o nome de todo mundo.',['Me enturmar|h+8 >d|Já sou "a pessoa da casa amarela".','Sentir falta da cidade grande|h-6 >d|Saudade do caos.']],
+ d:['Um ano depois','Faz um ano que me mudei.',['Ficar para sempre|h+10 hl+4|Encontrei meu lugar.','Voltar para a cidade grande|$-5000 h+2|Descobri que eu gosto do caos.']],
+});
+
+// ===== Histórias em cadeia: maturidade e velhice =====
+chain('meia_idade',{k:'Vida',min:40,max:55,gap:[1,1]},{
+ a:['O espelho','Acordei, olhei no espelho e não reconheci a pessoa de cabelo grisalho que me olhava de volta.',['Comprar um conversível|$-60000 h+12 >b|Vermelho. Claro.','Começar a fazer algo novo|>c|Chega de esperar o momento certo.','Aceitar o tempo|k+3 h+3 >d|As rugas contam a minha história.']],
+ b:['O conversível','O carro novo chama atenção. Meus filhos morrem de vergonha.',['Fazer uma viagem de estrada|h+10 >d|Cabelo ao vento. O que sobrou dele.','Vender depois de seis meses|$+40000 h-2 >d|A crise passou mais rápido que a garantia.']],
+ c:['Algo novo','Decidi aprender algo que sempre quis.',['Aprender a tocar bateria|tal.musical+6 h+8 >d|Os vizinhos me odeiam.','Fazer aulas de dança|tal.dance+6 h+8 >d|Duas aulas por semana. Me sinto com vinte anos.','Voltar a estudar|sm+5 >d|Sala de aula cheia de gente da idade dos meus filhos.']],
+ d:['A conclusão','A crise dos quarenta passou. Ficou uma vontade de viver melhor.',['Diminuir o ritmo do trabalho|h+10 perf-5|Mais tempo para o que importa.','Fazer uma lista de sonhos para os próximos anos|h+6 sm+2|Primeiro item: ver a aurora boreal.']],
+});
+chain('neto',{k:'Família',min:45,max:90,who:'grandkid',gap:[1,2]},{
+ a:['Uma geração nova','Segurar {p} pela primeira vez me fez entender tudo de novo.',['Prometer ser a melhor companhia do mundo|h+15 bond+10 >b|Já comprei brinquedo demais.','Chorar escondid{o}|h+12 >b|Lágrimas boas.']],
+ b:['Os fins de semana','{p} passa os fins de semana comigo.',['Ensinar o que eu sei|bond+10 h+8 >c|Ensinei a pescar, a fazer bolo e a perder no dominó.','Mimar sem limites|bond+12 h+10 >c|Em casa de avó não tem regra.']],
+ c:['A pergunta','{p} me perguntou como era o mundo quando eu era criança.',['Contar histórias da minha vida|bond+10 h+8 >d|{p} ficou de boca aberta com cada aventura.','Mostrar fotos antigas|bond+8 h+6 >d|"Você tinha cabelo?"']],
+ d:['Crescendo','{p} cresceu e agora me visita menos.',['Ligar e chamar para um almoço|bond+8 h+6|{p} veio, e trouxe a namorada para me conhecer.','Entender que é assim mesmo|h+2|Também fui assim com meus avós.']],
+});
+chain('aposentadoria',{k:'Vida',min:58,max:72,when:m=>!!m.job&&!m.job.hero,gap:[1,1]},{
+ a:['A conta da aposentadoria','Fiz as contas: posso me aposentar daqui a pouco.',['Planejar a aposentadoria|sm+3 >b|Planilha de despesas e de sonhos.','Não pensar nisso ainda|>b@2|Trabalhar me faz bem.']],
+ b:['O último dia','Hoje é meu último dia de trabalho. A equipe preparou uma festa.',['Fazer um discurso|h+12 f+1 fire >c|Agradeci a cada um pelo nome.','Sair sem alarde|h+8 fire >c|Peguei minha caneca e fui embora sorrindo.']],
+ c:['As primeiras semanas','Os primeiros dias de aposentadoria são estranhos. Acordo cedo sem motivo.',['Criar uma rotina nova|h+6 hl+3 >d|Caminhada, jornal e café na padaria.','Ficar em casa vendo TV|h-6 >e|Os dias ficaram longos demais.']],
+ d:['Um novo propósito','Descobri que a aposentadoria pode ser o começo de algo.',['Fazer trabalho voluntário|k+8 h+8|Ensino jovens a fazer o que eu fazia.','Viajar|$-15000 h+15|Conheci lugares que sempre quis.','Cuidar de um jardim|h+8 hl+3|Plantas não têm pressa. Nem eu.']],
+ e:['O vazio','Me sinto inútil sem o trabalho.',['Procurar ajuda|$-1000 h+6 >d|A terapia me ajudou a achar outro sentido.','Arrumar um bico|$+2000 h+4 >d|Voltei a trabalhar meio período. Me sinto útil de novo.']],
+});
+chain('reencontro_turma',{k:'Amizade',min:40,max:80,npc:1,gap:[1,1]},{
+ a:['Trinta anos de formatura','O grupo da turma da escola está organizando um reencontro de trinta anos de formatura.',['Confirmar presença|>b|Fiquei uma semana pensando no que vestir.','Não ir|h-2|Não tenho coragem de ver todo mundo.']],
+ b:['O reencontro','Ninguém está igual. Todo mundo está igual.',['Procurar {p}, que era {o2} mais quiet{o2} da turma|>c|{p} virou uma pessoa fascinante.','Contar as minhas conquistas|?50 h+6 >d|Impressionei.|h-3 >d|Ninguém se importou muito.']],
+ c:['Conversa longa','Eu e {p} conversamos a noite inteira sobre a vida.',['Manter contato|vira:amigo h+8 >e@1|Amizade nova com cara de antiga.','Deixar a noite ser só uma noite|h+6|Uma noite perfeita.']],
+ d:['A falta','Na mesa de homenagens, fotos de colegas que já se foram.',['Fazer um brinde a eles|h+3 k+3 >e@1|Silêncio e taças levantadas.','Sair um pouco para respirar|h-4 >e@1|A vida passa rápido demais.']],
+ e:['O grupo de mensagens','Depois do reencontro, o grupo da turma não para de mandar mensagens.',['Participar|h+6|Bom dia com figurinha todo santo dia.','Silenciar o grupo|h+2|Amo todos, mas não às seis da manhã.']],
+});
+chain('viuvez',{k:'Família',min:45,max:95,when:m=>S.people.some(p=>!p.alive&&p.rel==='conjuge'),gap:[1,1]},{
+ a:['A casa vazia','A casa ficou grande demais desde que meu amor se foi.',['Deixar tudo como estava|h-8 >b|O casaco ainda no cabide.','Doar as roupas|h-6 k+3 >c|Cada peça com uma lembrança.']],
+ b:['O luto','Os dias são longos. Os amigos ligam cada vez menos.',['Entrar num grupo de apoio|h+6 >c|Gente que entende sem precisar explicar.','Me isolar|h-10 >d|Fechei as cortinas.']],
+ c:['Pequenas alegrias','Descobri que é possível rir de novo sem culpa.',['Voltar a sair com amigos|h+8 >e@1|Primeiro jantar fora em um ano.','Começar um hobby|h+6 >e@1|Comecei a pintar.']],
+ d:['A visita','Meus filhos apareceram sem avisar, preocupados.',['Deixar eles ajudarem|h+8 >c|Às vezes a gente precisa ser cuidad{o}.','Dizer que estou bem|h-4 >c|Não estava.']],
+ e:['Seguir em frente','Seguir em frente não é esquecer. É levar junto.',['Abrir o coração para alguém novo um dia|h+6|Quem sabe.','Viver de boas lembranças|h+5|Foram muitos anos bons.']],
+});
+chain('golpe_idoso',{k:'Golpe',min:60,max:95,v:[2000,15000],gap:[1,1]},{
+ a:['A ligação do banco','Uma voz simpática disse que é do banco e que minha conta foi invadida. Pede os dados para "proteger o dinheiro".',['Passar os dados|$-v >b|Parecia tão real.','Desligar e ligar para o banco|sm+2 k+2 >c|O banco disse que era golpe.','Pedir para um neto verificar|>c|Meu neto riu e bloqueou o número.']],
+ b:['O prejuízo','O dinheiro sumiu da conta.',['Ir à delegacia e ao banco|?30 $+v >d|O banco devolveu uma parte.|h-6 >d|Não recuperei nada.','Esconder da família por vergonha|h-10 >d|Fiquei calad{o} por semanas.']],
+ c:['Escapei','Por pouco não caí no golpe.',['Avisar os amigos|k+5 >d|Montei um grupo para alertar a vizinhança.','Ficar mais esperto|sm+3|Agora desconfio até do padeiro.']],
+ d:['Aprendizado','Hoje ensino outros idosos a reconhecer golpes.',['Dar palestras no centro comunitário|k+8 f+2|Ninguém cai no conto do falso banco perto de mim.','Contar para os netos|k+4|Eles também aprenderam.']],
+});
+chain('faculdade_tardia',{k:'Estudos',min:45,max:80,gap:[1,1]},{
+ a:['Nunca é tarde','Sempre quis fazer faculdade. Agora, com mais de quarenta e cinco, decidi tentar.',['Prestar vestibular|?sm >b|Passei! Vou ser {o} mais velh{o} da turma.|>c|Não passei desta vez.','Desistir da ideia|h-3|Fica para outra vida.']],
+ b:['A turma','A turma tem a idade dos meus filhos. No começo me olhavam de um jeito curioso.',['Me enturmar|h+8 sm+3 >d|Virei a pessoa que todo mundo procura para conselhos.','Ficar na minha|sm+4 >d|Sentei na primeira fila e anotei tudo.']],
+ c:['Tentar de novo','Faltou pouco no vestibular.',['Fazer cursinho|$-3000 sm+3 >b@1|Desta vez vai.','Fazer um curso livre|sm+3 h+4|Aprender não precisa de diploma.']],
+ d:['A formatura','Chegou o dia da minha formatura.',['Subir no palco|sm+5 h+20 f+1|Meus netos gritaram meu nome na plateia.','Fazer o discurso da turma|?sm h+20 f+3|Falei sobre começar de novo. Ninguém segurou o choro.|h+15|Gaguejei, mas me aplaudiram de pé.']],
+});
+chain('casa_praia',{k:'Sonhos',min:40,max:80,v:[80000,250000],gap:[1,2]},{
+ a:['A casa na praia','Sempre sonhei com uma casa na praia. Vi uma à venda.',['Comprar|$-v h+15 >b|Cheiro de maresia todos os dias.','Alugar por temporada|$-3000 h+8|Só um gostinho.']],
+ b:['Os fins de semana','A casa virou ponto de encontro da família.',['Receber todo mundo|h+10 k+3 >c|Casa cheia, rede na varanda e peixe frito.','Usar só para descansar|h+8 hl+3 >c|Silêncio e mar.']],
+ c:['A manutenção','A maresia está destruindo a casa.',['Reformar|$-15000 >d|Telhado novo, pintura nova.','Vender|$+v h-4|Sonho caro demais.']],
+ d:['Para sempre','Decidi passar a velhice ali.',['Mudar de vez|h+15 hl+5|Acordo com o barulho das ondas.','Deixar para os filhos|k+4|Um lugar para a família se reunir quando eu não estiver.']],
+});
+chain('amigo_doente',{k:'Amizade',min:50,max:90,who:'friend',gap:[1,1]},{
+ a:['A notícia','{p}, meu amigo de tantos anos, me contou que está muito doente.',['Ficar ao lado d{ele}|bond+12 h-6 >b|Prometi não deixar {ele} sozinh{o2}.','Ter dificuldade de lidar|h-8 >c|Não sei o que dizer.']],
+ b:['Últimos desejos','{p} tem uma lista de coisas que quer fazer.',['Realizar a lista junto|$-5000 h+8 bond+15 >d|Fomos ao estádio, à praia e a um show de rock.','Fazer uma festa surpresa|$-2000 h+10 bond+10 >d|Todos os amigos de uma vida inteira.']],
+ c:['O afastamento','Fiquei semanas sem visitar {p}.',['Criar coragem e ir|bond+10 >b|{p} só disse: "Que bom que você veio."','Mandar mensagens|bond+3 >d|Não é o mesmo.']],
+ d:['A despedida','{p} se foi.',['Fazer a homenagem no velório|h-12 k+4|Contei como nos conhecemos. Riram e choraram.','Guardar o luto em silêncio|h-15|A saudade é do tamanho da amizade.']],
+});
+chain('hobby_velhice',{k:'Vida',min:55,max:95,gap:[1,1]},{
+ a:['Tempo livre','Com mais tempo livre, quero aprender algo que nunca tive tempo.',['Xadrez na praça|sm+4 >b|Os velhinhos da praça me receberam com desconfiança.','Marcenaria|sm+3 >c|Primeiro projeto: um banquinho torto.','Dança de salão|tal.dance+6 h+8 >d|Dois pra lá, dois pra cá.']],
+ b:['O campeonato da praça','Ganhei confiança e me inscrevi no campeonato de xadrez da praça.',['Jogar com estratégia|?sm h+12 f+1|Venci o campeonato da praça! Ganhei um troféu de plástico lindo.','Jogar por diversão|h+8|Perdi todas, ri muito.']],
+ c:['Peças de madeira','Os banquinhos agora saem retos. Os vizinhos encomendam.',['Vender as peças|$+3000 h+8|Virei marceneir{o} de bairro.','Dar de presente|k+5 h+8|Toda a família tem um banquinho meu.']],
+ d:['O baile','No baile da terceira idade, alguém me tirou para dançar.',['Dançar a noite toda|h+15 hl+3|Esqueci da idade.','Sentar e assistir|h+5|Mas sorri o baile inteiro.']],
+});
+
+// ===== Histórias em cadeia: justiça, acidentes e escolhas difíceis =====
+chain('acidente_carro',{k:'Trânsito',min:18,max:80,when:m=>!!m.lic,npc:1,gap:[1,1]},{
+ a:['A batida','Bati o carro num cruzamento. O outro motorista, {p}, saiu furios{o2}.',['Assumir a culpa|k+5 $-3000 >b|Paguei o conserto d{ele}.','Dizer que a culpa foi d{ele}|>c|Começou a discussão no meio da rua.','Chamar a polícia para registrar|>d|Melhor fazer tudo certo.']],
+ b:['Gentileza','{p} ficou surpres{o2} com a minha honestidade e me convidou para um café.',['Aceitar|vira:amigo h+6 >g@1|Viramos amigos por causa de uma batida.','Recusar com educação|k+2|Cada um seguiu seu caminho.']],
+ c:['A discussão','A briga esquentou. Juntou gente em volta.',['Me acalmar e propor o seguro|k+3 >d|Respiramos e trocamos telefones.','Partir para cima|?fight hl-3 >e|Ganhei a briga e um processo.|hl-10 >e|Perdi a briga e ganhei um processo.']],
+ d:['O laudo','A perícia analisou o acidente.',['Esperar o resultado|?50 $+2000 h+6 >f|A culpa foi d{ele}. O seguro d{ele} pagou tudo.|$-4000 >f|A culpa foi minha. Seguro, franquia e dor de cabeça.']],
+ e:['O processo','{p} entrou com um processo por agressão.',['Fazer acordo|$-5000 >f|Paguei para encerrar.','Ir até o fim|?40 >f|O juiz arquivou.|$-8000 k-4 >f|Fui condenad{o} a pagar indenização.']],
+ f:['Lição de trânsito','Depois daquilo, dirijo com o dobro de atenção.',['Fazer um curso de direção defensiva|$-500 sm+2|Aprendi a prever as besteiras dos outros.','Vender o carro e andar de ônibus|$+15000 h+2|Menos estresse, mais podcast.']],
+ g:['Amizade improvável','{p} virou um dos meus melhores amigos. Sempre contamos a história da batida.',['Fazer uma festa de aniversário da batida|h+8 bond+10|Bolo com um carrinho amassado em cima.','Ajudar {p} numa mudança|k+4 bond+8|Amigo de verdade carrega geladeira.']],
+});
+chain('jurado',{k:'Justiça',min:21,max:70,gap:[1,1]},{
+ a:['Convocação','Fui convocad{o} para ser jurad{o} num julgamento de homicídio.',['Ir|>b|Não dá para recusar. E eu nem queria.','Tentar ser dispensad{o}|?40 h+2|Me dispensaram.|>b|Não me dispensaram.']],
+ b:['O julgamento','O réu é um jovem acusado de matar um comerciante durante um assalto. As provas são confusas.',['Prestar atenção em cada detalhe|sm+3 >c|Anotei tudo no caderninho.','Formar opinião logo|>c|Ele tem cara de culpado.']],
+ c:['A sala secreta','Os jurados estão divididos: seis querem condenar, seis querem absolver.',['Defender que há dúvida|?sm k+5 >d|Convenci os outros a rever as provas.|>e|Fui voto vencido.','Votar com a maioria|>e|Melhor não discutir.']],
+ d:['A dúvida','Revendo as provas, encontramos uma contradição no depoimento da principal testemunha.',['Votar pela absolvição|k+8 >f|O júri absolveu o rapaz.','Votar pela condenação mesmo assim|k-3 >e|Fiquei com a consciência pesada.']],
+ e:['O veredito','O réu foi condenado.',['Aceitar|h-3|A justiça foi feita. Eu acho.','Ficar com a dúvida para sempre|h-6 >g@3-6|Ainda penso nele.']],
+ f:['Inocente','Meses depois, a polícia prendeu o verdadeiro culpado. O rapaz era mesmo inocente.',['Sentir alívio|h+12 k+5|Salvamos uma vida.','Contar para todo mundo|f+2 h+8|Virei defensor{a} do júri popular.']],
+ g:['A verdade','Anos depois, li no jornal: o homem que ajudei a condenar foi inocentado por um exame de DNA.',['Procurar a família dele|k+8 h-6|Pedi desculpas pessoalmente.','Carregar o peso|h-12|Nunca mais vou julgar ninguém tão rápido.']],
+});
+chain('amigo_trafico',{k:'Crime',min:16,max:45,who:'friend',gap:[1,1]},{
+ a:['Dinheiro fácil','Meu amigo {p} anda de carro novo e tênis caro. Disse que tem um "trabalho" fácil para mim.',['Perguntar que trabalho é|>b|{p} riu e disse: "Entrega. Não pergunta o que é."','Recusar sem perguntar|bond-5 k+3|Já imagino.']],
+ b:['A proposta','É só levar uma mochila de um ponto a outro da cidade.',['Aceitar uma vez|k-10 $+3000 >c|Foi a mochila mais pesada da minha vida.','Recusar e tentar tirar {p} dessa|k+6 >d|{p} disse que eu não entendo.']],
+ c:['De novo','{p} quer que eu faça mais entregas.',['Continuar|k-10 $+8000 >e|Dinheiro fácil vicia.','Parar|bond-8 >d|{p} não gostou.']],
+ d:['A operação','A polícia fez uma operação grande no bairro.',['Ligar para avisar {p}|k-3 bond+5 >f|{p} conseguiu fugir.','Não me meter|>f|{p} foi pres{o2}.']],
+ e:['A batida','A polícia parou o carro durante uma entrega.',['Tentar fugir|?30 h+4 >c|Escapei. Por pouco.|arrest:tráfico_de_drogas:2:6|Me pegaram.','Me entregar|arrest:tráfico_de_drogas:1:4 k+2|Contei tudo. Pena menor.']],
+ f:['Visita na prisão','Fui visitar {p} na prisão.',['Prometer ajudar quando {ele} sair|k+6 bond+10 >g@2-4|{Ele} chorou pela primeira vez na minha frente.','Dizer que eu avisei|bond-10|{p} virou o rosto.']],
+ g:['A saída','{p} saiu da prisão e não tem para onde ir.',['Ajudar a arrumar um emprego|k+10 bond+15|Hoje {p} trabalha numa marcenaria e manda áudio todo domingo.','Emprestar dinheiro|$-2000 bond+6|Foi o que eu pude.']],
+});
+chain('policial_corrupto',{k:'Justiça',min:18,max:75,v:[500,3000],gap:[1,1]},{
+ a:['A blitz','Fui parad{o} numa blitz. O policial disse que tem um "probleminha" no documento e sugeriu resolver ali mesmo.',['Pagar a propina|$-v k-6 >b|Ele sorriu e me liberou.','Recusar e pedir a multa por escrito|k+5 >c|Ele ficou irritado.','Gravar escondido|sm+2 >d|Celular no bolso, gravando tudo.']],
+ b:['De novo','O mesmo policial me parou de novo na semana seguinte.',['Pagar de novo|$-v k-5|Virou pedágio.','Denunciar à corregedoria|>e|Desta vez, não.']],
+ c:['A multa','Ele aplicou uma multa por algo que eu nem fiz.',['Recorrer|?55 k+3|O recurso foi aceito!|$-800|Recurso negado. Paguei.','Denunciar|>e|Chega.']],
+ d:['A gravação','Tenho a gravação do pedido de propina.',['Levar à corregedoria|>e|Entreguei o pen drive com a mão tremendo.','Postar nas redes|f+6 >e|O vídeo viralizou em uma hora.']],
+ e:['A investigação','A corregedoria abriu uma investigação.',['Depor|?50 k+8 f+2 >f|O policial foi afastado.|h-6 >g|O caso foi arquivado.']],
+ f:['Mudança','Soube que a blitz daquela avenida mudou de equipe.',['Sentir que fiz a diferença|k+5 h+8|Uma andorinha não faz verão, mas ajuda.','Ficar com medo de represália|h-4|Às vezes ainda olho pelo retrovisor.']],
+ g:['Arquivado','O caso foi arquivado. O policial continua na rua.',['Seguir em frente|h-4|Fiz minha parte.','Procurar a imprensa|?40 f+4 >f|Uma reportagem reabriu o caso.|h-3|Ninguém se interessou.']],
+});
+chain('briga_bar',{k:'Encrenca',min:18,max:60,npc:1,gn:'M',gap:[1,1]},{
+ a:['A provocação','Num bar, um sujeito chamado {p} começou a me provocar.',['Ignorar e ir embora|k+3|Não vale a pena.','Responder à altura|>b|O bar inteiro parou para olhar.','Pagar uma bebida para acalmar|$-50 ?50 vira:amigo >e|{p} riu e virou meu parceiro de bar.|>b|Ele jogou a bebida em mim.']],
+ b:['A briga','Os dois foram para a rua.',['Brigar|?fight hl-4 >c|Ganhei. Mas ele chamou a polícia.|hl-15 >c|Perdi feio.','Correr|h-3|Fui embora correndo e sem dignidade.']],
+ c:['A delegacia','Fomos os dois parar na delegacia.',['Fazer as pazes ali mesmo|k+4 >d|O delegado nos fez apertar as mãos.','Registrar queixa|>d|Agora é processo.']],
+ d:['O dia seguinte','Acordei com dor no corpo e na consciência.',['Prometer nunca mais|k+3 add.alcool-5|Bar só com amigos.','Rir da história|h+3|Virou anedota de churrasco.']],
+ e:['O parceiro de bar','{p} acabou virando companhia de toda sexta.',['Manter a tradição|h+6 add.alcool+3|Toda sexta, mesma mesa.','Diminuir|hl+2|Só de vez em quando.']],
+});
+chain('denuncia_vizinho',{k:'Dilema',min:18,max:80,npc:1,age:[-15,25],gap:[1,1]},{
+ a:['Barulhos estranhos','Escuto gritos e choro de criança vindos da casa de {p}, aqui do lado.',['Ligar para o Conselho Tutelar|k+6 >b|Fiz a denúncia anônima.','Bater na porta|>c|{p} abriu com cara de poucos amigos.','Não me meter|k-6 >d|Aumentei o volume da TV.']],
+ b:['A visita','O Conselho Tutelar visitou a casa.',['Acompanhar o caso|k+5 >e|As crianças foram para a casa da avó.','Ficar de longe|>e|Não sei o que aconteceu depois.']],
+ c:['A conversa','{p} disse que está passando por um momento difícil e pediu desculpas pelo barulho.',['Oferecer ajuda|k+6 vira:amigo >e|Indiquei um lugar que ajuda famílias.','Desconfiar e denunciar mesmo assim|k+3 >b|Melhor prevenir.']],
+ d:['O silêncio','Os gritos pararam. Nunca soube se isso era bom ou ruim.',['Procurar saber|>c|Toquei a campainha.','Esquecer|h-4|Às vezes ainda penso nisso.']],
+ e:['Anos depois','Uma das crianças daquela casa, já crescida, me reconheceu na rua e me agradeceu.',['Abraçar|h+12 k+5|Ela disse que aquele dia mudou tudo.','Ficar sem palavras|h+10|Só sorri.']],
+});
+chain('processo_trabalhista',{k:'Justiça',min:20,max:70,gap:[1,1],when:m=>m.hist.length>0},{
+ a:['Os direitos','Um advogado disse que a empresa onde eu trabalhava me deve horas extras.',['Entrar com a ação|>b|Junte os comprovantes.','Deixar para lá|h+0|Página virada.']],
+ b:['A audiência','Na audiência, a empresa trouxe três advogados.',['Contar tudo com calma|?sm >c|O juiz pareceu do meu lado.|>d|A empresa apresentou documentos que eu nem lembrava.','Ficar nervos{o}|?35 >c|Mesmo nervos{o}, fui convincente.|>d|Me enrolei nas datas.']],
+ c:['A vitória','Ganhei a causa.',['Receber o dinheiro|$+18000 h+12|Justiça. Tarde, mas justiça.','Doar parte para colegas que também foram prejudicados|$+9000 k+8|Ajudei quem não podia pagar advogado.']],
+ d:['O acordo','A empresa ofereceu um acordo.',['Aceitar|$+7000 h+4|Melhor um acordo do que nada.','Recorrer|?40 $+15000 h+8|Ganhei no recurso.|$-2000 h-6|Perdi e ainda paguei custas.']],
+});
+chain('heroi_acidental',{k:'Coragem',min:16,max:75,npc:1,age:[-30,20],gap:[1,1]},{
+ a:['O rio','Uma criança caiu no rio perto de onde eu estava.',['Pular|?hl k+12 f+5 >b|Tirei a criança da água.|hl-12 k+10 >b|Tirei a criança, mas quase me afoguei.','Gritar por ajuda|k+4 >c|Um pescador pulou e salvou a criança.']],
+ b:['Herói','Os pais da criança, a família {pl}, vieram me agradecer em casa.',['Aceitar o agradecimento|h+12 >d|A mãe me deu um bolo que fez com as próprias mãos.','Dizer que qualquer um faria o mesmo|k+3 h+10 >d|Mas nem todo mundo fez.']],
+ c:['O que eu não fiz','Fiquei pensando se deveria ter pulado.',['Fazer um curso de primeiros socorros|sm+3 k+4 >e@2|Da próxima vez, vou saber o que fazer.','Tentar esquecer|h-4|Fiz o que consegui.']],
+ d:['A homenagem','A prefeitura me deu uma medalha de honra ao mérito.',['Ir à cerimônia|f+3 h+10 >e@3-8|Minha mãe guardou o recorte do jornal.','Pedir para não ter cerimônia|k+4 >e@3-8|A medalha chegou pelo correio.']],
+ e:['O reencontro','Anos depois, alguém bateu na minha porta: "Lembra da criança do rio? Sou eu."',['Convidar para entrar|h+15 k+5|Conversamos a tarde inteira. Vai estudar para ser bombeiro.','Abraçar ali mesmo|h+15|Não precisei dizer nada.']],
+});
+
+// ===== Histórias em cadeia: escola, vestibular e faculdade =====
+const NA_FACUL=m=>!!m.edu.cur&&m.edu.cur.type==='uni';
+chain('gremio',{k:'Escola',min:13,max:17,gap:[1,1],when:m=>!!m.edu.cur},{
+ a:['Eleição do grêmio','Vai ter eleição para o grêmio estudantil. Ninguém da minha turma quer se candidatar.',['Me candidatar|>b|Montei uma chapa com três amigos.','Ajudar a campanha de outra chapa|k+2 >e|Fiz os cartazes.','Ignorar a política escolar|h+0|Não é comigo.']],
+ b:['A campanha','A chapa rival promete festa toda sexta-feira. A minha promete consertar o bebedouro.',['Prometer festa também|?lk+10 >c|Ganhamos com promessas que talvez não dê para cumprir.|>d|Perdemos.','Manter as propostas sérias|?sm >c|A escola surpreendeu e votou na gente!|>d|Perdemos por cinco votos.']],
+ c:['Presidente do grêmio','Ganhei! Agora tenho que cumprir as promessas.',['Consertar o bebedouro e organizar uma festa|k+6 f+2 h+8 >e|Os dois! Fiquei popular.','Brigar com a diretoria por mais liberdade|?k f+3 >e|Conquistamos o direito de usar o pátio no intervalo da tarde.|h-4 >e|A diretora quase me suspendeu.']],
+ d:['A derrota','Perdi a eleição, mas aprendi a falar em público.',['Fiscalizar a chapa eleita|k+3 sm+2|Virei a oposição mais chata da escola.','Seguir a vida|h+2|Ano que vem tem mais.']],
+ e:['Experiência','A experiência do grêmio me fez gostar de liderar.',['Pensar em política no futuro|f+1 sm+2|Quem sabe um dia.','Guardar como uma boa lembrança|h+4|Foi divertido.']],
+});
+chain('vestibular',{k:'Estudos',min:16,max:19,gap:[1,1],when:m=>!!m.edu.cur&&m.edu.cur.type==='medio'},{
+ a:['O ano do vestibular','Último ano da escola. Todo mundo só fala de vestibular.',['Fazer cursinho|$-3000 sm+4 >b|Aula de manhã, de tarde e simulado no sábado.','Estudar sozinh{o} pela internet|sm+3 >b|Disciplina é tudo.','Não estudar|h+4 >c|Vou ver como é.']],
+ b:['A pressão','A pressão está me deixando sem dormir.',['Manter o ritmo|sm+3 hl-3 >d|Café e flashcards.','Diminuir um pouco|h+4 sm+1 >d|Saúde mental também conta ponto.','Ter uma crise de choro|h-6 >d|Minha mãe me abraçou e disse que eu ia conseguir.']],
+ c:['A realidade','Um simulado mostrou que eu estou muito atrás.',['Correr atrás|sm+4 >d|Três meses de foco total.','Pensar em outro caminho|>e|Talvez um curso técnico.']],
+ d:['A prova','O dia da prova chegou.',['Fazer com calma|?sm grade+5 h+15 >f|Saí da prova com a sensação de que fui bem!|h-8 >e|Travei na redação.','Chutar sem medo nas difíceis|?40 h+12 >f|Os chutes foram ótimos.|h-8 >e|Errei todos.']],
+ e:['Não foi desta vez','Não passei no vestibular.',['Tentar de novo ano que vem|sm+3 >d@1|Mais um ano.','Fazer um curso técnico|h+3|Outro caminho, também bom.']],
+ f:['A lista','A lista dos aprovados saiu.',['Procurar meu nome|h+20 f+1|PASSEI! Raspei a cabeça na frente de casa.','Pedir para alguém olhar por mim|h+18|Meu pai gritou da sala: "PASSOU!"']],
+});
+chain('republica_estudantil',{k:'Faculdade',min:17,max:30,npc:1,when:NA_FACUL,gap:[1,1]},{
+ a:['A república','Vou morar numa república com cinco estudantes que não conheço.',['Ir|h+6 >b|Quarto dividido com {p}, que estuda {materia}.','Morar sozinh{o}|$-4000 h+2|Paz e silêncio caros.']],
+ b:['O trote','Os veteranos da república prepararam um trote para os novatos.',['Participar com bom humor|h+6 vira:amigo >c|Fui pintad{o} de azul. Ganhei amigos para a vida.','Recusar|k+3 >c|Respeitaram, mas me olharam torto.']],
+ c:['A festa da república','A república vai dar a maior festa do ano.',['Ajudar a organizar|h+10 >d|Trezentas pessoas numa casa para vinte.','Estudar no quarto com fone|grade+5 >d|Prova na segunda.']],
+ d:['A conta de luz','A conta de luz veio absurda e ninguém quer pagar.',['Propor uma divisão justa|k+5 >e|Planilha na geladeira.','Pagar tudo para acabar a briga|$-800 >e|Agora sou quem paga as contas da casa.']],
+ e:['Família escolhida','No fim da faculdade, a república virou uma família.',['Prometer um reencontro anual|h+10 bond+10|Todo ano, mesma data, mesma bagunça.','Chorar na despedida|h+8|Cinco anos numa casa só.']],
+});
+chain('tcc',{k:'Faculdade',min:20,max:35,when:NA_FACUL,npc:1,age:[15,35],gap:[1,1]},{
+ a:['O orientador','Preciso escolher um orientador para o TCC. {O2} professor{a2} {p} é exigente, mas brilhante.',['Escolher {p}|sm+3 >b|{Ele} me deu uma lista de vinte livros.','Escolher alguém mais tranquilo|h+3 >c|TCC sem drama.']],
+ b:['As correções','{p} devolveu meu primeiro capítulo todo riscado de vermelho.',['Reescrever tudo|sm+4 grade+4 >d|Ficou dez vezes melhor.','Discutir as correções|?sm >d|{Ele} admitiu que eu tinha razão em uma.|>d|{Ele} não gostou.']],
+ c:['TCC tranquilo','O orientador mal lê o que eu mando.',['Fazer bem feito mesmo assim|sm+3 >d|Faço por mim.','Fazer o mínimo|h+3 >e|Nota sete e liberdade.']],
+ d:['A banca','Chegou o dia de apresentar o TCC para a banca.',['Apresentar com confiança|?sm grade+10 h+15 >f|Nota máxima! A banca sugeriu publicar.|h-4 >e|A banca fez perguntas que eu não soube responder.','Ficar nervos{o}|?40 grade+6 h+10 >e|Deu certo.|h-6 >e|Gaguejei. Passei raspando.']],
+ e:['Aprovad{o}','O TCC foi aprovado. Acabou a faculdade!',['Comemorar|h+12|Joguei o chapéu de formatura para o alto.','Dormir dois dias seguidos|hl+4 h+8|Merecido.']],
+ f:['Mestrado?','{O2} professor{a2} {p} me convidou para fazer mestrado com {ele}.',['Aceitar|sm+5 h+8|Vou seguir na pesquisa.','Recusar para trabalhar|$+2000 h+4|O mercado me chama.']],
+});
+chain('intercambio_escola',{k:'Estudos',min:15,max:24,npc:1,gap:[1,1],when:m=>!!m.edu.cur},{
+ a:['Bolsa de intercâmbio','A escola oferece uma bolsa de intercâmbio de seis meses em {lugar}.',['Me inscrever|?sm >b|Fui selecionad{o}!|h-3|Não passei na seleção.','Não ter coragem|h-2|Seis meses longe é muito.']],
+ b:['A família anfitriã','Vou morar com a família de {p}, da minha idade.',['Me esforçar no idioma|sm+5 >c|Os primeiros dias foram mímica pura.','Ficar com os brasileiros|h+5 >c|Saudade de feijão.']],
+ c:['Choque cultural','Tudo é diferente: a comida, os horários, o jeito de falar.',['Mergulhar na cultura|sm+4 vira:amigo >d|{p} me mostrou cada canto da cidade.','Sentir falta de casa|h-6 >d|Chorei ligando para minha mãe.']],
+ d:['A volta','O intercâmbio acabou. {p} me levou ao aeroporto.',['Prometer visitar|h+6 >e@3-6|Combinamos de nos ver de novo.','Despedida emocionada|h+4|Seis meses que pareceram uma vida.']],
+ e:['A visita','Anos depois, {p} veio me visitar.',['Mostrar minha cidade|h+10 bond+10|Agora é a minha vez de receber.','Fazer uma viagem juntos|$-3000 h+12 bond+10|Amizade que atravessa oceanos.']],
+});
+chain('bolsa_faculdade',{k:'Faculdade',min:17,max:30,when:NA_FACUL,gap:[1,1]},{
+ a:['A mensalidade','A mensalidade da faculdade subiu e minha família não consegue pagar.',['Procurar uma bolsa|>b|Preenchi doze formulários.','Trancar a matrícula|h-8 >e|Vou trabalhar e voltar depois.','Arrumar um emprego à noite|$+1500 hl-3 >c|Trabalho de dia, estudo de noite.']],
+ b:['A entrevista da bolsa','A entrevista para a bolsa é amanhã.',['Contar minha história com sinceridade|?k+10 $+5000 h+12 >d|Ganhei bolsa integral!|>c|Não consegui. Vou trabalhar à noite.','Exagerar um pouco a situação|?40 $+5000 k-4 >d|Funcionou.|k-4 >c|Perceberam.']],
+ c:['Jornada dupla','Trabalhar e estudar está me esgotando.',['Aguentar até o fim|hl-4 grade-3 >d|Durmo no ônibus.','Diminuir as matérias|grade+3 >d|Vou demorar mais para formar, mas com saúde.']],
+ d:['Formad{o}','Consegui me formar, com muito esforço.',['Agradecer a quem ajudou|k+5 h+15|Liguei para cada pessoa que me apoiou.','Comemorar sem parar|h+15|Ninguém sabe o que custou.']],
+ e:['A volta','Depois de um ano trabalhando, posso voltar à faculdade.',['Voltar|grade+3 h+8 >d|Voltei mais madur{o}.','Não voltar|h-3|O trabalho me engoliu.']],
+});
+chain('professor_carreira',{k:'Carreira',min:22,max:60,when:m=>!!m.job&&['prof','univ','psub','pedg'].includes(m.job.id),npc:1,age:[-20,-10],gap:[1,1]},{
+ a:['O aluno difícil','Na minha turma, {p} não para quiet{o2} e responde a todos os professores.',['Ter paciência|k+4 >b|Puxei uma cadeira para conversar depois da aula.','Mandar para a diretoria|perf+2 >c|Mais um na lista.']],
+ b:['O motivo','{p} contou que cuida dos irmãos sozinh{o2} porque a mãe trabalha à noite.',['Ajudar com as tarefas no intervalo|k+8 >d|{p} começou a entregar trabalhos.','Avisar a assistência social|k+5 >d|A família recebeu apoio.']],
+ c:['A expulsão','{p} está prestes a ser expuls{o2}.',['Defender {p} na reunião|?k k+6 >b|Ganhei mais uma chance para {ele}.|>e|Não adiantou.','Concordar com a expulsão|k-3 >e|Foi melhor para a turma.']],
+ d:['A virada','{p} passou de ano com notas boas.',['Dizer que tenho orgulho|k+5 h+10 >f@5-10|{p} sorriu de um jeito que eu nunca tinha visto.','Ficar emocionad{o} em silêncio|h+8 >f@5-10|Por isso eu dou aula.']],
+ e:['O arrependimento','Nunca mais soube de {p}.',['Procurar saber|?40 >d|Achei {p} trabalhando e estudando à noite.|h-4|Ninguém sabia.','Seguir|h-3|Não dá para salvar todo mundo.']],
+ f:['O convite','Recebi um convite de formatura: {p} vai se formar em pedagogia e me chamou para ser homenagead{o}.',['Ir à formatura|h+20 k+5|{p} disse no microfone que eu mudei a vida d{ele}.','Mandar uma carta|h+15|Não consegui ir, mas escrevi três páginas.']],
+});
+
+// ===== Histórias em cadeia: família =====
+chain('filho_pequeno',{k:'Família',min:22,max:60,who:'child',gap:[1,1]},{
+ a:['O desenho na parede','{p} desenhou um mural inteiro na parede da sala com canetinha permanente.',['Dar uma bronca|bond-4 >b|{p} chorou e disse que era um presente para mim.','Tirar uma foto e emoldurar a parede|bond+10 h+8 >c|Virou a parede mais bonita da casa.','Comprar um quadro branco para {ele}|$-200 bond+6 >c|Arte tem lugar certo.']],
+ b:['O presente','O desenho era nossa família inteira de mãos dadas.',['Pedir desculpas pela bronca|bond+8 k+3 >c|Pintamos juntos uma parede só para {ele}.','Explicar com carinho onde pode desenhar|bond+4 >c|{p} entendeu.']],
+ c:['O talento','A professora disse que {p} desenha muito bem para a idade.',['Matricular numa aula de arte|$-1200 bond+6 >d|{p} chega em casa toda feliz.','Deixar desenhar por diversão|bond+3 >d|Sem pressão.']],
+ d:['A exposição da escola','Um desenho de {p} foi escolhido para a exposição da escola.',['Ir com a família inteira|h+12 bond+10 >e@3-6|Tirei mil fotos de um desenho de girafa.','Faltar por causa do trabalho|bond-8 h-6 >e@3-6|{p} procurou meu rosto na plateia.']],
+ e:['Crescendo','{p} cresceu e ainda desenha.',['Guardar todos os desenhos numa pasta|h+8 bond+5|Um dia vou mostrar para os netos.','Incentivar a seguir com arte|bond+6|Quem sabe vira profissão.']],
+});
+chain('natal_familia',{k:'Família',min:20,max:85,rep:1,gap:[1,1],when:m=>parents().length>0||kids().length>0},{
+ a:['O Natal','Este ano o Natal da família vai ser na minha casa.',['Caprichar na ceia|$-1500 h+6 >b|Peru, farofa e uma mesa enorme.','Fazer um amigo secreto simples|$-300 h+4 >b|Ninguém precisa gastar muito.','Fugir e viajar|$-4000 h+8|Natal na praia, sem drama.']],
+ b:['A tia polêmica','Uma tia começou a falar de política na mesa.',['Mudar de assunto com uma piada|?k h+6 >c|Todo mundo riu. Crise evitada.|>d|Ninguém riu.','Entrar na discussão|h-6 >d|A ceia virou debate.']],
+ c:['A ceia perfeita','Foi o Natal mais bonito em anos.',['Tirar uma foto de todo mundo|h+10|A foto foi para a parede.','Prometer repetir no ano que vem|h+8|Tradição nova.']],
+ d:['A briga','A discussão acabou com uma porta batida.',['Ir atrás para fazer as pazes|k+5 h+3 >c|Voltamos para a sobremesa.','Deixar esfriar|h-6|O peru esfriou também.']],
+});
+chain('casamento_irmao',{k:'Família',min:18,max:70,who:'sib',gap:[1,1]},{
+ a:['O noivado','{p} vai se casar e quer que eu faça parte da cerimônia.',['Aceitar com alegria|bond+10 h+8 >b|Vou entrar na igreja com {p}.','Aceitar, mas achar a pessoa errada para {ele}|bond+2 >c|Guardei a opinião.']],
+ b:['A organização','{p} está estressad{o2} com os preparativos.',['Ajudar com tudo|k+5 bond+10 >d|Escolhi flores, testei bolo e briguei com o buffet.','Dar apoio emocional|bond+8 >d|Ouvi {ele} reclamar por horas.']],
+ c:['A dúvida','Na véspera do casamento, {p} me perguntou se está fazendo a coisa certa.',['Dizer que deve seguir o coração|bond+8 >d|{p} respirou fundo e foi.','Dizer o que eu penso de verdade|?50 bond+5 >e|{p} cancelou o casamento e me agradeceu meses depois.|bond-15 >d|{p} ficou furios{o2} comigo.']],
+ d:['A festa','O casamento foi lindo. Dancei com a família inteira.',['Fazer um brinde aos noivos|h+10 bond+8|Contei uma história da nossa infância.','Dançar até o fim|h+12|Fui a última pessoa a sair da pista.']],
+ e:['O casamento cancelado','A família inteira ficou sabendo que fui eu quem fez {p} pensar melhor.',['Assumir|k+3 h-3|Era o certo.','Pedir para {p} não contar|h+1|Tarde demais.']],
+});
+chain('avos_historias',{k:'Família',min:8,max:30,gap:[1,2],when:m=>people('avo').length>0},{
+ a:['Histórias da vó','Minha avó começou a contar histórias de quando era jovem, no interior.',['Pedir para contar mais|h+5 sm+2 >b|Ela fugiu de casa para ir a um baile. Quem diria.','Gravar as histórias no celular|h+4 >b|Um dia vou querer ouvir de novo.']],
+ b:['A receita secreta','Ela quer me ensinar a receita do bolo que só ela sabe fazer.',['Aprender passo a passo|h+6 >c|"Uma xícara é a minha xícara, não a sua."','Anotar tudo num caderno|sm+2 >c|Caderno sujo de farinha.']],
+ c:['O álbum','Ela mostrou um álbum de fotos que eu nunca tinha visto.',['Escanear todas as fotos|k+3 h+5 >d@2-5|Mandei para a família inteira.','Ouvir a história de cada foto|h+8 >d@2-5|Uma tarde inteira de memórias.']],
+ d:['A falta','Minha avó partiu. A receita do bolo ficou comigo.',['Fazer o bolo no aniversário dela|h-4 k+3|Ficou quase igual. Quase.','Ouvir as gravações|h-6|A voz dela ainda está aqui.']],
+});
+chain('gemeos',{k:'Família',min:22,max:45,who:'partner',when:m=>kids().length===0,gap:[1,1]},{
+ a:['O ultrassom','No ultrassom, o médico ficou em silêncio e depois sorriu: "Tem dois aqui".',['Rir de nervoso|h+10 bond+8 >b|Dois berços, dois carrinhos, duas vezes tudo.','Desmaiar|h+8 >b|Acordei com {p} me abanando.']],
+ b:['A preparação','Preparar a casa para gêmeos exige um exército.',['Pedir ajuda à família|k+3 >c|Minha mãe se mudou para casa por um mês.','Fazer tudo sozinhos|hl-4 bond+5 >c|Nós dois contra o mundo.']],
+ c:['O nascimento','Nasceram dois bebês saudáveis!',['Segurar os dois de uma vez|bebe bebe h+25 bond+15 >d@1|Dois chorando, um coração explodindo.','Chorar mais que os bebês|bebe bebe h+22 >d@1|Ninguém estava preparado para tanta emoção.']],
+ d:['O primeiro ano','O primeiro ano com gêmeos foi uma maratona sem linha de chegada.',['Celebrar o primeiro aniversário|$-1500 h+12 bond+8|Dois bolos, porque cada um merece o seu.','Dormir oito horas pela primeira vez|hl+5 h+10|Um milagre.']],
+});
+chain('mudanca_familia',{k:'Família',min:10,max:16,gap:[1,1],when:m=>parents().length>0},{
+ a:['A mudança','Meus pais anunciaram: vamos nos mudar para outra cidade por causa do trabalho.',['Ficar animad{o}|h+4 >b|Cidade nova, vida nova.','Brigar e chorar|h-8 >c|Não quero deixar meus amigos.']],
+ b:['A escola nova','Primeiro dia na escola nova. Não conheço ninguém.',['Puxar conversa com alguém|?lk h+8 >d|Fiz amizade no recreio.|h-4 >d|Almocei sozinh{o}.','Ficar quiet{o} observando|>d|Primeiro entender o lugar.']],
+ c:['A despedida','Meus amigos fizeram uma despedida surpresa.',['Prometer manter contato|h+4 >b|Choramos todos juntos.','Ficar com raiva dos meus pais|h-6 >b|Fiquei uma semana sem falar com eles.']],
+ d:['Adaptação','Seis meses depois, a cidade nova já parece casa.',['Agradecer aos meus pais|h+6|Eles estavam certos, no fim.','Sentir saudade das duas cidades|h+3|Agora tenho dois lugares no coração.']],
+});
+chain('divorcio_pais_adulto',{k:'Família',min:25,max:60,gap:[1,1],when:m=>parents().length>=2&&parents().every(p=>p.age>=50)},{
+ a:['A notícia','Meus pais, depois de trinta anos, vão se divorciar.',['Apoiar a decisão|k+4 >b|Eles merecem ser felizes, mesmo separados.','Tentar convencer a ficarem juntos|>c|Organizei um jantar só para os dois.','Ficar do lado de um deles|h-6 >d|A família rachou.']],
+ b:['Vida nova','Minha mãe começou a viajar e meu pai a fazer aula de dança.',['Achar ótimo|h+6|Pais felizes, família tranquila.','Estranhar|h+2|Vai levar um tempo.']],
+ c:['O jantar','O jantar romântico que organizei para os dois foi constrangedor.',['Aceitar a separação|k+3 >b|Não dá para forçar.','Insistir mais um pouco|h-4 >b|Não adiantou.']],
+ d:['A divisão','Ter que escolher onde passar o Natal virou um pesadelo.',['Passar a manhã com um e a noite com outro|k+3 h+2|Duas ceias, dois perus.','Fazer uma ceia para todos juntos|?k h+10|Conseguimos reunir todo mundo.|h-6|Não deu certo. Briga na sobremesa.']],
+});
+chain('irmao_novo',{k:'Família',min:5,max:13,npc:1,age:[-30,-30],gap:[1,1],when:m=>parents().length>=2&&people('mae').some(p=>p.age<43)},{
+ a:['A novidade','Meus pais contaram que a família vai crescer: vem um bebê aí.',['Ficar feliz|h+6 >b|Vou ensinar tudo que eu sei.','Ficar com ciúmes|h-4 >c|E se gostarem mais do bebê?']],
+ b:['O nascimento','{p} chegou. É pequen{o2} e chora o tempo todo.',['Ajudar a cuidar|vira:irmao k+5 h+5 >d|Aprendi a trocar fralda.','Pedir atenção|vira:irmao h-2 >c|Ninguém mais olha para mim.']],
+ c:['Ciúmes','Fiz birra na frente das visitas.',['Conversar com meus pais|h+4 >d|Eles me levaram para tomar sorvete, só nós.','Continuar emburrad{o}|h-4 >d|Durou uma semana.']],
+ d:['Irmãos','{p} aprendeu a falar meu nome antes de "papai".',['Me derreter|h+10 k+3|Meu coração é de {p} agora.','Ensinar a falar palavrão|h+6 k-2|Meus pais não acharam graça.']],
+});
+
+// ===== Saúde: a maioria das doenças só tem nome depois da consulta; antes, você só sente os sintomas =====
+// Médico mais barato erra mais e cura menos. Medicina alternativa quase nunca funciona, mas às vezes acontece um milagre.
+const VISIVEL=new Set(['acne','calvicie','piolho','verruga','vitiligo']);   // dá para saber o que é só de olhar no espelho
+const SINT_GRUPOS=[
+  [['gripe','resfriado','covid','sinusite','rinite','amigdalite','bronquite','pneumonia','tuberculose','coqueluche','otite','caxumba','mononucleose'],
+    ['Acordei com febre e o corpo todo doendo.','Uma tosse que não passa de jeito nenhum.','Nariz entupido e a garganta arranhando.','Acordei me sentindo mal hoje, com calafrios.','Dor de ouvido e um cansaço estranho.']],
+  [['catapora','sarampo','rubeola','dengue','zika','chikungunya','febre_amarela','psoriase'],
+    ['Acordei com bolinhas vermelhas pelo corpo.','Manchas vermelhas apareceram na pele, e uma febre alta.','Dor atrás dos olhos e as juntas doendo muito.','A pele começou a coçar e a descascar.']],
+  [['intox','gastrite','ulcera','refluxo','apendicite','hepatite','cirrose','cancer_estomago','cancer_colon'],
+    ['Uma dor forte na barriga que não vai embora.','Enjoo o dia inteiro e nada para no estômago.','Queimação no peito depois de comer.','Fiquei amarelad{o} e sem fome.']],
+  [['enxaqueca','labirintite','tumor_cerebral'],['Uma dor de cabeça que não passa.','Tudo começou a girar do nada.','Luz me incomoda e a cabeça lateja.']],
+  [['depressao','ansiedade','panico','toc','tdah','burnout','insonia'],
+    ['Não tenho vontade de levantar da cama.','Meu coração dispara do nada, sem motivo.','Não consigo dormir direito há semanas.','Ando esgotad{o}, sem energia para nada.','Não consigo me concentrar em coisa nenhuma.']],
+  [['hipertensao','colesterol','diabetes','cardiaca','anemia','hipotireoidismo','apneia'],
+    ['Ando cansad{o} sem motivo nenhum.','Sinto sede o tempo todo.','Uma pressão estranha no peito quando subo escada.','Ronco tanto que acordo cansad{o}.','Tontura quando levanto rápido.']],
+  [['cancer_pele','cancer_pulmao','cancer_mama','cancer_prostata','leucemia','cancer_tireoide','cancer_ovario','cancer_testiculo','linfoma'],
+    ['Encontrei um caroço estranho no corpo.','Perdi peso sem fazer dieta nenhuma.','Um cansaço que não vai embora nunca.','Uma pinta mudou de cor e de tamanho.','Uma tosse com um pouco de sangue.']],
+  [['ist','sifilis','gonorreia','herpes','hiv'],['Uma ardência estranha lá embaixo.','Apareceram umas feridinhas que eu não sei explicar.','Ando com febre baixa e ínguas no pescoço.']],
+  [['artrite','gota','osteoporose','hernia','rins','lupus'],['Dor nas juntas toda manhã.','Uma dor nas costas que desce pela perna.','Dor forte do lado, perto das costelas.','O dedão do pé inchou e dói muito.']],
+  [['catarata','glaucoma','conjuntivite'],['Minha vista está ficando embaçada.','Olho vermelho, ardendo e coçando.','Vejo um halo em volta das luzes.']],
+  [['alzheimer','parkinson','esclerose'],['Esqueci o caminho de casa por um minuto.','Minhas mãos começaram a tremer.','Formigamento nas pernas e uma fraqueza estranha.']],
+  [['asma'],['Falta o ar quando corro.','Chiado no peito à noite.']],
+  [['malaria','anemia'],['Febre que vai e volta, com tremedeira.']],
+];
+const SINT={}; SINT_GRUPOS.forEach(([ids,txt])=>ids.forEach(id=>{ SINT[id]=(SINT[id]||[]).concat(txt); }));
+const sintoma=id=>(R.pick(SINT[id]||['Acordei me sentindo mal hoje.','Alguma coisa não está certa no meu corpo.','Ando me sentindo estranh{o} faz uns dias.'])).replace(/\{o\}/g,oa());
+const disNome=d=>d&&d.k===false?null:dn(DISEASES[d.id].n);
+// pegar uma doença: só sintomas no diário (menos as que dá para ver no espelho)
+addDisease=(o=>function(id){ const m=S.me;
+  if(id==='ist') id=R.wpick([['ist',4],['sifilis',2],['gonorreia',3],['herpes',2],['hiv',.4]]);
+  if(!DISEASES[id]||m.dis.find(d=>d.id===id)) return;
+  if(VISIVEL.has(id)) return o(id);
+  if(id==='catapora') m.genes.pox=1; if(id==='vitiligo') m.genes.vitiligo=1;
+  const sx=sintoma(id); m.dis.push({id,y:0,ctrl:false,k:false,sx}); log(sx,'bad'); st('happy',-3); })(addDisease);
+// descobrir o que é (a qualidade do médico importa)
+const TIERS={posto:{n:'Posto de saúde',c:0,ac:.55,cu:.5},clinica:{n:'Clínica popular',c:120,ac:.75,cu:.75},doc:{n:'Médico particular',c:300,ac:.93,cu:1},hosp:{n:'Hospital',c:8000,ac:1,cu:1}};
+function diagnose(d,tier){ const m=S.me, def=DISEASES[d.id]; if(d.k!==false) return '';
+  const ac=TIERS[tier].ac*(CANCERS.has(d.id)?.85:1);
+  if(!R.chance(ac)) return R.pick(['O médico disse que é "virose" e mandou tomar bastante água.','Fizeram uns exames, mas não acharam nada.','O médico mal olhou para mim e passou um remédio para dor.']);
+  d.k=true; const n=dn(def.n); log(`O médico descobriu o que eu tenho: ${n}.`,'bad');
+  if(CANCERS.has(d.id)&&!m.c.chemo){ m.c.chemo=1; setTimeout(()=>log('Comecei a quimioterapia. Meu cabelo caiu todo.','bad'),0); }
+  return `Diagnóstico: ${n}.`; }
+// tratar: médico barato erra o diagnóstico e cura menos
+treat=(o=>function(where,dis){ const m=S.me, def=DISEASES[dis.id];
+  if(where==='psi') return o(where,dis);
+  if(where==='alt') return treatAlt(dis);
+  const T=TIERS[where]||TIERS.doc; m.money-=T.c;
+  if(where==='posto'&&R.chance(.25)) return R.pick(['A fila do posto dobrava o quarteirão. Voltei para casa sem ser atendid'+oa()+'.','Não tinha médico no posto hoje.']);
+  const dg=diagnose(dis,where); if(dis.k===false) return dg;
+  const nome=dn(def.n);
+  if(def.ctrl){ if(R.chance(T.cu)){ dis.ctrl=true; st('health',2); return `${dg} ${nome[0].toUpperCase()+nome.slice(1)} agora está sob controle com remédios.`.trim(); } return `${dg} O remédio que me passaram não fez efeito.`.trim(); }
+  if(def.cure==='none') return `${dg} Não existe cura para ${nome}. Os médicos só aliviaram os sintomas.`.trim();
+  let p=where==='hosp'?(def.hosp||def.doc||0)+.05:(def.doc||0)*T.cu;
+  if(R.chance(p)){ m.dis=m.dis.filter(x=>x!==dis); st('happy',8); st('health',R.int(3,8)); return `${dg} Fui ${m.gender==='F'?'curada':'curado'} de ${nome}!`.trim(); }
+  return `${dg} ${where==='posto'||where==='clinica'?'O tratamento barato não resolveu. Talvez um médico melhor resolva.':`O tratamento para ${nome} não funcionou desta vez.`}`.trim(); })(treat);
+// medicina alternativa: uma vez por ano para cada problema; pode piorar, quase nunca cura, e às vezes cura até o incurável
+function treatAlt(dis){ const m=S.me, def=DISEASES[dis.id]; if(use('alt_'+dis.id)>1) return 'O curandeiro disse que só pode me atender uma vez por ano para isso.';
+  m.money-=80; const nome=disNome(dis)||'esse mal-estar';
+  if(R.chance(.1)){ st('health',-6); return 'O curandeiro me deu um chá estranho. Piorei.'; }
+  if(def.cure==='none'||def.ctrl){ if(R.chance(.008)){ m.dis=m.dis.filter(x=>x!==dis); st('happy',25); st('health',15); cnt('milagre'); log(`Os médicos não sabem explicar: ${nome} sumiu depois de um tratamento alternativo.`,'good'); return `Um milagre! ${nome[0].toUpperCase()+nome.slice(1)} sumiu. Os médicos repetiram os exames três vezes.`; }
+    return R.pick(['Garrafada, banho de ervas e reza. Não mudou nada.','Agulhas, cristais e incenso. Relaxei, mas continuo igual.','O curandeiro garantiu que funcionaria. Não funcionou.']); }
+  if(R.chance((def.doc||def.hosp||0)*.15)){ m.dis=m.dis.filter(x=>x!==dis); st('happy',8); return `O chá de ervas funcionou: ${nome} passou.`; }
+  return 'O chá de ervas não fez efeito.'; }
+// consulta de rotina descobre o que estava escondido
+checkup=(o=>function(){ const m=S.me, r=o(); const hid=m.dis.filter(d=>d.k===false); if(!hid.length) return r;
+  const found=hid.filter(d=>R.chance(CANCERS.has(d.id)?.7:.85)); found.forEach(d=>diagnose(Object.assign(d,{}),'hosp'));
+  return found.length?`Os exames de rotina acharam: ${found.map(d=>dn(DISEASES[d.id].n)).join(', ')}.`:r; })(checkup);
+// tela de saúde: problemas sem diagnóstico aparecem pelo sintoma
+V.health=(o=>()=>{ const r=o(), m=S.me; if(!m.dis.length) return r;
+  const i0=r.items.findIndex(x=>x.sec==='Meus problemas'), i1=r.items.findIndex(x=>x.sec==='Cuidados'); if(i0<0||i1<0) return r;
+  const it=[{sec:'Meus problemas'}];
+  m.dis.forEach(d=>{ const def=DISEASES[d.id], known=d.k!==false, nome=known?def.n:(d.sx||'Algo não vai bem');
+    const op=Object.entries(TIERS).map(([k,T])=>({l:T.n,s:T.c?fmt(T.c):'Grátis'+(k==='posto'?' · fila e menos chance':''),on:()=>act(()=>treat(k,d),known?def.n:'Consulta')}));
+    op.push({l:'Terapia',s:fmt(400),dis:!known||def.cure!=='psi',why:known?'Terapia não resolve isso.':'Primeiro preciso saber o que eu tenho.',on:()=>act(()=>treat('psi',d),def.n)});
+    op.push({l:'Medicina alternativa',s:fmt(80)+' · uma vez por ano',on:()=>act(()=>treat('alt',d),'Medicina alternativa')});
+    it.push({l:nome,s:known?`${d.y} ano(s)${d.ctrl?' · controlada':''}${def.cure==='none'?' · sem cura':''}`:'Sem diagnóstico · vá ao médico descobrir o que é',tone:'bad',
+      on:()=>UI.push(()=>({title:known?def.n:'O que eu estou sentindo',items:(known?[]:[{html:`<div class="card"><p>${esc(d.sx||'')}</p><p style="color:var(--muted);font-size:13px">Médico melhor acerta mais o diagnóstico. A consulta de rotina também pode descobrir.</p></div>`}]).concat(op)}))}); });
+  r.items.splice(i0,i1-i0,...it); return r; })(V.health);
 
 // ===== Membros das equipes: clube ou time da escola, trabalho, carreira especial, equipe de heróis e grupo religioso =====
 // Cada equipe tem gente de verdade (rel 'equipe'): dá para conversar, fazer amizade, namorar ou brigar, como qualquer pessoa.
@@ -12114,6 +13151,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.12',d:'14/10/2026',t:'Histórias em que uma coisa leva à outra',itens:['Mais de 600 eventos em sequência, em 115 histórias: cada escolha decide o próximo capítulo e quando ele acontece (às vezes anos depois).','Exemplos: o valentão da escola que vira amigo, o vizinho mecânico que te deixa as ferramentas, a startup com o amigo, o chefe abusivo, o primeiro amor que volta vinte anos depois, o jurado que descobre um inocente.','Pessoas das histórias podem virar amigos, namorados, inimigos ou família de verdade na sua lista.','Doenças agora aparecem como sintomas ("acordei com bolinhas vermelhas"). Só a consulta revela o nome.','Posto de saúde, clínica popular, médico particular e hospital: quanto mais barato, mais erra o diagnóstico e menos cura.','Medicina alternativa: uma vez por ano, quase nunca funciona, mas pode curar até doença incurável (menos de 1%).','Antes dos 18, o topo mostra o seu dinheiro, não o da família (a família continua podendo falir).','Save mais seguro: se o salvamento estragar, o jogo abre a cópia anterior sozinho.','Nos começos dos modos fictícios, opções que custam dinheiro só aparecem se você puder pagar.']},
   {v:'1.11',d:'14/10/2026',t:'Saves mais seguros e rodinha de atualização',itens:['Eventos agora têm identificação fixa: atualizar o jogo não troca mais o evento que estava esperando na sua vida.','Depois de cada atualização, a rodinha aparece girando até 100% (mesmo quando o download foi rápido) e só então mostra as novidades.','O jogo só é publicado se passar no teste automático de centenas de vidas.']},
   {v:'1.10.1',d:'14/10/2026',t:'Correção na tela inicial',itens:['Em celulares de tela pequena, o topo da tela inicial cortava o logo e a frase. Agora aparece tudo, e a tela rola quando não cabe.']},
   {v:'1.10',d:'14/10/2026',t:'Aventuras que chegam aos poucos, e formação que vale',itens:['Os modos fictícios não te jogam mais lá de uma vez: a história começa na vida real e vai crescendo ano a ano.','Zumbi: primeiro as notícias, no ano seguinte as prateleiras vazias e só no terceiro ano o fim do mundo. Dá para estocar comida, comprar arma, treinar e fugir com a família.','Ilha e Marte começam com um convite: ir sozinho, levar o par, os filhos ou a família toda, ou recusar. Marte tem um ano de treinamento antes do lançamento.','Isekai começa com sonhos; Superpoderes, com um acidente estranho um ano antes dos poderes. Quem vai junto vive tudo com você e volta para casa (ou morre lá).','10 cursos técnicos novos (radiologia, segurança do trabalho, edificações, química…) com empregos que só pedem o técnico.','Especialização nova na pós-graduação e 20 empregos que pedem especialização, mestrado, doutorado, MBA ou residência (cientista de IA, auditor fiscal, astrofísico, dermatologista…).','Pós-graduação aumenta o salário: mestrado +10%, doutorado +15%, MBA +8%, especialização +5%.']},
@@ -12553,6 +13591,20 @@ function selfTest(){
     S.pending=[{id:'p123',d:{}},{id:real,d:{}},{id:'p_naoexiste',d:{}}]; S.me.ev={p5:30,[real]:20}; S.me.c.ev_p9=1;
     fixSave(S); chkReg('fixSave não limpou a fila',S.pending.length===1&&S.pending[0].id===real); chkReg('fixSave não limpou os contadores',!('p5' in S.me.ev)&&(real in S.me.ev)&&!S.me.c.ev_p9);
     S=JSON.parse(snap); }
+  // cadeias de eventos: estrutura e cada escolha de cada etapa
+  { const au=cadAudit(); au.errs.forEach(e=>{ const k='cadeia: '+e; errs[k]=(errs[k]||0)+1; }); lives.unshift(`HISTÓRIAS EM CADEIA: ${au.chains} histórias, ${au.steps} etapas`);
+    const snap=JSON.stringify(S);
+    for(const [id,ch] of Object.entries(CHAINS)){ for(const sid of Object.keys(ch.steps)){ const nch=ch.steps[sid][2].length;
+      for(let ci=0;ci<nch;ci++){ T('cad:'+id+'.'+sid,()=>{ newLife({}); const m=S.me; m.age=Math.max(ch.o.min||18,Math.min(ch.o.max||40,30)); m.alive=true; m.prison=ch.o.jail?{left:3,total:3,behav:50}:null;
+          if(ch.o.who==='partner'||ch.o.who==='spouse'){ const pp=mkPerson({rel:'conjuge',gender:m.gender==='M'?'F':'M',age:m.age}); S.people.push(pp); }
+          if(['friend','colega','boss','classmate','kid','child','teen','adultkid','ex','sib','parent','pet','grandkid'].includes(ch.o.who)&&!WHO[ch.o.who]()){ const rel={friend:'amigo',colega:'colegaT',boss:'chefe',classmate:'colega',kid:'filho',child:'filho',teen:'filho',adultkid:'filho',ex:'ex',sib:'irmao',parent:'mae',pet:'pet',grandkid:'neto'}[ch.o.who];
+            const ag={child:8,teen:15,adultkid:25,kid:10,grandkid:4}[ch.o.who]; S.people.push(mkPerson({rel,age:ag||m.age,gender:R.chance(.5)?'M':'F'})); }
+          if(!cadStart(id,true)) return; const c=cadState().on[id]; c.s=sid; c.due=m.age; const ev=EVENTS[cadEv(id,sid)]; const d=ev.prep(m); const sh=ev.show(d); const r=ev.pick(String(ci),d);
+          [sh.t,sh.x,sh.ch[ci][0],r].forEach(x=>{ if(/\{\w+\}|undefined|NaN/.test(String(x))){ const k=`texto quebrado em cad:${id}.${sid}: ${String(x).slice(0,90)}`; errs[k]=(errs[k]||0)+1; } }); }); } } }
+    S=JSON.parse(snap); }
+  { const K='nlteste.save'; const ok=JSON.stringify({me:{first:'X'},people:[]}); try{ localStorage.setItem(K,'{"me":{"first":"X"'); localStorage.setItem(K+'.bak',ok); }catch(e){}
+    const r=(()=>{ const s0=localStorage.getItem(K); if(s0&&saveOk(SAVE_KEY,s0)) return 'principal'; const b=localStorage.getItem(K+'.bak'); return b&&saveOk(SAVE_KEY,b)?'bak':null; })();
+    chkReg('save estragado não cai na cópia',r==='bak'); chkReg('save bom reprovado',saveOk(SAVE_KEY,ok)); try{ localStorage.removeItem(K); localStorage.removeItem(K+'.bak'); }catch(e){} }
   const calm=[];
   for(let L=0;L<60;L++){ T('calmLife',()=>newLife({})); let g=0; while(S.me.alive&&g++<130){ T('ageUp',ageUp); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; T('ev',()=>{ const sh=EVENTS[e.id].show(e.d); EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); }); } if(S.me.alive&&S.me.age%3===0) T('calmDoc',()=>{ S.me.dis.forEach(d=>treat('hosp',d)); body('walk'); }); if(S.me.alive&&S.me.health<=0) die(causeFromHealth()); } calm.push(S.me.age); }
   lives.unshift(`VIDA CALMA (só envelhecer + médico): média ${(calm.reduce((a,b)=>a+b,0)/calm.length).toFixed(1)} · acima de 70: ${Math.round(calm.filter(a=>a>=70).length/calm.length*100)}% · acima de 90: ${Math.round(calm.filter(a=>a>=90).length/calm.length*100)}%`);
