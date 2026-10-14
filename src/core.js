@@ -398,7 +398,7 @@ function yearMoney(){
     const ownHome=m.assets.some(a=>a.k==='casa');
     if(!S.flags.movedOut&&(m.age>=26||ownHome||people('conjuge').length||!parents().length)){ S.flags.movedOut=1; if(!ownHome&&parents().length) log('Saí da casa dos meus pais e aluguei um lugar só meu.'); }
     const atHome=!S.flags.movedOut;
-    let cost=atHome?1800:(ownHome?3500:7500)+Math.round(gross*.14);
+    let cost=atHome?1800:(ownHome?4500:9500)+Math.round(gross*.32); /* o padrão de vida sobe junto com o salário */
     cost+=m.assets.filter(a=>a.k==='carro').length*900+people('pet').reduce((s,p)=>s+(typeof petDef==='function'&&petDef(p)&&petDef(p).ex?1500:500),0);
     if(m.edu.cur&&m.edu.cur.type!=='medio'&&m.age<26) cost=Math.min(cost,3000);
     kids().filter(k=>k.age<18).forEach(()=>cost+=4000);
@@ -414,8 +414,8 @@ function yearMoney(){
   for(const l of m.loans.slice()){ const p=Math.min(l.bal,l.pay); if(m.edu.cur&&l.n==='Financiamento estudantil') continue; m.money-=p; l.bal-=p; if(l.bal<=0){ m.loans.splice(m.loans.indexOf(l),1); log(`Quitei: ${l.n.toLowerCase()}.`,'good'); } }
   const iv=m.inv;
   if(iv.poup) iv.poup=Math.round(iv.poup*1.04);
-  if(iv.acoes){ const r=R.norm(.08,.18); iv.acoes=Math.max(0,Math.round(iv.acoes*(1+r))); if(Math.abs(r)>.2) log(`Minhas ações ${r>0?'subiram':'caíram'} ${Math.round(Math.abs(r)*100)}% este ano.`,r>0?'good':'bad'); }
-  if(iv.cripto){ const r=R.chance(.5)?R.f()*2.5:-R.f()*.8; iv.cripto=Math.max(0,Math.round(iv.cripto*(1+r))); log(`Minhas criptomoedas ${r>0?'valorizaram':'derreteram'} ${Math.round(Math.abs(r)*100)}%.`,r>0?'good':'bad'); }
+  if(iv.acoes){ const r=R.norm(.065,.18); iv.acoes=Math.max(0,Math.round(iv.acoes*(1+r))); if(Math.abs(r)>.2) log(`Minhas ações ${r>0?'subiram':'caíram'} ${Math.round(Math.abs(r)*100)}% este ano.`,r>0?'good':'bad'); }
+  if(iv.cripto){ const r=R.chance(.45)?R.f()*1.3:-R.f()*.65; /* a maioria perde um pouco, poucos ganham muito */ iv.cripto=Math.max(0,Math.round(iv.cripto*(1+r))); log(`Minhas criptomoedas ${r>0?'valorizaram':'derreteram'} ${Math.round(Math.abs(r)*100)}%.`,r>0?'good':'bad'); }
   if(m.money<-20000&&R.chance(.3)) queue('divida',{});
 }
 function yearPrison(){
