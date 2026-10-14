@@ -2454,7 +2454,7 @@ function pack(gr,list){
         if(o.fant&&typeof fantNames==='function') Object.assign(d,fantNames());
         if(o.crew){ const all=typeof crew==='function'?crew():[], cs=o.crew==='par'?all.filter(c=>c.par):o.crew==='sol'?all.filter(c=>typeof romOK==='function'&&romOK(c)&&!c.par):all.filter(c=>!c.bebe&&!c.bicho); if(!cs.length) return null; const c=R.pick(cs); d.c=c.first; d.co=c.gender==='F'?'a':'o'; d.celn=c.gender==='F'?'ela':'ele'; d.cid=c.id; }
         if(o.who){ const p=WHO[o.who](); if(!p) return null; d.pid=p.id; d.p=p.first; d.ele=p.gender==='F'?'ela':'ele'; d.o2=p.gender==='F'?'a':'o'; d.idade=p.age; }
-        if(o.gente&&typeof scGenteFor==='function'){ const p=scGenteFor(o.gente); if(!p) return null; d.mor=p.first; d.mo=p.gender==='F'?'a':'o'; d.moeln=p.gender==='F'?'ela':'ele'; d.gid=p.id; d.gkey=o.gente; d.mprof=p.prof; }
+        if(o.gente&&typeof scGenteFor==='function'){ const p=scGenteFor(o.gente); if(!p) return null; d.mor=p.first; d.mo=p.gender==='F'?'a':'o'; d.moeln=p.gender==='F'?'ela':'ele'; d.gid=p.id; d.gkey=p._k||o.gente; d.mprof=p.prof; }
         return d; },
       show:d=>({k:o.k,t:tp(title,d),x:tp(Array.isArray(text)?text[d.xi]:text,d),ch:choices.map((c,i)=>[tp(c.split('|')[0],d),String(i)])}),
       pick:(key,d)=>dslChoice(choices[+key],d)};
@@ -8268,7 +8268,7 @@ V.iskLar=(o=>()=>{ const r=o(); const sc=S.scen; if(!sc||sc.vila||!r||!r.items) 
 const grpOf=pre=>()=>R.pick(people('equipe').filter(p=>p.grp&&p.grp.startsWith(pre)));
 Object.assign(WHO,{clube:grpOf('club:'),spcEq:grpOf('spc:'),heroEq:grpOf('hero:'),fiel:grpOf('seita:'),gabinete:grpOf('office:'),func:grpOf('biz:'),corte:grpOf('corte:'),prof:()=>R.pick(people('prof'))});
 // moradores dos mundos paralelos ({mor}, {mo} = o|a)
-function scGenteFor(key){ const sc=S.scen; if(!sc) return null; const n=key==='zbase'?(sc.zb?sc.zb.pop:0):key==='vila'?(sc.vila?sc.vila.pop:0):0; if(n<=0) return null; const L=scGente(key,n); return L.length?R.pick(L):null; }
+function scGenteFor(key){ const sc=S.scen; if(!sc) return null; let k=key, n=0; if(key==='zbase') n=sc.zb?sc.zb.pop:0; else if(key==='vila') n=sc.vila?sc.vila.pop:0; else if(key==='town'&&sc.id==='isekai'&&!sc.vila&&typeof townOf==='function'&&townOf(sc)){ k='town:'+sc.morada; n=12; } if(n<=0) return null; const L=scGente(k,n); if(!L.length) return null; const p=R.pick(L); p._k=k; return p; }
 // os grupos se formam sozinhos todo ano (não precisa abrir a tela)
 function grpAuto(){ const m=S.me; if(!m||!m.alive) return;
   const c=m.edu.club&&clubDef(); if(c) grpEnsure('club:'+m.edu.club,R.int(6,9),{n:c.n,role:c.st==='athletic'?'Colega de time':c.st==='musical'?'Colega de banda':'Colega de clube',age:()=>clamp(m.age+R.int(-1,1),5,30)});
@@ -8410,6 +8410,388 @@ pack({k:'Vila',w:1.4,cd:10,scen:'isekai',when:ZW(sc=>!!sc.vila&&sc.vila.pop>0),g
   ['Briga de vizinhos','{mor} briga com o vizinho por causa de uma cerca.',['Julgar a favor de {mor}|glv+8 vfel-2|O vizinho ficou de cara feia.','Julgar contra|glv-8 vfel+2|{mor} ficou magoad{mo}.']],
   ['Nascimento','A esposa de {mor} deu à luz gêmeos.',['Mandar um presente|ouro-10 glv+10 vfel+3 vpop+2|A vila fez festa.','Visitar|glv+6 vpop+2|Os bebês choram muito.']],
   ['Morador doente','{mor} pegou a febre do pântano.',['Pagar o curandeiro|ouro-20 glv+12|{mor} se recuperou.','Esperar|?50 glv+2|Melhorou sozinh{mo}.|gmorre vfel-4|{mor} não resistiu.']],
+]);
+
+// ===== Mais eventos com membros (parte 2): escola e trabalho =====
+pack({k:'Escola',w:1.1,cd:8,min:6,max:25,when:NP,who:'clube'},[
+  ['Uniforme rasgado','O uniforme de {p} rasgou no meio do jogo.',['Emprestar sua blusa reserva|bond+8|{p} jogou com a minha blusa e fez o gol.','Rir|bond-6|O time inteiro riu junto. {p} não.']],
+  ['Pais na arquibancada','Os pais de {p} nunca vão aos jogos.',['Convidar {ele} para comer com sua família depois|bond+12 pamigo|{p} adotou minha família.','Não falar nada|h+0|Cada um com seus problemas.']],
+  ['Superstição','{p} diz que o time só ganha se você usar a mesma meia.',['Usar a meia fedida|bond+6 h+4|Ganhamos. A meia virou lenda.','Lavar a meia|bond-2|Perdemos. {p} me culpou.']],
+  ['Treino extra','{p} chama você para treinar no sábado de manhã.',['Ir|bond+8 tal.athletic+2|Acordei às 7 num sábado. Valeu.','Dormir|bond-2|{p} treinou sozinh{o2}.']],
+  ['Olheiro','Um olheiro de um clube grande veio ver {p} jogar.',['Passar a bola para {p} brilhar|bond+12 k+3|{p} foi chamad{o2} para um teste!','Jogar para se mostrar|f+1 bond-6|O olheiro gostou de mim. {p} ficou magoad{o2}.']],
+  ['Grito de guerra','{p} inventou um grito de guerra para o time.',['Adotar|bond+8 h+4|O grito virou tradição.','Achar ridículo|bond-6|{p} ficou sem graça.']],
+  ['Derrota feia','O time perdeu de goleada e {p} chora no vestiário.',['Consolar|bond+10|Prometemos treinar mais.','Culpar {ele}|bond-12 pinimigo|{p} saiu batendo a porta.']],
+  ['Técnico injusto','O técnico deixou {p} no banco o campeonato inteiro.',['Falar com o técnico|?50 bond+10|{p} entrou no segundo tempo e fez gol.|bond+4|O técnico não mudou de ideia.','Ficar na sua|h+0|Não é problema meu.']],
+  ['Foto do time','{p} quer tirar uma foto só vocês dois com o troféu.',['Tirar|bond+8 h+4|A foto está na minha parede até hoje.','Sair da foto|bond-4|{p} tirou sozinh{o2}.']],
+  ['Segredo do vestiário','{p} te conta que vai sair do time porque os pais vão se separar.',['Ouvir e guardar segredo|bond+12|{p} disse que eu sou a única pessoa que sabe.','Contar para o técnico|bond-8 k+2|O técnico ajudou, mas {p} se sentiu traíd{o2}.']],
+  ['Concurso de embaixadinhas','{p} desafia você para um concurso de embaixadinhas valendo lanche.',['Aceitar|?50 h+6 bond+4|Ganhei o lanche!|bond+6|Perdi, mas rimos muito.','Recusar|h+0|Sou péssim{o} nisso.']],
+  ['Ônibus da viagem','Na viagem do time, {p} vomita no ônibus.',['Ajudar a limpar|bond+10|{p} nunca esqueceu.','Mudar de lugar|bond-4|O ônibus inteiro mudou de lugar.']],
+]);
+pack({k:'Escola',w:1.1,cd:8,min:6,max:30,when:m=>NP(m)&&!!m.edu.cur,who:'classmate'},[
+  ['Feira de ciências','{p} quer fazer o vulcão de bicarbonato com você na feira de ciências.',['Topar|bond+8 grade+3|O vulcão explodiu na hora certa.','Fazer sozinh{o}|grade+2 bond-4|Meu projeto foi melhor. Mais solitário também.']],
+  ['Celular apreendido','O professor tomou o celular de {p} e {ele} acha que você dedurou.',['Provar que não foi|?50 bond+4|{p} acreditou.|pinimigo|{p} não acreditou.','Ignorar|bond-6|Fiquei com fama de dedo-duro.']],
+  ['Estudar em grupo','{p} chama para estudar na casa dele antes da prova.',['Ir|bond+10 grade+4|Estudamos e jogamos videogame. Mais videogame.','Estudar sozinh{o}|grade+3|Concentração total.']],
+  ['Colega novo','{p} é novo na escola e almoça sozinho.',['Sentar com {ele}|bond+12 pamigo k+3|Hoje somos inseparáveis.','Deixar|h+0|Ele vai se enturmar sozinho.']],
+  ['Piada na aula','{p} faz uma piada e a turma inteira olha para você rindo.',['Rir junto|bond+6 h+4|Melhor rir de si mesm{o}.','Ficar brav{o}|bond-6|Piorou.']],
+  ['Formatura','Na formatura, {p} te dá um abraço e diz que vai sentir saudade.',['Prometer manter contato|pamigo h+6|Mantivemos. Por um tempo, pelo menos.','Abraçar e seguir|bond+4|Cada um para um lado.']],
+  ['Excursão','Na excursão da escola, você e {p} se perdem do grupo.',['Explorar juntos|bond+12 h+6|A melhor aventura do ano.','Procurar o professor|bond+4|Achamos o grupo em dez minutos.']],
+  ['Bullying','{p} está sofrendo bullying de alunos mais velhos.',['Chamar a coordenação|bond+10 k+6|Os valentões foram suspensos.','Enfrentar os valentões|?fight bond+12 pamigo|Eles nunca mais mexeram com {p}.|hl-8|Apanhei, mas {p} viu que eu tentei.','Ficar fora|k-4|Não consegui olhar {p} nos olhos depois.']],
+  ['Caderno emprestado','{p} pegou seu caderno emprestado e devolveu todo rabiscado.',['Deixar para lá|bond+2|Os rabiscos eram engraçados.','Cobrar um caderno novo|bond-6|{p} comprou, de cara feia.']],
+  ['Representante de turma','{p} e você concorrem a representante de turma.',['Fazer campanha limpa|?50 h+8|Ganhei!|bond+4|{p} ganhou e me chamou de vice.','Desistir e apoiar {p}|bond+12|{p} ganhou e me agradeceu no discurso.']],
+  ['Dia de chuva','Você e {p} ficam presos na escola por causa de um temporal.',['Conversar até a chuva passar|bond+10|Descobrimos que gostamos das mesmas músicas.','Ficar no celular|h+0|Bateria acabou em meia hora.']],
+  ['Primeira paixão','Você descobre que {p} gosta de você.',['Conversar com {ele}|?55 pnamoro|Primeiro namoro!|bond+4|Ficamos só amigos.','Fingir que não sabe|h-2|Ficou um clima esquisito.'],{min:12}],
+  ['Celular quebrado','{p} derrubou seu celular sem querer e a tela quebrou.',['Perdoar|bond+6 $-300|Acidente acontece.','Exigir que pague|bond-8|Os pais de {p} pagaram, de cara feia.']],
+  ['Trabalho em grupo','No trabalho em grupo, {p} não fez nada.',['Fazer tudo e reclamar com o professor|grade+4 bond-8|Justiça feita.','Fazer tudo e ficar quiet{o}|grade+4 h-4|Fiquei com raiva sozinh{o}.']],
+  ['Festa do pijama','{p} convida para uma festa do pijama.',['Ir|bond+10 h+8|Ninguém dormiu.','Não ir|h+0|Prefiro minha cama.'],{max:14}],
+]);
+pack({k:'Escola',w:1.1,cd:10,min:6,max:30,when:m=>NP(m)&&!!m.edu.cur,who:'prof'},[
+  ['Professor engraçado','{p} conta uma piada no meio da aula de prova.',['Rir|bond+6 h+4|A tensão sumiu.','Pedir silêncio|bond-2|Alguns colegas me olharam feio.']],
+  ['Livro emprestado','{p} te empresta um livro que mudou a vida dele.',['Ler e devolver com uma carta|bond+12 sm+4|{p} ficou emocionad{o2}.','Esquecer de ler|bond-4|Devolvi intacto.']],
+  ['Prova difícil','{p} preparou a prova mais difícil do ano.',['Estudar a semana inteira|grade+6 sm+2|Tirei a melhor nota da turma.','Reclamar|bond-4|Não adiantou.']],
+  ['Professor desanimado','{p} parece triste e cansad{o2} nas aulas.',['Perguntar se está tudo bem|bond+12 k+4|{p} agradeceu: ninguém tinha perguntado.','Ignorar|h+0|Cada um com seus problemas.']],
+  ['Viagem pedagógica','{p} organiza uma viagem ao museu.',['Ir e prestar atenção|bond+8 sm+3|Aprendi mais que no semestre inteiro.','Ir e bagunçar|bond-8 h+4|Fui proibid{o} da próxima viagem.']],
+  ['Nota errada','{p} lançou sua nota errada no sistema.',['Pedir revisão com educação|bond+4 grade+5|Corrigido.','Fazer escândalo|bond-10 grade+5|Corrigido, mas com climão.']],
+  ['Professor aposentando','{p} vai se aposentar no fim do ano.',['Organizar uma homenagem|bond+15 k+4|{p} chorou na frente da turma.','Assinar o cartão|bond+3|Simples.']],
+  ['Conselho de vida','{p} te chama depois da aula para falar do seu futuro.',['Ouvir com atenção|sm+3 bond+8|Saí com um plano.','Fingir que ouve|h+0|Entrou por um ouvido e saiu pelo outro.']],
+  ['Professor rígido','{p} expulsou você da sala por conversar.',['Pedir desculpas|bond+6|{p} aceitou.','Discutir|bond-12 grade-3|Fui parar na diretoria.']],
+  ['Aluno favorito','Os colegas dizem que você é o favorito de {p}.',['Aproveitar|grade+3 bond+2|Pode ser útil.','Mostrar que não precisa de favor|grade+2 k+2|Estudei mais ainda.']],
+]);
+pack({k:'Trabalho',w:1.1,cd:8,min:16,when:m=>NP(m)&&!!m.job&&!m.job.spc&&!m.job.hero,who:'colega'},[
+  ['Ar-condicionado','{p} quer o ar-condicionado no 17; você quer no 25.',['Ceder|bond+6|Levei um casaco.','Guerra fria do controle remoto|bond-6 h+2|O controle sumiu misteriosamente.']],
+  ['Almoço junto','{p} chama para almoçar no restaurante por quilo.',['Ir|bond+8 $-30|Descobrimos que temos muito em comum.','Comer na mesa|h+0|Marmita e planilha.']],
+  ['Colega chorando','Você encontra {p} chorando no banheiro.',['Perguntar o que houve|bond+12 k+4|Problema em casa. Ajudei como pude.','Sair discretamente|h+0|Fingi que não vi.']],
+  ['Planilha salva','{p} salvou você de um erro que ia custar caro.',['Agradecer com um presente|$-50 bond+10|Uma caixa de chocolates.','Agradecer só com palavras|bond+4|Valeu, de coração.']],
+  ['Viagem a trabalho','Você e {p} viajam a trabalho para outra cidade.',['Conhecer a cidade juntos|bond+12 h+6|Melhor viagem de trabalho da vida.','Ficar no hotel|h+2|Serviço de quarto e TV.']],
+  ['Colega puxa-saco','{p} vive puxando o saco do chefe.',['Ignorar|h+0|Cada um com sua estratégia.','Imitar|perf+3 k-2|Funcionou, mas me senti mal.','Fazer piada|bond-8|{p} ouviu.']],
+  ['Microondas','{p} esquentou peixe no micro-ondas da copa.',['Reclamar com educação|bond-2|{p} pediu desculpas.','Esquentar algo pior no dia seguinte|bond-6 h+4|Guerra de cheiros.']],
+  ['Ajuda no sistema','{p} não sabe usar o sistema novo e tem vergonha de pedir ajuda.',['Ensinar com paciência|bond+12|{p} me chama de anjo da guarda.','Deixar se virar|h+0|Aprendeu do jeito difícil.']],
+  ['Colega grávida','{p} conta para você antes de todo mundo que vai ter um bebê.',['Comemorar|bond+10 h+6|Fui a primeira pessoa a saber.','Desejar parabéns|bond+4|Que bom.']],
+  ['Futebol da firma','{p} te chama para o futebol da empresa.',['Ir|bond+8 hl+2|Fiz um gol. O chefe estava assistindo.','Recusar|h+0|Não sou de esporte.']],
+  ['Amigo secreto','No amigo secreto da firma, você tirou {p}.',['Comprar algo caprichado|$-150 bond+12|{p} amou.','Comprar um chaveiro|$-15 bond-4|{p} sorriu amarelo.']],
+  ['Senha do wi-fi','{p} pediu a senha do wi-fi pela décima vez.',['Escrever num post-it|bond+4|Problema resolvido para sempre.','Fingir que não ouviu|bond-4|{p} pediu de novo.']],
+  ['Colega doente','{p} veio trabalhar doente e está espirrando em todo mundo.',['Mandar ir para casa|bond+4 hl+2|O escritório agradeceu.','Ficar quiet{o}|hl-4|Peguei a gripe.']],
+  ['Mudança de setor','{p} vai mudar de setor e vocês não vão mais trabalhar juntos.',['Manter a amizade|pamigo|Almoçamos juntos toda sexta.','Deixar ir|psai|Perdemos o contato.']],
+  ['Hora extra','{p} pede para você cobrir o turno dele no fim de semana.',['Cobrir|bond+10 perf+2 h-4|{p} ficou me devendo uma.','Recusar|bond-4|Fim de semana é sagrado.']],
+  ['Segredo do escritório','{p} viu você chorando no carro no estacionamento.',['Desabafar|bond+12 h+4|Ninguém mais soube.','Dizer que era alergia|h-2|{p} sabia que não era.']],
+  ['Aposta do jogo','{p} aposta com você o resultado do clássico.',['Apostar um almoço|?50 h+6|Ganhei o almoço.|$-40 bond+4|Paguei o almoço rindo.','Não apostar|h+0|Sem graça.']],
+  ['Colega encrenqueiro','{p} arruma briga com todo mundo da equipe.',['Conversar a sós|?50 bond+8|{p} melhorou.|pinimigo|Agora briga comigo também.','Reclamar com o chefe|psai|{p} foi transferido.']],
+]);
+pack({k:'Trabalho',w:1.1,cd:10,min:16,when:m=>NP(m)&&!!m.job&&!m.job.spc&&!m.job.hero,who:'boss'},[
+  ['Reunião de feedback','{p} marca uma reunião de feedback com você.',['Ouvir as críticas com calma|perf+4 bond+6|Saí com metas claras.','Se defender de tudo|bond-6|{p} anotou "resistente a críticas".']],
+  ['Chefe aniversariante','É aniversário de {p}.',['Organizar uma surpresa com a equipe|bond+12 perf+2|{p} ficou emocionad{o2}.','Só dar parabéns|bond+2|Simples.']],
+  ['Chefe novo','A empresa trocou de chefe: {p} chegou com ideias novas.',['Apoiar as mudanças|perf+4 bond+8|{p} me escolheu como braço direito.','Resistir|bond-8|{p} me marcou.']],
+  ['Chefe sumido','{p} passa o dia todo fora e deixa tudo nas suas costas.',['Assumir e fazer bem|perf+8 h-4|A diretoria percebeu.','Reclamar com o RH|bond-10|{p} ficou sabendo.']],
+  ['Viagem com o chefe','{p} te leva numa viagem de negócios.',['Impressionar|?sm perf+10 bond+8|{p} disse que vai me indicar para promoção.|bond+2|Fiquei nervos{o}.','Só cumprir tabela|perf+2|Viagem tranquila.']],
+  ['Chefe bêbado','Na festa da firma, {p} bebeu demais e está falando besteira.',['Levar para casa|bond+12|{p} me agradeceu discretamente na segunda.','Filmar|bond-15 k-6|O vídeo rodou a empresa toda.']],
+  ['Pedido de folga','Você precisa de folga e {p} está de mau humor.',['Pedir com jeito|?50 h+4|Consegui.|h-2|Não consegui.','Faltar sem avisar|bond-12 perf-6|Levei advertência.']],
+]);
+pack({k:'Carreira',w:1.1,cd:8,min:14,when:m=>NP(m)&&!!m.job&&!!m.job.spc,who:'spcEq'},[
+  ['Camarim','{p} divide o camarim com você antes da grande estreia.',['Conversar para acalmar|bond+10 h+4|Entramos juntos no palco, rindo.','Ficar no seu canto|h+0|Concentração.']],
+  ['Fofoca na imprensa','A imprensa diz que você e {p} estão brigados.',['Desmentir juntos|bond+8 f+2|A foto abraçados viralizou.','Não comentar|bond-4|O boato cresceu.']],
+  ['Colega lesionado','{p} se lesionou antes da maior apresentação do ano.',['Visitar|bond+10|{p} ficou feliz.','Aproveitar a vaga|perf+6 bond-8|Brilhei no lugar dele.']],
+  ['Contrato melhor','{p} conta que recebeu uma proposta melhor de outro lugar.',['Torcer por {ele}|bond+8 psai|{p} foi embora com minha bênção.','Pedir para ficar|?50 bond+6|{p} ficou.|psai|{p} foi mesmo assim.']],
+  ['Ensaio até tarde','{p} chama para ensaiar até de madrugada.',['Ir|perf+6 bond+8 hl-2|Ficou perfeito.','Ir dormir|hl+2|Descansad{o}, pelo menos.']],
+  ['Dupla famosa','O público adora quando você e {p} aparecem juntos.',['Fazer mais coisas juntos|f+4 bond+8|Viramos uma dupla.','Querer brilhar sozinh{o}|f+2 bond-6|{p} ficou chatead{o2}.']],
+  ['Colega iniciante','{p} acabou de chegar e está perdid{o2}.',['Ajudar|bond+12 k+4|{p} diz que sou sua inspiração.','Deixar aprender sozinh{o2}|h+0|Todo mundo começa assim.']],
+  ['Viagem em turnê','Numa turnê, você e {p} dividem o quarto de hotel.',['Virar parceiros de quarto|bond+10 pamigo|Amizade de estrada.','Pedir quarto separado|$-500|Privacidade.']],
+]);
+
+// ===== Mais eventos com membros (parte 3): mais escola e trabalho, fiéis, gabinete, funcionários e corte =====
+pack({k:'Escola',w:1,cd:9,min:6,max:25,when:NP,who:'clube'},[
+  ['Apelido no time','O time inteiro passou a te chamar pelo apelido que {p} inventou.',['Assumir o apelido|bond+8 h+4|Agora todo mundo me chama assim.','Pedir para parar|bond-4|Continuaram, só que escondido.']],
+  ['Festa da vitória','{p} faz uma festa em casa para comemorar o título.',['Ir|bond+10 h+8|A melhor festa do ano.','Não ir|bond-4|Vi tudo pelos stories.']],
+  ['Colega sem dinheiro','{p} não tem dinheiro para a inscrição do campeonato.',['Pagar por {ele}|$-100 bond+15 pamigo|{p} nunca esqueceu.','Fazer uma vaquinha|bond+8 k+3|O time inteiro ajudou.']],
+  ['Disputa de capitão','O técnico vai escolher entre você e {p} para capitão.',['Indicar {p}|bond+12 k+4|{p} me abraçou na frente de todos.','Lutar pela vaga|?50 h+6|Virei capitão.|bond-6|{p} foi escolhid{o2}.']],
+  ['Trote','{p} prega uma peça em você: encheu sua mochila de areia.',['Revidar com outra peça|bond+6 h+6|Guerra de pegadinhas.','Contar ao técnico|bond-8|{p} ficou de castigo.']],
+  ['Medo de perder','{p} tem crises de ansiedade antes dos jogos.',['Ajudar a respirar|bond+12|{p} jogou o melhor jogo da vida.','Dizer para ser forte|bond-2|Não ajudou muito.']],
+  ['Torcida de um só','Nos jogos, só a mãe de {p} grita na arquibancada. E grita muito.',['Fazer amizade com a mãe|bond+8 h+4|Agora ela grita meu nome também.','Rir disso|bond-4|{p} ficou envergonhad{o2}.']],
+  ['Colega de outra escola','{p} vai mudar para o time rival.',['Desejar sorte|bond+6 psai|Nos enfrentamos na final. Abraço no fim do jogo.','Chamar de traidor|pinimigo|O clássico ficou pessoal.']],
+]);
+pack({k:'Escola',w:1,cd:9,min:6,max:30,when:m=>NP(m)&&!!m.edu.cur,who:'classmate'},[
+  ['Fofoca da turma','{p} espalhou que você gosta de alguém da sala.',['Rir e negar|h+2 bond-2|Ninguém acreditou na negação.','Confrontar {ele}|bond-8|{p} disse que foi brincadeira.']],
+  ['Ajuda na lição','{p} não entende nada de matemática e pede ajuda.',['Explicar|bond+10 sm+2|Ensinar também ensina.','Passar a resposta|bond+4 k-2|{p} copiou tudo.']],
+  ['Lanche trocado','{p} propõe trocar o lanche todo dia.',['Topar|bond+6 h+2|Às vezes eu ganho, às vezes perco.','Recusar|h+0|Meu lanche é meu.']],
+  ['Viagem de formatura','{p} quer dividir o quarto com você na viagem de formatura.',['Aceitar|bond+12 pamigo|Histórias para a vida inteira.','Recusar|bond-4|Fiquei com outra pessoa.'],{min:14}],
+  ['Primeiro emprego','{p} conseguiu o primeiro emprego e está todo orgulhoso.',['Comemorar com {ele}|bond+8|{p} pagou o lanche.','Ficar com inveja|h-4|Por que não eu?'],{min:15}],
+  ['Colega briguento','{p} quer brigar com você na saída.',['Conversar antes|?sm bond+4|Era um mal-entendido.|hl-6 pinimigo|Brigamos mesmo.','Não ir à saída|h-2|{p} me chamou de covarde.']],
+  ['Grupo de estudos','{p} cria um grupo de estudos para o vestibular.',['Entrar|grade+5 bond+8 sm+2|Passamos todos!','Estudar sozinh{o}|grade+3|Cada um no seu ritmo.'],{min:15}],
+  ['Desabafo','{p} conta que os pais estão se divorciando.',['Ouvir com atenção|bond+12|{p} disse que precisava muito disso.','Mudar de assunto|bond-4|{p} se fechou.']],
+  ['Show juntos','{p} tem dois ingressos para um show e te convida.',['Ir|bond+10 h+10|Gritamos todas as músicas.','Recusar|bond-2|{p} foi com outra pessoa.'],{min:13}],
+  ['Ex da escola','{p} terminou com o namorado e está muito triste.',['Consolar com sorvete|bond+10|Tomamos um litro.','Dizer que é melhor assim|bond+2|Verdade, mas doeu.'],{min:13}],
+]);
+pack({k:'Escola',w:1,cd:12,min:6,max:30,when:m=>NP(m)&&!!m.edu.cur,who:'prof'},[
+  ['Projeto especial','{p} te convida para um projeto de iniciação científica.',['Aceitar|sm+5 bond+10 grade+3|Meu nome num artigo!','Recusar|h+0|Muito trabalho.'],{min:14}],
+  ['Professor substituto','{p} está substituindo e a turma faz bagunça.',['Ajudar a controlar a turma|bond+10 k+3|{p} me agradeceu depois.','Bagunçar junto|bond-8 h+4|Divertido, mas maldoso.']],
+  ['Pergunta difícil','Você faz uma pergunta que {p} não sabe responder.',['Esperar a resposta na próxima aula|bond+6 sm+2|{p} trouxe uma resposta incrível.','Tirar sarro|bond-12|A turma riu. {p} não.']],
+  ['Recuperação','{p} te dá uma chance extra para não reprovar.',['Agarrar a chance|grade+8 bond+8|Passei raspando.','Desperdiçar|grade-4 bond-6|Reprovei na matéria.']],
+  ['Professor no shopping','Você encontra {p} no shopping fazendo compras.',['Cumprimentar|bond+6|{p} ficou feliz em ser lembrad{o2}.','Fingir que não viu|h+0|Professor fora da escola é estranho.']],
+]);
+pack({k:'Trabalho',w:1,cd:9,min:16,when:m=>NP(m)&&!!m.job&&!m.job.spc&&!m.job.hero,who:'colega'},[
+  ['Colega some com o grampeador','Seu grampeador sumiu e está na mesa de {p}.',['Pegar de volta sem falar nada|h+2|Guerra silenciosa de material de escritório.','Comprar dois grampeadores|$-20 bond+4|Um de presente para {p}.']],
+  ['Dica de investimento','{p} jura que tem uma dica de investimento infalível.',['Investir|?40 $+3000|Deu certo!|$-2000|Perdi dinheiro. {p} também.','Recusar|h+0|Infalível nada é.']],
+  ['Colega estagiário','{p} é estagiário e está sobrecarregado.',['Ajudar e ensinar|bond+12 k+4|{p} foi efetivado e disse que foi por minha causa.','Passar mais tarefas|perf+2 bond-8|Ele aprendeu na marra.']],
+  ['Reunião chata','Numa reunião de três horas, {p} manda mensagens engraçadas para você.',['Responder|bond+8 h+4|Quase ri alto na frente do diretor.','Ignorar|perf+1|Foco.']],
+  ['Carona','{p} mora perto e oferece carona todo dia.',['Aceitar e dividir a gasolina|bond+10 $-50|Viramos amigos no trânsito.','Recusar|h+0|Gosto do meu ônibus.']],
+  ['Rivalidade amigável','Você e {p} competem para bater a meta primeiro.',['Competir|perf+6 bond+4|Os dois bateram a meta. Pizza para todos.','Não entrar na disputa|h+0|Tranquilo.']],
+  ['Colega em luto','O pai de {p} morreu.',['Ir ao velório|bond+12 k+4|{p} me abraçou e chorou.','Mandar flores|bond+6|{p} agradeceu.']],
+  ['Colega demitido','{p} foi demitido de surpresa.',['Ajudar a achar outro emprego|bond+12 pamigo|{p} conseguiu emprego em um mês.','Desejar sorte|psai|{p} recolheu as coisas numa caixa.']],
+  ['Planta da mesa','{p} pede para você regar a planta dela nas férias.',['Regar todo dia|bond+8|Voltou viva e maior.','Esquecer|bond-6|Morreu. Comprei outra igual.']],
+  ['Viralizou','{p} postou um vídeo da equipe e viralizou.',['Aproveitar a fama|f+2 bond+6|Todo mundo quer conhecer a "equipe do vídeo".','Pedir para apagar|bond-4|Já era tarde.']],
+  ['Caso no escritório','Você descobre que {p} tem um caso com alguém casado da empresa.',['Guardar segredo|bond+6|Não é da minha conta.','Contar para alguém|bond-12 k-4|A fofoca chegou em {p}.']],
+  ['Equipe de Natal','{p} organiza a decoração de Natal do escritório.',['Ajudar|bond+8 h+4|O escritório ficou lindo.','Achar brega|bond-4|{p} ficou chatead{o2}.']],
+]);
+pack({k:'Trabalho',w:1,cd:12,min:16,when:m=>NP(m)&&!!m.job&&!m.job.spc&&!m.job.hero,who:'boss'},[
+  ['Chefe pede opinião','{p} pede sua opinião sincera sobre um projeto ruim.',['Ser sincer{o}|?50 bond+8 perf+4|{p} agradeceu a honestidade.|bond-6|{p} não gostou de ouvir.','Elogiar|bond+2 k-2|Mais um sim-senhor.']],
+  ['Chefe sobrecarregado','{p} está à beira de um colapso de tanto trabalho.',['Oferecer ajuda|bond+10 perf+4|{p} disse que vai lembrar disso.','Ficar na sua|h+0|Cada um com sua cruz.']],
+  ['Chefe com favorito','{p} claramente favorece outro colega.',['Trabalhar mais|perf+6|{p} começou a me notar.','Reclamar|bond-8|Piorou.']],
+  ['Chefe aposentando','{p} vai se aposentar e quer indicar um substituto.',['Pedir a indicação|?perf promo bond+6|Fui indicad{o}!|bond+2|{p} indicou outra pessoa.','Desejar uma boa aposentadoria|bond+8|Ele me deu o telefone dele.']],
+  ['Chefe em público','{p} te dá uma bronca na frente de clientes.',['Engolir e conversar depois|bond+4|{p} pediu desculpas em particular.','Responder na hora|bond-12 perf-6|Clima péssimo.']],
+]);
+pack({k:'Carreira',w:1,cd:10,min:14,when:m=>NP(m)&&!!m.job&&!!m.job.spc,who:'spcEq'},[
+  ['Parceria criativa','{p} quer escrever algo junto com você.',['Topar|perf+6 bond+10|Ficou o melhor trabalho da carreira.','Recusar|h+0|Prefiro trabalhar sozinh{o}.']],
+  ['Ego','{p} acha que é a estrela da equipe.',['Deixar {ele} brilhar|bond+6 k+2|Paz no grupo.','Disputar o destaque|perf+4 bond-8|Climão.']],
+  ['Escândalo do colega','{p} se envolveu num escândalo e a imprensa pergunta sua opinião.',['Defender|bond+10 f-1|{p} agradeceu.','Se afastar|bond-10 f+1|Melhor não me envolver.']],
+  ['Aniversário no trabalho','A equipe faz uma festa surpresa para {p}.',['Fazer um discurso|bond+10 h+4|{p} chorou.','Só cantar parabéns|bond+2|Normal.']],
+  ['Colega te copia','{p} copia o seu estilo descaradamente.',['Tratar como elogio|bond+4 k+2|Imitação é homenagem.','Reclamar publicamente|bond-10 f+2|Polêmica nas redes.']],
+  ['Viagem internacional','{p} e você são escalados para um trabalho no exterior.',['Ir juntos|bond+10 c:trips h+6|Uma semana inesquecível.','Ir sozinh{o}|c:trips|Trabalho é trabalho.']],
+]);
+pack({k:'Religião',w:1,cd:9,min:18,when:m=>NP(m)&&!!m.seita,who:'fiel'},[
+  ['Fiel generoso','{p} doou o carro para {seita}.',['Agradecer em público|bond+10 caixa+20000|{p} se emocionou.','Recusar o carro|bond+4 k+4|{p} insistiu, mas aceitei só o abraço.']],
+  ['Fiel cantor','{p} canta lindamente nos cultos.',['Colocar no coral|bond+8 devo+3|Os cultos ficaram mais bonitos.','Deixar como está|h+0|Nem todos querem holofote.']],
+  ['Fiel brigado com a família','{p} brigou com a família por causa de {seita}.',['Ajudar a fazer as pazes|bond+8 k+4 susp-2|A família agradeceu.','Dizer que o grupo é a nova família|bond+6 devo+3 susp+3 k-4|{p} se afastou de todos.']],
+  ['Fiel pede milagre','{p} pede um milagre para o filho doente.',['Orar e indicar um hospital|k+6 bond+8|O filho melhorou.','Prometer o milagre|devo+4 k-6|Agora preciso entregar.']],
+  ['Fiel jovem','{p} tem 18 anos e quer largar a faculdade para servir {seita}.',['Mandar terminar os estudos|bond+6 k+6|{p} terminou e voltou para ajudar.','Aceitar|devo+4 k-6|Mais um servo em tempo integral.']],
+  ['Disputa entre fiéis','{p} brigou com outro fiel por causa de um cargo.',['Mediar|?sm bond+6 devo+2|Paz no grupo.|bond-4|Ninguém ficou satisfeito.','Tomar partido de {p}|bond+10 devo-3|O outro saiu chateado.']],
+  ['Testemunho emocionante','{p} conta no culto como {seita} mudou a vida dele.',['Aplaudir de pé|bond+8 devo+5|O templo inteiro chorou.','Pedir para gravar|sfama+3 bond+4|Virou vídeo de divulgação.']],
+  ['Fiel some com dinheiro','{p} sumiu com o dinheiro da cantina do grupo.',['Perdoar em público|bond+4 devo+3 k+4|{p} voltou envergonhad{o2} e devolveu tudo.','Denunciar à polícia|psai susp-2|{p} foi preso.']],
+  ['Fiel apaixonado','{p} confessa que está apaixonad{o2} por você.',['Corresponder|?55 pnamoro|Romance no grupo.|bond+4|Ficou só na amizade.','Recusar com carinho|bond+2|{p} entendeu.']],
+  ['Fiel quer sair','{p} diz que quer sair de {seita}.',['Deixar ir em paz|psai k+6|{p} me abraçou na saída.','Convencer a ficar|?50 bond+6 devo+2|{p} ficou.|psai|{p} foi mesmo assim.']],
+]);
+pack({k:'Política',w:1,cd:9,min:21,when:m=>NP(m)&&!!m.office,who:'gabinete'},[
+  ['Discurso escrito','{p} escreveu um discurso brilhante para você.',['Dar o crédito|bond+10 appr+3|O discurso foi um sucesso.','Fingir que é seu|appr+4 bond-6|{p} ficou magoad{o2}.']],
+  ['Assessor ambicioso','{p} quer concorrer ao seu cargo na próxima eleição.',['Apoiar|bond+12 k+4|Formei um sucessor.','Sabotar|pinimigo appr+2|Agora tenho um inimigo dentro de casa.']],
+  ['Viagem oficial','{p} organiza uma viagem oficial impecável.',['Elogiar publicamente|bond+8 appr+2|Equipe motivada.','Reclamar dos detalhes|bond-6|Ninguém é perfeito.']],
+  ['Assessor doente','{p} precisa de uma cirurgia cara.',['Ajudar a pagar|$-10000 bond+15 k+6|{p} vai lembrar disso para sempre.','Desejar melhoras|bond+2|É o que dá para fazer.']],
+  ['Segredo de Estado','{p} viu documentos que não devia.',['Confiar no silêncio|?50 bond+6|{p} guardou o segredo.|appr-8|{p} contou para a imprensa.','Demitir|psai appr-2|Melhor prevenir.']],
+  ['Estagiário brilhante','{p}, estagiário do gabinete, sugere um projeto de lei muito bom.',['Apresentar o projeto citando {ele}|appr+6 bond+12|{p} virou assessor efetivo.','Apresentar como ideia sua|appr+6 k-4|Ninguém soube.']],
+  ['Briga no gabinete','{p} brigou feio com outro assessor.',['Mediar|bond+4|Resolvido.','Demitir os dois|psai appr+2|Gabinete mais silencioso.']],
+  ['Romance escondido','A imprensa fotografa você jantando com {p}.',['Assumir o relacionamento|?50 pnamoro appr-2|O povo achou romântico.|appr-6|Escândalo.','Dizer que foi reunião de trabalho|h-2|Ninguém acreditou.']],
+]);
+pack({k:'Empresa',w:1,cd:9,min:18,when:m=>NP(m)&&!!m.biz,who:'func'},[
+  ['Funcionário antigo','{p} está na empresa desde o primeiro dia.',['Dar uma participação nos lucros|$-8000 bond+15 biz+2|{p} chorou de emoção.','Dar uma placa de homenagem|bond+6|Ficou na parede da recepção.']],
+  ['Licença-maternidade','{p} vai ter um bebê e pede licença estendida.',['Conceder|bond+12 k+6|A equipe inteira ficou orgulhosa da empresa.','Negar|bond-12 k-6|{p} pediu demissão.']],
+  ['Funcionário atrasado','{p} chega atrasado todo dia.',['Conversar|?50 bond+6|Era problema de transporte. Ajustei o horário.|bond-4|Continuou atrasando.','Demitir|psai|Fora.']],
+  ['Inventor da empresa','{p} inventou um produto novo na hora do almoço.',['Lançar com o nome de {ele}|biz+10 bond+12|Sucesso de vendas.','Lançar sem dar crédito|biz+10 bond-12 k-6|{p} foi para a concorrência.']],
+  ['Greve','{p} lidera uma greve por melhores salários.',['Negociar|$-6000 bond+8 biz+2|Acordo fechado.','Demitir o líder|psai biz-4 k-6|A greve piorou.']],
+  ['Funcionário ferido','{p} se machucou no trabalho.',['Pagar o tratamento|$-4000 bond+12 k+4|{p} voltou mais leal.','Deixar com o plano de saúde|bond-4|{p} ficou chateado.']],
+  ['Proposta da concorrência','A concorrência quer contratar {p}.',['Cobrir a oferta|$-5000 bond+10|{p} ficou.','Deixar ir|psai|Boa sorte.']],
+  ['Festa de aniversário da empresa','{p} organizou a festa de aniversário da empresa.',['Fazer um discurso agradecendo|bond+10|Equipe unida.','Só aparecer|bond+2|Ok.']],
+  ['Funcionário infeliz','{p} parece infeliz há semanas.',['Perguntar o que houve|bond+12 k+3|Era sobrecarga. Contratei ajuda.','Ignorar|bond-6|{p} pediu demissão.']],
+  ['Romance no escritório','{p} te convida para um café depois do expediente.',['Ir|?50 pnamoro|Romance no trabalho.|bond+4|Só um café.','Recusar|h+0|Chefe não namora funcionário.']],
+]);
+pack({k:'Realeza',w:1,cd:10,when:m=>NP(m)&&!!m.royal&&!m.royal.abd,who:'corte'},[
+  ['Baile real','{p} te convida para a primeira dança do baile.',['Dançar|bond+10 pop+2|A corte inteira aplaudiu.','Recusar|bond-6|{p} ficou humilhad{o2}.'],{min:14}],
+  ['Mordomo leal','{p} sabe todos os segredos do palácio.',['Dar um aumento|$-20000 bond+12|Lealdade garantida.','Ficar desconfiad{o}|bond-6|{p} sentiu a desconfiança.']],
+  ['Conspiração','{p} conta que alguém da corte conspira contra você.',['Investigar|?sm pop+4 bond+10|{p} tinha razão.|bond-4|Era intriga.','Ignorar|h-2|Prefiro não saber.']],
+  ['Presente real','{p} te dá um presente de família, de 300 anos.',['Aceitar com honra|bond+10 h+4|Uma relíquia.','Recusar|bond-4|{p} ficou ofendid{o2}.']],
+  ['Guarda ferido','{p} foi ferido protegendo você de um invasor.',['Visitar no hospital|bond+15 pop+4|A imprensa fotografou. O povo amou.','Mandar flores|bond+4|Gesto real.']],
+  ['Bobo da corte','{p} faz uma piada sobre você na frente de diplomatas.',['Rir junto|pop+4 bond+6|Os diplomatas adoraram.','Banir do palácio|psai pop-2|O palácio ficou sem graça.']],
+  ['Herdeiro ilegítimo','{p} insinua ser seu meio-irmão.',['Fazer um teste de DNA|?30 bond+10|Era verdade! Um novo membro da família.|pinimigo|Era mentira.','Abafar|h-2|Segredo de família.']],
+]);
+
+// ===== Mais eventos com membros (parte 4): equipe de heróis e os mundos paralelos =====
+pack({k:'Superpoderes',w:1.2,cd:20,scen:'heroi',when:HW(()=>!!hTeam()),who:'heroEq'},[
+  ['Poder descontrolado','O poder de {p} saiu do controle no meio da cidade.',['Ajudar a controlar|?pwr bond+12 rep+6|Conseguimos juntos.|hl-12 bond+6|Saí ferid{o}, mas salvei {p}.','Isolar a área e esperar|rep+2|{p} se acalmou sozinh{o2}.']],
+  ['Codinome ridículo','{p} quer mudar o próprio codinome e pede sua opinião.',['Sugerir um nome épico|bond+8|{p} adorou.','Sugerir algo engraçado|bond+4 h+4|{p} riu e manteve o antigo.']],
+  ['Herói novato','{p} entrou na equipe e está nervos{o2}.',['Treinar com {ele}|bond+10 pw+3|{p} evoluiu rápido.','Deixar com o líder|h+0|Cada um com seu mentor.']],
+  ['Uniforme combinando','{p} quer que vocês usem uniformes combinando.',['Topar|bond+8 rep+3|Viramos a dupla favorita da imprensa.','Recusar|bond-4|Prefiro meu estilo.']],
+  ['Família do colega','A família de {p} está sendo ameaçada por {inimigo}.',['Proteger a família de {ele}|?pwr bond+15 rep+6|Ninguém se feriu.|hl-15 bond+8|Lutei até o fim.','Avisar a polícia|bond+2|Fiz o mínimo.']],
+  ['Disputa pela liderança','{p} quer ser o líder da equipe.',['Apoiar|bond+10 hperf+2|{p} virou líder e me fez vice.','Disputar|?car hperf+6|Fui eleit{o}.|bond-8 pinimigo|{p} venceu e ficou com raiva.']],
+  ['Missão sem permissão','{p} quer fazer uma missão sem avisar o líder.',['Ir junto|?pwr rep+8 bond+10|Deu certo.|hperf-8|O líder descobriu.','Avisar o líder|hperf+4 bond-8|{p} me chamou de dedo-duro.']],
+  ['Herói cansado','{p} diz que quer pendurar a capa.',['Convencer a ficar|?car bond+8|{p} ficou.|psai|{p} se aposentou.','Apoiar a decisão|psai k+3|Fizemos uma festa de despedida.']],
+  ['Selfie com fã','Uma fã pede selfie com você e {p}.',['Topar|rep+3 bond+4 sec-2|A foto viralizou.','Recusar|sec+2|Identidade em primeiro lugar.']],
+  ['Ferimento escondido','{p} esconde um ferimento grave para não sair das missões.',['Obrigar {ele} a se tratar|bond+8|{p} ficou bom em duas semanas.','Respeitar|bond+2|{p} piorou.']],
+  ['Herói com fama','{p} ganhou um programa de TV.',['Comemorar|bond+8|{p} me chamou como convidad{o}.','Sentir inveja|h-4|Por que não eu?']],
+  ['Ex-vilão na equipe','{p} era vilão antes de entrar para a equipe.',['Dar uma chance|bond+10 k+4|{p} provou que mudou.','Desconfiar|bond-6|{p} sentiu a desconfiança.']],
+  ['Poderes trocados','Um acidente troca seus poderes com os de {p} por um dia.',['Aproveitar a experiência|h+8 bond+8|Entendemos melhor um ao outro.','Desesperar|h-6|Que dia horrível.']],
+  ['Pedido de casamento','{p} vai pedir alguém em casamento no meio de uma missão e quer sua ajuda.',['Ajudar a organizar|bond+12 h+6|Fogos de artifício com superpoderes.','Dizer que é loucura|bond-4|Foi um sucesso mesmo sem mim.']],
+  ['Traidor revelado','{p} entregou a equipe para {inimigo}.',['Lutar contra {ele}|?pwr pinimigo rep+8|Venci, mas perdi um amigo.|hl-20|{p} me venceu e fugiu.','Tentar convencer a voltar|?40 bond+10|{p} chorou e se arrependeu.|psai|{p} fugiu.']],
+]);
+pack({k:'Base',w:1.3,cd:12,scen:'zumbi',when:ZW(sc=>!!sc.zb&&sc.zb.pop>0),gente:'zbase'},[
+  ['Aniversário na base','Hoje é aniversário de {mor}.',['Fazer um bolo com o que tiver|-it:@comida glv+12 zmoral+5|Bolo de biscoito com uma vela de aniversário achada num saque.','Desejar parabéns|glv+4|Um abraço já vale muito.']],
+  ['Pesadelos','{mor} grita toda noite com pesadelos.',['Conversar com {moeln}|glv+10 h+2|{mor} contou o que viu no começo do fim do mundo.','Dar um calmante|-it:calm glv+6|Dormiu a noite inteira.']],
+  ['Horta','{mor} sabe plantar e quer cuidar da horta.',['Deixar|glv+8 zcom+6|Primeira colheita de tomates.','Preferir outra pessoa|glv-4|{mor} ficou chatead{mo}.']],
+  ['Criança órfã','{mor} adotou uma criança órfã que chegou na base.',['Ajudar com comida extra|-it:@comida glv+10 zmoral+4|A criança sorriu pela primeira vez.','Deixar com {moeln}|glv+2|Eles se viram.']],
+  ['Fofoca na base','{mor} espalha que você esconde comida para si.',['Abrir o estoque para todos verem|glv+6 zmoral+4|A fofoca morreu.','Ameaçar|glv-12 zmoral-4|Ficaram com medo de mim.']],
+  ['Gênio da rádio','{mor} consegue fazer o rádio pegar uma frequência distante.',['Ouvir juntos|glv+10 h+6|Uma voz falou de outros sobreviventes.','Mandar desligar|glv-4|Barulho atrai zumbis.']],
+  ['Ex-médico','{mor} era médic{mo} antes de tudo.',['Colocar na enfermaria|glv+12 hl+10|Os curativos ficaram profissionais.','Chamar para o grupo|?50 gcrew|{mor} pegou a maleta e veio.|glv-2|{mor} prefere ficar.']],
+  ['Casal brigando','{mor} briga com o parceiro todo dia.',['Mediar|glv+6 zmoral+3|Fizeram as pazes.','Separar os dois de quarto|glv-2 zmoral+1|Silêncio na base.']],
+  ['Saudade da família','{mor} encontrou uma foto da família perdida.',['Ajudar a procurar notícias|glv+12 h-2|Não achamos nada, mas {mor} se sentiu menos sozinh{mo}.','Dizer para seguir em frente|glv-4|{mor} chorou a noite toda.']],
+  ['Morador armado','{mor} esconde uma arma no quarto.',['Pedir para entregar|?50 glv+4 it:pistola|{mor} entregou.|glv-8|{mor} se recusou.','Deixar|glv+4|Todo mundo tem medo.']],
+  ['Herói da noite','{mor} matou sozinh{mo} três zumbis que entraram pela cerca.',['Dar uma medalha improvisada|glv+12 zmoral+6|Uma tampinha de garrafa pendurada num barbante.','Agradecer|glv+6|Herói silencioso.']],
+  ['Infecção','{mor} está com uma infecção feia no pé.',['Usar o último antibiótico|-it:@remedio glv+10|{mor} vai ficar bem.','Esperar|?50 glv+2|A infecção passou.|gmorre zmoral-6|A infecção se espalhou.']],
+  ['Ladrão de remédios','Remédios estão sumindo e {mor} é suspeit{mo}.',['Investigar|?50 glv+4|Não era {mor}. Era um rato.|gsai zmoral-2|Era mesmo. Expulsei.','Acusar direto|glv-10 zmoral-3|{mor} jurou inocência.']],
+  ['Cozinheiro de mão cheia','{mor} faz uma sopa incrível com quase nada.',['Nomear cozinheir{mo} oficial|glv+10 zmoral+6|Comida boa, moral alta.','Agradecer|glv+4 h+4|A melhor sopa do apocalipse.']],
+  ['Nascimento na base','A companheira de {mor} deu à luz.',['Fazer uma festa|zmoral+10 glv+8 bebe|Um choro de bebê no fim do mundo.','Organizar turnos de cuidado|zmoral+4 bebe|Todo mundo ajudou.']],
+  ['Pedido de casamento','{mor} quer se casar na base.',['Celebrar|zmoral+8 glv+10|Casamento com alianças de arame.','Dizer que não é hora|glv-4|Casaram escondido.']],
+  ['Morador sabe lutar','{mor} era instrutor de luta antes do fim do mundo.',['Pedir aulas para todos|glv+8 zdef+4 fight+3|A base inteira aprendeu a se defender.','Chamar para o grupo|?50 gcrew|{mor} topou na hora.|glv-2|{mor} prefere proteger a base.']],
+  ['Medo de sair','{mor} nunca mais saiu da base desde que chegou.',['Levar numa saída curta|?60 glv+10 h+4|{mor} voltou sorrindo.|hl-8 glv+4|Fomos atacados, mas voltamos.','Respeitar|glv+4|Cada um no seu tempo.']],
+  ['Velho sábio','{mor}, o mais velho da base, conta histórias para as crianças.',['Ouvir também|glv+8 h+6|Histórias de antes, bonitas e tristes.','Pedir que ensine algo útil|glv+4 zxp+10|Ensinou a fazer armadilhas.']],
+  ['Querendo liderar','{mor} acha que lideraria a base melhor que você.',['Dar uma função de liderança|glv+10 zmoral+3|{mor} organizou os turnos muito bem.','Lembrar quem manda|glv-10|{mor} ficou ressentid{mo}.']],
+]);
+pack({k:'Vila',w:1.3,cd:12,scen:'isekai',when:ZW(sc=>!!sc.vila&&sc.vila.pop>0),gente:'vila'},[
+  ['Ferreiro talentoso','{mor} forjou uma espada incrível.',['Comprar a espada|ouro-40 it:runica glv+8|Uma lâmina que brilha à noite.','Elogiar|glv+6|{mor} ficou orgulhos{mo}.']],
+  ['Festa da colheita','{mor} organiza a festa da colheita da vila.',['Ajudar com ouro|ouro-20 vfel+8 glv+10|A vila dançou até de madrugada.','Só aparecer|vfel+3|Boa festa.']],
+  ['Fofoqueira da vila','{mor} sabe da vida de todo mundo.',['Usar as informações|glv+4 vfel+2|Descobri quem estava roubando galinhas.','Pedir discrição|glv-4|{mor} ficou ofendid{mo}.']],
+  ['Aprendiz de mago','{mor} quer estudar magia e pede para você ensinar.',['Ensinar|mana-10 glv+12|{mor} acendeu a primeira chama mágica.','Recusar|glv-4|Magia é perigosa.']],
+  ['Disputa de terras','{mor} diz que o vizinho invadiu as terras dele.',['Julgar com sabedoria|?sm vfel+4 glv+6|Os dois ficaram satisfeitos.|vfel-2|Ninguém ficou feliz.','Ignorar|vfel-3|A briga virou rixa de família.']],
+  ['Morador doente','{mor} pegou uma doença estranha.',['Usar magia de cura|mana-20 glv+12|{mor} se curou.','Chamar o curandeiro|ouro-15 glv+8|Curad{mo}.','Esperar|?50 glv+2|Melhorou.|gmorre vfel-4|Não resistiu.']],
+  ['Taverneiro','{mor} abriu uma taverna e quer seu apoio.',['Investir|ouro-50 vcom+6 vfel+6 glv+10|A taverna virou o coração da vila.','Recusar|glv-4|Ele abriu do mesmo jeito.']],
+  ['Bardo','{mor} compôs uma música sobre você.',['Ouvir na taverna|glv+10 h+6 trep+3|A vila inteira canta.','Pedir que mude a letra|glv-2|A letra era meio exagerada.']],
+  ['Criança travessa','O filho de {mor} quebrou a janela da sua casa.',['Perdoar|glv+8 vfel+2|O garoto pediu desculpas.','Cobrar o conserto|ouro+10 glv-6|{mor} pagou de cara feia.']],
+  ['Morador quer partir','{mor} quer se mudar para a capital.',['Deixar ir com uma carta de recomendação|gsai glv+6 trep+2|{mor} prometeu falar bem da vila.','Convencer a ficar|?50 glv+6|{mor} ficou.|gsai|Foi mesmo assim.']],
+  ['Casamento na vila','{mor} vai se casar e quer que você celebre.',['Celebrar|vfel+8 glv+12|Uma festa linda.','Mandar um presente|ouro-10 glv+6|Muito obrigad{mo}!']],
+  ['Ataque de goblins','Goblins atacaram a fazenda de {mor}.',['Defender pessoalmente|?pwr glv+12 vdef+3|Expulsamos os goblins.|hl-10 glv+6|Me feri, mas a fazenda está salva.','Mandar a guarda|vdef+2 glv+4|Resolvido.']],
+  ['Herói local','{mor} salvou uma criança do rio.',['Fazer uma homenagem|glv+12 vfel+6|A vila inteira aplaudiu.','Agradecer em particular|glv+6|Humilde.']],
+  ['Morador desconfiado','{mor} acha que você é um forasteiro sem direito de governar.',['Conquistar a confiança|?car glv+12|{mor} virou meu defensor.|glv-4|Continua desconfiad{mo}.','Ignorar|glv-6 vfel-1|A desconfiança se espalhou.']],
+  ['Nascimento de gêmeos','A esposa de {mor} teve gêmeos.',['Presentear com ouro|ouro-20 glv+12 vpop+2|A família chorou de gratidão.','Visitar|vpop+2 glv+6|Os bebês choram muito.']],
+]);
+pack({k:'Cidade',w:1.2,cd:12,scen:'isekai',when:ZW(sc=>!sc.vila&&!!sc.morada),gente:'town'},[
+  ['Vizinha curiosa','{mor}, {mprof}, pergunta de onde você veio.',['Contar que é de outro mundo|glv+8 h+4|{mor} achou fascinante.','Inventar uma vila distante|glv+2|{mor} acreditou.']],
+  ['Pedido de ajuda','{mor} pede ajuda para levar mercadorias até a feira.',['Ajudar|glv+10 trep+3 ouro+5|Ganhei umas moedas e um amigo.','Recusar|glv-4|Tenho coisas a fazer.']],
+  ['Aventureiro da guilda','{mor} quer formar dupla com você para missões da guilda.',['Aceitar|?60 gcrew|{mor} entrou no grupo!|glv+4|{mor} achou melhor esperar.','Recusar|h+0|Prefiro meu grupo.']],
+  ['Aula de culinária','{mor} te ensina uma receita típica da cidade.',['Aprender|glv+8 fome-10 h+4|Ensopado de cogumelo encantado.','Recusar|h+0|Não sei cozinhar nem no meu mundo.']],
+  ['Dívida','{mor} te deve dinheiro há semanas.',['Perdoar a dívida|glv+12 k+4|{mor} chorou de gratidão.','Cobrar|ouro+15 glv-8|Pagou, de cara feia.']],
+  ['Romance na cidade','{mor} te convida para o festival da cidade.',['Ir|glv+12 h+8|Dançamos até amanhecer.','Recusar|glv-4|Talvez na próxima.']],
+  ['Ladrão no mercado','{mor} foi roubad{mo} no mercado.',['Perseguir o ladrão|?pwr glv+12 trep+4|Recuperei tudo.|hl-6|O ladrão escapou.','Consolar|glv+4|Não deu para fazer nada.']],
+  ['Artesão','{mor} faz uma armadura de couro sob medida para você.',['Encomendar|ouro-35 sc.arm+1 glv+8|Ficou perfeita.','Agradecer e recusar|glv+2|Muito caro agora.']],
+  ['Morador some','{mor} desapareceu na floresta.',['Procurar|?pwr glv+15 xp+20|Achei {mor} preso numa armadilha de goblins.|hl-12|Não achei ninguém.','Avisar a guarda|glv+2|A guarda procurou.']],
+  ['Festa na casa do vizinho','{mor} dá uma festa e te convida.',['Ir|glv+8 h+8|Hidromel, música e amigos.','Não ir|glv-2|Fiquei treinando.']],
+]);
+pack({k:'Colônia',w:1.2,cd:15,scen:'marte',when:scWhen('marte'),crew:1},[
+  ['Aniversário em Marte','É aniversário de {c} e não tem bolo em Marte.',['Fazer um bolo de batata|-it:@comida clv+12 h+6|O primeiro bolo de aniversário de Marte.','Gravar um vídeo da equipe|clv+6 h+4|A família de {c} recebeu na Terra.']],
+  ['Saudade da Terra','{c} chora olhando a Terra pela escotilha.',['Fazer companhia|clv+10 h+2|Ficamos em silêncio, olhando o pontinho azul.','Dar trabalho para distrair|clv-2 ciencia+3|Funcionou, mais ou menos.']],
+  ['Descoberta','{c} acha um mineral estranho na cratera.',['Analisar juntos|ciencia+8 clv+8|Pode mudar a história da ciência.','Deixar {c} analisar sozinh{co}|ciencia+4|Bom trabalho.']],
+  ['Briga na base','{c} e outro colono brigam pelo controle da música da base.',['Fazer uma playlist compartilhada|clv+6 h+4|Paz musical.','Proibir música|clv-6 h-4|Silêncio deprimente.']],
+  ['Traje defeituoso','O traje de {c} apresenta defeito numa saída.',['Dividir seu oxigênio|o2-8 clv+15|Voltamos abraçados, respirando o mesmo ar.','Correr para a base|?50 clv+4|Deu tempo.|chp-25|{c} se feriu.']],
+  ['Planta especial','{c} conseguiu fazer uma flor nascer na estufa.',['Celebrar|clv+10 h+8|A primeira flor de Marte.','Usar o espaço para batatas|clv-6 fome-4|Prático, mas triste.']],
+  ['Colono com depressão','{c} não sai do beliche há dias.',['Conversar com cuidado|clv+12 h-2|Aos poucos, {c} voltou.','Dar ordens|clv-8|Piorou.']],
+  ['Aula de geologia','{c} dá uma aula de geologia para a equipe.',['Assistir|ciencia+5 clv+6 sm+2|Aprendi a ler as rochas.','Faltar|clv-2|Dormi.']],
+  ['Ronco','{c} ronca muito alto.',['Comprar tampões com peças da impressora|-it:pecas clv+4|Silêncio!','Reclamar|clv-6|{c} ficou envergonhad{co}.']],
+  ['Herói da colônia','{c} consertou o gerador de oxigênio sozinh{co} de madrugada.',['Homenagear|clv+12 o2+5|Medalha impressa em 3D.','Agradecer|clv+6 o2+5|Herói silencioso.']],
+]);
+pack({k:'Ilha',w:1.2,cd:15,scen:'ilha',when:scWhen('ilha'),crew:1},[
+  ['Pescaria','{c} pescou um peixe enorme.',['Dividir com todos|clv+10 fome-10|Banquete na praia.','Guardar para depois|fome-4|Precavido.']],
+  ['Saudade','{c} grava o nome da família numa pedra todo dia.',['Gravar o seu também|clv+10 h-2|Nossas famílias, lado a lado na pedra.','Deixar {c} em paz|clv+2|Cada um com seu luto.']],
+  ['Mergulho','{c} achou destroços do avião no fundo do mar.',['Mergulhar junto|?hl clv+8 it:corda|Achamos uma mala com corda e roupas.|hl-8|Quase me afoguei.','Esperar na praia|h+0|Melhor não arriscar.']],
+  ['Fogueira de histórias','{c} conta histórias de terror na fogueira.',['Contar uma também|clv+8 h+6|Ninguém dormiu.','Pedir histórias alegres|clv+4 h+4|Rimos muito.']],
+  ['Ferimento no coral','{c} cortou o pé no coral.',['Fazer um curativo|-it:@remedio chp+20 clv+8|Vai cicatrizar.','Lavar com água do mar|chp+5|Arde, mas ajuda.']],
+  ['Cabana nova','{c} quer construir uma cabana separada.',['Ajudar|abrigo+5 clv+10|Ficou linda.','Dizer que é melhor ficarem juntos|clv-4|{c} ficou chatead{co}.']],
+  ['Sinal no céu','{c} jura ter visto um avião.',['Acender a fogueira de sinal|sos+6 clv+6|Se foi um avião, agora nos viu.','Achar que é delírio|clv-6|{c} ficou magoad{co}.']],
+  ['Coco no chão','Um coco cai na cabeça de {c}.',['Cuidar do galo|clv+6 h+4|{c} riu de si mesm{co}.','Rir|clv-4 h+4|Foi engraçado. Para mim.']],
+  ['Professor na ilha','{c} ensina a fazer fogo com pedras.',['Aprender|clv+8 sm+2|Agora sei fazer fogo.','Já sei fazer|h+0|Obrigad{o}, mas já sei.']],
+  ['Desistindo','{c} diz que vai nadar até achar terra firme.',['Convencer a ficar|?car clv+10|{c} ficou.|cbye|{c} nadou e nunca mais voltou.','Ajudar a construir uma boia|jangada+5 clv+6|Pelo menos vai com segurança.']],
+]);
+
+// ===== Mais eventos com membros (parte 5): grupo do apocalipse, grupo do isekai, heróis e mais vida real =====
+pack({k:'Grupo',w:1.2,cd:15,scen:'zumbi',when:scWhen('zumbi'),crew:1},[
+  ['Turno de vigia','{c} adormeceu no turno de vigia.',['Acordar com calma|clv+6|{c} pediu desculpas e nunca mais dormiu.','Gritar na frente de todos|clv-10 moral-3|{c} ficou humilhad{co}.']],
+  ['Música no rádio','{c} achou uma fita cassete da banda favorita.',['Ouvir todos juntos|clv+8 moral+5 h+6|Cantamos baixinho, para não atrair zumbis.','Mandar desligar|clv-4|Barulho atrai mortos.']],
+  ['Ferida feia','{c} cortou a mão abrindo uma porta emperrada.',['Costurar com linha de pesca|-it:@remedio chp+15 clv+8|Ficou feio, mas fechou.','Enrolar num pano|chp+5|Vamos ver como fica.']],
+  ['Segredo','{c} confessa que fez coisas terríveis para sobreviver antes de te encontrar.',['Perdoar|clv+12 h-2|Todo mundo fez algo de que se arrepende.','Ficar desconfiad{o}|clv-8|{c} percebeu.']],
+  ['Habilidade escondida','{c} sabe fazer ligação direta em carros.',['Pedir para ensinar|clv+8 zxp+10|Agora eu também sei.','Usar na próxima saída|veh+|Saímos com um carro novo.']],
+  ['Desaparecid{co}','{c} saiu para buscar água e não voltou.',['Ir atrás|?pwr clv+15 h+4|Achei {c} preso num telhado cercado de zumbis.|hl-15 cdie|Cheguei tarde.','Esperar até amanhã|?50 clv+2|{c} voltou com água e uma história.|cbye|{c} nunca voltou.']],
+  ['Aniversário perdido','{c} nem sabe mais que dia é e acha que é aniversário dele.',['Fazer uma festinha|-it:@comida clv+12 moral+4|Velas improvisadas num pão velho.','Dizer que não dá|clv-4|{c} ficou triste.']],
+  ['Liderança','{c} questiona suas decisões na frente do grupo.',['Explicar o plano com calma|?car clv+8 moral+3|{c} concordou.|clv-6|Continuou discordando.','Impor autoridade|clv-10 moral-2|Silêncio desconfortável.']],
+  ['Cachorro perdido','{c} quer adotar um cachorro que seguiu o grupo.',['Deixar|bicho:cachorro clv+8 moral+4|O cachorro late quando zumbis chegam perto.','Afastar o cachorro|clv-6|{c} chorou escondid{co}.']],
+  ['Plano de fuga','{c} sugere um atalho perigoso para chegar mais rápido.',['Topar|?50 etapa+1 clv+6|Funcionou!|hl-12|Era uma armadilha de saqueadores.','Recusar|clv-4|Melhor o caminho longo.']],
+  ['Diário','Você encontra o diário de {c}. Tem uma página sobre você.',['Ler|h+4 clv-4|Ele escreveu que eu salvei a vida dele.','Devolver sem ler|clv+6 k+3|Privacidade, mesmo no fim do mundo.']],
+  ['Saudade da mãe','{c} conta que a mãe virou zumbi na frente dele.',['Abraçar|clv+12 h-4|Choramos juntos.','Mudar de assunto|clv-2|Melhor não lembrar.']],
+]);
+pack({k:'Grupo',w:1.2,cd:15,scen:'isekai',when:scWhen('isekai'),crew:1},[
+  ['Treino de espada','{c} propõe um duelo de treino.',['Aceitar|?pwr xp+20 clv+8|Venci por pouco.|hl-6 clv+6|Perdi, mas aprendi.','Recusar|h+0|Hoje não.']],
+  ['Passado sombrio','{c} conta que já foi um ladrão famoso.',['Aceitar o passado|clv+10|{c} prometeu usar as habilidades para o bem.','Ficar de olho|clv-6|{c} percebeu a desconfiança.']],
+  ['Feitiço errado','{c} errou um feitiço e transformou a comida em sapos.',['Rir|clv+8 h+6|Sapos saltando pelo acampamento.','Brigar|clv-8 fome+5|Ficamos sem jantar e sem paz.']],
+  ['Lar de {c}','{c} quer visitar a vila natal no caminho.',['Ir|clv+12 h+4 ouro+10|A família de {c} nos recebeu como heróis.','Seguir viagem|clv-6|{c} ficou olhando a estrada para trás.']],
+  ['Maldição','{c} foi amaldiçoad{co} por uma bruxa.',['Gastar mana para quebrar a maldição|mana-25 clv+12 chp+10|Quebrei a maldição.','Procurar um sacerdote|ouro-30 clv+8|Resolvido.']],
+  ['Bebida de anão','{c} desafia você a beber hidromel de anão.',['Aceitar|?hl clv+8 h+8|Venci. Acordei com dor de cabeça.|hl-6 clv+6|Desmaiei na mesa.','Recusar|h+0|Sei os meus limites.']],
+  ['Rival amoroso','{c} está apaixonad{co} pela mesma pessoa que você.',['Deixar {c} tentar|clv+8|Amizade acima de tudo.','Competir|clv-8|Clima tenso no grupo.']],
+  ['Pesadelo com o Rei Demônio','{c} acorda gritando: sonhou com o Rei Demônio.',['Acalmar|clv+8|Ficamos acordados até o sol nascer.','Dizer que é bobagem|clv-4|{c} ficou com medo sozinh{co}.']],
+  ['Ferimento de batalha','{c} levou uma flechada protegendo você.',['Usar a melhor poção|-it:@remedio chp+30 clv+12|{c} vai ficar bem.','Fazer um curativo simples|chp+10 clv+4|Vai cicatrizar.']],
+  ['Herança mágica','{c} herdou um amuleto mágico e quer dar para você.',['Aceitar|clv+10 mana+20|O amuleto brilha quando estou em perigo.','Recusar|clv+4|É uma lembrança da família de {c}.']],
+]);
+pack({k:'Superpoderes',w:1.1,cd:22,scen:'heroi',when:HW(()=>!!hTeam()),who:'heroEq'},[
+  ['Base secreta','{p} te mostra a base secreta pessoal.',['Guardar o segredo|bond+12|Agora sou da confiança total.','Pedir para usar também|bond+4 pw+2|Treino com equipamentos novos.']],
+  ['Herói e jornalista','{p} namora uma jornalista que está perto de descobrir a equipe.',['Alertar {p}|bond+6 sec+4|{p} terminou o namoro.','Confiar|?50 bond+8|A jornalista guardou o segredo.|sec-15|A matéria saiu.']],
+  ['Missão de resgate','{p} foi capturad{o2} por {inimigo}.',['Resgatar sozinh{o}|?pwr bond+15 rep+10|Tirei {p} de lá.|hl-20|Fui capturad{o} também, mas fugimos juntos.','Esperar a equipe|bond+4|Demoramos, mas resgatamos.']],
+  ['Herói vaidoso','{p} só pensa em aparecer na TV.',['Brincar com isso|bond+4 h+4|{p} riu de si mesm{o2}.','Criticar|bond-8|{p} ficou ofendid{o2}.']],
+  ['Pacto','{p} propõe um pacto: se um cair, o outro cuida da família.',['Aceitar|bond+15 pamigo|Pacto selado com um aperto de mão.','Recusar|bond-4|Não gosto de pensar nisso.']],
+  ['Poder novo','{p} descobriu um poder novo e quer testar em você.',['Deixar|?50 bond+8 pw+4|Foi incrível.|hl-8|Doeu.','Recusar|h+0|Melhor não.']],
+  ['Herói mentor','{p} se oferece para ser seu mentor.',['Aceitar|pw+6 bond+10|Aprendi técnicas novas.','Recusar|h+0|Prefiro aprender sozinh{o}.']],
+]);
+pack({k:'Escola',w:1,cd:10,min:6,max:25,when:NP,who:'clube'},[
+  ['Viagem internacional','O time foi convidado para um torneio no exterior, e {p} não tem passaporte.',['Ajudar a tirar o passaporte|bond+12|{p} conseguiu a tempo.','Deixar para lá|bond-4|{p} ficou em casa.']],
+  ['Recorde','{p} quebrou o recorde da escola.',['Comemorar|bond+8 h+4|Festa no vestiário.','Treinar para quebrar o recorde de {ele}|bond+2 tal.athletic+3|Rivalidade saudável.']],
+  ['Lanche pós-treino','{p} sempre leva lanche para todo o time.',['Retribuir|$-30 bond+8|Agora revezamos.','Só agradecer|bond+2|Valeu!']],
+  ['Bolsa de estudos','{p} ganhou uma bolsa de atleta numa faculdade.',['Comemorar|bond+10|Prometemos manter contato.','Ficar com inveja|h-6|Por que não eu?'],{min:15}],
+  ['Treinador doente','O técnico adoeceu e {p} vai treinar o time.',['Apoiar {p}|bond+10|O time não perdeu nenhum jogo.','Questionar|bond-8|Climão no treino.']],
+]);
+pack({k:'Trabalho',w:1,cd:10,min:16,when:m=>NP(m)&&!!m.job&&!m.job.spc&&!m.job.hero,who:'colega'},[
+  ['Colega promovido','{p} foi promovido e agora é seu superior.',['Parabenizar|bond+8|{p} prometeu não mudar.','Ficar ressentid{o}|bond-10 h-4|Climão.']],
+  ['Ideia conjunta','Você e {p} têm uma ideia juntos que pode render um prêmio.',['Apresentar juntos|perf+8 bond+10|Ganhamos o prêmio de inovação.','Apresentar sozinh{o}|perf+8 pinimigo k-6|Ganhei o prêmio e um inimigo.']],
+  ['Vaquinha','{p} faz uma vaquinha para um colega doente.',['Contribuir|$-100 bond+8 k+4|Juntamos o suficiente.','Não contribuir|bond-4|Todo mundo viu.']],
+  ['Colega some','{p} não aparece há três dias e não responde mensagens.',['Ir até a casa de {ele}|bond+12 k+4|{p} estava doente e sozinh{o2}. Levei comida.','Avisar o RH|bond+2|O RH resolveu.']],
+  ['Desabafo no café','{p} te conta que odeia o próprio trabalho.',['Ajudar a pensar em outra carreira|bond+10|{p} saiu para fazer o que ama.','Dizer para aguentar|bond+2|Todos aguentam.']],
+]);
+pack({k:'Empresa',w:1,cd:10,min:18,when:m=>NP(m)&&!!m.biz,who:'func'},[
+  ['Cliente furioso','Um cliente grita com {p}.',['Defender {p}|bond+12 biz-1|O cliente foi embora. A equipe me aplaudiu.','Mandar {p} pedir desculpas|bond-8 biz+1|O cliente ficou.']],
+  ['Funcionário estuda à noite','{p} faz faculdade à noite e chega cansado.',['Pagar parte da faculdade|$-3000 bond+15|{p} se formou e virou gerente.','Ignorar|h+0|Problema dele.']],
+  ['Dia de folga','{p} pede um dia de folga para o casamento da filha.',['Dar o dia e um presente|$-300 bond+12|{p} me mandou fotos do casamento.','Dar só o dia|bond+6|Justo.']],
+  ['Erro grave','{p} cometeu um erro que custou caro à empresa.',['Perdoar|bond+12 biz-2|{p} trabalhou dobrado para compensar.','Descontar do salário|bond-10|Justo, mas frio.']],
+  ['Uniforme novo','{p} sugere um uniforme novo para a equipe.',['Aprovar|$-1000 bond+8 biz+1|A equipe ficou mais unida.','Recusar|h+0|Gasto desnecessário.']],
+]);
+
+// ===== Mais eventos com membros (parte 6) =====
+pack({k:'Escola',w:1,cd:12,min:6,max:30,when:m=>NP(m)&&!!m.edu.cur,who:'prof'},[
+  ['Redação premiada','{p} inscreveu sua redação num concurso nacional.',['Agradecer|bond+10 tal.writing+3|Fiquei em segundo lugar no país!','Dizer que não queria|bond-4|{p} retirou a inscrição.']],
+  ['Professor rouba sua ideia','{p} usou um trabalho seu numa palestra sem te citar.',['Conversar em particular|?50 bond+4|{p} pediu desculpas e me citou na próxima.|bond-6|{p} negou.','Deixar para lá|h-2|Fiquei com raiva sozinh{o}.']],
+  ['Chamada para ajudar','{p} te escolhe como monitor da turma.',['Aceitar|bond+10 grade+2 sm+2|Ensinar é aprender duas vezes.','Recusar|h+0|Muita responsabilidade.']],
+  ['Professor e celular','{p} te pega no celular durante a prova.',['Explicar que era emergência|?40 bond+2|Acreditou.|grade-10|Zero na prova.','Aceitar o castigo|grade-6 k+2|Mereci.']],
+  ['Último dia','No último dia de aula, {p} se despede da turma emocionad{o2}.',['Dar um abraço|bond+12 h+4|{p} disse que vai lembrar de mim.','Só acenar|bond+2|Tchau, professor.']],
+]);
+pack({k:'Trabalho',w:1,cd:12,min:16,when:m=>NP(m)&&!!m.job&&!m.job.spc&&!m.job.hero,who:'boss'},[
+  ['Chefe confessa','{p} confessa que vai ser demitid{o2} e indicou você para o lugar.',['Agradecer|bond+12 promo|Assumi o cargo.','Recusar|bond+6 k+4|Não quero subir assim.']],
+  ['Chefe na sua casa','{p} aparece de surpresa na sua festa de aniversário.',['Receber bem|bond+10 h+4|{p} trouxe um presente caro.','Ficar sem graça|bond+2|Climão.']],
+  ['Chefe pede segredo','{p} te conta um segredo da empresa.',['Guardar|bond+12|Confiança total.','Contar para os colegas|bond-15|{p} descobriu quem vazou.']],
+]);
+pack({k:'Carreira',w:1,cd:12,min:14,when:m=>NP(m)&&!!m.job&&!!m.job.spc,who:'spcEq'},[
+  ['Homenagem','{p} te homenageia publicamente numa entrevista.',['Retribuir|bond+12 f+2|Viramos melhores amigos.','Agradecer em particular|bond+6|Discreto.']],
+  ['Mentor e aprendiz','{p} pede que você seja mentor dele.',['Aceitar|bond+12 k+4|{p} cresceu muito.','Recusar|h+0|Não tenho tempo.']],
+  ['Briga pública','{p} te critica numa entrevista.',['Responder com elegância|f+3 bond+4|Saí por cima.','Responder com raiva|f+2 pinimigo|Treta na imprensa.']],
+]);
+pack({k:'Religião',w:1,cd:12,min:18,when:m=>NP(m)&&!!m.seita,who:'fiel'},[
+  ['Visão do fiel','{p} diz que teve uma visão sobre o futuro de {seita}.',['Ouvir com atenção|bond+8 devo+3|A visão animou o grupo.','Mandar calar|bond-8 devo-2|{p} ficou magoad{o2}.']],
+  ['Fiel advogado','{p} é advogado e se oferece para defender o grupo.',['Aceitar|bond+10 susp-6|O grupo ficou mais protegido.','Recusar|h+0|Prefiro não misturar.']],
+  ['Fiel artista','{p} pintou um mural lindo no templo.',['Inaugurar com festa|bond+12 devo+4 sfama+2|O mural virou ponto de visita.','Agradecer|bond+4|Bonito.']],
+]);
+pack({k:'Política',w:1,cd:12,min:21,when:m=>NP(m)&&!!m.office,who:'gabinete'},[
+  ['Assessor fiel','{p} recusou uma proposta de suborno para trair você.',['Recompensar|$-5000 bond+15|Lealdade rara.','Agradecer|bond+8|Gratidão eterna.']],
+  ['Assessor cansado','{p} trabalhou 80 horas na semana e está exaust{o2}.',['Dar uma semana de folga|bond+12 appr-1|{p} voltou renovad{o2}.','Pedir mais esforço|bond-8 appr+2|{p} pediu demissão no mês seguinte.']],
+]);
+pack({k:'Realeza',w:1,cd:12,when:m=>NP(m)&&!!m.royal&&!m.royal.abd,who:'corte'},[
+  ['Duelo de honra','{p} desafia um nobre estrangeiro para defender sua honra.',['Impedir o duelo|bond+8 pop+2|Diplomacia vence.','Deixar acontecer|?50 bond+12 pop+4|{p} venceu.|pop-4|{p} perdeu e o reino passou vergonha.']],
+  ['Segredo da rainha mãe','{p} sabe um segredo antigo da família real.',['Pedir que conte|?50 bond+6 sm+2|Descobri um meio-irmão perdido.|h-4|Era melhor não saber.','Pedir silêncio eterno|bond+8|O segredo morreu com {p}.']],
+]);
+pack({k:'Base',w:1.2,cd:14,scen:'zumbi',when:ZW(sc=>!!sc.zb&&sc.zb.pop>0),gente:'zbase'},[
+  ['Artista da base','{mor} pintou um mural colorido no muro da base.',['Elogiar|glv+10 zmoral+6|O muro mais bonito do apocalipse.','Mandar apagar|glv-8|Cores chamam atenção.']],
+  ['Morador some à noite','{mor} sai escondid{mo} toda noite.',['Seguir {moeln}|?50 glv+6|{mor} visitava o túmulo da família.|glv-6|{mor} percebeu e ficou furios{mo}.','Perguntar direto|glv+4|{mor} contou tudo.']],
+  ['Morador arruma brigas','{mor} arruma briga com todo mundo.',['Dar uma tarefa pesada|glv-2 zmat+5|Cansado, ficou calmo.','Expulsar|gsai zmoral+2|A paz voltou.']],
+  ['Professor da base','{mor} começou a dar aulas para as crianças da base.',['Apoiar com materiais|glv+12 zmoral+5|As crianças aprendem a ler no fim do mundo.','Achar perda de tempo|glv-6|Mas ensinou mesmo assim.']],
+]);
+pack({k:'Vila',w:1.2,cd:14,scen:'isekai',when:ZW(sc=>!!sc.vila&&sc.vila.pop>0),gente:'vila'},[
+  ['Elfo na vila','{mor} é a primeira pessoa de outra raça a morar na vila.',['Receber com festa|glv+10 vfel+4|A vila ficou mais diversa e alegre.','Deixar a vila decidir|vfel-2 glv-2|Houve desconfiança no começo.']],
+  ['Inventor','{mor} inventou um moinho mais eficiente.',['Financiar|ouro-40 vcom+8 glv+12|A produção dobrou.','Recusar|glv-4|{mor} construiu sozinh{mo}, devagar.']],
+  ['Morador idoso','{mor}, o mais velho da vila, está muito doente.',['Visitar|glv+12 h-2|{mor} contou a história da região.','Mandar remédio|-it:@remedio glv+8|Melhorou um pouco.']],
 ]);
 
 // ===== Pesadelo zumbi · eventos da base e da comunidade =====
@@ -11308,7 +11690,7 @@ function selfTest(){
       else { iskEnsure(sc); sc.cls='mago'; V.iskLar().items.map(rowHtml).join(''); sc.ouro=3000; sc.lvl=6; vilaFound('T'); sc.vila.pop=15; V.iskVila().items.map(rowHtml).join(''); V.scGente('vila','t',()=>15,'x')().items.map(rowHtml).join(''); } S.scen=null; } });
   T('varreMembros',()=>{ newLife({}); let m=S.me; while(m.alive&&m.age<14){ S.pending=[]; ageUp(); } m.alive=true; m.prison=null; if(!m.edu.cur) m.edu.cur={type:'medio',n:'Ensino Médio',len:3,yr:1,grade:70,pub:1}; m.edu.club=CLUBS[0].n; if(!people('colega').length) for(let i=0;i<5;i++) S.people.push(mkPerson({rel:'colega',age:m.age,bond:40})); grpAuto(); sweepNow('escola');
     m.age=30; m.edu.club=null; m.edu.cur=null; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); takeJob({id:'poli',co:'Polícia Civil',size:'grande',mul:1}); grpAuto(); sweepNow('trab');
-    m.job={spc:'atleta',lvl:1,perf:50,yrs:0,co:'Clube Teste'}; m.office={id:'pref',yrs:0,appr:50}; m.biz={n:'Empresa T',sector:'Tecnologia',value:1e6,emp:20,yrs:1}; seitaFundar('igreja','T'); grpAuto(); sweepNow('outros');
+    m.job={spc:'atleta',lvl:1,perf:50,yrs:0,co:'Clube Teste'}; m.office={id:'pref',yrs:0,appr:50}; m.biz={n:'Empresa T',sector:'Tecnologia',value:1e6,emp:20,yrs:1}; seitaFundar('igreja','T'); m.royal={house:'Teste',pop:50}; grpAuto(); sweepNow('outros');
     if(!WHO.clube()&&!WHO.func()) errs['membros: grupos não se formaram']=1; });
   T('varreNovos',()=>{ const base=()=>{ newLife({}); const m=S.me; m.age=32; m.alive=true; m.prison=null; m.money=5e5; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); return m; };
     let m=base(); seitaFundar('igreja','Teste'); m.seita.fieis=8; m.seita.devo=30; sweepNow('seitaPeq'); m.seita.fieis=900; sweepNow('seitaMed'); m.seita.fieis=6000; m.seita.dom=['o bairro']; m.seita.tipo='apoc'; sweepNow('seitaGde');
