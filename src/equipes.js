@@ -58,7 +58,7 @@ interact=(o=>function(p,k,extra){ const was=p&&p.rel; const r=o.apply(this,argum
 // ---------- passar um tempo com todos ----------
 function tempoTodos(){ const m=S.me; if(use('tempoTodos')>1) return 'Já reuni todo mundo este ano.';
   const ps=people('mae','pai','irmao','avo','namoro','noivo','conjuge','filho','adot','neto','amigo').filter(p=>p.age>=1||p.rel!=='neto'); if(!ps.length) return 'Não tenho família nem amigos por perto.';
-  ps.forEach(p=>{ p.bond=clamp(p.bond+R.int(2,7)); p.yr.tempo=(p.yr.tempo||0)+1; }); st('happy',R.int(4,9)); cnt('actions');
+  ps.forEach(p=>{ p.bond=clamp(p.bond+R.int(2,7)); p.yr.tempo=(p.yr.tempo||0)+1; }); st('happy',R.int(4,9)); cnt('actions'); cnt('tempoTodos');
   const fam=ps.filter(p=>p.rel!=='amigo').length, am=ps.length-fam;
   return `${R.pick(['Fiz um churrasco no quintal','Organizei um almoço de domingo','Juntei todo mundo para um piquenique no parque','Fizemos uma noite de jogos de tabuleiro','Alugamos um sítio para o fim de semana'])} com ${fam?fam+(fam>1?' pessoas da família':' pessoa da família'):''}${fam&&am?' e ':''}${am?am+(am>1?' amigos':' amigo'):''}. ${R.pick(['Rimos até doer a barriga.','Teve briga por causa de política, mas acabou em abraço.','Foi o melhor dia do ano.','Alguém chorou de emoção no brinde.'])}`; }
 V.relations=(o=>()=>{ const r=o(); if(!r||!r.items||(S.scen&&S.scen.v===SC_V)) return r; if(S.me.prison) return r; r.items.splice(1,0,{ic:'🫂',l:'Passar um tempo com todos',s:'Família e amigos juntos · todo mundo fica mais próximo',on:()=>act(tempoTodos,'Família e amigos')}); return r; })(V.relations);

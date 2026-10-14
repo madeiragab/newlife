@@ -136,6 +136,11 @@ function selfTest(){
     m.age=30; m.edu.club=null; m.edu.cur=null; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); takeJob({id:'poli',co:'Polícia Civil',size:'grande',mul:1}); grpAuto(); sweepNow('trab');
     m.job={spc:'atleta',lvl:1,perf:50,yrs:0,co:'Clube Teste'}; m.office={id:'pref',yrs:0,appr:50}; m.biz={n:'Empresa T',sector:'Tecnologia',value:1e6,emp:20,yrs:1}; seitaFundar('igreja','T'); m.royal={house:'Teste',pop:50}; grpAuto(); sweepNow('outros');
     if(!WHO.clube()&&!WHO.func()) errs['membros: grupos não se formaram']=1; });
+  T('conquistas',()=>{ for(let k=0;k<6;k++){ newLife({}); const m=S.me; m.age=R.int(1,90); CONQ.forEach(c=>{ try{ c.ok(m,{dead:k%2}); }catch(e){ errs['conquista quebrada: '+c.id+': '+e.message]=1; } }); }
+    V.conquistas().items.map(rowHtml).join(''); if(new Set(CONQ.map(c=>c.id)).size!==CONQ.length) errs['conquista com id repetido']=1;
+    newLife({}); const m=S.me; m.age=25; const p=mkPerson({rel:'namoro',age:25,gender:m.gender==='F'?'M':'F',bond:70}); S.people.push(p); for(let i=0;i<3;i++){ m.yr={}; p.yr={}; const r=interact(p,'amor',i%2===0); if(typeof r!=='string'||/undefined/.test(r)) errs['fazer amor: '+r]=1; }
+    m.age=16; const q=mkPerson({rel:'namoro',age:16,bond:70}); S.people.push(q); interact(q,'amor',false); if(S.births.some(b=>b.with===q.id)) errs['fazer amor liberado para menor']=1; if(V.person(q).items.some(x=>x.l==='Fazer amor')) errs['opção de fazer amor para menor']=1;
+    newLife({}); S.me.age=70; m.c.gaveUp=1; computeRibbon(); });
   T('varreNovos',()=>{ const base=()=>{ newLife({}); const m=S.me; m.age=32; m.alive=true; m.prison=null; m.money=5e5; if(!m.edu.deg.includes('medio')) m.edu.deg.push('medio'); return m; };
     let m=base(); seitaFundar('igreja','Teste'); m.seita.fieis=8; m.seita.devo=30; sweepNow('seitaPeq'); m.seita.fieis=900; sweepNow('seitaMed'); m.seita.fieis=6000; m.seita.dom=['o bairro']; m.seita.tipo='apoc'; sweepNow('seitaGde');
     ['natureza','guru','igreja'].forEach(t=>{ m.seita.tipo=t; sweepNow('seita'+t); });

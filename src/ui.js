@@ -373,9 +373,8 @@ V.person=p=>{
   A('flertar','Flertar',null,canFlirt);
   A('reatar','Tentar voltar',null,rel==='ex');
   if(love){
-    A('noite','Passar a noite juntos',null,a>=18&&p.age>=18);
+    if(a>=18&&p.age>=18) it.push({ic:'❤️‍🔥',l:'Fazer amor',s:'Felicidade · sem proteção pode vir um bebê',on:()=>modal({t:`Com ${p.first}`,x:'Como vai ser?',ch:[{l:'Com proteção',fn:()=>{ const r=interact(p,'amor',true); log(r); MQ.unshift({t:p.first,x:r}); }},{l:'Sem proteção',fn:()=>{ const r=interact(p,'amor',false); log(r); MQ.unshift({t:p.first,x:r}); }},{l:'Hoje não',cls:'alt'}]})});
     A('viagem','Viajar juntos',5000,a>=18,fmt(5000));
-    A('filho','Tentar ter um filho',null,a>=16&&a<=55&&p.age<=55);
     if(rel==='namoro'&&a>=16) it.push({l:'Pedir em casamento',on:()=>modal({t:'Qual anel?',ch:[[500,'Anel simples'],[5000,'Anel de ouro'],[40000,'Diamante enorme']].map(([c,l])=>({l:`${l} (${fmt(c)})`,fn:()=>{ const r=interact(p,'pedido',[c]); log(r); MQ.unshift({t:p.first,x:r}); }})).concat([{l:'Cancelar',cls:'alt'}])})});
     if(rel==='noivo') it.push({l:'Marcar o casamento',on:()=>modal({t:'Casamento',x:'Que tipo de cerimônia?',ch:[[800,'Só no cartório'],[25000,'Festa para os íntimos'],[150000,'Festão com 500 convidados']].flatMap(([c,l])=>[{l:`${l} (${fmt(c)})`,fn:()=>{ const r=interact(p,'casar',[c,false]); log(r); MQ.unshift({t:'Casamento',x:r}); }}]).concat([{l:'Com pacto antenupcial (protege meu dinheiro)',fn:()=>{ const r=interact(p,'casar',[800,true]); log(r); MQ.unshift({t:'Casamento',x:r}); }},{l:'Cancelar',cls:'alt'}])})});
     if(rel!=='conjuge') A('terminar','Terminar');

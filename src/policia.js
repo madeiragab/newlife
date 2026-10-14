@@ -28,7 +28,7 @@ function casoPasso(c,k,i){ if(c.passos<=0||c.fim) return; c.passos--; const s=c.
 function casoAcusar(c,i){ const m=S.me, s=c.sus[i], j=m.job; c.fim=true; cnt('casos');
   if(s.culp){ m.c.casosOk=(m.c.casosOk||0)+1; if(j){ j.perf=clamp(j.perf+15); if(R.chance(.3)&&j.lvl<4){ j.lvl++; log(`Promovid${oa()} a ${jobTitle(j).toLowerCase()} depois de resolver um caso.`,'good'); } } m.fame=clamp(m.fame+2); m.karma=clamp(m.karma+3); st('happy',10);
     log(`Resolvi o caso: ${c.tp[0].toLowerCase()} de ${c.vit.n}. ${s.n} foi pres${s.g==='F'?'a':'o'}.`,'good'); return `${s.first} confessou na sala de interrogatório. Caso encerrado. A delegacia inteira aplaudiu.`; }
-  if(j) j.perf=clamp(j.perf-18); m.karma=clamp(m.karma-8); st('happy',-10); const real=c.sus.find(x=>x.culp);
+  m.c.casoErr=(m.c.casoErr||0)+1; if(j) j.perf=clamp(j.perf-18); m.karma=clamp(m.karma-8); st('happy',-10); const real=c.sus.find(x=>x.culp);
   log(`Errei no caso de ${c.vit.n}: ${s.n} foi pres${s.g==='F'?'a':'o'} injustamente.`,'bad');
   if(R.chance(.25)&&j){ return `${s.first} era inocente. Meses depois, ${real.first} foi pego por outro crime e confessou tudo. Fui afastad${oa()} do cargo. `+(endJob(),'Perdi o distintivo.'); }
   return `${s.first} foi pres${s.g==='F'?'a':'o'}. Mas eu tenho uma sensação ruim. ${R.chance(.5)?`Hoje vi ${real.first} sorrindo na rua.`:'O caso não fecha na minha cabeça.'}`; }

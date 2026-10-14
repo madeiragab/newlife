@@ -72,6 +72,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - Quem você conhece nos eventos vira uma pessoa de verdade na sua lista, com nome, rosto e gênero coerentes.
 - Namoro, casamento, filhos, divórcio, amigos, pets (cães e gatos por raça, exóticos e animais de fazenda).
 - Selo **Minha primeira vez**, ganho na hora (a partir dos 18 anos), com o nome da pessoa e a idade.
+- **Fazer amor** com quem você namora ou é casado (a partir dos 18): dá felicidade e, sem proteção, pode vir um bebê.
 
 ### 🥋 Lutas e brigas
 - **9 artes marciais** (Judô, Jiu-jítsu, Karatê, Muay thai, Boxe, Taekwondo, Capoeira, Kung fu, Krav maga) com faixas, uma por ano, e um **golpe especial** na última.
@@ -129,7 +130,8 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Autoescola** com prova de placas (22 placas desenhadas), passaporte (inclusive falsificado) e emigração.
 - **80 doenças**, com tratamentos, doenças crônicas e câncer.
 - **Mais de 4.100 eventos**: mais de 1.400 na vida normal, coerentes com idade, carreira e situação, e mais de 2.300 nos modos fictícios.
-- Selos, cemitério, desafios, dificuldade, herdeiros (continue a vida com um filho).
+- **73 conquistas**, muitas zoeiras e várias secretas, que valem para todas as vidas e aparecem na hora num popup (Menu → Conquistas).
+- Selos (um por vida, inclusive Ditador, Filho da noite, Profeta, Detetive e Viajante de mundos), cemitério, desafios, dificuldade, herdeiros (continue a vida com um filho).
 - **Sons e música** sintetizados (sem arquivos de áudio), tema claro e escuro, efeito de dano.
 - Segredos para quem zerar o jogo. 😉
 

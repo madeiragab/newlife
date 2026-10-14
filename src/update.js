@@ -3,6 +3,7 @@
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.7',d:'14/10/2026',t:'Conquistas e selos novos',itens:['73 conquistas, muitas zoeiras e várias secretas, que valem para todas as vidas. Veja em Menu → Conquistas.','Selos novos no fim da vida: Ditador, Filho da noite, Profeta, Detetive, Viajante de mundos, Fogo no rabo e Lobo solitário.','"Fazer amor" substitui "Tentar ter um filho" (a partir dos 18): dá felicidade e, sem proteção, pode vir um bebê.']},
   {v:'1.6.2',d:'14/10/2026',t:'Tela de atualização',itens:['Quando o app se atualiza, aparece um anel de progresso colorido com a música do jogo, notinhas subindo e dicas.','Ao terminar, o jogo abre sozinho na versão nova.']},
   {v:'1.6.1',d:'14/10/2026',t:'Novidades na tela',itens:['Depois de cada atualização, este quadro mostra o que mudou (uma vez só).','Menu → Novidades mostra o histórico de versões quando você quiser.']},
   {v:'1.6',d:'14/10/2026',t:'Atualização automática',itens:['O app procura uma versão nova sempre que abre e se atualiza sozinho, sem reinstalar.','Sem internet, abre a última versão baixada. O progresso nunca se perde.','A versão atual aparece no fim do menu.']},

@@ -14,7 +14,7 @@ function revAcao(k){ const m=S.me, r=rev(); if(!r) return ''; if(use('rev_'+k)>2
   revFix(r); return t; }
 function revChance(r){ return Math.max(.03,Math.min(.9,r.apoio/250+r.mil/160+r.armas/300+(r.membros>500?.08:0)-.1)); }
 function revGolpe(){ const m=S.me, r=rev(); if(!r) return ''; const p=revChance(r); m.c.golpe=(m.c.golpe||0)+1;
-  if(R.chance(p)){ if(m.job) endJob(); m.office={id:'pres',yrs:0,appr:R.int(30,60),dit:1}; cnt('office_pres'); cnt('pres'); m.fame=clamp(m.fame+70); m.rev=null; st('happy',20);
+  if(R.chance(p)){ if(m.job) endJob(); m.office={id:'pres',yrs:0,appr:R.int(30,60),dit:1}; m.c.golpeOk=1; cnt('office_pres'); cnt('pres'); m.fame=clamp(m.fame+70); m.rev=null; st('happy',20);
     log(`Derrubei o governo. Agora sou ${m.gender==='F'?'a líder suprema':'o líder supremo'} do país.`,'good'); return `Tanques nas ruas, o palácio cercado, o presidente fugindo de helicóptero. Às 6 da manhã, falei em rede nacional: o país agora é meu.`; }
   const n=R.f(); m.rev=null; m.karma=clamp(m.karma-5);
   if(n<.2){ die('fuzilad'+oa()+' depois de um golpe de Estado fracassado'); return 'O golpe fracassou. O tribunal militar foi rápido.'; }
