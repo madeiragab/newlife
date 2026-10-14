@@ -3,7 +3,7 @@
 const grpOf=pre=>()=>R.pick(people('equipe').filter(p=>p.grp&&p.grp.startsWith(pre)));
 Object.assign(WHO,{clube:grpOf('club:'),spcEq:grpOf('spc:'),heroEq:grpOf('hero:'),fiel:grpOf('seita:'),gabinete:grpOf('office:'),func:grpOf('biz:'),corte:grpOf('corte:'),prof:()=>R.pick(people('prof'))});
 // moradores dos mundos paralelos ({mor}, {mo} = o|a)
-function scGenteFor(key){ const sc=S.scen; if(!sc) return null; const n=key==='zbase'?(sc.zb?sc.zb.pop:0):key==='vila'?(sc.vila?sc.vila.pop:0):0; if(n<=0) return null; const L=scGente(key,n); return L.length?R.pick(L):null; }
+function scGenteFor(key){ const sc=S.scen; if(!sc) return null; let k=key, n=0; if(key==='zbase') n=sc.zb?sc.zb.pop:0; else if(key==='vila') n=sc.vila?sc.vila.pop:0; else if(key==='town'&&sc.id==='isekai'&&!sc.vila&&typeof townOf==='function'&&townOf(sc)){ k='town:'+sc.morada; n=12; } if(n<=0) return null; const L=scGente(k,n); if(!L.length) return null; const p=R.pick(L); p._k=k; return p; }
 // os grupos se formam sozinhos todo ano (não precisa abrir a tela)
 function grpAuto(){ const m=S.me; if(!m||!m.alive) return;
   const c=m.edu.club&&clubDef(); if(c) grpEnsure('club:'+m.edu.club,R.int(6,9),{n:c.n,role:c.st==='athletic'?'Colega de time':c.st==='musical'?'Colega de banda':'Colega de clube',age:()=>clamp(m.age+R.int(-1,1),5,30)});
