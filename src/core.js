@@ -505,14 +505,14 @@ function royalTitle(){ const m=S.me,r=m.royal; if(!r||r.abd) return null; return
 function yearBiz(){
   const m=S.me,b=m.biz; if(!b) return;
   b.yrs++; const sec=BIZ_SECTORS.find(s=>s.n===b.sector)||BIZ_SECTORS[0];
-  const r=R.norm(.09+(m.smarts-50)/600+(b.mkt||0),sec.risk); b.mkt=0;
+  const r=R.norm(.03+(m.smarts-50)/800+(b.mkt||0)+(b.bonus||0),sec.risk*1.15); b.mkt=0; b.bonus=0;
   b.value=Math.max(0,Math.round(b.value*(1+r)));
   b.emp=Math.max(1,Math.round(b.emp*(1+r*.8)+R.int(-1,2)));
   m.c.bizMax=Math.max(m.c.bizMax||0,b.value);
   if(m.prison){ b.value=Math.round(b.value*.8); }
-  if(r>0&&!m.prison){ const p=Math.round(b.value*R.f()*.08*diff().$); m.money+=p; if(p>1000) log(`A ${b.n} lucrou e me rendeu ${fmt(p)}.`,'good'); }
+  if(r>0&&!m.prison){ const p=Math.round(b.value*R.f()*.04*diff().$); m.money+=p; if(p>1000) log(`A ${b.n} lucrou e me rendeu ${fmt(p)}.`,'good'); }
   else if(r<-.2) log(`A ${b.n} teve um ano péssimo.`,'bad');
-  if(b.value<b.start*.12&&R.chance(.5)){ log(`A ${b.n} faliu.`,'bad'); st('happy',-15); m.biz=null; }
+  if((b.value<b.start*.3&&R.chance(.35))||(r<-.3&&R.chance(sec.risk*.4))){ log(`A ${b.n} faliu.`,'bad'); st('happy',-15); cnt('falencias'); if(R.chance(.5)){ const div=Math.round(b.start*R.f()*.5); m.money-=div; log(`Fiquei com ${fmt(div)} em dívidas da empresa.`,'bad'); } m.biz=null; }
   if(b.value>1e8) m.fame=clamp(Math.max(m.fame,30+Math.log10(b.value)*4));
 }
 

@@ -34,6 +34,7 @@ function econRun(pol,n){ const res=[];
       try{ if(m.dis.length){ if(m.dis.some(d=>d.k===false)) checkup(); m.dis.slice().forEach(d=>treat(m.age>=18?'doc':'clinica',d)); } }catch(err){}   // um jogador razoável vai ao médico
       try{ econYear(pol); }catch(err){}
       if(m.alive&&m.health<=0) die(causeFromHealth());
+      row.her=(row.her||0); S.log[S.log.length-1].lines.forEach(l=>{ const t=typeof l==='string'?l:l.t; const mm=/Recebi uma herança de \$([\d.]+)/.exec(t||''); if(mm) row.her+=+mm[1].replace(/\./g,''); }); if(m.job) row.sal=(row.sal||0)+jobSalary(m.job);
       if(m.age===45&&m.alive) row.w45=netWorth(); if(m.age===65&&m.alive){ row.w65=netWorth(); row.alive65=true; } if(m.age>65) break; }
     res.push(row); }
   return res; }
@@ -41,5 +42,5 @@ const econMed=a=>{ a=a.filter(x=>x!=null).sort((x,y)=>x-y); return a.length?a[Ma
 const econAvg=a=>{ a=a.filter(x=>x!=null); return a.length?Math.round(a.reduce((s,x)=>s+x,0)/a.length):null; };
 function econDiag(n=24,pols){ const out=['ESTRATÉGIA | patrimônio mediano aos 45 | aos 65 | média aos 65 | vivos aos 65'];
   for(const p of pols||Object.keys(ECON_POL)){ const r=econRun(p,n);
-    out.push(`${ECON_POL[p].n} | ${fmt(econMed(r.map(x=>x.w45))||0)} | ${fmt(econMed(r.map(x=>x.w65))||0)} | ${fmt(econAvg(r.map(x=>x.w65))||0)} | ${Math.round(r.filter(x=>x.alive65).length/r.length*100)}%`); }
+    out.push(`${ECON_POL[p].n} | herança média ${fmt(econAvg(r.map(x=>x.her||0))||0)} | salário somado ${fmt(econAvg(r.map(x=>x.sal||0))||0)} | ${fmt(econMed(r.map(x=>x.w45))||0)} | ${fmt(econMed(r.map(x=>x.w65))||0)} | ${fmt(econAvg(r.map(x=>x.w65))||0)} | ${Math.round(r.filter(x=>x.alive65).length/r.length*100)}%`); }
   return out.join('\n'); }

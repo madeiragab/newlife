@@ -76,3 +76,22 @@ V.health=(o=>()=>{ const r=o(), m=S.me; if(!m.dis.length) return r;
     it.push({l:nome,s:known?`${d.y} ano(s)${d.ctrl?' · controlada':''}${def.cure==='none'?' · sem cura':''}`:'Sem diagnóstico · vá ao médico descobrir o que é',tone:'bad',
       on:()=>UI.push(()=>({title:known?def.n:'O que eu estou sentindo',items:(known?[]:[{html:`<div class="card"><p>${esc(d.sx||'')}</p><p style="color:var(--muted);font-size:13px">Médico melhor acerta mais o diagnóstico. A consulta de rotina também pode descobrir.</p></div>`}]).concat(op)}))}); });
   r.items.splice(i0,i1-i0,...it); return r; })(V.health);
+// doenças graves sem tratamento pioram a cada ano (o estrago cresce com o tempo)
+yearHealth=(o=>function(){ const r=o.apply(this,arguments); const m=S.me; try{ (m.dis||[]).forEach(d=>{ const def=DISEASES[d.id]; if(!def||d.ctrl||def.cure==='auto') return;
+  const grave=def.dmg>=8||CANCERS.has(d.id); if(grave&&d.y>=1){ const x=def.dmg>=15?Math.min(4,d.y):Math.min(10,Math.round(d.y*1.3)); st('health',-x); if(d.y===3&&R.chance(.6)) log(d.k===false?'Aquilo que eu sinto está piorando. Já não dá para ignorar.':`${dn(def.n)[0].toUpperCase()+dn(def.n).slice(1)} está piorando sem tratamento.`,'bad'); } }); }catch(e){} return r; })(yearHealth);
+// câncer é bem mais difícil de curar
+CANCERS.forEach(id=>{ const d=DISEASES[id]; if(d){ if(d.doc) d.doc=Math.round(d.doc*45)/100; if(d.hosp) d.hosp=Math.round(d.hosp*55)/100; } });
+// doenças graves: tratamento de vários anos, um ciclo por ano, com risco de morrer mesmo tratando
+const LONGOS=new Set([...CANCERS,'tuberculose','hepatite','tumor_cerebral','cirrose']);
+treat=(o=>function(where,dis){ const m=S.me, def=DISEASES[dis.id];
+  if(!def||!LONGOS.has(dis.id)||where==='alt'||where==='psi'||where==='posto'||dis.k===false||def.ctrl) return o.apply(this,arguments);
+  if(dis.tAno===m.age) return 'O ciclo de tratamento deste ano já foi feito. Volto no ano que vem.';
+  const cancer=CANCERS.has(dis.id), nome=dn(def.n), custo=where==='hosp'?(cancer?14000:8000):(TIERS[where]||TIERS.doc).c+(cancer?6000:2500);
+  m.money-=custo; let aviso='';
+  if(dis.tAno!=null&&m.age-dis.tAno>1&&dis.tA>0){ dis.tA=Math.max(0,dis.tA-1); aviso=' Como parei o tratamento, perdi parte do progresso.'; }
+  dis.tAno=m.age; dis.tA=(dis.tA||0)+1; dis.tNeed=dis.tNeed||R.int(2,4)+(cancer?1:0);
+  if(R.chance(cancer?(where==='hosp'?.04:.07):.02)){ die(`de complicações no tratamento de ${nome}`); return `O corpo não aguentou o tratamento de ${nome}.`; }
+  st('health',R.int(5,12));
+  if(dis.tA>=dis.tNeed){ if(R.chance(where==='hosp'?.7:where==='doc'?.5:.3)){ m.dis=m.dis.filter(x=>x!==dis); st('happy',20); log(`Depois de ${dis.tA} anos de tratamento, venci ${nome}.`,'good'); return `Depois de ${dis.tA} anos de tratamento, os exames vieram limpos. Venci ${nome}!`; }
+    dis.tNeed++; return `Os exames mostraram que ${nome} ainda não acabou. Mais um ano de tratamento.${aviso}`; }
+  return `Ano ${dis.tA} de pelo menos ${dis.tNeed} no tratamento de ${nome}.${cancer?' Quimioterapia, enjoo e cabelo no travesseiro.':''}${aviso}`; })(treat);
