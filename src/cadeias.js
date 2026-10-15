@@ -20,7 +20,7 @@ function cadReg(id,sid,st){ const [title,text,choices,so={}]=st;
     pick:(key,d)=>cadPick(id,sid,choices[+key],d)};
 }
 // separa os efeitos próprios das cadeias (>etapa, vira:, +cad:) dos efeitos normais do pack
-function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$|separar$|pbond[+-]\d+$|caso[+-]$|curar$|morder$|virar:\w+$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
+function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$|separar$|pbond[+-]\d+$|caso[+-]$|curar$|morder$|fome[+-]\d+$|virar:\w+$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
 function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me; const d=c?c.d:dPend;
   const parts=choice.split('|'); let fx1=parts[1]||'', t1=parts[2]||'', fx2=parts[3], t2=parts[4];
   const toks=fx1.trim().split(/\s+/); let chance=null, base='';
@@ -38,6 +38,7 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
     else if(t==='noivar'||t==='casar'){ const p=d.pid&&P(d.pid); if(p&&p.alive&&['namoro','noivo'].includes(p.rel)&&(!partner()||partner()===p)){ if(t==='noivar'&&p.rel==='namoro'){ p.rel='noivo'; out.push(`Estou noiv${oa()} de ${p.first}!`); } else if(t==='casar'){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } } }
     else if(t==='separar'){ const pp=partner(); if(pp){ if(pp.rel==='conjuge') divorce(pp,true); else { pp.rel='ex'; m.happy=clamp(m.happy-15); log(`${pp.first} terminou comigo.`,'bad'); } out.push(`${pp.first} foi embora.`); } }
     else if(mm=t.match(/^pbond([+-]\d+)$/)){ const pp=partner(); if(pp) pp.bond=clamp(pp.bond+ +mm[1]); }
+    else if(mm=t.match(/^fome([+-]\d+)$/)){ if(m.criatura) m.fomeP=clamp((m.fomeP||0)+ +mm[1]); }
     else if(t==='curar'){ if(m.criatura){ const tp0=m.criatura; m.criatura=null; m.fomeP=0; log(`Deixei de ser ${g(CRIATURA[tp0][0],m.gender).toLowerCase()}.`,'good'); } }
     else if(t==='morder'){ const pp=d.pid&&P(d.pid); if(pp&&m.criatura){ pp.criatura=m.criatura; out.push(`${pp.first} agora também carrega a maldição.`); } }
     else if(mm=t.match(/^virar:(\w+)$/)){ if(typeof virar==='function'&&!m.criatura&&CRIATURA[mm[1]]) out.push(virar(mm[1]).trim()); }
