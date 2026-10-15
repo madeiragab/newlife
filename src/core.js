@@ -312,6 +312,7 @@ function yearHealth(){
     if(m.dis.find(d=>d.id===id)) continue;
     if(def.min&&m.age<def.min||def.max&&m.age>def.max||def.g&&def.g!==m.gender) continue;
     if(def.country&&!def.country.split(',').includes(m.country)) continue;
+    if(def.criatura&&(S.scen||def.criatura!==m.criatura)) continue;
     let p=def.p*mult; if(def.smoke&&m.add.cigarro>40) p*=8;
     if(R.chance(p)){ addDisease(id); break; }
   }

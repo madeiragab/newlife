@@ -109,6 +109,16 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Vampiros e lobisomens** podem matar você, ou morder. Aí é para sempre, na vida normal: o rosto muda, a sede de sangue ou a lua cheia aparecem todo ano, a família corre perigo e caçadores batem na porta. Existe uma cura, cara e difícil.
 - Mais de 200 eventos de caça-fantasmas, vida de vampiro e vida de lobisomem.
 
+### 🔦 Investigação paranormal profissional
+- Em **Carreira → Investigador paranormal** ou **Atividades → Investigar o paranormal**, abra a agenda a partir dos 18 anos.
+- Clientes procuram investigações e expulsões. Contratos anuais têm risco, recompensa e reputação; a confiança dos clientes aumenta a quantidade de pedidos.
+- Explore quatro cômodos e volte à van. Use seis equipamentos para reunir três evidências, consulte o bestiário e identifique uma das oito entidades.
+- Sanidade e bateria acabam; caçadas exigem esconderijo ou fuga. Prepare proteção e escolha o ritual correto para os pedidos de expulsão.
+- Relatório correto paga e aumenta fama. Expulsão pendente paga apenas 40%; erro ou abandono não paga. Ao envelhecer, contratos em andamento são abandonados.
+- O caso em andamento e o bestiário ficam salvos com a vida. Equipamentos têm três melhorias de autonomia.
+- Vampiros e lobisomens podem desenvolver **quatro doenças exclusivas**, tratadas na clínica sobrenatural em Saúde.
+- **Menu → Novidades → Ver histórico desde o início** abre os registros originais do Git, inclusive anteriores ao changelog.
+
 ### 📖 Histórias em cadeia
 - 800 eventos em sequência, em 160 histórias da infância à velhice: cada escolha decide o próximo capítulo e quando ele chega, às vezes anos depois.
 - Quem aparece numa história pode virar amigo, namorado, inimigo ou família de verdade, e uma história pode abrir outra.

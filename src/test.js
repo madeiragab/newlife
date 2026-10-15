@@ -2,6 +2,33 @@
 function selfTest(){
   const errs={},lives=[]; let years=0,events=0,actions=0;
   const T=(name,fn)=>{ window.__T=name; (window.__TR=window.__TR||[]).push(name); if(window.__TR.length>30) window.__TR.shift(); try{ actions++; const r=fn(); if(S&&S.me&&!isFinite(S.me.money)){ const k='NaN após '+name; errs[k]=(errs[k]||0)+1; S.me.money=0; } return r; }catch(e){ const k=name+': '+e.message; errs[k]=(errs[k]||0)+1; if(errs[k]===1) errs[k+' @']=(e.stack||'').split('\n').slice(1,3).join(' | '); } };
+  T('paranormal profissional',()=>{
+    const assert=(ok,msg)=>{ if(!ok) throw Error(msg); };
+    newLife({}); S.me.age=25; S.me.money=100000; S.me.health=100; S.me.prison=null; S.scen=null;
+    pnEntrar(); assert(pn().ativa,'carreira'); const ofertas=pnOfertas(); assert(ofertas===pnOfertas(),'ofertas mudaram no mesmo ano');
+    const chance=R.chance; try { R.chance=()=>false;
+      for(const e of PN_ENTIDADES){
+        pn().ofertas=[{id:'teste',cliente:'Cliente',local:'Casa',nivel:1,ex:true,pago:1000,aceito:false}];pn().ano=S.year;
+        pnAceitar('teste'); const c=pn().caso; c.ent=e.id;c.quarto=1; const antes=S.me.money;
+        pnAcao('mover',1); for(const k of Object.keys(PN_PISTAS)) pnAcao('medir',k);
+        assert(c.pistas.length===3,'três provas '+e.id); const bateria=c.bat;pnAcao('medir',e.p[0]);assert(c.bat===bateria,'repetição consumiu bateria');
+        c.caca=2;pnAcao('esconder');assert(!c.caca,'esconderijo');
+        pnAcao('proteger');pnAcao('rito',e.rit);assert(c.expulsa,'rito '+e.id);pnAcao('mover',0);
+        S=JSON.parse(JSON.stringify(S)); assert(pn().caso.pistas.length===3,'save perdeu pistas');
+        pnFinalizar(e.id);assert(S.me.money===antes+1000,'pagamento');pnFinalizar(e.id);assert(S.me.money===antes+1000,'pagamento duplicado');assert(pn().best[e.id]===1,'bestiário');
+      }
+      pn().ofertas=[{id:'erro',local:'Casa',nivel:1,ex:false,pago:1000}]; pnAceitar('erro');let saldo=S.me.money;pnFinalizar('inexistente');assert(S.me.money===saldo,'erro pagou');
+      pn().ofertas=[{id:'fuga',local:'Casa',nivel:1,ex:true,pago:1000}];pnAceitar('fuga');pn().caso.san=1;pnAcao('mover',1);assert(!pn().caso,'sanidade zero não encerrou');
+      pn().ofertas=[{id:'parcial',local:'Casa',nivel:1,ex:true,pago:1000}];pnAceitar('parcial');pn().caso.ent='errante';pn().caso.pistas=['frio','voz','escrita'];saldo=S.me.money;pnFinalizar('errante');assert(S.me.money===saldo+400,'pagamento parcial');
+      S.me.criatura=null;addDisease('febre_lunar');assert(!S.me.dis.some(d=>d.id==='febre_lunar'),'humano com doença lunar');
+      S.me.criatura='vampiro';addDisease('febre_lunar');assert(!S.me.dis.some(d=>d.id==='febre_lunar'),'vampiro com doença lunar');addDisease('sangue_cinzento');assert(S.me.dis.some(d=>d.id==='sangue_cinzento'),'doença vampiro');
+      const dinheiro=S.me.money;pnTratar('sangue_cinzento');assert(S.me.money===dinheiro-1800,'custo tratamento');pnTratar('sangue_cinzento');assert(S.me.money===dinheiro-1800,'tratamento repetido');
+      S.me.criatura=null;yearHealth();assert(!S.me.dis.some(d=>PN_DOENCAS[d.id]),'doença após cura da maldição');
+      S.me.age=12;pn().ativa=false;pnEntrar();assert(!pn().ativa,'menor profissional');S.me.age=25;
+      [V.paraProf,V.paraCaso,V.paraBest,V.paraSaude,V.novidades,V.historico(),V.historico(999)].forEach(v=>v().items.map(rowHtml));
+      assert(NL_HISTORICO.some(x=>x.h==='de8e932'),'histórico sem início');
+    } finally { R.chance=chance; }
+  });
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
