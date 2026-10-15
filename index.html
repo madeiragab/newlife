@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610151814'</script>
+<title>NewLife</title><script>window.NL_VER='2610151824'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -10489,6 +10489,287 @@ giveUpFlow=(o=>function(){ const sc=S.scen, m=S.me; if(!sc||sc.id==='heroi'||!m|
   const html=info.crew.length?`<div style="text-align:left;margin-top:6px">${mfRows(info)}</div>`:'<p style="color:var(--muted)">Não há ninguém do seu lado aqui. Ninguém vai saber o que aconteceu.</p>';
   modal({t:`Antes de ${m.first} desistir…`,x:'É assim que o grupo vai receber a notícia.',html,ch:[{l:'Continuar lutando',fn:()=>{ scStat('san',4); scLog('Pensei em desistir. Olhei para o grupo e continuei.','good'); }},{l:'Desistir mesmo assim',cls:'danger',fn:()=>{ UI.close(); mfGuarda(); S.scen=null; die('desistiu'); save(); render(); showDeath(); }}]}); })(giveUpFlow);
 
+// ===== Histórias paranormais em cadeia para qualquer pessoa (1): fantasmas e casas assombradas =====
+const LIVRE=m=>!m.prison;
+chain('casa_assombrada',{k:'Assombração',min:10,max:85,when:LIVRE,w:.7,gap:[1,1]},{
+ a:['Barulhos à noite','Desde que mudamos de casa, ouço passos no corredor às três da manhã. Todo dia, no mesmo horário.',['Levantar para ver|>b|O corredor estava vazio. Mas a porta do sótão estava aberta.','Cobrir a cabeça com o cobertor|h-3 >c|Os passos pararam na porta do meu quarto.','Achar que é o encanamento|>d@1|Encanamento não sobe escada.']],
+ b:['O sótão','No sótão, uma caixa de fotos antigas de uma família que morou aqui há cinquenta anos.',['Olhar as fotos|>e|Em todas, uma menina de vestido branco olha direto para a câmera.','Fechar o sótão com cadeado|h-2 >c|Na manhã seguinte, o cadeado estava no chão.']],
+ c:['A presença','A temperatura do quarto cai de repente. Sinto alguém sentado na beira da cama.',['Perguntar quem está aí|>e|Uma voz de criança respondeu meu nome.','Chamar um padre|$-300 >f|O padre benzeu a casa inteira.','Sair correndo para a sala|h-5 >d|Dormi no sofá com a luz acesa.']],
+ d:['Pior a cada noite','Os objetos agora mudam de lugar. A família inteira está assustada.',['Investigar a história da casa|sm+2 >e|Fui à biblioteca da cidade procurar jornais antigos.','Mudar de casa|$-8000 h+4|Fomos embora. Nunca mais passei naquela rua.']],
+ e:['A menina do vestido branco','Os jornais contam: uma menina desapareceu nesta casa em 1974. Nunca foi encontrada.',['Procurar no quintal|>g|Debaixo da velha mangueira, a terra parecia diferente.','Fazer uma oração por ela|k+5 h+4 >f|Naquela noite, ninguém andou no corredor.']],
+ f:['Silêncio','A casa ficou em paz por um tempo. Mas às vezes ainda escuto uma risada de criança.',['Aceitar a companhia|h+4|Ela é parte da casa agora.','Deixar um brinquedo no sótão|k+3 h+3|De manhã, o brinquedo estava em outro lugar. Ela gostou.']],
+ g:['A descoberta','Achei uma caixinha de metal enterrada com um diário e um laço de cabelo.',['Levar à polícia|f+3 k+6 >h|O caso de 1974 foi reaberto.','Devolver à família da menina|k+8 h+6 >h|Uma senhora de oitenta anos chorou abraçada ao laço: era a irmã dela.']],
+ h:['Paz','Depois daquilo, os passos pararam para sempre.',['Sentir que fiz o certo|h+10 k+4|Às vezes a gente ajuda quem já se foi.','Plantar flores na mangueira|h+6|O lugar mais bonito do quintal.']],
+});
+chain('tabuleiro_ouija',{k:'Assombração',min:12,max:40,when:LIVRE,w:.6,gap:[1,1]},{
+ a:['O tabuleiro','Numa festa do pijama, alguém trouxe um tabuleiro Ouija.',['Jogar|>b|Dedos no copo, luz apagada, risadas nervosas.','Recusar e ir dormir|h+1|Ouvi gritos do outro quarto a noite inteira.']],
+ b:['Alguém respondeu','O copo se mexeu sozinho e soletrou: "E-S-T-O-U-A-Q-U-I".',['Perguntar o nome|>c|O copo soletrou um nome que ninguém conhecia.','Mandar embora|?50 >e|O copo foi até "ADEUS". Respiramos.|>c|O copo não se mexeu mais. Mas a vela apagou.','Quebrar o tabuleiro|h-3 >d|Todo mundo gritou ao mesmo tempo.']],
+ c:['O nome','Pesquisei o nome soletrado. Era de um homem que morreu no prédio há vinte anos.',['Contar para os amigos|>d|Ninguém dormiu direito por uma semana.','Guardar segredo|h-2 >d|Eu sei o que vi.']],
+ d:['As coisas estranhas','Desde a festa, objetos caem sozinhos e o celular liga de madrugada.',['Procurar uma benzedeira|$-100 ?60 h+6 >e|Ela rezou, bateu galho de arruda em mim e tudo parou.|>f|Ela disse que é forte demais para ela.','Ignorar|h-5 >f|Não adiantou ignorar.']],
+ e:['Lição','Nunca mais toquei num tabuleiro daqueles.',['Contar a história como lenda urbana|h+4|Virou a melhor história de acampamento.','Esquecer|h+2|Algumas portas não se abrem duas vezes.']],
+ f:['Ele quer algo','Uma noite, a mesma voz sussurrou no meu ouvido: "Termine o que eu não terminei."',['Descobrir o que ele queria|sm+2 k+5 >e|Ele deixou uma carta de amor sem entregar. Achei e entreguei à viúva.','Mudar de cidade|$-5000 h+2|Ele não veio junto. Eu acho.']],
+});
+chain('cemiterio_aposta',{k:'Assombração',min:12,max:30,when:LIVRE,w:.5,gap:[1,1]},{
+ a:['A aposta','Os amigos apostaram que eu não passo uma noite inteira no cemitério da cidade.',['Aceitar|>b|Levei um saco de dormir e uma lanterna.','Recusar|h-1|Chamaram de medros{o}, mas dormi em paz.']],
+ b:['Meia-noite','À meia-noite, vi uma luz azul flutuando entre os túmulos.',['Seguir a luz|>c|Ela parou em cima de um túmulo sem nome.','Fingir que não vi|h-3 >d|Fechei os olhos e contei até mil.']],
+ c:['O túmulo sem nome','No túmulo, só uma data e uma frase: "Esperando por quem não voltou."',['Deixar uma flor|k+4 >d|A luz azul apagou devagar.','Tirar uma foto|>e|Na foto, uma mulher aparece ao lado do túmulo.']],
+ d:['Amanhecer','Sobrevivi à noite. Os amigos me receberam no portão.',['Cobrar a aposta|$+200 h+6|Ganhei a aposta e uma história.','Contar o que vi|f+1 h+4|Ninguém acreditou. Ainda.']],
+ e:['A foto','A foto rodou a internet. Especialistas dizem que não é montagem.',['Investigar a mulher|sm+3 >f|Descobri que ela esperou o noivo voltar da guerra a vida inteira.','Vender a foto para um programa de TV|$+3000 f+4|Fiquei conhecid{o} como quem fotografou um fantasma.']],
+ f:['O noivo','Achei o nome do noivo num arquivo militar. Ele está enterrado em outra cidade.',['Levar terra de um túmulo para o outro|k+10 h+10|Juntei os dois, do jeito que deu. A luz azul nunca mais apareceu.','Publicar a história|f+4 k+4|A cidade fez uma homenagem aos dois.']],
+});
+chain('crianca_fala_sozinha',{k:'Assombração',min:22,max:70,who:'child',w:.6,gap:[1,1]},{
+ a:['O amigo invisível','{p} passa horas conversando com um "amigo" que ninguém vê. Diz que ele se chama Tobias.',['Achar normal para a idade|>b|Toda criança tem um amigo imaginário.','Perguntar sobre o Tobias|>c|{p} disse que ele mora no armário e é muito velho.']],
+ b:['Coincidências','{p} sabe coisas que não deveria: o nome do meu avô, a cor da casa onde eu cresci.',['Levar a um psicólogo|$-800 >d|O psicólogo ficou intrigado.','Perguntar como {ele} sabe|>c|"O Tobias me contou."']],
+ c:['O Tobias','{p} desenhou o Tobias: um menino de roupa antiga, com um chapéu engraçado.',['Procurar fotos antigas da casa|>e|Numa foto de 1920, um menino igualzinho ao desenho.','Pedir para {p} dizer ao Tobias que vá embora|?50 bond-3 >f|{p} chorou, mas o Tobias foi.|>d|"O Tobias não quer ir."']],
+ d:['Noites difíceis','{p} acorda chorando: o Tobias está triste.',['Perguntar o que o Tobias quer|>e|"Ele quer que alguém lembre dele."','Chamar alguém para benzer a casa|$-200 >f|A casa ficou mais leve.']],
+ e:['Lembrar','Descobri que o Tobias era filho dos primeiros donos da casa. Morreu de gripe aos seis anos.',['Fazer uma pequena homenagem com {p}|bond+10 k+6 >f|Acendemos uma vela e falamos o nome dele em voz alta.','Contar a história para a família|h+4 >f|Agora todo mundo conhece o Tobias.']],
+ f:['Despedida','{p} disse que o Tobias foi embora feliz e deixou um abraço.',['Abraçar {p}|bond+8 h+8|Às vezes as crianças veem mais que a gente.','Ficar arrepiad{o}|h+3|Mas sorri.']],
+});
+chain('estrada_fantasma',{k:'Assombração',min:18,max:85,when:m=>!!m.lic&&!m.prison,w:.6,npc:1,gap:[1,1]},{
+ a:['A carona na estrada','Numa estrada escura, uma pessoa de branco pediu carona no acostamento.',['Dar carona|>b|{p} entrou no carro sem dizer nada.','Passar direto|>e@2|Pelo retrovisor, não tinha ninguém no acostamento.']],
+ b:['A passageira','{p} pediu para ser deixad{o2} numa casa a dez quilômetros dali. O carro ficou gelado.',['Puxar conversa|>c|{p} só disse: "Faz tanto tempo que eu tento voltar para casa."','Dirigir em silêncio|>c|Não tive coragem de olhar para o lado.']],
+ c:['A casa','Parei na frente da casa. Quando olhei para o banco do passageiro, estava vazio.',['Bater na porta|>d|Uma senhora atendeu e ficou pálida quando eu descrevi {p}.','Ir embora acelerando|h-6|Nunca mais peguei aquela estrada à noite.']],
+ d:['A senhora','"Essa é {p}, minha filha. Morreu nessa estrada há trinta anos. Você não é o primeiro que a traz."',['Abraçar a senhora|k+6 h+3 >f|Tomamos um café e ela me mostrou fotos.','Sair dali o mais rápido possível|h-4|Arrepio que não passa.']],
+ e:['De novo','Dois anos depois, na mesma estrada, a mesma pessoa de branco no acostamento.',['Parar desta vez|>b|Algo me disse para parar.','Acelerar|h-3|Vi no retrovisor: estava no banco de trás.']],
+ f:['Em paz','A senhora me ligou meses depois: ninguém mais viu {p} na estrada.',['Sentir que ajudei|h+8 k+4|Algumas viagens terminam depois de trinta anos.','Contar a história|f+2|Virou a lenda da cidade.']],
+});
+chain('hotel_antigo',{k:'Assombração',min:18,max:85,when:LIVRE,w:.5,gap:[1,1]},{
+ a:['O quarto 13','Num hotel antigo do interior, a recepcionista hesitou antes de me dar a chave do quarto 13.',['Pedir outro quarto|>e|"Só tem esse livre", disse, sem me olhar.','Aceitar e rir da superstição|>b|Quarto grande, cheiro de naftalina e um espelho enorme.']],
+ b:['O espelho','À noite, no espelho, vi uma mulher penteando o cabelo atrás de mim.',['Virar para trás|>c|Não tinha ninguém. No espelho, ela ainda estava lá.','Cobrir o espelho com a toalha|h-3 >d|A toalha caiu no chão sozinha.']],
+ c:['O recado','No espelho embaçado apareceu escrito: "Ele me trancou aqui."',['Procurar a gerência|>d|O gerente mudou de cor.','Investigar o quarto|sm+2 >f|Atrás do armário, uma porta pintada por cima.']],
+ d:['A história do hotel','O gerente contou: em 1950, a esposa do dono sumiu. Disseram que fugiu com um viajante.',['Duvidar da versão oficial|>f|Ninguém foge e deixa as joias para trás.','Pedir para trocar de hotel|$-300 h+2|Saí de madrugada.']],
+ e:['O hotel lotado','Sem outro quarto, aceitei o 13 com um mau pressentimento.',['Dormir de luz acesa|>b|A luz piscou a noite inteira.','Ir dormir no carro|hl-2 h-2|Dormi mal, mas dormi.']],
+ f:['A porta escondida','Atrás da porta pintada, um quartinho e um esqueleto com um vestido de 1950.',['Chamar a polícia|f+5 k+8 >g|Virou notícia nacional.','Fugir do hotel|h-6|Liguei anonimamente para a polícia da estrada.']],
+ g:['Justiça tardia','O caso foi resolvido: o dono do hotel matou a esposa. Ela finalmente foi enterrada.',['Ir ao enterro|k+5 h+8|Uma mulher que eu só vi no espelho. Mas fui.','Seguir viagem|h+4|O quarto 13 foi fechado para sempre.']],
+});
+chain('poltergeist',{k:'Assombração',min:8,max:85,when:LIVRE,w:.5,gap:[1,1]},{
+ a:['A louça','Os pratos começaram a cair do armário sozinhos. Um de cada vez.',['Filmar|>b|O vídeo mostra um prato deslizando devagar até cair.','Prender os armários com fita|h-2 >c|Os pratos começaram a cair da mesa.']],
+ b:['O vídeo','Postei o vídeo. Metade da internet acha que é montagem, a outra metade quer ir lá em casa.',['Chamar investigadores paranormais|>d|Uma equipe com câmeras e aparelhos chegou em uma semana.','Apagar o vídeo|h+0 >c|Melhor não chamar atenção.']],
+ c:['A escalada','Agora são cadeiras arrastadas e portas batendo à noite.',['Chamar investigadores|>d|Não dá mais para ignorar.','Chamar um padre|$-300 ?50 h+6|O exorcismo funcionou.|>d|O padre saiu correndo da casa.']],
+ d:['A investigação','Os aparelhos registraram uma voz: "Saiam da minha casa."',['Negociar com o espírito|?k >e|Prometi cuidar da casa como ele cuidava. Os barulhos diminuíram.|hl-6 >f|Uma cadeira voou na minha direção.','Mudar de casa|$-6000 h+4|Ele que fique com a casa.']],
+ e:['Convivência','O espírito ficou mais calmo. Às vezes até ajuda: acho as chaves em cima da mesa.',['Agradecer em voz alta|h+6|Convivência pacífica.','Chamar de "vovô"|h+8|Ele parece ter gostado.']],
+ f:['Machucad{o}','A cadeira me acertou. Saímos de casa naquela noite.',['Vender a casa|$-4000 h+2|Vendi barato. O comprador desistiu em um mês.','Voltar com reforço espiritual|$-1000 ?50 h+8|Rezamos a casa inteira por três dias e funcionou.|h-6|Não adiantou.']],
+});
+chain('sonho_premonitorio',{k:'Mistério',min:12,max:85,when:LIVRE,w:.5,gap:[1,1]},{
+ a:['O sonho','Sonhei que um ônibus caía de uma ponte. No dia seguinte, vi a mesma ponte no caminho do trabalho.',['Não pegar o ônibus|>b|Peguei um táxi, sentindo-me ridícul{o}.','Pegar o ônibus mesmo assim|>c|Sonho é só sonho.']],
+ b:['A notícia','O ônibus que eu ia pegar bateu na mureta da ponte. Ninguém morreu, mas muitos se feriram.',['Contar para alguém|>d|Ninguém acreditou. Nem eu.','Guardar segredo|h-3 >d|Fiquei sem dormir.']],
+ c:['A batida','O ônibus bateu na mureta. Me machuquei pouco, mas o sonho não sai da cabeça.',['Começar a anotar os sonhos|hl-5 >d|Um caderno do lado da cama.','Ignorar|hl-5 >d|Coincidência.']],
+ d:['Outros sonhos','Os sonhos continuam. Alguns se realizam, outros não.',['Usar para ajudar as pessoas|?50 k+8 f+2 >e|Avisei uma vizinha sobre um vazamento de gás. Era verdade.|h-4 >e|Avisei alguém e era bobagem. Fiquei com fama de louc{o}.','Tentar fazer parar|>f|Remédio para dormir, meditação, chá.']],
+ e:['O dom','Comecei a aceitar que talvez eu tenha um dom.',['Fazer as pazes com isso|h+6|Os sonhos ficaram mais calmos.','Procurar quem entenda|>f|Uma senhora me disse que a avó dela também sonhava assim.']],
+ f:['Paz','Os sonhos foram ficando raros, como se tivessem cumprido o que precisavam.',['Agradecer|h+5|Fui guiad{o} quando precisei.','Sentir falta|h+2|Às vezes eu queria saber o que vem pela frente.']],
+});
+chain('espelho_avo',{k:'Assombração',min:10,max:85,when:m=>!m.prison&&people('avo').length===0,w:.5,gap:[1,1]},{
+ a:['O espelho da avó','Herdei o espelho antigo da minha avó. À noite, sinto o perfume dela no quarto.',['Pendurar no quarto|>b|O perfume ficou mais forte.','Guardar na garagem|>c@1|O perfume foi junto.']],
+ b:['O reflexo','Uma madrugada, o reflexo no espelho sorriu antes de mim.',['Falar com ela|>d|"Vó?" A luz da cabeceira piscou duas vezes.','Cobrir o espelho|h-2 >c|O pano estava no chão de manhã.']],
+ c:['Saudade','Sinto falta dela todo dia.',['Contar para o espelho como foi meu dia|h+4 >d|Virou hábito.','Visitar o túmulo dela|h+4 >d|Levei as flores que ela gostava.']],
+ d:['O último recado','Um dia, no espelho embaçado do banho, apareceu escrito: "Estou orgulhosa."',['Chorar|h+12|Chorei e ri ao mesmo tempo.','Mostrar para a família|h+8|Minha mãe reconheceu a letra.']],
+});
+chain('boneca',{k:'Assombração',min:6,max:70,when:LIVRE,w:.4,gap:[1,1]},{
+ a:['A boneca da feira','Comprei uma boneca de porcelana antiga numa feira. O vendedor pareceu aliviado.',['Colocar na estante|>b|Ela é bonita. Bonita demais.','Dar de presente|>e|Dei para uma prima colecionadora.']],
+ b:['De lugar','Toda manhã a boneca está numa posição diferente.',['Filmar a noite inteira|>c|Às 3h17, a cabeça da boneca virou para a câmera.','Jogar no lixo|>d|De manhã, ela estava de volta na estante.']],
+ c:['A gravação','Mostrei a gravação para um especialista em antiguidades. Ele ficou branco.',['Perguntar a história da boneca|>d|Pertenceu a uma menina que morreu num incêndio em 1890.','Vender para um colecionador de objetos assombrados|$+4000 h+4|Ele pagou bem e levou com luvas.']],
+ d:['A menina','A boneca não quer ir embora. Precisa de alguma coisa.',['Levar a boneca ao túmulo da menina|k+6 h+6|Deixei ao lado da lápide. Nunca mais voltou.','Queimar a boneca|?50 h+4|Ela queimou rápido. Paz.|h-8|Ela não queimou. Nem chamuscou.']],
+ e:['A prima','Minha prima me ligou chorando: a boneca anda pela casa dela.',['Ir buscar a boneca|>d|Fiquei com a responsabilidade de volta.','Dizer que não é problema meu|k-4|Ela nunca mais falou comigo.']],
+});
+
+// ===== Histórias paranormais em cadeia para qualquer pessoa (2): lendas, OVNIs, maldições e médiuns =====
+chain('ovni',{k:'Mistério',min:12,max:85,when:LIVRE,w:.5,gap:[1,1]},{
+ a:['Luzes no céu','Três luzes em triângulo pararam em cima da cidade e sumiram de repente.',['Filmar|>b|O vídeo ficou tremido, mas dá para ver.','Achar que é drone|>c@1|Drone não some daquele jeito.']],
+ b:['O vídeo viral','O vídeo foi parar no jornal nacional. A aeronáutica disse que era "fenômeno atmosférico".',['Dar entrevistas|f+5 >c|Virei "a pessoa do OVNI".','Ficar quiet{o}|>c|Não quero ser chamad{o} de louc{o}.']],
+ c:['Tempo perdido','Voltando para casa, olhei o relógio: tinham passado três horas que eu não lembro.',['Procurar um hipnoterapeuta|$-1000 >d|Ele quis gravar a sessão.','Tentar esquecer|h-4 >e@1|Não consegui esquecer.']],
+ d:['A sessão','Sob hipnose, descrevi uma sala branca e figuras altas que me examinavam.',['Acreditar|h-6 sm+2 >e|Ninguém sai igual de uma lembrança dessas.','Achar que foi imaginação|>e|A mente prega peças.']],
+ e:['A marca','Apareceu uma marca de três pontinhos em triângulo no meu braço.',['Mostrar para um ufólogo|>f|Ele disse que já viu outras iguais.','Esconder com uma blusa|h-3|Nunca mostrei para ninguém.']],
+ f:['O grupo','O ufólogo me apresentou a um grupo de pessoas com a mesma marca.',['Entrar no grupo|h+6 f+2|Pela primeira vez, alguém acreditou em mim.','Ir embora|h+0|Parecia uma seita.']],
+});
+chain('maldicao_cigana',{k:'Maldição',min:16,max:85,when:LIVRE,w:.4,npc:1,gn:'F',age:[30,50],gap:[1,1]},{
+ a:['A velha da feira','Uma senhora na feira, {p}, pegou minha mão e disse que eu carrego "um peso que não é meu".',['Pedir para ela explicar|>b|"Alguém da sua família foi amaldiçoado. E a maldição passou para você."','Rir e ir embora|>c@1|Ela gritou: "Sete anos!"']],
+ b:['A maldição','Segundo {p}, a cada ano algo de valor vai ser tirado de mim, até a maldição ser quebrada.',['Pagar para ela quebrar|$-1500 ?40 h+8|Ela queimou ervas e disse que acabou. Acabou mesmo.|>c|Ela sumiu com o dinheiro.','Procurar a origem da maldição|sm+2 >d|Perguntei aos parentes mais velhos.']],
+ c:['Azar','Coisas ruins começaram a acontecer: pneu furado, celular roubado, dente quebrado.',['Voltar à feira para procurar {p}|>b|Ela estava lá, como se me esperasse.','Achar que é coincidência|$-800 h-4 >d|Coincidência cara.']],
+ d:['A origem','Minha tia-avó contou: meu bisavô enganou uma família pobre e foi amaldiçoado.',['Procurar os descendentes da família|k+6 >e|Achei uma neta deles, vivendo com dificuldade.','Desistir|h-3|O peso continua.']],
+ e:['A reparação','Decidi reparar o que meu bisavô fez.',['Ajudar a família com dinheiro|$-5000 k+12 h+10|Senti, literalmente, um peso saindo das costas.','Pedir perdão em nome da família|k+8 h+6|A senhora aceitou. Disse que a mãe dela tinha perdoado antes de morrer.']],
+});
+chain('medium',{k:'Mistério',min:16,max:85,when:LIVRE,w:.4,npc:1,age:[10,40],gap:[1,1]},{
+ a:['A médium','Uma amiga me levou numa médium famosa, {p}, só por curiosidade.',['Fazer uma consulta|$-300 >b|Ela fechou os olhos e começou a falar com a voz diferente.','Ficar na sala de espera|h+0|Fiquei lendo revista velha.']],
+ b:['A mensagem','{p} disse coisas que só eu e uma pessoa que já morreu sabíamos.',['Chorar|h+8 >c|Fazia anos que eu queria ouvir aquilo.','Desconfiar|sm+2 >d|Deve ter pesquisado sobre mim.']],
+ c:['O recado','{p} disse que essa pessoa quer que eu procure uma caixa escondida na casa antiga da família.',['Procurar a caixa|?50 $+3000 h+12|Achei a caixa com cartas e economias guardadas. Um presente do além.|h-2|Não achei nada. Mas a busca trouxe lembranças boas.','Deixar para lá|h+2|Já recebi o que precisava.']],
+ d:['A investigação','Investiguei {p}: nenhuma informação sobre mim estava na internet.',['Voltar para outra consulta|$-300 >c|Desta vez fui sem desconfiança.','Ficar com a dúvida|h+2|Algumas coisas não têm explicação.']],
+});
+chain('lobisomem_visto',{k:'Paranormal',min:14,max:80,when:m=>!m.prison&&!m.criatura,w:.4,gap:[1,1]},{
+ a:['O uivo','Numa noite de lua cheia, um uivo que não era de cachorro ecoou na rua.',['Olhar pela janela|>b|Uma sombra enorme atravessou a rua sobre duas pernas.','Fechar tudo e ir dormir|>e@1|Não dormi.']],
+ b:['As pegadas','De manhã, pegadas enormes no quintal e o cachorro do vizinho sumido.',['Seguir as pegadas|>c|Elas iam até o mato atrás do bairro.','Avisar a polícia|>d|O policial riu: "Cachorro grande."']],
+ c:['A toca','No mato, ossos, roupas rasgadas e um cheiro de bicho.',['Ir embora antes do anoitecer|>d|Saí correndo.','Esperar escondid{o} para ver|?40 >d|Vi um homem nu acordando no meio dos ossos. Ele não me viu.|>f|A fera me viu primeiro.']],
+ d:['Nos jornais','O jornal da cidade fala em "ataques de animal selvagem" no bairro.',['Investigar os ataques|>e|Todos aconteceram em noites de lua cheia.','Mudar de bairro|$-3000 h+2|Prefiro não saber.']],
+ e:['A lua cheia','Na lua cheia seguinte, o uivo voltou. Mais perto.',['Comprar balas de prata|$-2000 >g|O armeiro nem perguntou para quê.','Trancar a casa e rezar|h-4|Amanheceu. Sobrevivi.']],
+ f:['O ataque','A fera pulou em mim. Senti os dentes no braço.',['Lutar|?fight >g|Consegui escapar com um corte feio.|virar:lobisomem|A mordida foi funda. Na lua seguinte, entendi o que tinha acontecido comigo.','Fingir de mort{o}|?40 >g|A fera foi embora.|virar:lobisomem|A fera mordeu antes de ir.']],
+ g:['A caçada','Na noite certa, encontrei a fera de novo.',['Atirar|?fight f+6 k+4|Acertei. Ao amanhecer, era um homem caído no mato.|hl-25|Errei. A fera fugiu e me deixou ferid{o}.','Deixar ir|k+2|Ela também é uma vítima.']],
+});
+chain('vampiro_visto',{k:'Paranormal',min:16,max:80,when:m=>!m.prison&&!m.criatura,w:.4,npc:1,date:1,gap:[1,1]},{
+ a:['Alguém da noite','Conheci {p} numa festa. Pálid{o2}, elegante, só aparece depois do pôr do sol.',['Puxar conversa|>b|{p} conhece tudo de música antiga. Muito antiga.','Achar estranho e ir embora|h+0|Senti um frio na nuca.']],
+ b:['Os encontros','Saímos algumas vezes. Nunca de dia. Nunca num restaurante.',['Perguntar o porquê|>c|{p} riu e disse que tem "alergia ao sol".','Notar que {ele} não aparece em fotos|>c|Na foto da festa, só eu estou na mesa.']],
+ c:['A verdade','{p} confessou: tem duzentos anos e se alimenta de sangue.',['Fugir|h-6 >e|Corri até em casa sem olhar para trás.','Ficar|vira:namoro >d|O coração não escuta o bom senso.']],
+ d:['A proposta','{p} quer me transformar para ficarmos juntos para sempre.',['Aceitar|virar:vampiro h+10|Senti as presas no pescoço e depois nada. Acordei com sede.','Recusar|bond-10 >e|{p} respeitou. Mas ficou triste.']],
+ e:['A ausência','{p} desapareceu da cidade. Deixou um bilhete: "Você mereceu uma vida inteira."',['Guardar o bilhete|h+4|Às vezes ainda vejo alguém pálido na multidão e penso n{ele}.','Tentar encontrar {p}|>b@2|Procurei em todas as festas.']],
+});
+chain('igreja_abandonada',{k:'Assombração',min:14,max:60,when:LIVRE,w:.4,gap:[1,1]},{
+ a:['A igreja fechada','A igreja abandonada no fim da rua tem o sino tocando sozinho à meia-noite.',['Entrar para ver|>b|A porta rangeu como em filme de terror.','Gravar o sino do lado de fora|>d|O áudio tem uma voz cantando junto.']],
+ b:['O altar','No altar, velas acesas. Ninguém mora aqui há quarenta anos.',['Apagar as velas|>c|Elas se acenderam de novo.','Rezar|k+4 >d|Senti uma paz estranha.','Sair correndo|h-4|Nunca mais passei na frente.']],
+ c:['O padre','Uma figura de batina apareceu no corredor e apontou para o porão.',['Ir ao porão|>e|Achei um cofre antigo trancado.','Ir embora|h-3|Não é comigo.']],
+ d:['O coral','Moradores antigos dizem que o coral da igreja morreu num incêndio em 1960, durante a missa.',['Fazer uma missa em homenagem|$-500 k+8 h+6|O sino nunca mais tocou sozinho.','Contar para a imprensa|f+3|Virou ponto turístico.']],
+ e:['O cofre','No cofre, as doações que o padre escondeu para reconstruir a igreja.',['Entregar à paróquia|k+10 f+3|A igreja foi reformada com aquele dinheiro.','Ficar com o dinheiro|$+15000 k-12|Aquela noite, o sino tocou na minha porta.']],
+});
+chain('chupacabra',{k:'Mistério',min:12,max:85,when:LIVRE,w:.4,gap:[1,1]},{
+ a:['Os bichos mortos','No sítio da família, galinhas e cabras aparecem mortas, sem sangue, com dois furinhos no pescoço.',['Montar uma câmera|>b|Se tem alguma coisa, vai aparecer.','Achar que foi raposa|>c@1|Raposa come. Isso não comeu.']],
+ b:['A gravação','A câmera gravou um vulto curvado, com olhos vermelhos e espinhos nas costas.',['Mandar para um programa de TV|f+5 $+1000 >d|Virou "o chupa-cabra do sítio".','Mostrar só para a família|>c|Ninguém dormiu.']],
+ c:['A espera','Fiquei de vigia com uma lanterna e uma enxada.',['Encarar o bicho|?fight >d|Ele fugiu ganindo pelo mato.|hl-10 >d|Ele me arranhou e fugiu.','Gritar e acender todas as luzes|>d|O bicho fugiu.']],
+ d:['O fim dos ataques','Os ataques pararam. Mas pegadas estranhas ainda aparecem na lama.',['Contar a história para os netos|h+4|A melhor história do sítio.','Vender o sítio|$+20000 h+2|Que o próximo dono se vire.']],
+});
+chain('lenda_curupira',{k:'Lenda',min:8,max:60,when:LIVRE,w:.4,gap:[1,1]},{
+ a:['Perdid{o} na mata','Numa trilha, as pegadas que eu seguia de volta estavam ao contrário, com os calcanhares para frente.',['Seguir as pegadas mesmo assim|>b|Andei em círculos por horas.','Parar e esperar ajuda|>c|Escureceu.']],
+ b:['O assobio','Um assobio fino ecoou em volta, de todos os lados.',['Oferecer fumo e cachaça, como dizem as lendas|>d|Deixei no tronco de uma árvore.','Gritar por ajuda|>c|Só o assobio respondeu.']],
+ c:['A noite na mata','Passei a noite encolhid{o} entre as raízes.',['Rezar|h-3 >d|De manhã, a trilha apareceu bem na minha frente.','Chorar|h-5 >d|De manhã, um caçador me encontrou.']],
+ d:['O guardião','Voltei para casa sabendo que algo na mata me deixou sair.',['Nunca mais caçar ali|k+5 h+4|A mata tem dono.','Contar a história|h+4|Ninguém da cidade grande acreditou. Os mais velhos da roça, sim.']],
+});
+chain('fantasma_trabalho',{k:'Assombração',min:18,max:70,when:m=>!!m.job&&!m.prison,w:.4,gap:[1,1]},{
+ a:['Hora extra','Fazendo hora extra sozinh{o} no escritório, o elevador parou no meu andar. Vazio.',['Ignorar e continuar|>b|O elevador abriu e fechou mais três vezes.','Ir embora|>e@1|O trabalho fica para amanhã.']],
+ b:['O colega da noite','Alguém digitava no computador do canto. Não tinha ninguém sentado.',['Olhar a tela|>c|Uma planilha de 1998, com o nome de um funcionário antigo.','Desligar o computador da tomada|>c|Ele continuou ligado.']],
+ c:['O funcionário antigo','O porteiro contou: um contador morreu na mesa do canto, numa noite de hora extra.',['Terminar o relatório dele|sm+2 k+5 >d|Achei um erro antigo na planilha e corrigi.','Pedir para mudar de andar|h+2|Nunca mais fico até tarde.']],
+ d:['O erro','O erro que eu corrigi mostrou um desvio de dinheiro de vinte anos atrás.',['Levar à diretoria|?50 promo f+2|Fui promovid{o} por descobrir a fraude.|perf-5|Ninguém quis mexer em coisa antiga.','Deixar quieto|h+0|Mas o computador nunca mais ligou sozinho.']],
+ e:['De novo','Toda vez que fico até tarde, o elevador para no meu andar.',['Dar boa-noite para o elevador|h+3|Virou um ritual.','Nunca mais fazer hora extra|perf-3 h+3|Meu chefe não entende, mas eu entendo.']],
+});
+
+// ===== Histórias paranormais em cadeia para qualquer pessoa (3): bruxas, duplos, outras vidas e cultos =====
+chain('casa_bruxa',{k:'Bruxaria',min:18,max:85,when:LIVRE,w:.4,gap:[1,1]},{
+ a:['A herança estranha','Uma tia distante que eu mal conhecia me deixou a casa dela no interior. Os vizinhos dizem que ela era bruxa.',['Ir conhecer a casa|>b|Ervas penduradas, gatos por todo lado e um cheiro de incenso.','Vender sem ver|$+40000 h+2|Dinheiro na conta, mistério para sempre.']],
+ b:['O grimório','No porão, um livro de capa de couro com receitas, rezas e feitiços escritos à mão.',['Ler o livro|sm+3 >c|Tem um feitiço para cada problema da vida.','Queimar o livro|>e|O fogo ficou verde.']],
+ c:['O primeiro feitiço','Testei um feitiço simples de sorte.',['Fazer certinho|?50 $+2000 h+8 >d|No dia seguinte, achei dinheiro na rua. Muito dinheiro.|h-4 >d|Nada aconteceu. Ou quase: meu cabelo ficou azul por um dia.','Desistir no meio|>d|Senti que algo me observava.']],
+ d:['O preço','A última página do grimório avisa: "Todo feitiço cobra um preço. Sempre."',['Parar de usar|k+3 h+3 >f|Guardei o livro num lugar seguro.','Fazer um feitiço maior|?40 $+15000 f+3 >g|Funcionou. Mas o espelho do banheiro rachou sozinho.|hl-15 >g|O feitiço deu errado e passei uma semana de cama.']],
+ e:['Os gatos','Os gatos da tia começaram a me seguir pela casa, como se esperassem algo.',['Cuidar dos gatos|pet k+5 h+6 >f|Sete gatos agora são meus.','Doar os gatos|k-2 >f|Na mesma noite, a casa ficou fria.']],
+ f:['A vizinha','Uma vizinha idosa bateu na porta pedindo uma "simpatia" que minha tia fazia.',['Ajudar com o que aprendi|k+6 f+2 >h|A vizinha voltou dias depois, curada de uma dor antiga.','Dizer que não sei fazer|h+0|Ela foi embora decepcionada.']],
+ g:['A cobrança','O preço veio: perdi algo que eu amava.',['Aceitar e parar de vez|h-10 k+4|Aprendi da pior forma.','Tentar desfazer com outro feitiço|?30 h+8|Consegui desfazer.|hl-20|Piorei tudo.']],
+ h:['A nova bruxa da cidade','A cidade começou a me procurar como procuravam minha tia.',['Assumir o papel|f+3 k+5 $+3000|Chás, rezas e conselhos. Virei a nova benzedeira da região.','Vender a casa e ir embora|$+40000|Não é a minha vida.']],
+});
+chain('duplo',{k:'Mistério',min:16,max:85,when:LIVRE,w:.35,gap:[1,1]},{
+ a:['Eu mesm{o}','Uma amiga jurou que me viu no shopping ontem. Eu estava em casa o dia inteiro.',['Rir|>b|Deve ser alguém parecido.','Perguntar detalhes|>b|"Você estava com a mesma roupa que está agora."']],
+ b:['De novo','Mais três pessoas disseram ter me visto em lugares onde eu não estive.',['Investigar|>c|Fui aos lugares. Ninguém lembrava de nada.','Ignorar|h-3 >d|Comecei a ficar paranoic{o}.']],
+ c:['O encontro','No metrô, vi alguém igual a mim do outro lado da plataforma. Ela sorriu.',['Correr até lá|>d|O trem passou. Do outro lado, ninguém.','Ficar paralisad{o}|h-6 >d|Senti um frio que não passava.']],
+ d:['O aviso','Dizem que ver o próprio duplo é um aviso.',['Ir ao médico fazer exames|$-500 ?50 hl+5 >e|Descobri um problema cedo e tratei. O duplo me salvou.|>e|Tudo normal.','Mudar a rotina toda|h+2 >e|Se é aviso, vou ser cuidados{o}.']],
+ e:['Nunca mais','O duplo nunca mais apareceu.',['Agradecer|h+4|Se era aviso, funcionou.','Ficar com medo dele voltar|h-2|Às vezes olho duas vezes para o espelho.']],
+});
+chain('outra_vida',{k:'Mistério',min:5,max:30,when:LIVRE,w:.35,gap:[1,2]},{
+ a:['Lembranças estranhas','Desde pequen{o}, lembro de uma casa à beira-mar que nunca visitei e de um nome que não é o meu.',['Contar para os pais|>b|Eles acharam que era imaginação.','Guardar para mim|>c@2|As lembranças continuam.']],
+ b:['Os desenhos','Desenhei a casa tantas vezes que meus pais começaram a se preocupar.',['Pesquisar na internet|>c|Achei uma foto de uma casa igual, numa cidade do litoral.','Parar de desenhar|h-2 >c|Mas os sonhos continuam.']],
+ c:['A viagem','Fui até a cidade do litoral.',['Procurar a casa|>d|Ela existe. Exatamente como eu lembrava.','Desistir na porta|h-3|Tive medo do que ia descobrir.']],
+ d:['A dona da casa','Uma senhora abriu a porta. Eu disse o nome que lembrava, e ela começou a chorar.',['Perguntar quem era|>e|Era o nome do marido dela, que morreu no mar há trinta anos.','Pedir desculpas e ir embora|h-4|Não tive coragem.']],
+ e:['Reconhecimento','Contei detalhes da casa que só o marido dela saberia. Ela segurou minhas mãos.',['Visitar sempre|h+12 k+5|Ela virou uma avó para mim.','Nunca mais voltar|h+3|Algumas coisas precisam ficar no passado.']],
+});
+chain('anjo_guarda',{k:'Mistério',min:6,max:85,when:LIVRE,w:.35,gap:[1,2]},{
+ a:['O estranho','Quase fui atropelad{o}. Um desconhecido me puxou pelo braço no último segundo.',['Agradecer|>b|Ele só disse: "Ainda não é a sua hora." E sumiu na multidão.','Ficar em choque|h-3 >b|Quando olhei, ele não estava mais lá.']],
+ b:['De novo','Anos depois, num incêndio, a mesma pessoa me guiou até a saída.',['Perguntar quem é|>c|"Alguém que cuida de você há muito tempo."','Seguir sem perguntar|>c|Quando saí, ninguém tinha visto ninguém comigo.']],
+ c:['A foto antiga','Numa foto antiga da família, o estranho aparece ao lado do meu avô, em 1950. Igual, sem envelhecer.',['Perguntar à família|>d|Minha avó disse: "Ele também salvou seu avô."','Guardar a foto|h+4 >d|Agora sei que não estou só.']],
+ d:['A última vez','Muito tempo depois, ele apareceu mais uma vez. Sorriu e acenou de longe.',['Acenar de volta|h+10|Senti uma paz enorme.','Ir atrás dele|h+4|Ele sumiu de novo. Mas eu sei que volta quando precisar.']],
+});
+chain('culto_mata',{k:'Mistério',min:16,max:70,when:LIVRE,w:.35,gap:[1,1]},{
+ a:['Os encapuzados','Numa noite, vi gente encapuzada entrando na mata com tochas.',['Seguir de longe|>b|Eles formaram um círculo numa clareira.','Chamar a polícia|>e|A polícia não achou nada.','Ir para casa|>f@1|Melhor não me meter.']],
+ b:['O ritual','No círculo, cantavam numa língua estranha. No centro, um altar de pedra.',['Fotografar|?50 >c|Consegui fotos claras dos rostos.|>d|O flash disparou.','Ir embora em silêncio|>f|Saí sem fazer barulho.']],
+ c:['Os rostos','Reconheci um vereador e o dono da maior loja da cidade nas fotos.',['Levar à imprensa|f+6 >g|A história explodiu.','Usar para chantagem|k-12 $+20000 >d|Eles pagaram. E começaram a me vigiar.']],
+ d:['Descobert{o}','Eles me viram. Agora sinto que estou sendo seguid{o}.',['Mudar de cidade|$-6000 h-4|Fugi antes que fosse tarde.','Enfrentar|?k >g|Fui à delegacia com tudo o que sabia.|hl-15|Uma noite, me cercaram na rua.']],
+ e:['Nada encontrado','A polícia disse que era só uma festa de fantasia.',['Insistir|>b@1|Na lua seguinte, voltei sozinh{o}.','Desistir|h-2|Mas toda lua cheia eu vejo as tochas.']],
+ f:['Os sumiços','O jornal fala de animais sumindo na região. E de um rapaz desaparecido.',['Voltar à mata|>b|Agora é sério.','Avisar a família do rapaz|k+5 >e|Eles foram à polícia comigo.']],
+ g:['O fim do culto','A polícia prendeu os membros do culto. O rapaz desaparecido foi encontrado vivo.',['Dar entrevista|f+5 k+8|Virei herói da cidade.','Ficar no anonimato|k+8 h+6|Fiz o que tinha que fazer.']],
+});
+chain('anel_maldito',{k:'Maldição',min:16,max:85,when:LIVRE,w:.35,gap:[1,1]},{
+ a:['O anel','Achei um anel de ouro com uma pedra vermelha num brechó. Coube perfeitamente.',['Comprar|$-200 >b|O vendedor disse: "Ninguém nunca conseguiu tirar esse anel."','Deixar lá|h+0|Mas fiquei pensando nele por dias.']],
+ b:['A sorte','Desde que coloquei o anel, tudo dá certo: promoção, dinheiro, amor.',['Aproveitar|$+5000 h+10 >c|Que fase!','Desconfiar|>c|Sorte demais assusta.']],
+ c:['O preço','Ao meu redor, as pessoas começaram a ter azar: acidentes, doenças, perdas.',['Tentar tirar o anel|>d|Não sai. Nem com sabão, nem com gelo.','Ignorar|k-6 >d|Não é culpa minha. Ou é?']],
+ d:['A dona','Pesquisei: o anel pertenceu a uma condessa que fez um pacto para ter sorte.',['Procurar quem desfaça o pacto|$-3000 ?50 h+8|Uma rezadeira tirou o anel com um fio de linha. Acabou.|>e|Não funcionou.','Aceitar a maldição|k-8 $+10000|Continuo com sorte. Os outros, não.']],
+ e:['O sacrifício','A única forma de tirar o anel é abrir mão de toda a sorte que ele trouxe.',['Abrir mão|$-8000 k+10 h+4|O anel caiu do dedo sozinho. Joguei no mar.','Ficar com ele|k-10|O anel é meu. E eu sou dele.']],
+});
+chain('investigador_podcast',{k:'Paranormal',min:16,max:70,when:m=>!!m.para&&m.para.visitas>=1&&!m.prison,w:.6,npc:1,gap:[1,1]},{
+ a:['O podcast','{p}, que tem um podcast sobre mistérios, ouviu falar das minhas investigações e quer me entrevistar.',['Dar a entrevista|f+2 vira:amigo >b|O episódio foi o mais ouvido do mês.','Recusar|h+0|Prefiro trabalhar em silêncio.']],
+ b:['A parceria','{p} propôs fazermos um programa juntos, investigando lugares assombrados.',['Topar|>c|Microfones, câmeras e uma van velha.','Recusar|bond-5|{p} achou outro parceiro.']],
+ c:['O primeiro episódio','Primeira investigação: um hospital psiquiátrico abandonado.',['Ir de noite|?50 f+5 follow+20000 >d|Captamos uma voz clara pedindo ajuda. Viralizou.|hl-8 >d|Uma porta bateu na minha mão. Mas o episódio ficou ótimo.','Ir de dia|f+2 >d|Menos medo, menos audiência.']],
+ d:['O sucesso','O programa virou o maior podcast de mistério do país.',['Assinar com uma plataforma grande|$+40000 f+6 >e|Contrato de três temporadas.','Manter independente|f+3 k+3 >e|Liberdade acima de tudo.']],
+ e:['O episódio proibido','Para o final da temporada, {p} quer investigar um lugar onde três investigadores sumiram.',['Ir|?k f+10 $+20000|Voltamos com o maior episódio da história do programa.|hl-25 h-15|Só eu voltei. {p} nunca foi encontrad{o2}.','Recusar|bond-10|{p} foi com outra pessoa. Voltaram, mas nunca mais foram os mesmos.']],
+});
+chain('sessao_espirita',{k:'Mistério',min:16,max:85,when:m=>!m.prison&&S.people.some(p=>!p.alive&&['mae','pai','avo','irmao','conjuge','filho','amigo'].includes(p.rel)),w:.5,gap:[1,1]},{
+ a:['Saudade de quem foi','Uma amiga me convidou para uma sessão espírita. Disse que eu poderia receber notícias de quem já partiu.',['Ir|>b|Uma sala simples, luz baixa e gente de mãos dadas.','Recusar|h+0|Prefiro guardar a saudade do meu jeito.']],
+ b:['A mensagem','A médium disse um apelido que só a pessoa que eu perdi usava comigo.',['Pedir mais|>c|"Ela diz que está bem. E que você precisa parar de se culpar."','Ficar em choque|h+4 >c|Ninguém sabia daquele apelido.']],
+ c:['O alívio','Saí de lá mais leve do que entrei.',['Voltar outras vezes|h+6 >d|Virou um consolo mensal.','Não voltar nunca mais|h+8|Recebi o que precisava. Uma vez basta.']],
+ d:['A dependência','Comecei a ir toda semana. Gasto dinheiro e tempo esperando novas mensagens.',['Parar e viver o luto de verdade|h+6 k+3|A pessoa que eu perdi ia querer que eu vivesse.','Continuar|$-2000 h-3|Não consigo largar.']],
+});
+
+// ===== Histórias paranormais em cadeia para qualquer pessoa (4): encontros, fenômenos e assombrações de família =====
+chain('cidade_fantasma',{k:'Mistério',min:18,max:75,when:LIVRE,w:.35,gap:[1,1]},{
+ a:['A cidade do mapa antigo','Num mapa antigo, achei uma cidade que não existe mais nos mapas novos.',['Ir até lá|$-500 >b|Estrada de terra, mato alto e uma placa enferrujada.','Pesquisar antes|sm+2 >b|Ninguém sabe por que ela foi abandonada em 1952.']],
+ b:['As ruas vazias','A cidade está intacta: casas mobiliadas, mesas postas, relógios parados às 18h40.',['Entrar numa casa|>c|O jantar ainda estava nos pratos, petrificado.','Fotografar tudo|f+2 >c|As fotos saem com vultos nas janelas.']],
+ c:['O sino','Às 18h40, o sino da praça tocou sozinho. As luzes das casas acenderam.',['Ficar para ver|>d|Vultos começaram a andar pelas ruas, como numa tarde normal.','Correr para o carro|h-5 >e|O carro não pegava.']],
+ d:['A noite de 1952','Os vultos repetem a última noite da cidade. Uma criança me puxou pela mão até a igreja.',['Seguir a criança|>f|Na igreja, um livro de registros aberto numa página.','Soltar a mão e fugir|h-6 >e|Corri até o carro.']],
+ e:['Fuga','O carro finalmente pegou. Pelo retrovisor, a cidade inteira me olhava da praça.',['Nunca mais voltar|h-3|Mas sonho com o sino toda noite.','Voltar de dia para entender|>f@1|Precisava saber.']],
+ f:['O registro','O livro conta: uma barragem estourou às 18h40 e a cidade inteira foi soterrada pela lama. Nunca acharam os corpos.',['Contar para o mundo|f+6 k+5|Um documentário foi feito. A cidade ganhou um memorial.','Rezar pelos moradores|k+6 h+5|O sino tocou uma última vez enquanto eu ia embora.']],
+});
+chain('pacto_encruzilhada',{k:'Maldição',min:16,max:70,when:LIVRE,w:.3,gap:[1,1]},{
+ a:['A encruzilhada','Desesperad{o} com a vida, ouvi falar que quem pede algo numa encruzilhada à meia-noite é atendido.',['Ir à encruzilhada|>b|Meia-noite, vela e um vento que não vinha de lugar nenhum.','Achar loucura|h+0|Prefiro resolver do meu jeito.']],
+ b:['O homem de terno','Um homem de terno branco apareceu do nada. "O que você quer?"',['Pedir dinheiro|$+50000 k-10 >c|"Feito. Volto daqui a sete anos para cobrar."','Pedir talento|tal.musical+20 f+5 k-10 >c|"Feito. Volto daqui a sete anos."','Desistir e ir embora|>e|Ele riu. O riso me acompanhou até em casa.']],
+ c:['Os sete anos','A vida mudou completamente. Mas o prazo se aproxima.',['Procurar um jeito de quebrar o pacto|>d|Falei com um padre, um pai de santo e um rabino.','Aproveitar o tempo que resta|h+10 >d@7|Vivi como se não houvesse amanhã.']],
+ d:['A cobrança','Sete anos depois, o homem de terno branco bateu na porta.',['Oferecer outra coisa em troca|?k k+5|Ele aceitou levar o que eu ganhei, e não a mim. Voltei a ser quem eu era.|hl-40 h-20|Ele levou algo que eu não sei nomear. Nunca mais fui o mesmo.','Enfrentar com fé|?k h+15|Ele desapareceu em fumaça. Acabou.|hl-30|A fé não bastou.']],
+ e:['A dúvida','Nunca soube o que teria acontecido se eu tivesse pedido.',['Agradecer por ter ido embora|h+5 k+3|Algumas portas é melhor nunca abrir.','Voltar outro dia|>a@2|A curiosidade venceu.']],
+});
+chain('praia_noturna',{k:'Mistério',min:14,max:80,when:LIVRE,w:.35,npc:1,gap:[1,1]},{
+ a:['A voz do mar','Numa praia deserta, à noite, uma voz cantava vinda das ondas.',['Chegar mais perto|>b|Uma pessoa de cabelo longo, sentada numa pedra no mar.','Ir embora|>e@1|A música ficou na cabeça por dias.']],
+ b:['A sereia','{p} me chamou pelo nome. Os olhos brilhavam como escamas.',['Ir até a pedra|?will >c|Parei com a água no peito e voltei. Algo me segurou.|>d|Fui até ela sem conseguir parar.','Tapar os ouvidos e correr|h-4 >e|Corri até a estrada.']],
+ c:['O presente','{p} sorriu e deixou uma concha na areia antes de mergulhar.',['Guardar a concha|h+6 >f|Encostei no ouvido: a mesma música.','Jogar de volta no mar|k+3|Não quero nada que venha de lá.']],
+ d:['Debaixo d\'água','Afundei. Senti mãos me puxando para o fundo.',['Lutar para voltar|?hl hl-10 >f|Acordei na areia, cuspindo água, com uma concha na mão.|hl-35|Um pescador me tirou da água quase sem vida.','Aceitar|hl-50|Acordei num hospital. Ninguém sabe como cheguei na areia.']],
+ e:['A lenda','Pescadores antigos contam que quem ouve a música uma vez, ouve para sempre.',['Voltar à praia|>b@1|Precisava ver de novo.','Nunca mais pisar ali|h-2|Mas a música vem nos sonhos.']],
+ f:['A concha','A concha brilha nas noites de lua cheia.',['Usar como amuleto|h+4 k+2|Desde então, o mar sempre me trata bem.','Dar para alguém que ama o mar|k+4|Passei o encanto adiante.']],
+});
+chain('visita_sonho',{k:'Mistério',min:10,max:95,when:m=>!m.prison&&S.people.some(p=>!p.alive&&['mae','pai','avo','conjuge','irmao','filho'].includes(p.rel)),w:.5,gap:[1,1]},{
+ a:['Um sonho tão real','Sonhei com alguém da família que já partiu. Parecia tão real que acordei com o cheiro dessa pessoa no quarto.',['Contar para alguém|>b|Minha tia disse que sonhou a mesma coisa.','Guardar o sonho|h+3 >b|Fiquei o dia inteiro com um sorriso bobo.']],
+ b:['O segundo sonho','No segundo sonho, essa pessoa me pediu para entregar um recado.',['Perguntar qual|>c|"Diz pra sua mãe que a chave está no pote azul."','Acordar assustad{o}|h-2 >c|Mas o recado ficou na cabeça.']],
+ c:['O pote azul','Achei uma chave dentro de um pote azul esquecido no armário.',['Descobrir o que ela abre|>d|Um cofrinho antigo no fundo do guarda-roupa.','Entregar para a família|k+3 >d|Todo mundo chorou.']],
+ d:['O cofrinho','Dentro, cartas escritas para cada pessoa da família, para serem lidas "quando eu partir".',['Ler a minha carta|h+15|Chorei por horas. Era tudo o que eu precisava ouvir.','Reunir a família para ler juntos|h+12 k+5|Um último encontro com quem já se foi.']],
+});
+chain('eclipse',{k:'Mistério',min:10,max:85,when:LIVRE,w:.3,gap:[1,1]},{
+ a:['O eclipse','Durante um eclipse total, todos os animais da cidade ficaram em silêncio. E eu ouvi meu nome.',['Responder|>b|A voz disse: "Você foi escolhid{o}."','Fingir que não ouvi|>d@2|O eclipse passou.']],
+ b:['O símbolo','Apareceu um símbolo desenhado na minha porta. Ninguém sabe quem fez.',['Pesquisar o símbolo|sm+3 >c|É um símbolo antigo de proteção.','Apagar|>d|Na manhã seguinte, estava lá de novo.']],
+ c:['A proteção','Desde o eclipse, escapei de três acidentes por pouco.',['Aceitar a proteção|h+6 >d|Alguém olha por mim.','Ficar com medo|h-3 >d|Proteção de quem?']],
+ d:['O próximo eclipse','No eclipse seguinte, a voz voltou: "Obrigado por cuidar do que te demos."',['Perguntar o que foi dado|>e|"Tempo." E silêncio.','Agradecer|h+6|Não precisava entender.']],
+ e:['Tempo','Desde então, sinto que tenho mais tempo do que deveria.',['Usar bem esse tempo|h+8 k+5|Cada dia vale mais.','Contar para alguém|f+1|Ninguém acreditou, mas eu sei.']],
+});
+chain('cachorro_ve',{k:'Assombração',min:8,max:85,when:m=>!m.prison&&people('pet').length>0,w:.4,gap:[1,1]},{
+ a:['O latido para o nada','Meu bichinho fica latindo para o canto vazio da sala, toda noite.',['Olhar o canto|>b|Nada. Mas o ar ali é mais frio.','Brigar com ele|>b|Ele não parou.']],
+ b:['O rabo abanando','Uma noite, ele parou de latir e começou a abanar o rabo para o mesmo canto.',['Chamar o canto pelo nome de alguém que partiu|>c|O bichinho deitou e ficou olhando, feliz.','Filmar|>c|Na gravação, ele brinca com alguém que não aparece.']],
+ c:['A visita','A família acredita que é a visita de alguém querido que já partiu.',['Deixar uma cadeira ali|h+5|A cadeira da visita.','Pedir para o canto descansar em paz|k+3 h+3|O bichinho nunca mais latiu ali.']],
+});
+chain('radio_antigo',{k:'Mistério',min:12,max:85,when:LIVRE,w:.3,gap:[1,1]},{
+ a:['O rádio do avô','Liguei o rádio antigo do meu avô. Entre os chiados, uma transmissão de 1969.',['Ouvir com atenção|>b|Um locutor narrando notícias daquele ano, ao vivo.','Desligar|>d@1|Na manhã seguinte, o rádio estava ligado.']],
+ b:['A voz','No meio da transmissão, o locutor disse: "Recado para quem está ouvindo em outro tempo."',['Continuar ouvindo|>c|Ele leu números. Seis números.','Gravar|>c|A gravação só tem chiado.']],
+ c:['Os números','Os seis números. Eu não resisti.',['Jogar na loteria|$-10 ?15 $+300000 h+25|ACERTEI. O rádio nunca mais ligou.|h-2|Não ganhei. Mas foi divertido.','Guardar os números num papel|h+2|Às vezes é melhor não saber.']],
+ d:['O rádio insiste','O rádio liga sozinho na mesma estação todos os dias.',['Ouvir de novo|>b|Desta vez, prestei atenção.','Vender o rádio|$+800|O comprador o devolveu uma semana depois, sem explicar.']],
+});
+
+// ===== Histórias paranormais em cadeia para qualquer pessoa (5) =====
+chain('escola_assombrada',{k:'Assombração',min:8,max:17,when:m=>!m.prison&&!!m.edu.cur,w:.4,gap:[1,1]},{
+ a:['O banheiro do terceiro andar','Todo mundo na escola fala da "Loira do Banheiro". Desafiaram você a ir lá sozinh{o} e chamar o nome dela três vezes.',['Aceitar o desafio|>b|O banheiro estava gelado e a torneira pingava.','Recusar|h-1|Chamaram de medros{o} o resto do ano.']],
+ b:['Três vezes','Na terceira vez, a luz apagou e a descarga disparou sozinha.',['Sair correndo|f+1 h+4 >c|Saí gritando. Virei lenda da escola.','Ficar para ver|>d|No espelho, por um segundo, um rosto pálido atrás de mim.']],
+ c:['Lenda da escola','Os colegas agora contam a história como se eu fosse um herói.',['Aumentar a história|f+2 h+4|A cada vez que conto, ela fica maior.','Contar a verdade|k+2|Só deu medo mesmo.']],
+ d:['O recado','No espelho embaçado, apareceu escrito: "Me ajuda a achar meu brinco."',['Procurar o brinco|>e|Atrás da pia, um brinco antigo de pérola.','Contar para a diretora|>c|Ela ficou pálida e mandou fechar o banheiro.']],
+ e:['A ex-aluna','A diretora reconheceu o brinco: de uma aluna que morreu na escola em 1985.',['Entregar à família da aluna|k+8 h+8|O banheiro do terceiro andar nunca mais ficou gelado.','Guardar o brinco|h-3|Os pesadelos começaram.']],
+});
+chain('acampamento_lago',{k:'Assombração',min:12,max:40,when:LIVRE,w:.35,gap:[1,1]},{
+ a:['O lago','Num acampamento com amigos, alguém contou a lenda da moça que se afogou no lago.',['Rir da história|>b|À meia-noite, ouvimos alguém nadando no lago.','Pedir para mudar de assunto|>b|Ninguém mudou.']],
+ b:['Os barulhos','Um dos amigos sumiu da barraca no meio da noite.',['Procurar com lanternas|>c|As pegadas dele iam até a beira do lago.','Esperar amanhecer|h-6 >d|Ninguém dormiu.']],
+ c:['O resgate','Achei meu amigo dentro do lago, com a água até o pescoço, sem saber como foi parar lá.',['Puxar para fora|k+6 hl-3 >e|Ele disse que uma moça chamou o nome dele.','Chamar ajuda|>e|Os outros correram para ajudar.']],
+ d:['Amanhecer','De manhã, o amigo estava dormindo na beira do lago, encharcado.',['Ir embora na hora|h-3|Nunca mais acampamos ali.','Perguntar o que houve|>e|Ele não lembrava de nada.']],
+ e:['Nunca mais','Arrumamos as barracas e fomos embora antes do almoço.',['Contar para o guarda do parque|>f|Ele disse que todo ano alguém tem a mesma história.','Prometer nunca mais voltar|h+2|Pacto feito no carro.']],
+ f:['A lenda é verdade','O guarda mostrou um recorte de jornal: a moça se afogou em 1979, procurando o noivo que tinha caído no lago.',['Deixar flores no lago|k+5 h+4|No ano seguinte, ninguém sumiu da barraca.','Ir embora|h+0|Algumas histórias ficam no lago.']],
+});
+chain('casa_vizinha_vazia',{k:'Assombração',min:10,max:85,when:LIVRE,w:.35,gap:[1,1]},{
+ a:['A casa ao lado','A casa ao lado está vazia há anos, mas toda noite a luz da cozinha acende às oito.',['Avisar a imobiliária|>b|Disseram que a energia está cortada.','Espiar pela janela|>c|Uma mesa posta para dois e ninguém sentado.']],
+ b:['Sem energia','Mesmo sem energia, a luz acendeu de novo às oito.',['Entrar na casa|>c|A porta dos fundos estava destrancada.','Esquecer|>d@1|Fingir que não é comigo.']],
+ c:['O jantar','Na cozinha, uma carta em cima da mesa: "Para quando você voltar."',['Ler a carta|>d|Uma esposa esperando o marido que nunca voltou da guerra.','Deixar onde estava|k+2 >d|Não é minha para ler.']],
+ d:['O marido','Descobri que o marido morreu num hospital da cidade vizinha, sem que ela soubesse.',['Levar a notícia ao túmulo dela|k+8 h+6|Naquela noite, a luz da cozinha não acendeu.','Contar aos vizinhos|f+1 h+3|A rua inteira passou a deixar flores na porta.']],
+});
+
 // ===== Membros das equipes: clube ou time da escola, trabalho, carreira especial, equipe de heróis e grupo religioso =====
 // Cada equipe tem gente de verdade (rel 'equipe'): dá para conversar, fazer amizade, namorar ou brigar, como qualquer pessoa.
 REL_LABEL.equipe='Colega de equipe';
@@ -13906,6 +14187,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.16',d:'15/10/2026',t:'Paranormal para todo mundo',itens:['Quase 200 eventos paranormais em sequência que podem acontecer com qualquer pessoa: casa assombrada, tabuleiro Ouija, carona na estrada, quarto 13 do hotel, poltergeist, sonhos que se realizam, OVNI, maldição de família, médium, sereia, pacto na encruzilhada, cidade fantasma e muito mais.','Alguns encontros podem terminar em mordida: dá para virar vampiro ou lobisomem sem nunca ter investigado nada.']},
   {v:'1.15.2',d:'15/10/2026',t:'A morte em outro mundo',itens:['Morrer num mundo fictício mostra como o grupo daquele mundo recebeu a notícia: o comboio no apocalipse zumbi, os náufragos na ilha, o grupo em Eldoria, os colonos em Marte.','Desistir dentro de um mundo fictício mostra a reação do grupo, não da família.']},
   {v:'1.15.1',d:'15/10/2026',t:'Correção',itens:['Noite fora, investigar o paranormal e ter filhos com ajuda não aparecem mais dentro dos modos fictícios.']},
   {v:'1.15',d:'15/10/2026',t:'Identidade, família e amores',itens:['Identidade de gênero (cis, trans, não binária) e orientação (hétero, gay/lésbica, bi, pan, assexual), sorteadas ou escolhidas na vida personalizada.','Eventos de sair do armário e de transição, com a reação da família.','Quem engravida é decidido pelo sexo biológico: um homem trans pode engravidar.','Implante de embrião (FIV) para quem pode engravidar e barriga de aluguel para qualquer pessoa. Às vezes, a mãe de aluguel tenta fugir com o bebê.','Casamento com uma pessoa por vez, mas dá para trair com várias. Os amores podem descobrir: chantagem por dinheiro, contar para os outros, encontro no mesmo restaurante, ultimato.','Doenças graves sem tratamento pioram a cada ano.','Câncer e doenças graves pedem anos de tratamento (um ciclo por ano no médico ou hospital), com risco de morrer mesmo tratando. Parar o tratamento faz perder progresso.','Empresas bem mais difíceis: crescem menos, rendem menos e quebram mais. Agora há assaltos, sócio que desvia dinheiro, fiscalização, processos trabalhistas, crises e incêndios. Falir pode deixar dívida.']},
