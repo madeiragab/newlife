@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610151807'</script>
+<title>NewLife</title><script>window.NL_VER='2610151811'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -5852,7 +5852,7 @@ V.paranormal=()=>{ const m=S.me, P=para(), it=[];
   it.push({sec:'Provas'},{ic:'🎬',l:'Publicar as provas',s:'Fama e dinheiro, ou virar piada',on:()=>act(paraPublicar,'Paranormal')});
   if(m.criatura) it.push({sec:'A maldição'},{ic:'🧪',l:'Procurar uma cura',s:`${fmt(40000)} · chance pequena`,on:()=>act(paraCura,'Cura')});
   return {title:'Paranormal',items:it}; };
-V.activities=(o=>()=>{ const r=o(); const m=S.me; if(m.prison||!r||!r.items) return r; r.items.push(Object.assign({ic:'👻',l:'Investigar o paranormal',s:m.criatura?`Sou ${g(CRIATURA[m.criatura][0],m.gender).toLowerCase()}`:'Fantasmas, vampiros e lobisomens',on:()=>UI.push(V.paranormal)},ageGate(14))); return r; })(V.activities);
+V.activities=(o=>()=>{ const r=o(); const m=S.me; if(m.prison||S.scen||!r||!r.items) return r; r.items.push(Object.assign({ic:'👻',l:'Investigar o paranormal',s:m.criatura?`Sou ${g(CRIATURA[m.criatura][0],m.gender).toLowerCase()}`:'Fantasmas, vampiros e lobisomens',on:()=>UI.push(V.paranormal)},ageGate(14))); return r; })(V.activities);
 // ---------- a vida de criatura ----------
 deathRoll=(o=>function(){ const m=S.me; if(m.criatura==='vampiro') return R.chance(.003); return o.apply(this,arguments); })(deathRoll);
 yearMoney=(o=>function(){ const x=o.apply(this,arguments); const m=S.me; try{ if(m.alive&&m.criatura&&!(S.scen)){
@@ -10038,7 +10038,7 @@ function noiteFora(tipo){ const m=S.me, p=partner();
   if(!p&&R.chance(.3)){ return R.pick(['Dancei até os pés doerem e troquei telefone com alguém interessante.','Conheci gente nova na fila do banheiro. A noite rendeu.']); }
   return R.pick(['Dancei como se ninguém estivesse olhando. Todo mundo estava olhando.','Voltei para casa com o sol nascendo e o sapato na mão.','Conversei com um estranho sobre a vida por duas horas. Nunca soube o nome dele.']); }
 function add_bebida(){ const m=S.me; m.add.alcool=clamp((m.add.alcool||0)+2*(1.3-m.will/100)); }
-V.activities=(o=>()=>{ const r=o(); const m=S.me; if(!r||!r.items||m.prison||m.age<16) return r;
+V.activities=(o=>()=>{ const r=o(); const m=S.me; if(!r||!r.items||m.prison||m.age<16||S.scen) return r;
   r.items.push({ic:'🪩',l:'Noite fora',s:'Boate, bar' + (m.age>=18?' ou boate adulta':''),on:()=>UI.push(()=>({title:'Noite fora',items:[
     {html:`<div class="card"><p>Diversão garantida. ${partner()?'Mas quem tem par em casa pode arrumar encrenca.':'Quem sabe você conhece alguém.'}</p></div>`},
     {ic:'🪩',l:'Boate',s:fmt(250),on:()=>act(()=>noiteFora('boate'),'Boate')},
@@ -10385,7 +10385,7 @@ EVENTS.barriga_fuga={show:d=>({k:'Família',t:'A mãe de aluguel sumiu',x:`${d.n
     if(k==='c'){ if(R.chance(.55)){ nascer(); st('happy',8); return `Encontrei ${d.n} num hotel de beira de estrada, chorando. Ela tinha medo de se arrepender. Conversamos e ela me entregou o bebê.`; } m.barriga=null; st('happy',-20); return `${d.n} fugiu de novo antes que eu chegasse. Nunca mais soube dela.`; }
     m.barriga=null; st('happy',-15); m.karma=clamp(m.karma+8); return `Deixei ${d.n} ficar com o bebê. Doeu como nada na vida.`; }};
 // no menu do amor
-V.love=(o=>()=>{ const r=o(), m=S.me; if(!r||!r.items||m.age<18) return r;
+V.love=(o=>()=>{ const r=o(), m=S.me; if(!r||!r.items||m.age<18||S.scen) return r;
   r.items.push({sec:'Ter filhos com ajuda'},
     Object.assign({ic:'🧫',l:'Implante de embrião (FIV)',s:`${fmt(18000)} por tentativa · para quem pode engravidar`,on:()=>act(fertFIV,'Clínica de fertilidade')},sexoDe(m)!=='F'?{dis:true,why:'O implante é para quem tem útero. A barriga de aluguel serve para qualquer pessoa.'}:{}),
     {ic:'🤰',l:'Barriga de aluguel',s:`${fmt(70000)} · o bebê nasce no ano seguinte`,on:()=>act(fertBarriga,'Barriga de aluguel')});
@@ -13878,6 +13878,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.15.1',d:'15/10/2026',t:'Correção',itens:['Noite fora, investigar o paranormal e ter filhos com ajuda não aparecem mais dentro dos modos fictícios.']},
   {v:'1.15',d:'15/10/2026',t:'Identidade, família e amores',itens:['Identidade de gênero (cis, trans, não binária) e orientação (hétero, gay/lésbica, bi, pan, assexual), sorteadas ou escolhidas na vida personalizada.','Eventos de sair do armário e de transição, com a reação da família.','Quem engravida é decidido pelo sexo biológico: um homem trans pode engravidar.','Implante de embrião (FIV) para quem pode engravidar e barriga de aluguel para qualquer pessoa. Às vezes, a mãe de aluguel tenta fugir com o bebê.','Casamento com uma pessoa por vez, mas dá para trair com várias. Os amores podem descobrir: chantagem por dinheiro, contar para os outros, encontro no mesmo restaurante, ultimato.','Doenças graves sem tratamento pioram a cada ano.','Câncer e doenças graves pedem anos de tratamento (um ciclo por ano no médico ou hospital), com risco de morrer mesmo tratando. Parar o tratamento faz perder progresso.','Empresas bem mais difíceis: crescem menos, rendem menos e quebram mais. Agora há assaltos, sócio que desvia dinheiro, fiscalização, processos trabalhistas, crises e incêndios. Falir pode deixar dívida.']},
   {v:'1.14.1',d:'14/10/2026',t:'Economia mais equilibrada',itens:['Morar sozinho custa mais, e o padrão de vida sobe junto com o salário: ficar milionário trabalhando sem estudo ficou bem mais difícil.','Criptomoeda virou aposta de verdade: a maioria perde um pouco e poucos ganham muito.','Ações rendem um pouco menos (6,5% ao ano em média).']},
   {v:'1.14',d:'14/10/2026',t:'Traição, divórcio e a fera no sangue',itens:['Noite fora: boate, bar com os amigos e boate adulta (18+). Quem tem par em casa pode levantar suspeitas ou começar um caso.','Caso secreto: a desconfiança cresce todo ano. Quando descobrem: pedir perdão, negar ou assumir. E o seu par também pode trair você.','Divórcio com filhos menores vai para a justiça: brigar pela guarda, guarda compartilhada ou pagar pensão até as crianças fazerem 18.','Vampiros têm barra de sede e lobisomens, de fome. Em 100%, a criatura toma o controle: frenesi, ataques a estranhos e até à própria família.','Saciar: comprar sangue ou carne, caçar animais ou atacar alguém (com carma, prisão e culpa).','A maldição passa para os filhos: dentes afiados, olhos amarelos e, na adolescência, a fera pode atacar a família.','Combate de criatura: mordida, garras, uivo, velocidade sobrenatural e mais resistência.','Novas histórias em cadeia: clã de vampiros, alcateia, o par que descobre o seu segredo, o médico que estranha o seu sangue, a lenda da cura e o ninho de vampiros.']},
