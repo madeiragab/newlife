@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610151831'</script>
+<title>NewLife</title><script>window.NL_VER='2610151837'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -10978,6 +10978,210 @@ chain('vamp_bebe',{k:'Vampiro',min:20,max:200,when:VAMP,gap:[1,1]},{
  d:['A pergunta','A criança, crescida, perguntou por que eu nunca saio no sol.',['Contar a verdade|h+6 k+3|Ela ficou em silêncio, depois me abraçou: "Você é meu monstro favorito."','Inventar uma doença|h-2|Um dia eu conto.']],
 });
 
+// ===== Histórias em cadeia: a vida de lobisomem (1) =====
+const LOBO=CRI('lobisomem');
+chain('lobo_trabalho',{k:'Lobisomem',min:16,max:120,when:m=>LOBO(m)&&!!m.job,gap:[1,1]},{
+ a:['Lua cheia na reunião','A reunião mais importante do ano foi marcada justo para a noite de lua cheia.',['Pedir para remarcar|?50 >b|Remarcaram para a semana seguinte.|perf-5 >c|O chefe negou.','Ir e torcer|>c|Talvez dê tempo de sair antes.']],
+ b:['Escapou','Consegui fugir da lua cheia desta vez.',['Montar um calendário lunar no trabalho|sm+2 >e|Nunca mais marco nada em lua cheia.','Contar a verdade para um colega de confiança|>d|Alguém para me cobrir.']],
+ c:['A transformação','No meio da reunião, senti os ossos estalando.',['Correr para o banheiro|?hl perf-8 >d|Me tranquei no banheiro e pulei pela janela.|perf-20 >f|Saí uivando pelo corredor.','Segurar até o fim|?will perf+10 hl-10 >e|Segurei. Ninguém percebeu, só o suor.|perf-20 >f|Não deu.']],
+ d:['O colega','Um colega me viu saindo pela janela com os olhos amarelos.',['Pedir segredo|?k vira:amigo >e|Ele prometeu. E cumpriu.|>f|Ele contou para o escritório inteiro.','Dizer que foi um mal-estar|?40 >e|Ele acreditou.|>f|Ele não acreditou.']],
+ e:['Rotina','Aprendi a organizar a vida em ciclos de vinte e oito dias.',['Trabalhar de casa na lua cheia|h+6|O chefe acha que é "home office mensal".','Pedir folga fixa na lua cheia|h+4 perf-2|"Assunto de família."']],
+ f:['O vídeo','Alguém filmou. O vídeo de "funcionário vira bicho" está circulando.',['Dizer que era uma pegadinha|?50 f+2|Virou meme. Ninguém acreditou que era real.|fire h-10|Fui demitid{o} por "comportamento inadequado".','Pedir demissão|fire h-4|Saí antes do escândalo crescer.']],
+});
+chain('lobo_fazendeiro',{k:'Lobisomem',min:16,max:120,when:LOBO,npc:1,gn:'M',age:[10,30],gap:[1,1]},{
+ a:['O gado','Na lua cheia, ataquei o gado de um sítio. O fazendeiro, seu {p}, perdeu cinco bezerros.',['Pagar o prejuízo anonimamente|$-6000 k+8 >b|Deixei um envelope na porteira.','Fingir que não foi eu|k-4 >c|Foi a fera, não eu.']],
+ b:['O envelope','Seu {p} achou o envelope e ficou desconfiado. Quem pagaria por bezerros que não matou?',['Ficar quiet{o}|>d|Ele começou a vigiar a porteira toda noite.','Aparecer e conversar|>e|Bati na porta dele numa tarde de chuva.']],
+ c:['A caçada','Seu {p} chamou os vizinhos para caçar "o lobo".',['Ficar longe do sítio|fome+15 >d|Na lua seguinte, me acorrentei em casa.','Voltar ao sítio|?fight >d|Escapei dos caçadores.|hl-25 >d|Levei chumbo nas costas.']],
+ d:['A armadilha','Na lua seguinte, caí numa armadilha de urso no pasto.',['Arrancar a pata da armadilha|hl-20 >f|Fugi mancando. A pata vai sarar. A dor, não sei.','Esperar o amanhecer|>e|Seu {p} me achou, humano, com o pé preso.']],
+ e:['O segredo do fazendeiro','Seu {p} me olhou por muito tempo e disse: "Meu avô também era assim."',['Contar tudo|vira:amigo h+8 >g|Ele me ofereceu o celeiro para as noites de lua cheia.','Fugir|>f|Corri sem olhar para trás.']],
+ f:['Ferid{o}','A ferida da armadilha não fecha direito.',['Procurar um curandeiro|$-1500 hl+10|Ervas e paciência.','Deixar sarar sozinha|hl-5|Lobisomem sara rápido. Mais ou menos.']],
+ g:['O celeiro','Agora, toda lua cheia, durmo no celeiro do seu {p}. Ninguém mais perde gado.',['Ajudar no sítio durante o mês|k+6 h+6|Virei parte da família da fazenda.','Pagar aluguel do celeiro|$-500 h+4|Acordo justo.']],
+});
+chain('lobo_alcateia_lider',{k:'Lobisomem',min:18,max:120,when:LOBO,npc:1,gap:[1,1]},{
+ a:['O desafio','{p}, o líder da alcateia da região, está velho. Alguém precisa assumir.',['Me candidatar à liderança|>b|Na tradição, o desafio é na lua cheia.','Apoiar outro candidato|>e|Prefiro não liderar.']],
+ b:['O duelo','Na lua cheia, o duelo pela liderança: eu contra o mais forte da alcateia.',['Lutar com tudo|?fight fight+5 f+0 >c|Venci. A alcateia baixou a cabeça para mim.|hl-30 >d|Perdi. Saí sangrando.','Desistir no meio|h-6 >e|Melhor perder o posto que a vida.']],
+ c:['Líder da alcateia','Agora sou responsável por oito lobisomens e suas famílias.',['Liderar com justiça|k+8 >f|Regras claras: ninguém mata humano.','Liderar com medo|k-6 fight+3 >f|Ninguém ousa me desobedecer.']],
+ d:['Derrotad{o}','O novo líder me deixou ficar na alcateia, mas abaixo de todos.',['Aceitar|h-4 >e|Paciência.','Sair da alcateia|h-6|Lobo solitário.']],
+ e:['O novo líder','O novo líder começou a quebrar as regras antigas e atacar humanos.',['Desafiar de novo|>b@1|Não posso deixar isso continuar.','Avisar os caçadores|k+4 >f|Traição à alcateia, para salvar humanos.']],
+ f:['A alcateia','A alcateia sobrevive e se fortalece.',['Fazer uma reunião na lua cheia|h+8|Correr junto com a família.','Treinar os jovens|fight+3 k+3|Os filhotes aprendem rápido.']],
+});
+chain('lobo_par',{k:'Lobisomem',min:18,max:120,when:m=>LOBO(m)&&!!partner(),who:'partner',gap:[1,1]},{
+ a:['A noite em que viu','{p} acordou no meio da noite de lua cheia e me viu me transformando no quintal.',['Correr para a floresta|>b|Não queria que {ele} me visse daquele jeito.','Ficar e deixar {ele} ver|>c|Os olhos d{ele} encontraram os meus.']],
+ b:['A manhã seguinte','Voltei de manhã, cobert{o} de lama. {p} estava na cozinha, esperando.',['Contar tudo|>c|Sentei e contei desde a mordida.','Negar|?30 pbond-10|{p} fingiu acreditar.|pbond-20 >d|{p} disse: "Eu vi."']],
+ c:['A reação','{p} ficou em silêncio por muito tempo.',['Esperar|?bond pbond+15 h+10 >e|{p} me abraçou: "A gente dá um jeito."|>d|{p} pediu um tempo.']],
+ d:['O tempo','{p} foi para a casa de parentes.',['Esperar|?bond pbond+10 >e|{p} voltou depois de um mês.|separar h-15|{p} não voltou.','Ir buscar|?40 pbond+10 >e|{p} voltou comigo.|separar h-12|Não adiantou.']],
+ e:['Juntos na lua cheia','Agora {p} prepara o porão nas noites de lua cheia e fica do lado de fora da porta, conversando.',['Agradecer|pbond+12 h+12|Ninguém nunca me amou desse jeito.','Pedir para {ele} ser mordid{o2} também|?30 morder pbond+10|{p} aceitou. Agora corremos juntos.|pbond-5|{p} disse que prefere ficar humano.']],
+});
+chain('lobo_prata',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,1]},{
+ a:['A aliança de prata','Num casamento, peguei uma colher de prata. Minha mão queimou na frente de todos.',['Disfarçar dizendo que estava quente|?50 >b|Ninguém percebeu.|>c|Uma senhora ficou me olhando fixamente.','Sair da festa|h-3 >b|Melhor sair.']],
+ b:['Prata em todo lugar','Comecei a perceber prata em todo lugar: brincos, talheres, maçanetas.',['Trocar tudo de casa|$-2000 >d|Nada de prata a menos de dez metros.','Usar luvas sempre|h-2 >d|"Problema de pele."']],
+ c:['A senhora','A senhora do casamento me procurou depois: "Eu sei o que você é. Meu marido também era."',['Conversar com ela|vira:amigo >e|Ela me ensinou truques que só uma viúva de lobisomem sabe.','Fugir|>d|Ninguém deve saber.']],
+ d:['A alergia','Uma joia de prata escondida numa roupa nova me deixou de cama.',['Ir ao médico|$-500 hl+5|"Alergia rara a metais", disse o médico.','Curar em casa|hl-8|Lobisomem se vira sozinho.']],
+ e:['Os conselhos','A senhora me ensinou: chá de acônito acalma a fera, mas é veneno para humanos.',['Usar o chá|fome-30 h+4|Funciona. Com moderação.','Guardar a receita|sm+2|Para emergências.']],
+});
+chain('lobo_filhote',{k:'Lobisomem',min:20,max:120,when:LOBO,npc:1,age:[-30,-15],gap:[1,1]},{
+ a:['O filhote perdido','Na lua cheia, encontrei um lobinho perdido na mata: uma criança lobisomem.',['Proteger até amanhecer|k+6 >b|De manhã, era um menino ou menina de dez anos, chorando.','Ignorar|k-6|Não é minha responsabilidade.']],
+ b:['A criança','{p} não sabe de onde veio nem quem a mordeu. Não tem família.',['Levar para casa|vira:amigo k+8 >c|Agora tenho uma criança lobisomem em casa.','Levar para a alcateia mais próxima|k+4 >e|Eles cuidam dos seus.']],
+ c:['Ensinar','{p} precisa aprender a controlar a fera antes da próxima lua.',['Ensinar com paciência|bond+12 >d|Corrente, porão e muita conversa.','Deixar livre na mata|bond-5 >e|A natureza ensina.']],
+ d:['A adoção','Os papéis da adoção chegaram. {p} agora é oficialmente da família.',['Comemorar|h+15 bond+10|Primeira lua cheia em família.','Contar para os outros da família|h+8|Nem todos entenderam. Mas aceitaram.']],
+ e:['O reencontro','Anos depois, {p}, já crescid{o2}, me procurou para agradecer.',['Abraçar|h+10 k+5|Uma vida salva numa noite de lua.','Perguntar como está|h+6|Lidera uma alcateia no sul. Eu ensinei bem.']],
+});
+
+// ===== Histórias em cadeia: a vida de lobisomem (2) =====
+chain('lobo_controle',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,1]},{
+ a:['Dominar a fera','Ouvi dizer que lobisomens antigos conseguem se transformar quando querem, sem lua.',['Treinar|>b|Meditação, respiração e muita dor.','Achar impossível|h-2|A lua manda em mim.']],
+ b:['Os primeiros sinais','Depois de meses, consegui fazer as unhas crescerem por vontade própria.',['Continuar treinando|fight+4 >c|Um passo de cada vez.','Exibir para os amigos|f+1 >d|Má ideia.']],
+ c:['A transformação voluntária','Numa noite sem lua, me transformei por vontade própria. E voltei.',['Celebrar|fight+8 h+12 >e|Agora a fera obedece a mim.','Ter medo do próprio poder|h-4 >e|E se eu não conseguir voltar?']],
+ d:['O susto','Os amigos acharam que era um truque. Um deles não achou.',['Pedir segredo|?k >c|Ele guardou.|>c|Ele espalhou, mas ninguém acreditou nele.','Rir e mudar de assunto|>c|Mágica, claro.']],
+ e:['Mestre da fera','Agora a lua cheia não me domina mais. Eu escolho quando.',['Usar para proteger os outros|k+8 fome-20|Às vezes, a fera salva vidas.','Ensinar outros lobisomens|k+6 f+0|A alcateia inteira veio aprender.']],
+});
+chain('lobo_zoologico',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,1]},{
+ a:['Acordei no zoológico','Acordei pelad{o}, dentro da jaula dos lobos do zoológico, com três lobos dormindo em volta de mim.',['Sair escondid{o} antes da abertura|?sm >b|Pulei a cerca com um uniforme roubado do vestiário.|>c|Os tratadores chegaram antes.','Ficar quiet{o} e esperar|>c|Não tinha como sair.']],
+ b:['A fuga','Saí do zoológico sem ninguém ver.',['Rir da situação|h+6 >d|A melhor história que eu nunca vou poder contar.','Ficar preocupad{o}|h-3 >d|E se tivesse câmera?']],
+ c:['O flagra','Os tratadores me encontraram na jaula, abraçad{o} com um lobo.',['Dizer que sou ativista|?40 f+3 >d|Saí na TV como "ativista que dormiu com os lobos".|arrest:invasão:0:1|A polícia me levou.','Correr|?hl >d|Escapei pela cerca.|arrest:invasão:0:1|Me pegaram no estacionamento.']],
+ d:['A câmera','Uma câmera do zoológico gravou um lobo enorme pulando a cerca de madrugada.',['Torcer para ninguém ligar os pontos|h-2|O zoológico disse que foi um lobo "fugido de um circo".','Mudar o caminho das noites de lua cheia|k+3|Nunca mais passo perto do zoológico.']],
+});
+chain('lobo_policia_suspeito',{k:'Lobisomem',min:18,max:120,when:LOBO,npc:1,gn:'F',age:[0,20],gap:[1,1]},{
+ a:['A investigadora','A investigadora {p} está juntando relatos de "ataques de animal" e todos acontecem perto de onde eu moro.',['Me afastar do bairro nas luas cheias|fome+10 >b|Corro para longe, na mata do outro lado da cidade.','Agir normalmente|>c|Não posso mudar minha vida inteira.']],
+ b:['Mais longe','Mudei a rota, mas um ataque aconteceu do outro lado da cidade.',['Investigar|>d|Tem outro lobisomem na cidade.','Achar que é coincidência|>c|Não é comigo.']],
+ c:['A visita','{p} bateu na minha porta com perguntas e um olhar desconfiado.',['Responder com calma|?sm >b|Ela foi embora sem nada.|>e|Ela reparou nas cicatrizes no meu braço.','Contar a verdade|>e|Arrisquei tudo.']],
+ d:['O outro lobisomem','Encontrei o outro: um lobisomem selvagem, que mata por prazer.',['Enfrentar|?fight k+10 >f|Venci. Os ataques pararam.|hl-35 >f|Venci por pouco.','Contar para a investigadora|>e|Ela precisa saber onde procurar.']],
+ e:['A aliança','{p} ouviu tudo. Tinha medo, mas também precisava de ajuda.',['Fazer uma aliança|vira:amigo k+5 >d|Ela investiga de dia, eu caço de noite.','Fugir|$-4000 h-4|Melhor sumir.']],
+ f:['Caso encerrado','O caso foi encerrado como "ataque de animal selvagem abatido".',['Agradecer a {p}|bond+10 h+8|Ela guarda meu segredo até hoje.','Seguir em frente|h+4|Mais uma lua.']],
+});
+chain('lobo_esporte',{k:'Lobisomem',min:16,max:60,when:LOBO,gap:[1,1]},{
+ a:['Força demais','Desde a mordida, corro mais rápido e sou mais fort{o} do que qualquer atleta.',['Entrar para um time|tal.athletic+10 >b|O técnico ficou de queixo caído.','Esconder a força|h-2|Melhor não chamar atenção.']],
+ b:['O campeonato','Fui o destaque do campeonato. Quebrei um recorde regional.',['Continuar competindo|f+5 >c|Patrocinadores começaram a ligar.','Diminuir o ritmo|h+2 >d|Muita atenção.']],
+ c:['O exame antidoping','Fui sortead{o} para o antidoping. Meu sangue é... diferente.',['Fazer o exame|?40 f+6 $+20000|O laboratório achou "anomalia genética rara". Liberad{o}.|f+3 h-10|Fui suspens{o} por "substância desconhecida".','Fugir do exame|f-5 h-6|Desclassificad{o} e fim de carreira.']],
+ d:['A escolha','Brilhar no esporte ou proteger o segredo?',['Ficar no esporte amador|h+6|Ganho os campeonatos do bairro sem chamar atenção.','Largar o esporte|h-3|A fera não pode virar notícia.']],
+});
+chain('lobo_floresta',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,1]},{
+ a:['A floresta ameaçada','A mata onde corro nas noites de lua cheia vai ser derrubada para virar condomínio.',['Organizar um protesto|>b|Juntei moradores e ambientalistas.','Assustar os trabalhadores na lua cheia|k-3 >c|Uivos a noite toda perto das máquinas.']],
+ b:['O protesto','O protesto saiu no jornal, mas a construtora não recuou.',['Pressionar a prefeitura|?k f+3 >d|A prefeitura transformou a mata em reserva.|>c|A prefeitura liberou a obra.','Desistir|h-6|O dinheiro venceu.']],
+ c:['A lenda das máquinas','As máquinas aparecem quebradas toda manhã depois da lua cheia. Os operários dizem que tem um bicho enorme na mata.',['Continuar|?50 >d|A construtora desistiu: "terreno amaldiçoado".|arrest:dano_ao_patrimônio:0:2|Uma câmera me pegou humano, voltando da mata.','Parar|h-4|A mata foi derrubada.']],
+ d:['A reserva','A mata virou reserva ambiental. A fera tem onde correr.',['Comemorar correndo na lua cheia|h+15 fome-30|Nunca a mata pareceu tão minha.','Virar guarda voluntári{o} da reserva|k+8|Protejo de dia e de noite.']],
+});
+chain('lobo_vampiros',{k:'Lobisomem',min:18,max:120,when:LOBO,gap:[1,1]},{
+ a:['Cheiro de morte','Um clã de vampiros chegou à cidade. O cheiro deles é insuportável para mim.',['Avisar a alcateia|>b|Lobos e vampiros nunca dividiram território.','Ignorar|>c@1|Cada um no seu canto.']],
+ b:['A guerra','A alcateia quer guerra.',['Lutar|?fight fight+4 k-4 >d|Expulsamos os vampiros.|hl-35 >e|Perdemos feio.','Propor trégua|?k k+6 >d|O rio virou fronteira.|>e|Os vampiros atacaram primeiro.']],
+ c:['O ataque','Um vampiro atacou alguém do meu bairro.',['Caçar o vampiro|?fight k+8 >d|Achei e expulsei.|hl-25 >e|Ele era mais rápido.','Avisar os caçadores|>d|Que eles resolvam.']],
+ d:['Paz armada','Lobos e vampiros vivem de lados opostos da cidade.',['Respeitar a fronteira|h+6|Paz frágil.','Fazer amizade com um vampiro|?40 h+8 k+5|Uma amizade improvável: ele cheira mal, eu também, segundo ele.|hl-15|Era uma armadilha.']],
+ e:['Recuar','A cidade ficou com os vampiros por enquanto.',['Treinar e voltar|fight+6 >b@2|A lua vai voltar a ser nossa.','Mudar com a alcateia|$-4000 h-4|Outra cidade, outra mata.']],
+});
+chain('lobo_faro',{k:'Lobisomem',min:16,max:120,when:LOBO,npc:1,age:[-15,10],gap:[1,1]},{
+ a:['O faro','Desde a mordida, sinto cheiros a quilômetros. Senti cheiro de medo vindo de uma casa no fim da rua.',['Investigar|>b|O cheiro vinha do porão.','Ignorar|k-3|Não é da minha conta.']],
+ b:['A criança','No porão, uma criança desaparecida havia uma semana: {p}.',['Tirar {p} de lá|?fight k+12 f+5 >c|Arrombei a porta e levei {p} para a polícia.|hl-15 k+12 >c|O sequestrador me atacou, mas salvei {p}.','Chamar a polícia|k+10 >c|A polícia chegou em minutos.']],
+ c:['Herói','O jornal chamou de "faro inexplicável".',['Dar entrevista|f+6 >d@1|Disse que foi intuição.','Ficar no anonimato|k+5 >d@1|Ninguém pode saber como eu sei.']],
+ d:['Os pedidos','Agora a polícia me procura para casos de desaparecidos.',['Ajudar|k+10 f+3|Já encontrei sete pessoas.','Recusar|h+2|É arriscado demais.']],
+});
+
+// ===== Histórias em cadeia: a vida de lobisomem (3) =====
+chain('lobo_cacadores_familia',{k:'Lobisomem',min:16,max:120,when:LOBO,npc:1,gn:'M',age:[0,25],gap:[1,1]},{
+ a:['A família de caçadores','Uma família de caçadores de lobisomens, os {pl}, se mudou para a minha rua.',['Ficar de olho neles|>b|Armas de prata penduradas na parede da sala.','Mudar de rua|$-3000 h-2|Não vou esperar para ver.']],
+ b:['O filho','O filho mais novo dos caçadores, {p}, quer ser meu amigo. Não sabe o que eu sou.',['Fazer amizade|vira:amigo >c|Ele é gente boa. Muito diferente do pai.','Manter distância|>d|Amizade com caçador é suicídio.']],
+ c:['A descoberta','{p} descobriu a verdade numa lua cheia, me vendo pela janela.',['Pedir para ele não contar|?bond >e|Ele prometeu. E cumpriu.|>d|Ele contou para o pai.','Fugir naquela noite|$-4000 h-4|Antes que o pai dele soubesse.']],
+ d:['A caçada','O pai de {p} montou uma caçada na lua cheia.',['Enfrentar|?fight-10 k-4 >f|Desarmei o caçador e fugi.|hl-30 >f|A bala de prata passou de raspão.','Me esconder em outra cidade na lua cheia|$-1000 >e|O pai ficou esperando à toa.']],
+ e:['O segredo guardado','{p} guardou meu segredo, mesmo sendo filho de caçador.',['Retribuir a amizade|bond+15 h+8|Quando ele precisou, eu estava lá.','Agradecer e manter distância|h+3|Pelo bem dele.']],
+ f:['A trégua','O caçador me encontrou ferid{o} e pensou duas vezes.',['Falar com ele|?k k+6|Ele baixou a arma: "Meu filho diz que você é bom." Trégua.|hl-15|Ele não quis ouvir.','Fugir|h-3|Mais uma vida em fuga.']],
+});
+chain('lobo_cura',{k:'Lobisomem',min:16,max:120,when:LOBO,npc:1,gn:'F',age:[20,50],gap:[1,1]},{
+ a:['A curandeira','Uma curandeira do interior, dona {p}, diz que sabe curar a maldição do lobo.',['Ir até ela|$-500 >b|Uma casa de barro no meio da mata.','Achar que é golpe|>e@2|Mais uma charlatã.']],
+ b:['O ritual','Dona {p} disse que o ritual precisa de três luas cheias seguidas, sem eu matar nada.',['Aceitar o desafio|?will fome+20 >c|Três luas acorrentad{o}, sem matar nenhum bicho.|fome+30 >d|Na segunda lua, cacei um javali.','Desistir|h-2|Três luas é demais.']],
+ c:['A última lua','Na terceira lua, dona {p} acendeu uma fogueira e cantou a noite inteira.',['Aguentar até o fim|?50 curar h+25|Ao amanhecer, a fera foi embora para sempre.|hl-20 h-6 >d|Não funcionou desta vez.','Pedir para parar|h-4 >d|A dor foi demais.']],
+ d:['De novo','Dona {p} disse que posso tentar de novo no ano que vem.',['Voltar ano que vem|>b@1|Desta vez vai.','Aceitar a fera|h+4|Talvez eu não queira deixar de ser quem sou.']],
+ e:['A curiosidade','Não paro de pensar na curandeira.',['Ir finalmente|$-500 >b|Pelo menos tentar.','Esquecer|h+0|Já me acostumei com a lua.']],
+});
+chain('lobo_festa_fantasia',{k:'Lobisomem',min:16,max:60,when:LOBO,gap:[1,1]},{
+ a:['Festa à fantasia','Uma festa à fantasia vai acontecer justo na noite de lua cheia.',['Ir fantasiad{o} de lobisomem|>b|Ironia perfeita.','Ficar em casa|h-2|Prefiro não arriscar.']],
+ b:['A transformação na festa','À meia-noite, a fantasia ficou real. Ninguém percebeu a diferença.',['Curtir a festa como fera|?will h+15 f+3 >c|Ganhei o concurso de melhor fantasia.|>d|A fome começou a apertar.','Sair antes de perder o controle|k+3 h+4|Saí pelos fundos.']],
+ c:['O prêmio','"Melhor fantasia do ano: lobisomem realista." Recebi o prêmio com a voz rouca.',['Aceitar o prêmio|h+10 f+3|A foto da fera com o troféu virou lenda.','Sair correndo antes de alguém tocar no pelo|h+6|Melhor não.']],
+ d:['A fome','A fera quer caçar. A festa está cheia de gente.',['Correr para a mata|fome-20 k+3|Cacei um coelho e voltei para casa.','Atacar|fome-80 k-15 arrest:lesão_corporal:1:3|Mordi alguém. A polícia achou que era uma briga de fantasia.']],
+});
+chain('lobo_filho',{k:'Lobisomem',min:22,max:120,who:'kidpara',when:LOBO,gap:[1,1]},{
+ a:['A primeira lua do filho','{p} teve a primeira transformação. Chorou de dor e de medo.',['Ficar com {ele} a noite toda|bond+15 h+4 >b|Corremos juntos pela mata. Eu cuidei d{ele}.','Acorrentar {p} no porão|bond-8 >c|Para segurança de todos.']],
+ b:['A matilha da família','Agora somos uma pequena matilha: eu e {p}.',['Ensinar a caçar animais, nunca pessoas|k+5 bond+10 >d|{p} aprende rápido.','Deixar {ele} aprender sozinh{o2}|bond-5 >c|Cada lobo tem seu caminho.']],
+ c:['A revolta','{p} acha que eu escondi demais a verdade e está com raiva.',['Conversar|?bond bond+12 >d|Choramos juntos. Agora entendemos um ao outro.|bond-10 >d|{p} saiu batendo a porta.','Dar espaço|>d|O tempo cura.']],
+ d:['O futuro','{p} está aprendendo a viver com a fera.',['Ter orgulho|h+10 bond+8|A fera não é maldição quando há amor.','Procurar uma cura para {ele}|$-5000 >e|Talvez {p} mereça uma vida normal.']],
+ e:['A escolha d{ele}','Encontrei uma possível cura. {p} precisa decidir.',['Respeitar a escolha|bond+10|{p} escolheu continuar como é. E eu entendi.','Insistir na cura|bond-15|{p} se afastou de mim por um tempo.']],
+});
+chain('lobo_vizinho_desconfia',{k:'Lobisomem',min:16,max:120,when:LOBO,npc:1,gn:'M',age:[10,40],gap:[1,1]},{
+ a:['O vizinho curioso','{p}, o vizinho da frente, anotou que eu sumo sempre na lua cheia.',['Inventar uma viagem mensal|?40 >d|"Visito minha mãe todo mês."|>b|{p} ficou ainda mais curios{o2}.','Ignorar|>b|Ele que pense o que quiser.']],
+ b:['A câmera','{p} instalou uma câmera virada para a minha casa.',['Conversar|>c|Bati na porta para tirar a dúvida d{ele}.','Desviar a rota para os fundos|>d|Saio pelo quintal de trás.']],
+ c:['A conversa','{p} disse que viu "um cachorro enorme" saindo da minha casa.',['Dizer que é um cachorro que eu cuido|?50 >d|Ele riu: "Lindo bicho." Colou.|>e|"Mas você não tem cachorro."','Contar a verdade|>e|Arrisquei.']],
+ d:['Paz','{p} desistiu de investigar.',['Levar um bolo de agradecimento|vira:amigo h+4|Bom vizinho é aquele que não pergunta demais.','Seguir discret{o}|h+2|Melhor assim.']],
+ e:['O segredo','{p} ouviu tudo de boca aberta.',['Pedir segredo|?k vira:amigo h+6|Ele guarda até hoje. Às vezes até me avisa quando vem gente.|f+2 h-6|Ele contou para o bairro inteiro.','Mudar de casa|$-5000 h-2|Recomeço.']],
+});
+chain('lobo_ferido',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,1]},{
+ a:['Atropelad{o}','Na forma de lobo, fui atropelad{o} numa estrada. Acordei humano, numa vala.',['Ir para o hospital|>b|Os médicos ficaram intrigados.','Me curar sozinh{o}|hl-15 >c|Lobisomem sara rápido.']],
+ b:['Os exames','Os ossos estão se regenerando rápido demais. O médico chamou colegas para ver.',['Fugir do hospital|>c|Saí pela janela de pijama.','Inventar uma doença rara|?sm >c|Disseram que é "condição genética".|>d|O médico ficou de olho em mim.']],
+ c:['Recuperação','Em uma semana, estava novinh{o}.',['Agradecer à fera|hl+10 h+6|Às vezes a maldição é uma bênção.','Ficar mais cuidados{o} nas estradas|k+2 h+3|Lua cheia longe de asfalto.']],
+ d:['O médico','O médico apareceu na minha casa: "Quero estudar sua regeneração."',['Aceitar|$+5000 >c|Doei sangue para a pesquisa, em segredo.','Recusar|h-2 >c|Não vou virar experimento.']],
+});
+
+// ===== Histórias em cadeia: a vida de lobisomem (4) =====
+chain('lobo_selvagem',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,1]},{
+ a:['O lobisomem selvagem','Um lobisomem sem controle está matando pessoas na região. Todos vão achar que fui eu.',['Caçar o selvagem|>b|Segui o cheiro de sangue pela mata.','Ficar escondid{o}|>c|Melhor não aparecer.']],
+ b:['O encontro','O selvagem é maior que eu, e não tem nada de humano nos olhos.',['Lutar|?fight-10 k+10 f+0 >d|Venci. Ao amanhecer, era um homem sem nome, sem passado.|hl-35 >e|Ele quase me matou.','Tentar acalmar|?k >f|Ele parou. Por um segundo, vi alguém lá dentro.|hl-25 >e|Não adiantou.']],
+ c:['O medo da cidade','A cidade inteira está com medo. Montaram grupos de caça.',['Caçar o selvagem antes deles|>b|Não posso deixar inocentes morrerem.','Sair da cidade até passar|$-3000 h-3|Fui para longe.']],
+ d:['Paz na mata','Os ataques pararam. A mata voltou a ser segura.',['Enterrar o selvagem com respeito|k+5 h+3|Ele também foi vítima de uma mordida.','Contar aos caçadores que acabou|f+2|Eles nunca souberam quem matou a fera.']],
+ e:['Ferid{o} na mata','Fugi ferid{o}. O selvagem ainda está solto.',['Pedir ajuda à alcateia|>b@1|Juntos somos mais fortes.','Me recuperar e tentar de novo|fight+5 >b@1|Desta vez, mais preparad{o}.']],
+ f:['O humano lá dentro','Consegui acalmar o selvagem. Ele virou homem e chorou: não sabia o que tinha feito.',['Ajudar ele a se controlar|k+12|Ensinei tudo o que sei. Ele nunca mais matou.','Levar para uma alcateia|k+6|Eles cuidam dos seus.']],
+});
+chain('lobo_sentidos',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,2]},{
+ a:['O mundo mais alto','Desde a mordida, escuto conversas a três quadras e sinto o cheiro de mentira.',['Usar a meu favor|sm+3 >b|Sei quando alguém está mentindo para mim.','Sofrer com o barulho|h-4 >c|A cidade é alta demais.']],
+ b:['O detector de mentiras','Num negócio importante, senti o cheiro de mentira do outro lado da mesa.',['Recusar o negócio|$+0 k+3 >d|Depois soube: era um golpe.','Usar para negociar melhor|$+5000 >d|Ganhei a negociação.']],
+ c:['O excesso','O barulho da cidade me deixa irritad{o} e com dor de cabeça.',['Mudar para o interior|$-5000 h+8 >d|Silêncio, mato e passarinhos.','Usar protetor de ouvido|h+2 >d|Ajuda um pouco.']],
+ d:['Equilíbrio','Aprendi a ligar e desligar os sentidos como um rádio.',['Usar com sabedoria|sm+3 h+5|Um dom, não uma maldição.','Ajudar a polícia a achar pessoas|k+6|Meu faro já salvou gente.']],
+});
+chain('lobo_casamento_lua',{k:'Lobisomem',min:20,max:120,when:m=>LOBO(m)&&!!partner()&&partner().rel==='noivo',who:'partner',gap:[1,1]},{
+ a:['A data do casamento','A data do casamento caiu justo numa noite de lua cheia.',['Mudar a data|pbond-3 >b|"Vamos adiar uma semana, amor?"','Casar de manhã e fugir antes do anoitecer|>c|Corrida contra o sol.']],
+ b:['A explicação','{p} quer saber por que mudar a data.',['Contar a verdade|?bond pbond+10 >c|{p} riu e chorou: "Então é por isso que você some todo mês!"|separar h-12|{p} não aguentou a verdade.','Inventar desculpa|>c|A desculpa colou.']],
+ c:['O grande dia','O casamento foi lindo. A lua nasceu durante a valsa.',['Correr para a mata antes da transformação|casar h+15 pbond+8|Saí correndo da festa. Os convidados acharam romântico.','Ficar até o fim|casar ?will h+18 pbond+10|Segurei a fera até o último convidado ir embora.|casar h+5 f+3|Me transformei na pista de dança. Disseram que foi a fantasia mais realista que já viram.']],
+});
+chain('lobo_idade',{k:'Lobisomem',min:50,max:120,when:LOBO,gap:[2,3]},{
+ a:['Lobo velho','Com a idade, as transformações doem mais e demoram a passar.',['Procurar um jeito de aliviar|$-1000 >b|Chás, ervas e fisioterapia.','Aguentar|hl-5 >b|A fera não liga para a idade.']],
+ b:['O respeito','A alcateia trata os lobos velhos com respeito. Sou consultad{o} para tudo.',['Aconselhar os jovens|k+6 h+6 >c|Experiência vale mais que força.','Preferir ficar sozinh{o}|h-2 >c|Lobo velho gosta de silêncio.']],
+ c:['A última corrida','Numa lua cheia, senti que poderia ser minha última corrida pela mata.',['Correr com toda a força|h+15 hl-5|Corri como na primeira vez.','Ficar na varanda vendo a lua|h+8|Ver a lua também é bonito.']],
+});
+chain('lobo_lua_vermelha',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[2,3]},{
+ a:['A lua de sangue','Um eclipse vai deixar a lua vermelha. Os lobos antigos dizem que, nessa noite, a fera fica três vezes mais forte.',['Me acorrentar com o dobro de correntes|>b|Correntes de navio, no porão.','Ir para longe de tudo|>c|Uma cabana no meio da serra.']],
+ b:['As correntes','A fera arrebentou duas correntes. A terceira segurou.',['Agradecer à terceira corrente|h+4 >d|Comprei mais três para a próxima.','Ficar com medo do que a fera é capaz|h-6 >d|Nunca senti tanta força.']],
+ c:['A serra','Na serra, a fera correu livre a noite inteira.',['Voltar ao amanhecer|fome-50 h+6 >d|Nunca me senti tão viv{o}.','Encontrar outros lobos na serra|>e|Uma alcateia inteira tinha a mesma ideia.']],
+ d:['O dia seguinte','Acordei exaust{o}, mas em paz. Ninguém se machucou.',['Anotar a data da próxima lua de sangue|sm+2|Daqui a três anos. Preparad{o}.','Comemorar|h+6|Sobrevivi à noite mais difícil.']],
+ e:['A alcateia da serra','Os lobos da serra me convidaram para correr com eles toda lua de sangue.',['Aceitar|h+10|Uma família que só se encontra quando a lua sangra.','Agradecer e voltar sozinh{o}|h+4|Prefiro minha liberdade.']],
+});
+chain('lobo_pet',{k:'Lobisomem',min:16,max:120,when:LOBO,who:'pet',gap:[1,1]},{
+ a:['O bicho de estimação','{p}, meu bicho de estimação, percebe a fera antes de todo mundo. Na lua cheia, se esconde embaixo da cama.',['Deixar com um vizinho nas luas cheias|k+3 >b|Ele fica seguro longe de mim.','Ficar com ele em casa|>c|Ele sempre foi meu companheiro.']],
+ b:['Saudade','O vizinho perguntou por que eu sempre "viajo" na lua cheia.',['Inventar um motivo|h+0 >d|Visita à família.','Contar a verdade|?k >d|O vizinho achou que era piada, mas continuou cuidando.|>d|O vizinho ficou com medo e devolveu o bicho.']],
+ c:['A noite','Na lua cheia, a fera olhou para {p}, embaixo da cama.',['Controlar a fera|?will k+5 h+8 >d|A fera deitou do lado dele e dormiu. Ele também.|petdie h-25 >d|A fera venceu. Nunca vou me perdoar.']],
+ d:['Companheiros','{p} aprendeu a conviver com a fera. Às vezes até deita do meu lado na lua cheia.',['Fazer carinho|h+8|Ele sabe quem eu sou, por dentro.','Comprar um petisco especial|$-50 h+6|Recompensa merecida.']],
+});
+chain('lobo_historia',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,2]},{
+ a:['De onde veio a maldição','Quero entender de onde veio a maldição do lobo.',['Pesquisar em bibliotecas antigas|sm+4 >b|Livros em latim, contos de aldeias.','Perguntar aos lobos mais velhos|>c|Eles sabem histórias que não estão em livro.']],
+ b:['O primeiro lobo','Os livros falam de um caçador amaldiçoado por uma bruxa por ter matado o último lobo de uma floresta.',['Procurar a floresta|>d|Ainda existe, no norte.','Escrever um livro sobre isso|tal.writing+5 f+2|Vendeu como ficção. Ninguém sabe que é verdade.']],
+ c:['A lenda contada','O lobo mais velho contou: a primeira mordida foi um ato de amor, para salvar alguém que estava morrendo.',['Ver a maldição com outros olhos|h+8 k+3 >d|Talvez não seja só maldição.','Continuar pesquisando|>b|Quero a história inteira.']],
+ d:['A floresta do norte','Na floresta, um túmulo antigo com a marca de uma pata.',['Deixar uma oferenda|k+6 h+8|Senti uma paz que nunca tinha sentido em lua cheia.','Levar um pouco da terra|h+4|Guardo num vidrinho, como amuleto.']],
+});
+chain('lobo_acampamento',{k:'Lobisomem',min:16,max:60,when:LOBO,gap:[1,1]},{
+ a:['O acampamento','Os amigos marcaram um acampamento na serra. Só depois vi que cai na lua cheia.',['Inventar uma desculpa para não ir|h-2 >e|Fiquei em casa ouvindo as histórias depois.','Ir e dar um jeito|>b|Levei correntes escondidas na mochila.']],
+ b:['A fogueira','A lua está subindo. Os amigos contam histórias de lobisomem em volta da fogueira.',['Sair "para buscar lenha"|>c|Corri para longe do acampamento.','Ficar mais um pouco|?will h+6 >c|Segurei até a última história.|>d|A transformação começou na frente de todo mundo.']],
+ c:['A noite na mata','Passei a noite correndo pela serra, longe de todos.',['Voltar antes do amanhecer|fome-30 h+6 >e|Cheguei de manhã dizendo que me perdi procurando lenha.','Voltar atrasad{o}|>d|Os amigos estavam procurando por mim com lanternas.']],
+ d:['Visto','Um dos amigos me viu meio humano, meio lobo, sob a luz da lanterna.',['Pedir segredo|?k h+4 >e|Ele guardou. Hoje é meu melhor amigo.|f+2 h-8|Ele contou para todos. Ninguém acreditou, mas ficou o clima.','Dizer que ele estava sonhando|?40 >e|Ele acreditou: "Bebi demais."|>e|Ele sabe o que viu.']],
+ e:['A volta','O acampamento virou uma história que todos contam diferente.',['Rir junto|h+6|A melhor lenda da turma.','Prometer nunca mais acampar em lua cheia|h+2|Lição aprendida.']],
+});
+chain('lobo_ritual_alcateia',{k:'Lobisomem',min:18,max:120,when:LOBO,npc:1,gn:'F',age:[10,40],gap:[1,1]},{
+ a:['O convite da anciã','{p}, a mais velha das alcateias da região, me convidou para o ritual da Primeira Lua do ano.',['Ir|>b|Um círculo de pedras no alto de uma colina.','Recusar|h+0|Não sou de rituais.']],
+ b:['O ritual','Todos se transformam ao mesmo tempo e uivam juntos para a lua.',['Uivar com eles|h+12 >c|Nunca me senti tão parte de algo.','Ficar só olhando|h+4 >c|Uma beleza estranha.']],
+ c:['A bênção','{p} marcou minha testa com cinzas: "Agora você é da família da lua."',['Aceitar a família|vira:amigo h+10 k+4 >d|Tenho irmãos em todas as alcateias.','Agradecer|h+6|Uma noite para lembrar.']],
+ d:['A missão','{p} me pediu para proteger um filhote recém-mordido que está sozinho na cidade.',['Aceitar|k+10 >e|Encontrei o filhote escondido numa obra.','Recusar|bond-10|{p} ficou decepcionada.']],
+ e:['O filhote protegido','O filhote cresceu sob a minha proteção e aprendeu a controlar a fera.',['Ter orgulho|h+10 k+5|Mais um que não vai virar monstro.','Devolver para a alcateia|h+6|Ele tem uma família agora.']],
+});
+chain('lobo_dia_normal',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[2,3]},{
+ a:['Um mês sem lua','Neste mês, não haverá lua cheia, por um capricho do calendário.',['Aproveitar para viver como humano|h+10 >b|Saí, dancei, dormi tranquil{o}.','Ficar ansios{o} esperando a próxima|h-3 >b|A fera fica inquieta.']],
+ b:['A falta da fera','Estranho: senti falta da fera.',['Aceitar que ela faz parte de mim|h+8 >c|Somos dois em um.','Procurar uma cura|>c|Talvez eu queira ser só um.']],
+ c:['A volta da lua','A lua cheia voltou. A fera também.',['Correr feliz|fome-30 h+10|Voltei para casa.','Aguentar com paciência|h+4|Mais uma lua.']],
+});
+
 // ===== Membros das equipes: clube ou time da escola, trabalho, carreira especial, equipe de heróis e grupo religioso =====
 // Cada equipe tem gente de verdade (rel 'equipe'): dá para conversar, fazer amizade, namorar ou brigar, como qualquer pessoa.
 REL_LABEL.equipe='Colega de equipe';
@@ -14395,6 +14599,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.18',d:'15/10/2026',t:'A vida de lobisomem',itens:['Quase 140 eventos em sequência para quem é lobisomem: lua cheia na reunião do trabalho, o fazendeiro que perdeu o gado, a disputa pela liderança da alcateia, o par que vê a transformação, a alergia à prata, o filhote perdido na mata.','Também: dominar a fera sem lua, acordar no zoológico, a investigadora desconfiada, o atleta forte demais para o antidoping, defender a floresta, a guerra com os vampiros, o faro que acha desaparecidos, a família de caçadores, a curandeira, a lua de sangue e o casamento em noite de lua cheia.']},
   {v:'1.17',d:'15/10/2026',t:'A vida de vampiro',itens:['Quase 150 eventos em sequência para quem é vampiro: viver de noite, doador de sangue, o vampiro ancião dono da cidade, o padre que desconfia, a caçadora, o jornalista, o detetive, a guerra com os lobisomens.','Também: amar um humano que envelhece, criar um vampiro novo, trabalhar no banco de sangue, virar nuvem de morcegos, não envelhecer na frente da família, trocar de identidade, o tédio da eternidade, adotar uma criança e a busca por uma cura.','As histórias mexem na barra de sede.']},
   {v:'1.16',d:'15/10/2026',t:'Paranormal para todo mundo',itens:['Quase 200 eventos paranormais em sequência que podem acontecer com qualquer pessoa: casa assombrada, tabuleiro Ouija, carona na estrada, quarto 13 do hotel, poltergeist, sonhos que se realizam, OVNI, maldição de família, médium, sereia, pacto na encruzilhada, cidade fantasma e muito mais.','Alguns encontros podem terminar em mordida: dá para virar vampiro ou lobisomem sem nunca ter investigado nada.']},
   {v:'1.15.2',d:'15/10/2026',t:'A morte em outro mundo',itens:['Morrer num mundo fictício mostra como o grupo daquele mundo recebeu a notícia: o comboio no apocalipse zumbi, os náufragos na ilha, o grupo em Eldoria, os colonos em Marte.','Desistir dentro de um mundo fictício mostra a reação do grupo, não da família.']},
