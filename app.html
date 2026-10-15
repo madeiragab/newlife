@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610141237'</script>
+<title>NewLife</title><script>window.NL_VER='2610151807'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -1697,14 +1697,14 @@ function royalTitle(){ const m=S.me,r=m.royal; if(!r||r.abd) return null; return
 function yearBiz(){
   const m=S.me,b=m.biz; if(!b) return;
   b.yrs++; const sec=BIZ_SECTORS.find(s=>s.n===b.sector)||BIZ_SECTORS[0];
-  const r=R.norm(.09+(m.smarts-50)/600+(b.mkt||0),sec.risk); b.mkt=0;
+  const r=R.norm(.03+(m.smarts-50)/800+(b.mkt||0)+(b.bonus||0),sec.risk*1.15); b.mkt=0; b.bonus=0;
   b.value=Math.max(0,Math.round(b.value*(1+r)));
   b.emp=Math.max(1,Math.round(b.emp*(1+r*.8)+R.int(-1,2)));
   m.c.bizMax=Math.max(m.c.bizMax||0,b.value);
   if(m.prison){ b.value=Math.round(b.value*.8); }
-  if(r>0&&!m.prison){ const p=Math.round(b.value*R.f()*.08*diff().$); m.money+=p; if(p>1000) log(`A ${b.n} lucrou e me rendeu ${fmt(p)}.`,'good'); }
+  if(r>0&&!m.prison){ const p=Math.round(b.value*R.f()*.04*diff().$); m.money+=p; if(p>1000) log(`A ${b.n} lucrou e me rendeu ${fmt(p)}.`,'good'); }
   else if(r<-.2) log(`A ${b.n} teve um ano péssimo.`,'bad');
-  if(b.value<b.start*.12&&R.chance(.5)){ log(`A ${b.n} faliu.`,'bad'); st('happy',-15); m.biz=null; }
+  if((b.value<b.start*.3&&R.chance(.35))||(r<-.3&&R.chance(sec.risk*.4))){ log(`A ${b.n} faliu.`,'bad'); st('happy',-15); cnt('falencias'); if(R.chance(.5)){ const div=Math.round(b.start*R.f()*.5); m.money-=div; log(`Fiquei com ${fmt(div)} em dívidas da empresa.`,'bad'); } m.biz=null; }
   if(b.value>1e8) m.fame=clamp(Math.max(m.fame,30+Math.log10(b.value)*4));
 }
 
@@ -10397,6 +10397,169 @@ V.health=(o=>()=>{ const r=o(), m=S.me; if(!m.dis.length) return r;
     it.push({l:nome,s:known?`${d.y} ano(s)${d.ctrl?' · controlada':''}${def.cure==='none'?' · sem cura':''}`:'Sem diagnóstico · vá ao médico descobrir o que é',tone:'bad',
       on:()=>UI.push(()=>({title:known?def.n:'O que eu estou sentindo',items:(known?[]:[{html:`<div class="card"><p>${esc(d.sx||'')}</p><p style="color:var(--muted);font-size:13px">Médico melhor acerta mais o diagnóstico. A consulta de rotina também pode descobrir.</p></div>`}]).concat(op)}))}); });
   r.items.splice(i0,i1-i0,...it); return r; })(V.health);
+// doenças graves sem tratamento pioram a cada ano (o estrago cresce com o tempo)
+yearHealth=(o=>function(){ const r=o.apply(this,arguments); const m=S.me; try{ (m.dis||[]).forEach(d=>{ const def=DISEASES[d.id]; if(!def||d.ctrl||def.cure==='auto') return;
+  const grave=def.dmg>=8||CANCERS.has(d.id); if(grave&&d.y>=1){ const x=def.dmg>=15?Math.min(4,d.y):Math.min(10,Math.round(d.y*1.3)); st('health',-x); if(d.y===3&&R.chance(.6)) log(d.k===false?'Aquilo que eu sinto está piorando. Já não dá para ignorar.':`${dn(def.n)[0].toUpperCase()+dn(def.n).slice(1)} está piorando sem tratamento.`,'bad'); } }); }catch(e){} return r; })(yearHealth);
+// câncer é bem mais difícil de curar
+CANCERS.forEach(id=>{ const d=DISEASES[id]; if(d){ if(d.doc) d.doc=Math.round(d.doc*45)/100; if(d.hosp) d.hosp=Math.round(d.hosp*55)/100; } });
+// doenças graves: tratamento de vários anos, um ciclo por ano, com risco de morrer mesmo tratando
+const LONGOS=new Set([...CANCERS,'tuberculose','hepatite','tumor_cerebral','cirrose']);
+treat=(o=>function(where,dis){ const m=S.me, def=DISEASES[dis.id];
+  if(!def||!LONGOS.has(dis.id)||where==='alt'||where==='psi'||where==='posto'||dis.k===false||def.ctrl) return o.apply(this,arguments);
+  if(dis.tAno===m.age) return 'O ciclo de tratamento deste ano já foi feito. Volto no ano que vem.';
+  const cancer=CANCERS.has(dis.id), nome=dn(def.n), custo=where==='hosp'?(cancer?14000:8000):(TIERS[where]||TIERS.doc).c+(cancer?6000:2500);
+  m.money-=custo; let aviso='';
+  if(dis.tAno!=null&&m.age-dis.tAno>1&&dis.tA>0){ dis.tA=Math.max(0,dis.tA-1); aviso=' Como parei o tratamento, perdi parte do progresso.'; }
+  dis.tAno=m.age; dis.tA=(dis.tA||0)+1; dis.tNeed=dis.tNeed||R.int(2,4)+(cancer?1:0);
+  if(R.chance(cancer?(where==='hosp'?.04:.07):.02)){ die(`de complicações no tratamento de ${nome}`); return `O corpo não aguentou o tratamento de ${nome}.`; }
+  st('health',R.int(5,12));
+  if(dis.tA>=dis.tNeed){ if(R.chance(where==='hosp'?.7:where==='doc'?.5:.3)){ m.dis=m.dis.filter(x=>x!==dis); st('happy',20); log(`Depois de ${dis.tA} anos de tratamento, venci ${nome}.`,'good'); return `Depois de ${dis.tA} anos de tratamento, os exames vieram limpos. Venci ${nome}!`; }
+    dis.tNeed++; return `Os exames mostraram que ${nome} ainda não acabou. Mais um ano de tratamento.${aviso}`; }
+  return `Ano ${dis.tA} de pelo menos ${dis.tNeed} no tratamento de ${nome}.${cancer?' Quimioterapia, enjoo e cabelo no travesseiro.':''}${aviso}`; })(treat);
+
+// ===== Identidade de gênero e orientação sexual =====
+// m.ident: cis | trans | nb (não binárie)   m.sexo: sexo biológico (M/F, decide quem pode engravidar)
+// m.orient: hetero | gay | bi | pan | assexual   (m.pref continua sendo de quem a pessoa gosta: M, F ou A)
+const ORIENT={hetero:'Heterossexual',gay:'Gay|Lésbica',bi:'Bissexual',pan:'Pansexual',assexual:'Assexual'};
+
+const sexoDe=x=>x&&(x.sexo||x.gender);
+function prefDe(gender,orient){ return orient==='gay'?gender:orient==='bi'||orient==='pan'||orient==='assexual'?'A':(gender==='M'?'F':'M'); }
+function identTxt(m){ const o=m.orient||'hetero', i=m.ident||'cis'; const id=i==='nb'?'Pessoa não binária':i==='trans'?(m.gender==='F'?'Mulher trans':'Homem trans'):(m.gender==='F'?'Mulher cis':'Homem cis'); return `${id} · ${g(ORIENT[o],m.gender)}`; }
+newLife=(o=>function(opt={}){ const r=o.apply(this,arguments); const m=S.me;
+  m.orient=opt.orient||R.wpick([['hetero',85],['gay',6],['bi',6],['pan',1.5],['assexual',1.5]]);
+  m.ident=opt.ident||R.wpick([['cis',97.5],['trans',1.5],['nb',1]]);
+  m.sexo=m.ident==='trans'?(m.gender==='M'?'F':'M'):m.gender;
+  if(!opt.pref) m.pref=prefDe(m.gender,m.orient);
+  return r; })(newLife);
+// gravidez decidida pelo sexo biológico, não pelo gênero
+interact=(o=>function(p,k,extra){ if(k!=='amor') return o.apply(this,arguments); const m=S.me, g0=m.gender, pg=p.gender;
+  // truque: troca temporariamente o gênero pelo sexo biológico só para a conta da gravidez
+  m.gender=sexoDe(m); p.gender=sexoDe(p); let r; try{ r=o.apply(this,arguments); } finally{ m.gender=g0; p.gender=pg; } return r; })(interact);
+// tela "Eu": identidade e orientação
+V.me=(o=>()=>{ const r=o(), m=S.me; if(r&&r.items&&m.orient){ r.items.splice(1,0,{html:`<div class="card"><p style="font-size:13px">🏳️‍🌈 ${esc(identTxt(m))}</p></div>`}); } return r; })(V.me);
+// sair do armário e transição
+EVENTS.sair_armario={w:2.5,min:13,max:22,onceLife:1,cd:99,when:m=>m.age>=13&&m.age<=22&&m.orient&&m.orient!=='hetero'&&!m.c.assumiu&&!m.prison&&!S.scen,
+  prep:()=>({}),
+  show:()=>{ const m=S.me; return {k:'Identidade',t:'Quem eu sou',x:m.orient==='assexual'?'Percebi que não sinto atração sexual por ninguém, e que está tudo bem. Mas ninguém em casa entende isso.':`Tenho certeza: sou ${g(ORIENT[m.orient],m.gender).toLowerCase()}. Guardar isso está pesando.`,ch:[['Contar para a família','f'],['Contar só para os amigos','a'],['Guardar segredo por enquanto','s']]}; },
+  pick:k=>{ const m=S.me; if(k==='s'){ st('happy',-4); return 'Guardei para mim. Um dia eu conto.'; } m.c.assumiu=1; cnt('assumiu');
+    if(k==='a'){ st('happy',8); people('amigo').forEach(p=>p.bond=clamp(p.bond+R.int(2,8))); return 'Meus amigos me abraçaram. Um deles disse: "A gente já sabia e te ama do mesmo jeito."'; }
+    const ps=parents(); if(!ps.length){ st('happy',8); return 'Contei para quem é minha família de verdade. Fui acolhid'+oa()+'.'; }
+    let t=[]; ps.forEach(p=>{ const ok=R.chance(clamp(p.bond+10,10,95)/100); if(ok){ p.bond=clamp(p.bond+8); t.push(`${p.first} me abraçou e disse que me ama do jeito que eu sou.`); } else { p.bond=clamp(p.bond-25); t.push(`${p.first} ficou em silêncio e saiu da sala. Vai precisar de tempo.`); } });
+    st('happy',t.some(x=>x.includes('abraçou'))?10:-6); return t.join(' '); }};
+EVENTS.transicao={w:2.5,min:14,max:40,onceLife:1,cd:99,when:m=>m.age>=14&&m.age<=40&&m.ident==='trans'&&!m.c.transicao&&!m.prison&&!S.scen,
+  prep:()=>({}),
+  show:()=>{ const m=S.me; return {k:'Identidade',t:'Transição',x:`Sempre soube que sou ${m.gender==='F'?'mulher':'homem'}. Chegou a hora de viver isso por inteiro: nome social, roupas, acompanhamento médico.`,ch:[['Começar a transição com acompanhamento médico','m'],['Começar aos poucos, só com roupas e nome','r'],['Esperar mais um pouco','e']]}; },
+  pick:k=>{ const m=S.me; if(k==='e'){ st('happy',-5); return 'Ainda não. Mas um dia.'; } m.c.transicao=1; cnt('transicao');
+    if(k==='m'){ if(m.money<3000&&m.age>=18) return 'O acompanhamento custa dinheiro que ainda não tenho. Vou juntar.'; if(m.age>=18) m.money-=3000; st('happy',18); st('looks',R.int(2,8)); }
+    else st('happy',12);
+    const ps=parents(); const rej=ps.filter(p=>!R.chance(clamp(p.bond+5,10,95)/100)); rej.forEach(p=>p.bond=clamp(p.bond-25)); ps.filter(p=>!rej.includes(p)).forEach(p=>p.bond=clamp(p.bond+6));
+    log('Comecei minha transição. Pela primeira vez, o espelho mostra quem eu sou.','good');
+    return rej.length?`Algumas pessoas da família não aceitaram (${rej.map(p=>p.first).join(', ')}). Mas eu nunca me senti tão eu.`:'A família me apoiou. Pela primeira vez, me sinto em casa no meu corpo.'; }};
+// tela inicial: escolher orientação e identidade na vida personalizada
+showStart=(o=>function(){ const r=o.apply(this,arguments); try{ const gsel=document.getElementById('fGender'); if(gsel&&!document.getElementById('fOrient')){
+  const row=gsel.closest('.grid2'); row.insertAdjacentHTML('afterend',`<div class="grid2"><label class="f">Orientação<select class="in" id="fOrient"><option value="">Aleatória</option>${Object.entries(ORIENT).map(([k,v])=>`<option value="${k}">${v.replace('|','/')}</option>`).join('')}</select></label>
+    <label class="f">Identidade<select class="in" id="fIdent"><option value="">Aleatória</option><option value="cis">Cis</option><option value="trans">Trans</option><option value="nb">Não binárie</option></select></label></div>`);
+  const btn=document.getElementById('stCustom'); const old=btn.onclick; btn.onclick=ev=>{ window.__nlId={orient:document.getElementById('fOrient').value||undefined,ident:document.getElementById('fIdent').value||undefined}; return old&&old.call(btn,ev); }; } }catch(e){} return r; })(showStart);
+newLife=(o=>function(opt={}){ if(window.__nlId){ opt=Object.assign({},opt,window.__nlId); window.__nlId=null; } return o.call(this,opt); })(newLife);
+
+// ===== Ter filhos com ajuda: fertilização in vitro, barriga de aluguel, e as encrencas disso =====
+// FIV com implante de embrião: só para quem tem útero (sexo biológico feminino). Barriga de aluguel: qualquer pessoa.
+function fertFIV(){ const m=S.me, c=18000; if(m.age<18) return 'Só depois dos 18.'; if(sexoDe(m)!=='F') return 'Esse tratamento é para quem pode engravidar.';
+  if(m.age>50) return 'O médico disse que, na minha idade, o implante não tem chance.'; if(S.births.length||m.barriga) return 'Já tem um bebê a caminho.';
+  if(use('fiv')>2) return 'O corpo precisa descansar entre as tentativas. Só no ano que vem.'; if(!canPay(c)) return `Cada tentativa custa ${fmt(c)}.`; m.money-=c; cnt('fiv');
+  const ch=clamp((m.fert||60)-(m.age>35?(m.age-35)*4:0),5,75)/100;
+  if(R.chance(ch)){ const p=partner(); S.births.push({with:p?p.id:null}); st('happy',15); return 'O implante de embrião deu certo. O teste deu positivo! Vem um bebê aí.'; }
+  st('happy',-8); return R.pick(['O embrião não pegou. O médico disse para tentar de novo com calma.','Mais uma tentativa sem sucesso. Chorei no carro antes de entrar em casa.']); }
+function fertBarriga(){ const m=S.me, c=70000; if(m.age<21) return 'A clínica só aceita a partir dos 21.'; if(m.age>60) return 'A clínica não aceita mais na minha idade.';
+  if(S.births.length||m.barriga) return 'Já tem um bebê a caminho.'; if(!canPay(c)) return `O processo custa ${fmt(c)}.`; m.money-=c; cnt('barriga');
+  const st0=stranger({gender:'F'}); const mae=mkPerson({rel:'tmp',gender:'F',first:st0.first,last:st0.last,age:clamp(m.age+R.int(-10,2),22,40)});
+  m.barriga={n:mae.first,nl:mae.last,ano:m.age};
+  return `Conheci ${mae.first}, que vai gestar o nosso bebê. Contrato assinado, exames feitos. Agora é esperar.`; }
+// no ano seguinte: o bebê nasce, ou a mãe de aluguel tenta fugir (raro)
+yearMoney=(o=>function(){ const r=o.apply(this,arguments); const m=S.me; try{ if(m.alive&&m.barriga&&m.age>m.barriga.ano&&!S.scen){
+  if(R.chance(.05)&&!m.barriga.fuga){ m.barriga.fuga=1; queue('barriga_fuga',{n:m.barriga.n}); }
+  else if(!m.barriga.fuga){ const p=partner(); S.births.push({with:p?p.id:null}); log(`${m.barriga.n} deu à luz o nosso bebê. Segurei pela primeira vez no corredor da maternidade.`,'good'); m.barriga=null; } } }catch(e){} return r; })(yearMoney);
+EVENTS.barriga_fuga={show:d=>({k:'Família',t:'A mãe de aluguel sumiu',x:`${d.n}, a mãe de aluguel, parou de atender o telefone. A clínica diz que ela se mudou e quer ficar com o bebê.`,ch:[['Entrar na justiça ($15.000 de advogado)','j'],['Ir atrás dela e conversar','c'],['Deixar ela ficar com o bebê','d']]}),
+  pick:(k,d)=>{ const m=S.me; const nascer=()=>{ const p=partner(); S.births.push({with:p?p.id:null}); m.barriga=null; };
+    if(k==='j'){ m.money-=15000; if(R.chance(.8)){ nascer(); st('happy',10); return 'O juiz deu ganho de causa no mesmo mês. O bebê veio para casa.'; } m.barriga=null; st('happy',-25); return 'A justiça demorou demais e o juiz decidiu pelo vínculo com a mãe que gestou. Perdi o bebê.'; }
+    if(k==='c'){ if(R.chance(.55)){ nascer(); st('happy',8); return `Encontrei ${d.n} num hotel de beira de estrada, chorando. Ela tinha medo de se arrepender. Conversamos e ela me entregou o bebê.`; } m.barriga=null; st('happy',-20); return `${d.n} fugiu de novo antes que eu chegasse. Nunca mais soube dela.`; }
+    m.barriga=null; st('happy',-15); m.karma=clamp(m.karma+8); return `Deixei ${d.n} ficar com o bebê. Doeu como nada na vida.`; }};
+// no menu do amor
+V.love=(o=>()=>{ const r=o(), m=S.me; if(!r||!r.items||m.age<18) return r;
+  r.items.push({sec:'Ter filhos com ajuda'},
+    Object.assign({ic:'🧫',l:'Implante de embrião (FIV)',s:`${fmt(18000)} por tentativa · para quem pode engravidar`,on:()=>act(fertFIV,'Clínica de fertilidade')},sexoDe(m)!=='F'?{dis:true,why:'O implante é para quem tem útero. A barriga de aluguel serve para qualquer pessoa.'}:{}),
+    {ic:'🤰',l:'Barriga de aluguel',s:`${fmt(70000)} · o bebê nasce no ano seguinte`,on:()=>act(fertBarriga,'Barriga de aluguel')});
+  return r; })(V.love);
+
+// ===== Vários amores ao mesmo tempo: casar só com uma pessoa, mas trair com várias, e lidar com o que vem =====
+const amores=()=>people('namoro','noivo','conjuge');
+const casad=()=>people('conjuge')[0]||null;
+// um casamento (e um noivado) por vez
+interact=(o=>function(p,k,extra){ const m=S.me;
+  if(k==='pedido'){ const c=casad(), n=people('noivo').find(x=>x!==p); if(c&&c!==p) return `Já sou casad${oa()} com ${c.first}. Para casar de novo, preciso me divorciar primeiro.`; if(n) return `Já estou noiv${oa()} de ${n.first}.`; }
+  if(k==='casar'){ const c=casad(); if(c&&c!==p) return `Já sou casad${oa()} com ${c.first}. Bigamia é crime.`; }
+  return o.apply(this,arguments); })(interact);
+// todo ano, quem tem mais de um amor corre risco
+yearMoney=(o=>function(){ const r=o.apply(this,arguments); const m=S.me; try{ if(m.alive&&!S.scen&&!m.prison){ const L=amores();
+  if(L.length>=2&&!S.pending.some(e=>e.id==='amantes')&&R.chance(Math.min(.75,.28+.12*(L.length-2)))){
+    const c=casad(), outros=L.filter(p=>p!==c), tipos=[['chantagem',3],['conta',3],['encontro',2],['ultimato',2]]; if(c) tipos.push(['descobre',3]);
+    const t=R.wpick(tipos), quem=t==='descobre'?c:R.pick(outros.length?outros:L);
+    queue('amantes',{t,pid:quem.id,v:Math.max(3000,Math.round(Math.max(0,m.money)*R.int(8,20)/100/100)*100)}); } } }catch(e){ console.error(e); } return r; })(yearMoney);
+function amorSai(p,why){ if(!p||!p.alive) return; if(p.rel==='conjuge') divorce(p,true); else if(['namoro','noivo'].includes(p.rel)){ p.rel='ex'; p.bond=clamp(p.bond-20); log(`${p.first} terminou comigo${why?': '+why:''}.`,'bad'); } }
+function amorContaTudo(dedo){ const m=S.me; const out=[]; amores().filter(p=>p!==dedo).forEach(p=>{ p.bond=clamp(p.bond-40); if(R.chance(.55)){ amorSai(p,'descobriu as outras pessoas'); out.push(`${p.first} foi embora`); } else out.push(`${p.first} ficou, mas não confia mais em mim`); }); st('happy',-15); m.karma=clamp(m.karma-6); cnt('traicoes'); return out.join('; ')+'.'; }
+EVENTS.amantes={show:d=>{ const p=P(d.pid), m=S.me, L=amores(); const nomes=L.filter(x=>x!==p).map(x=>x.first).join(' e ');
+    const X={chantagem:[`${p.first} descobriu que não é a única pessoa na minha vida. Quer ${fmt(d.v)} para ficar de boca fechada.`,[['Pagar','p'],['Recusar','r'],['Terminar com '+p.first+' antes que conte','t']]],
+      conta:[`${p.first} descobriu tudo e ameaça contar para ${nomes||'todo mundo'}.`,[['Implorar para não contar','i'],['Contar eu mesm'+oa()+' antes','e'],['Escolher '+p.first+' e terminar com o resto','s']]],
+      encontro:[`Marquei com ${p.first} no mesmo restaurante onde eu já estava com ${nomes||'outra pessoa'}. Os dois me viram ao mesmo tempo.`,[['Inventar que é um primo','m'],['Assumir tudo ali mesmo','a'],['Sair pela porta da cozinha','f']]],
+      ultimato:[`${p.first} desconfia que existe mais alguém e deu um ultimato: "Ou só eu, ou ninguém."`,[['Ficar só com '+p.first,'s'],['Prometer e continuar escondendo','m'],['Terminar com '+p.first,'t']]],
+      descobre:[`${p.first}, com quem sou casad${oa()}, achou as mensagens com ${nomes||'outra pessoa'}. Sabe de tudo.`,[['Pedir perdão e terminar com o resto','p'],['Negar até o fim','n'],['Pedir o divórcio','d']]]}[d.t];
+    return {k:'Amor',t:{chantagem:'Chantagem',conta:'Vai contar tudo',encontro:'O restaurante',ultimato:'O ultimato',descobre:'Descobriu tudo'}[d.t],x:X[0],ch:X[1]}; },
+  pick:(k,d)=>{ const p=P(d.pid), m=S.me; if(!p||!p.alive) return ''; const outros=()=>amores().filter(x=>x!==p);
+    if(d.t==='chantagem'){ if(k==='p'){ m.money-=d.v; p.bond=clamp(p.bond-10); if(R.chance(.35)) queue('amantes',{t:'chantagem',pid:p.id,v:Math.round(d.v*1.5)}); return `Paguei ${fmt(d.v)}. ${p.first} prometeu silêncio. Prometeu.`; }
+      if(k==='t'){ amorSai(p,'cansou de dividir'); if(R.chance(.5)) return 'Terminei, mas antes de sair, '+p.first+' contou para todo mundo: '+amorContaTudo(p); return `Terminei com ${p.first}, que foi embora sem dizer nada a ninguém.`; }
+      return `${p.first} cumpriu a ameaça: ${amorContaTudo(p)}`; }
+    if(d.t==='conta'){ if(k==='i'){ if(R.chance(.4)){ p.bond=clamp(p.bond-15); return `${p.first} não contou. Desta vez.`; } return `${p.first} contou: ${amorContaTudo(p)}`; }
+      if(k==='e'){ const r=amorContaTudo(null); m.karma=clamp(m.karma+4); return 'Contei tudo eu mesm'+oa()+'. '+r; }
+      outros().forEach(x=>amorSai(x,'terminei para ficar com outra pessoa')); p.bond=clamp(p.bond+10); return `Escolhi ${p.first}. Os outros relacionamentos acabaram de uma vez.`; }
+    if(d.t==='encontro'){ if(k==='m'&&R.chance(.3)) return 'Acreditaram na história do primo. Não sei como.'; if(k==='f'){ p.bond=clamp(p.bond-20); outros().forEach(x=>x.bond=clamp(x.bond-20)); return 'Saí pela cozinha. Os dois ficaram na mesa, se olhando, e entenderam tudo.'; }
+      return amorContaTudo(null); }
+    if(d.t==='ultimato'){ if(k==='s'){ outros().forEach(x=>amorSai(x,'terminei para ficar com outra pessoa')); p.bond=clamp(p.bond+15); return `Fiquei só com ${p.first}.`; }
+      if(k==='t'){ amorSai(p,'deu um ultimato e eu não aceitei'); return `Terminei com ${p.first}.`; }
+      if(R.chance(.5)){ p.bond=clamp(p.bond-5); return 'Prometi. Continuo escondendo.'; } amorSai(p,'descobriu que eu menti de novo'); return `${p.first} descobriu a mentira e foi embora.`; }
+    if(d.t==='descobre'){ if(k==='d'){ divorce(p,false); return 'Pedi o divórcio antes que pedissem.'; }
+      if(k==='p'&&R.chance(p.bond/130)){ outros().forEach(x=>amorSai(x,'terminei para salvar meu casamento')); p.bond=clamp(p.bond-30); return `${p.first} me deu uma última chance. Terminei com todo mundo.`; }
+      if(k==='n'&&R.chance(.15)){ p.bond=clamp(p.bond-20); return 'Neguei com uma convicção assustadora. Ficou a dúvida.'; }
+      divorce(p,true); return `${p.first} não perdoou. O casamento acabou.`; }
+    return ''; }};
+
+// ===== Empresa dá trabalho: roubos, sócio que desvia, fiscalização, processos, crises =====
+yearBiz=(o=>function(){ const m=S.me, had=!!m.biz; const r=o.apply(this,arguments);
+  try{ if(had&&m.biz&&!m.prison&&R.chance(.4)&&!S.pending.some(e=>e.id==='biz_evento')) queue('biz_evento',{t:R.wpick([['roubo',3],['socio',2],['fiscal',3],['processo',2],['crise',2],['incendio',1],['funcionario',2]])}); }catch(e){} return r; })(yearBiz);
+EVENTS.biz_evento={show:d=>{ const b=S.me.biz; if(!b) return {k:'Empresa',t:'Empresa',x:'',ch:[['OK','x']]}; const T={
+    roubo:['Assalto na empresa',`A ${b.n} foi assaltada de madrugada. Levaram equipamentos e o dinheiro do cofre.`,[['Acionar o seguro','s'],['Reforçar a segurança','r'],['Engolir o prejuízo','e']]],
+    socio:['O sócio sumiu com o dinheiro',`Descobri que meu sócio desviou dinheiro da ${b.n} por meses.`,[['Processar o sócio','p'],['Fazer um acordo','a'],['Deixar para lá e seguir','d']]],
+    fiscal:['A fiscalização',`A Receita apareceu na ${b.n} e achou impostos atrasados.`,[['Pagar tudo com multa','p'],['Contratar um contador para recorrer','c'],['Oferecer um "agrado" ao fiscal','g']]],
+    processo:['Processo trabalhista',`Um ex-funcionário entrou na justiça contra a ${b.n}.`,[['Fazer acordo','a'],['Ir até o fim','f']]],
+    crise:['Crise no setor',`O setor da ${b.n} entrou em crise. As vendas despencaram.`,[['Demitir gente para sobreviver','d'],['Investir para atravessar a crise','i'],['Esperar passar','e']]],
+    incendio:['Incêndio',`Um curto-circuito causou um incêndio na ${b.n}.`,[['Reconstruir','r'],['Fechar as portas','f']]],
+    funcionario:['O funcionário desonesto',`Um funcionário de confiança estava vendendo produtos da ${b.n} por fora.`,[['Demitir e denunciar','d'],['Dar uma segunda chance','s']]]}[d.t];
+  return {k:'Empresa',t:T[0],x:T[1],ch:T[2]}; },
+  pick:(k,d)=>{ const m=S.me, b=m.biz; if(!b) return ''; const perde=f=>{ const v=Math.round(b.value*f); b.value=Math.max(0,b.value-v); return v; };
+    if(d.t==='roubo'){ if(k==='s'){ const v=perde(R.f()*.12); if(R.chance(.6)){ m.money+=Math.round(v*.7); return `O seguro cobriu parte do prejuízo de ${fmt(v)}.`; } return `O seguro achou uma cláusula e não pagou. Prejuízo de ${fmt(v)}.`; }
+      if(k==='r'){ const c=Math.round(b.value*.05)+2000; m.money-=c; perde(R.f()*.08); return `Câmeras, alarme e vigia noturno: ${fmt(c)}.`; } return `Prejuízo de ${fmt(perde(R.f()*.15))}.`; }
+    if(d.t==='socio'){ const v=perde(R.f()*.3+.1); if(k==='p'){ m.money-=8000; if(R.chance(.45)){ b.value+=Math.round(v*.6); return `Ganhei o processo e recuperei parte dos ${fmt(v)} desviados.`; } return `O sócio sumiu do país. Perdi ${fmt(v)} e o advogado.`; }
+      if(k==='a'){ b.value+=Math.round(v*.3); return `Recuperei um pouco no acordo. O resto dos ${fmt(v)} ficou com ele.`; } return `Perdi ${fmt(v)} e a confiança em sócios.`; }
+    if(d.t==='fiscal'){ const v=Math.round(b.value*(R.f()*.08+.02))+3000;
+      if(k==='p'){ m.money-=v; return `Paguei ${fmt(v)} entre impostos e multa.`; }
+      if(k==='c'){ m.money-=4000; if(R.chance(.5)){ m.money-=Math.round(v*.4); return 'O contador conseguiu reduzir a multa pela metade.'; } m.money-=v; return 'O recurso foi negado. Paguei tudo e o contador.'; }
+      m.karma=clamp(m.karma-8); if(R.chance(.55)){ m.money-=Math.round(v*.3); return 'O fiscal aceitou e "esqueceu" o assunto.'; } arrest('corrupção ativa',1,4); return 'O fiscal era honesto. Fui pres'+oa()+' por corrupção.'; }
+    if(d.t==='processo'){ const v=Math.round(R.int(15000,80000)*(b.emp>20?2:1)); if(k==='a'){ m.money-=Math.round(v*.5); return `Acordo de ${fmt(Math.round(v*.5))}.`; } if(R.chance(.4)) return 'Ganhei na justiça. Não paguei nada.'; m.money-=v; return `Perdi o processo: ${fmt(v)}.`; }
+    if(d.t==='crise'){ if(k==='d'){ b.emp=Math.max(1,Math.round(b.emp*.6)); perde(.1); m.karma=clamp(m.karma-3); return 'Demiti um monte de gente. A empresa sobreviveu, mas o clima morreu.'; }
+      if(k==='i'){ const c=Math.round(b.value*.15); if(!canPay(c)){ perde(.3); return 'Não tinha dinheiro para investir. A crise levou 30% da empresa.'; } m.money-=c; if(R.chance(.5)){ b.bonus=.15; return 'Investi na crise e saí na frente dos concorrentes.'; } perde(.2); return 'Investi e a crise engoliu o dinheiro também.'; }
+      return `A crise levou ${fmt(perde(R.f()*.3+.1))} do valor da empresa.`; }
+    if(d.t==='incendio'){ if(k==='r'){ const c=Math.round(b.value*.25); m.money-=c; perde(.1); return `Reconstruir custou ${fmt(c)}.`; } const sobra=Math.round(b.value*.2); m.money+=sobra; log(`Fechei a ${b.n} depois do incêndio.`,'bad'); m.biz=null; return `Fechei a empresa. Sobraram ${fmt(sobra)}.`; }
+    if(d.t==='funcionario'){ if(k==='d'){ perde(.04); return 'Demiti e denunciei. Recuperei parte do estoque.'; } if(R.chance(.5)) return 'Ele nunca mais repetiu. Virou o funcionário mais fiel da empresa.'; return `Ele fez de novo. Prejuízo de ${fmt(perde(.1))}.`; }
+    return ''; }};
 
 // ===== Membros das equipes: clube ou time da escola, trabalho, carreira especial, equipe de heróis e grupo religioso =====
 // Cada equipe tem gente de verdade (rel 'equipe'): dá para conversar, fazer amizade, namorar ou brigar, como qualquer pessoa.
@@ -13815,6 +13978,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.15',d:'15/10/2026',t:'Identidade, família e amores',itens:['Identidade de gênero (cis, trans, não binária) e orientação (hétero, gay/lésbica, bi, pan, assexual), sorteadas ou escolhidas na vida personalizada.','Eventos de sair do armário e de transição, com a reação da família.','Quem engravida é decidido pelo sexo biológico: um homem trans pode engravidar.','Implante de embrião (FIV) para quem pode engravidar e barriga de aluguel para qualquer pessoa. Às vezes, a mãe de aluguel tenta fugir com o bebê.','Casamento com uma pessoa por vez, mas dá para trair com várias. Os amores podem descobrir: chantagem por dinheiro, contar para os outros, encontro no mesmo restaurante, ultimato.','Doenças graves sem tratamento pioram a cada ano.','Câncer e doenças graves pedem anos de tratamento (um ciclo por ano no médico ou hospital), com risco de morrer mesmo tratando. Parar o tratamento faz perder progresso.','Empresas bem mais difíceis: crescem menos, rendem menos e quebram mais. Agora há assaltos, sócio que desvia dinheiro, fiscalização, processos trabalhistas, crises e incêndios. Falir pode deixar dívida.']},
   {v:'1.14.1',d:'14/10/2026',t:'Economia mais equilibrada',itens:['Morar sozinho custa mais, e o padrão de vida sobe junto com o salário: ficar milionário trabalhando sem estudo ficou bem mais difícil.','Criptomoeda virou aposta de verdade: a maioria perde um pouco e poucos ganham muito.','Ações rendem um pouco menos (6,5% ao ano em média).']},
   {v:'1.14',d:'14/10/2026',t:'Traição, divórcio e a fera no sangue',itens:['Noite fora: boate, bar com os amigos e boate adulta (18+). Quem tem par em casa pode levantar suspeitas ou começar um caso.','Caso secreto: a desconfiança cresce todo ano. Quando descobrem: pedir perdão, negar ou assumir. E o seu par também pode trair você.','Divórcio com filhos menores vai para a justiça: brigar pela guarda, guarda compartilhada ou pagar pensão até as crianças fazerem 18.','Vampiros têm barra de sede e lobisomens, de fome. Em 100%, a criatura toma o controle: frenesi, ataques a estranhos e até à própria família.','Saciar: comprar sangue ou carne, caçar animais ou atacar alguém (com carma, prisão e culpa).','A maldição passa para os filhos: dentes afiados, olhos amarelos e, na adolescência, a fera pode atacar a família.','Combate de criatura: mordida, garras, uivo, velocidade sobrenatural e mais resistência.','Novas histórias em cadeia: clã de vampiros, alcateia, o par que descobre o seu segredo, o médico que estranha o seu sangue, a lenda da cura e o ninho de vampiros.']},
   {v:'1.13',d:'14/10/2026',t:'Epidemia zumbi dinâmica',itens:['O fim do mundo não tem mais data marcada: infecção, governo, abastecimento e segurança mudam a cada ano.','O colapso pode vir em poucos anos ou demorar, conforme o mundo e as suas escolhas: estocar, se vacinar no teste, organizar a vizinhança, furar a quarentena...','O jeito que acaba (exército, fome ou caos) muda o começo do apocalipse.']},
@@ -14092,6 +14256,7 @@ function econRun(pol,n){ const res=[];
       try{ if(m.dis.length){ if(m.dis.some(d=>d.k===false)) checkup(); m.dis.slice().forEach(d=>treat(m.age>=18?'doc':'clinica',d)); } }catch(err){}   // um jogador razoável vai ao médico
       try{ econYear(pol); }catch(err){}
       if(m.alive&&m.health<=0) die(causeFromHealth());
+      row.her=(row.her||0); S.log[S.log.length-1].lines.forEach(l=>{ const t=typeof l==='string'?l:l.t; const mm=/Recebi uma herança de \$([\d.]+)/.exec(t||''); if(mm) row.her+=+mm[1].replace(/\./g,''); }); if(m.job) row.sal=(row.sal||0)+jobSalary(m.job);
       if(m.age===45&&m.alive) row.w45=netWorth(); if(m.age===65&&m.alive){ row.w65=netWorth(); row.alive65=true; } if(m.age>65) break; }
     res.push(row); }
   return res; }
@@ -14099,7 +14264,7 @@ const econMed=a=>{ a=a.filter(x=>x!=null).sort((x,y)=>x-y); return a.length?a[Ma
 const econAvg=a=>{ a=a.filter(x=>x!=null); return a.length?Math.round(a.reduce((s,x)=>s+x,0)/a.length):null; };
 function econDiag(n=24,pols){ const out=['ESTRATÉGIA | patrimônio mediano aos 45 | aos 65 | média aos 65 | vivos aos 65'];
   for(const p of pols||Object.keys(ECON_POL)){ const r=econRun(p,n);
-    out.push(`${ECON_POL[p].n} | ${fmt(econMed(r.map(x=>x.w45))||0)} | ${fmt(econMed(r.map(x=>x.w65))||0)} | ${fmt(econAvg(r.map(x=>x.w65))||0)} | ${Math.round(r.filter(x=>x.alive65).length/r.length*100)}%`); }
+    out.push(`${ECON_POL[p].n} | herança média ${fmt(econAvg(r.map(x=>x.her||0))||0)} | salário somado ${fmt(econAvg(r.map(x=>x.sal||0))||0)} | ${fmt(econMed(r.map(x=>x.w45))||0)} | ${fmt(econMed(r.map(x=>x.w65))||0)} | ${fmt(econAvg(r.map(x=>x.w65))||0)} | ${Math.round(r.filter(x=>x.alive65).length/r.length*100)}%`); }
   return out.join('\n'); }
 
 // ===== Teste automático (abre com #teste no endereço) =====
