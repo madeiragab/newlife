@@ -33,7 +33,7 @@ V.paranormal=()=>{ const m=S.me, P=para(), it=[];
   it.push({sec:'Provas'},{ic:'🎬',l:'Publicar as provas',s:'Fama e dinheiro, ou virar piada',on:()=>act(paraPublicar,'Paranormal')});
   if(m.criatura) it.push({sec:'A maldição'},{ic:'🧪',l:'Procurar uma cura',s:`${fmt(40000)} · chance pequena`,on:()=>act(paraCura,'Cura')});
   return {title:'Paranormal',items:it}; };
-V.activities=(o=>()=>{ const r=o(); const m=S.me; if(m.prison||!r||!r.items) return r; r.items.push(Object.assign({ic:'👻',l:'Investigar o paranormal',s:m.criatura?`Sou ${g(CRIATURA[m.criatura][0],m.gender).toLowerCase()}`:'Fantasmas, vampiros e lobisomens',on:()=>UI.push(V.paranormal)},ageGate(14))); return r; })(V.activities);
+V.activities=(o=>()=>{ const r=o(); const m=S.me; if(m.prison||S.scen||!r||!r.items) return r; r.items.push(Object.assign({ic:'👻',l:'Investigar o paranormal',s:m.criatura?`Sou ${g(CRIATURA[m.criatura][0],m.gender).toLowerCase()}`:'Fantasmas, vampiros e lobisomens',on:()=>UI.push(V.paranormal)},ageGate(14))); return r; })(V.activities);
 // ---------- a vida de criatura ----------
 deathRoll=(o=>function(){ const m=S.me; if(m.criatura==='vampiro') return R.chance(.003); return o.apply(this,arguments); })(deathRoll);
 yearMoney=(o=>function(){ const x=o.apply(this,arguments); const m=S.me; try{ if(m.alive&&m.criatura&&!(S.scen)){

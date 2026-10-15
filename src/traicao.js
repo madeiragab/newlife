@@ -10,7 +10,7 @@ function noiteFora(tipo){ const m=S.me, p=partner();
   if(!p&&R.chance(.3)){ return R.pick(['Dancei até os pés doerem e troquei telefone com alguém interessante.','Conheci gente nova na fila do banheiro. A noite rendeu.']); }
   return R.pick(['Dancei como se ninguém estivesse olhando. Todo mundo estava olhando.','Voltei para casa com o sol nascendo e o sapato na mão.','Conversei com um estranho sobre a vida por duas horas. Nunca soube o nome dele.']); }
 function add_bebida(){ const m=S.me; m.add.alcool=clamp((m.add.alcool||0)+2*(1.3-m.will/100)); }
-V.activities=(o=>()=>{ const r=o(); const m=S.me; if(!r||!r.items||m.prison||m.age<16) return r;
+V.activities=(o=>()=>{ const r=o(); const m=S.me; if(!r||!r.items||m.prison||m.age<16||S.scen) return r;
   r.items.push({ic:'🪩',l:'Noite fora',s:'Boate, bar' + (m.age>=18?' ou boate adulta':''),on:()=>UI.push(()=>({title:'Noite fora',items:[
     {html:`<div class="card"><p>Diversão garantida. ${partner()?'Mas quem tem par em casa pode arrumar encrenca.':'Quem sabe você conhece alguém.'}</p></div>`},
     {ic:'🪩',l:'Boate',s:fmt(250),on:()=>act(()=>noiteFora('boate'),'Boate')},

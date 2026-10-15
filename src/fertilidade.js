@@ -21,7 +21,7 @@ EVENTS.barriga_fuga={show:d=>({k:'Família',t:'A mãe de aluguel sumiu',x:`${d.n
     if(k==='c'){ if(R.chance(.55)){ nascer(); st('happy',8); return `Encontrei ${d.n} num hotel de beira de estrada, chorando. Ela tinha medo de se arrepender. Conversamos e ela me entregou o bebê.`; } m.barriga=null; st('happy',-20); return `${d.n} fugiu de novo antes que eu chegasse. Nunca mais soube dela.`; }
     m.barriga=null; st('happy',-15); m.karma=clamp(m.karma+8); return `Deixei ${d.n} ficar com o bebê. Doeu como nada na vida.`; }};
 // no menu do amor
-V.love=(o=>()=>{ const r=o(), m=S.me; if(!r||!r.items||m.age<18) return r;
+V.love=(o=>()=>{ const r=o(), m=S.me; if(!r||!r.items||m.age<18||S.scen) return r;
   r.items.push({sec:'Ter filhos com ajuda'},
     Object.assign({ic:'🧫',l:'Implante de embrião (FIV)',s:`${fmt(18000)} por tentativa · para quem pode engravidar`,on:()=>act(fertFIV,'Clínica de fertilidade')},sexoDe(m)!=='F'?{dis:true,why:'O implante é para quem tem útero. A barriga de aluguel serve para qualquer pessoa.'}:{}),
     {ic:'🤰',l:'Barriga de aluguel',s:`${fmt(70000)} · o bebê nasce no ano seguinte`,on:()=>act(fertBarriga,'Barriga de aluguel')});
