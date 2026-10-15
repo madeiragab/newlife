@@ -26,7 +26,7 @@ function selfTest(){
       S.me.criatura=null;yearHealth();assert(!S.me.dis.some(d=>PN_DOENCAS[d.id]),'doença após cura da maldição');
       S.me.age=12;pn().ativa=false;pnEntrar();assert(!pn().ativa,'menor profissional');S.me.age=25;
       [V.paraProf,V.paraCaso,V.paraBest,V.paraSaude,V.novidades,V.historico(),V.historico(999)].forEach(v=>v().items.map(rowHtml));
-      assert(NL_HISTORICO.some(x=>x.h==='de8e932'),'histórico sem início');
+      assert(nlNotas().some(x=>x.v==='1.0'&&x.body.includes('Primeira versão')),'changelog sem lançamento inicial');
     } finally { R.chance=chance; }
   });
   const views=()=>{

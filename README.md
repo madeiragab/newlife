@@ -117,7 +117,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - Relatório correto paga e aumenta fama. Expulsão pendente paga apenas 40%; erro ou abandono não paga. Ao envelhecer, contratos em andamento são abandonados.
 - O caso em andamento e o bestiário ficam salvos com a vida. Equipamentos têm três melhorias de autonomia.
 - Vampiros e lobisomens podem desenvolver **quatro doenças exclusivas**, tratadas na clínica sobrenatural em Saúde.
-- **Menu → Novidades → Ver histórico desde o início** abre os registros originais do Git, inclusive anteriores ao changelog.
+- **Menu → Novidades** mostra os changelogs completos de todas as versões, com os textos originais dos lançamentos desde a 1.0.
 
 ### 📖 Histórias em cadeia
 - 800 eventos em sequência, em 160 histórias da infância à velhice: cada escolha decide o próximo capítulo e quando ele chega, às vezes anos depois.

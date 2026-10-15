@@ -1,14 +1,17 @@
 // ===== Epidemia zumbi dinâmica: o fim do mundo não tem data marcada =====
 // Quatro forças mudam a cada ano: infecção (espalha), governo (contém, mas cansa), abastecimento e segurança (caem com o caos).
-// O colapso chega quando a infecção domina ou a segurança acaba: pode ser em dois anos ou em sete. As escolhas ajudam o seu lado.
+// O colapso chega quando a infecção domina ou a segurança acaba: a contenção também pode encerrar o surto sem apocalipse.
 const EP_CIDADES=['Manila','Lagos','Bucareste','Lima','Jacarta','Karachi','Daca','Kinshasa'];
 const epBar=e=>`Infecção ${e.inf}% · Governo ${e.gov}% · Abastecimento ${e.sup}% · Segurança ${e.seg}%`;
 function epEvolve(e){ e.anos++;
-  const spread=R.int(14,36)*(1.3-e.gov/100)*(e.vac?.45:1)*(e.anos>3?1.25:1);
-  e.inf=clamp(Math.round(e.inf+spread));
-  e.gov=clamp(e.gov+R.int(-14,5)-(e.inf>60?8:0)+(e.vac?6:0));
-  e.sup=clamp(e.sup-Math.round(e.inf*(.25+R.f()*.35)));
-  e.seg=clamp(e.seg-Math.round(e.inf*.3*(1-e.local/160))+(e.gov>60?6:0)); }
+  const spread=R.int(10,26)*(1.2-e.gov/100)*(e.vac?.45:1);
+  const controle=e.gov*.12+(e.local||0)*.06+(e.vac?10:0);
+  e.inf=clamp(e.inf+spread-controle);
+  e.gov=clamp(e.gov+R.int(-8,8)-(e.inf>60?8:0)+(e.inf<25?4:0)+(e.vac?4:0));
+  e.sup=clamp(e.sup-Math.round(e.inf*(.15+R.f()*.2))+(e.inf<40?8:0));
+  e.seg=clamp(e.seg-Math.round(e.inf*.3*(1-(e.local||0)/160))+(e.gov>60?8:0));
+  e.controle=e.inf<=5&&e.gov>=50?(e.controle||0)+1:0;
+}
 function epManchete(e){ return e.inf<25?R.pick(['Os casos ainda são poucos, mas os hospitais de três países estão lotados.','A OMS fala em "situação sob controle". Ninguém acredita muito.'])
   :e.inf<55?R.pick(['Primeiros casos confirmados no país. O governo fechou as fronteiras.','Escolas fechadas. Um vídeo de um "morto que levantou" foi apagado das redes em minutos.'])
   :e.inf<80?R.pick(['Bairros inteiros isolados pelo exército. Os mercados racionam arroz e água.','O noticiário parou de mostrar números. Só pede calma.'])
@@ -17,7 +20,12 @@ function epStep(pr){ const m=S.me, b=pr.b, adv=()=>{ pr.fase++; };
   const e=pr.ep||(pr.ep={inf:R.int(3,14),gov:R.int(35,85),sup:100,seg:100,anos:0,local:0,vac:0,cidade:R.pick(EP_CIDADES)});
   if(pr.fase>0) epEvolve(e);
   const Q=(t,x,ch)=>MQ.push({k:SCEN.zumbi.n,t:prT(t),x:prT(x)+'\n\n'+epBar(e),ch:ch.filter(Boolean)});
-  const colapso=e.inf>=92||e.seg<=15||e.anos>=7;
+  if(e.controle>=2){
+    log('A epidemia foi contida. Os hospitais esvaziaram e a cidade começou a voltar ao normal.','good');
+    prolCancel(); st('happy',10);
+    return Q('O surto foi contido','Dois anos com poucos casos e uma resposta de saúde firme impediram o colapso. A vida normal continua.',[{l:'Seguir em frente',fn:()=>{}}]);
+  }
+  const colapso=e.inf>=92||e.seg<=15;
   if(colapso){ pr.fim=e.gov>=55?'militar':e.sup<=10?'fome':'caos';
     const txt={militar:'O exército não conseguiu mais segurar. Os helicópteros passam levando só quem consegue chegar à zona verde. O resto está por conta própria.',
       fome:'Não sobrou comida em lugar nenhum. A cidade parou de vez, e os mortos agora são mais numerosos que os vivos.',
@@ -44,13 +52,13 @@ function epStep(pr){ const m=S.me, b=pr.b, adv=()=>{ pr.fase++; };
   if(e.inf<45) return Q('O mundo em alerta',`${epManchete(e)} Ainda dá para se preparar.`,[
       prolPago(1800,{l:'Estocar comida e água',fn:()=>{ adv(); b.com=(b.com||0)+4; b.agua=(b.agua||0)+3; m.money-=1800; }}),
       {l:'Fazer aulas de defesa pessoal',fn:()=>{ adv(); m.fight=clamp((m.fight||0)+8); }},
-      {l:'Ajudar no hospital como voluntári{o}',fn:()=>{ adv(); b.med=1; m.karma=clamp(m.karma+5); if(R.chance(.2)) st('health',-6); }},
+      {l:'Ajudar no hospital como voluntári{o}',fn:()=>{ adv(); b.med=1; e.gov=clamp(e.gov+8); e.inf=clamp(e.inf-3); m.karma=clamp(m.karma+5); if(R.chance(.2)) st('health',-6); }},
       {l:'Seguir a vida normal',fn:()=>{ adv(); st('happy',3); }}]);
   if(e.inf<75) return Q('Quarentena',`${epManchete(e)} O governo decretou quarentena.`,[
-      {l:'Obedecer a quarentena',fn:()=>{ adv(); st('happy',-4); e.local=Math.min(100,e.local+10); }},
+      {l:'Obedecer a quarentena',fn:()=>{ adv(); st('happy',-4); e.local=Math.min(100,e.local+10); e.inf=clamp(e.inf-5); }},
       prolPago(4500,{l:'Comprar uma arma "por precaução"',fn:()=>{ adv(); b.arma=1; m.money-=4500; }}),
       prolPago(3000,{l:'Reforçar portas e janelas de casa',fn:()=>{ adv(); b.forte=1; m.money-=3000; }}),
-      {l:'Furar a quarentena para trabalhar',fn:()=>{ adv(); m.money+=2500; if(R.chance(.3)) st('health',-10); }}]);
+      {l:'Furar a quarentena para trabalhar',fn:()=>{ adv(); m.money+=2500; e.inf=clamp(e.inf+6); if(R.chance(.3)) st('health',-10); }}]);
   return Q('A cidade desmorona',`${epManchete(e)} Os saques começaram.`,[
       {l:'Montar uma patrulha com os vizinhos',fn:()=>{ adv(); e.local=Math.min(100,e.local+30); b.viz=1; }},
       prolPago(1500,{l:'Comprar o que sobrou no mercado',fn:()=>{ adv(); b.com=(b.com||0)+3; m.money-=1500; }}),
