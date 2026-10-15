@@ -153,8 +153,8 @@ scTok=(o=>function(tok,d,out){ const sc=S.scen; let mm; if(!sc||sc.id!=='heroi')
   if(tok==='famhurt'){ if(p) out.push(famHurt(p,rnd(25,45))); return true; }
   if(tok==='famdie'){ if(p) out.push(famDie(p,`por causa de ${sc.inimigo}`)); return true; }
   if(tok==='esc'){ if(p) p.esc=sc.dia+1; return true; }
-  if(tok==='rnoivo'){ if(p&&p.rel==='namoro'){ p.rel='noivo'; p.bond=clamp(p.bond+10); out.push(`Estou noiv${oa()} de ${p.first}!`); } return true; }
-  if(tok==='rcasar'){ if(p&&['namoro','noivo'].includes(p.rel)){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } return true; }
+  if(tok==='rnoivo'){ if(p&&p.rel==='namoro'&&polyPodeOficializar(p)){ p.rel='noivo'; p.bond=clamp(p.bond+10); out.push(`Estou noiv${oa()} de ${p.first}!`); } return true; }
+  if(tok==='rcasar'){ if(p&&['namoro','noivo'].includes(p.rel)&&polyPodeOficializar(p)){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } return true; }
   if(tok==='rgrav'){ if(p&&!sc.rgrav&&p.gender!==m.gender&&(m.gender==='F'?m:p).age<=46){ sc.rgrav={pid:p.id,due:sc.dia+1}; out.push(m.gender==='F'?'Estou grávida!':`${p.first} está grávida!`); } return true; }
   if(tok==='hcrew'){ const c=mkCrew(); out.push(`${c.first} agora patrulha comigo.`); return true; }
   return o(tok,d,out); })(scTok);

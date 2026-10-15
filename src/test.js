@@ -29,6 +29,7 @@ function selfTest(){
       assert(nlNotas().some(x=>x.v==='1.0'&&x.body.includes('Primeira versão')),'changelog sem lançamento inicial');
     } finally { R.chance=chance; }
   });
+  T('poligamia consentida',polySelfTest);
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
@@ -335,4 +336,30 @@ function qualityReport(){
   out.push('\nIDADES: eventos com faixa de idade suspeita (<10 ou >85):'); Object.entries(evAge).filter(([k,a])=>a.min<10&&a.max>30).forEach(([k,a])=>out.push(`  ${k} ${a.t} ${a.min}-${a.max}`));
   const o=document.createElement('pre'); o.id='out'; o.textContent=out.join('\n'); o.style.cssText='position:fixed;inset:0;z-index:999;background:#fff;color:#000;overflow:auto;padding:10px;font-size:11px;white-space:pre-wrap';
   document.body.appendChild(o); document.title='QUALIDADE OK';
+}
+
+// Regressão curta: consentimento unânime, novas rodadas e persistência.
+function polySelfTest(){
+  const antigo=S,chance=R.chance,noSave=window.NO_SAVE; window.NO_SAVE=true;
+  const ok=(v,t)=>{ if(!v) throw Error(t); };
+  try{
+    newLife({});S.me.age=30;S.me.money=1000000;S.me.pref='A';S.scen=null;
+    let a=mkPerson({rel:'noivo',age:30,bond:90}),b=mkPerson({rel:'amigo',age:29,bond:90});S.people.push(a,b);
+    R.chance=()=>true;interact(a,'casar',[800,false]);ok(a.rel==='conjuge','primeiro casamento');
+    R.chance=()=>false;polyPropor(a);R.chance=()=>true;polyPropor(a);interact(b,'flertar');ok(b.rel==='amigo','recusa deve impedir namoro e insistência');
+    S.year++;polyPropor(a);ok(polyUnanime(),'primeira autorização');
+    R.chance=()=>false;interact(b,'flertar');ok(b.rel==='amigo','nova pessoa pode recusar');R.chance=()=>true;interact(b,'flertar');ok(b.rel==='amigo','recusa da nova pessoa deve persistir');
+    S.year++;const amorA=a.bond,traicoes=S.me.c.cheats||0;interact(b,'flertar');ok(b.rel==='namoro'&&polyGrupo(),'segundo namoro consentido');ok(a.bond===amorA&&(S.me.c.cheats||0)===traicoes,'acordo não é traição');
+    interact(b,'pedido',[500]);interact(b,'casar',[800,false]);ok(people('conjuge').length===2,'segundo casamento');ok(!polyUnanime(),'autorização deve ser consumida');
+    const c=candidate(false);c.age=30;ok(!askOut(c).ok,'terceira pessoa sem nova rodada');polyPropor(a);ok(!polyUnanime(),'um sim não basta');
+    R.chance=()=>false;polyPropor(b);R.chance=()=>true;ok(!askOut(c).ok,'uma recusa bloqueia terceira pessoa');
+    S=JSON.parse(JSON.stringify(S));a=P(a.id);b=P(b.id);ok(polyRodada().votos[b.id]===false,'recusa perdida no save');
+    S.year++;polyPropor(b);ok(polyUnanime(),'dois consentimentos');ok(askOut(c).ok&&polyAmores().length===3,'terceiro namoro');
+    interact(c,'pedido',[500]);interact(c,'casar',[800,false]);ok(people('conjuge').length===3,'terceiro casamento');
+    polyPropor(a);polyPropor(b);ok(!polyUnanime(),'terceiro parceiro também precisa aceitar');polyPropor(c);ok(polyUnanime(),'três consentimentos');
+    divorce(b,false);ok(!polyUnanime()&&polyAmores().length===2&&polyGrupo(),'divórcio invalida rodada e preserva acordos restantes');
+    ok(polyChance({id:1,bond:80,polyPerfil:{abertura:100,ciume:0}})>polyChance({id:2,bond:80,polyPerfil:{abertura:0,ciume:100}}),'personalidade não influencia');
+    V.poly().items.map(rowHtml);V.person(a).items.map(rowHtml);
+    return 'PASSOU: recusa, personalidade, save, 2 e 3 casamentos, unanimidade renovada, sem punição de traição e divórcio.';
+  }finally{ S=antigo;R.chance=chance;window.NO_SAVE=noSave; }
 }

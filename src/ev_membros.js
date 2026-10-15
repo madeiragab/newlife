@@ -19,7 +19,7 @@ yearMoney=(o=>function(){ const r=o.apply(this,arguments); try{ grpAuto(); }catc
 // tokens: pamigo pnamoro pinimigo psai (o {p}) · glv±n gsai gmorre gcrew (o morador {mor})
 extTok=(o=>function(tok,d,out){ const m=S.me, p=d&&typeof d.pid==='number'?P(d.pid):null; let mm;
   if(tok==='pamigo'){ if(p&&p.alive&&p.rel!=='amigo'){ if(p.rel==='colega') p.fromTurma=1; if(p.rel==='colegaT') p.fromJob=1; p.rel='amigo'; p.bond=clamp(p.bond+10); out.push(`${p.first} agora é ${p.gender==='F'?'minha amiga':'meu amigo'}.`); } return true; }
-  if(tok==='pnamoro'){ if(p&&p.alive&&m.age>=16&&p.age>=16){ if(partner()&&partner()!==p){ p.bond=clamp(p.bond+8); out.push('Mas eu já tenho alguém. Ficou no ar.'); } else { p.rel='namoro'; p.bond=clamp(p.bond+15); cnt('partners'); log(`Comecei a namorar ${fullName(p)}.`,'good'); out.push(`Estou namorando ${p.first}!`); } } return true; }
+  if(tok==='pnamoro'){ if(p&&p.alive&&m.age>=16&&p.age>=16){ const erro=polyNamorar(p); if(erro){ out.push(erro); } else { p.bond=clamp(p.bond+15); cnt('partners'); log(`Comecei a namorar ${fullName(p)}.`,'good'); out.push(`Estou namorando ${p.first}!`); } } return true; }
   if(tok==='pinimigo'){ if(p&&p.alive){ p.rel='inimigo'; p.bond=clamp(p.bond-20); out.push(`${p.first} virou ${p.gender==='F'?'minha inimiga':'meu inimigo'}.`); } return true; }
   if(tok==='psai'){ if(p&&p.alive&&['equipe','colegaT','colega','prof','chefe'].includes(p.rel)){ p.alive=false; out.push(`${p.first} saiu.`); } return true; }
   const sc=S.scen, L=sc&&d&&d.gkey&&sc.pp?sc.pp[d.gkey]:null, gp=L?L.find(x=>x.id===d.gid):null;

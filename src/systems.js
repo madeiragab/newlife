@@ -253,11 +253,13 @@ function candidate(app){
   return p;
 }
 function askOut(p){
+  const erro=polyEntrada(p); if(erro) return {ok:false,t:erro};
+  const anteriores=polyAmores();
   const m=S.me; const diff=(m.looks-p.looks)/120+(m.fame/300)+(m.money>200000?.08:0)+(m.age>=18?(m.job?.06:-.06):0);
   if(!R.chance(clamp((.42+diff)*100,5,95)/100)){ st('happy',-3); return {ok:false,t:R.pick([`${p.first} disse que não está procurando nada agora.`,`${p.first} riu e foi embora.`,`${p.first} me deu um número de telefone falso.`,`${p.first} disse que me vê só como amig${oa()}.`])}; }
   const cur=partner();
   p.rel='namoro'; S.people.push(p); cnt('partners'); st('happy',8);
-  if(cur){ cnt('cheats'); if(R.chance(.4)){ cur.bond=clamp(cur.bond-45); return {ok:true,t:`${p.first} topou. Mas ${cur.first} descobriu que estou saindo com outra pessoa!`}; } }
+  polyRegistrar(p,anteriores);
   log(`Comecei a namorar ${fullName(p)}.`,'good');
   return {ok:true,t:`${p.first} topou! Estamos namorando.`};
 }
@@ -291,9 +293,9 @@ function interact(p,k,extra){
     case 'piada': if(R.chance(.6)){ p.bond=clamp(p.bond+R.int(1,5)); return `${nm} riu muito da minha piada.`; } p.bond=clamp(p.bond-2); return `${nm} não achou graça nenhuma.`;
     case 'pegadinha': if(R.chance(.5)){ p.bond=clamp(p.bond+3); return `${nm} caiu na pegadinha e riu.`; } p.bond=clamp(p.bond-8); return `${nm} ficou furios${a} com a pegadinha.`;
     case 'amizade': if(R.chance(Math.min(.95,.08+frOf(p)/100*.9))){ p.fr=clamp(frOf(p)+8); p.rel='amigo'; p.bond=clamp(p.bond+10); return `Agora ${nm} é ${p.gender==='F'?'minha amiga':'meu amigo'}!`; } p.bond=clamp(p.bond-3); return `${nm} não deu muita bola.`;
-    case 'flertar': { const okPref=m.pref==='A'||m.pref===p.gender; if(!okPref) return `Não sinto atração por ${nm}.`; if(R.chance(clamp(p.bond*.5+(m.looks-p.looks)/2+20,5,90)/100)){ const cur=partner(); p.rel='namoro'; p.bond=clamp(p.bond+15); cnt('partners'); if(cur){ cnt('cheats'); if(R.chance(.4)) cur.bond=clamp(cur.bond-40); } return `Rolou um clima. ${nm} e eu estamos ficando sério!`; } p.bond=clamp(p.bond-6); return `${nm} me deu um fora.`; }
+    case 'flertar': { const okPref=m.pref==='A'||m.pref===p.gender; if(!okPref) return `Não sinto atração por ${nm}.`; if(R.chance(clamp(p.bond*.5+(m.looks-p.looks)/2+20,5,90)/100)){ const cur=partner(); p.rel='namoro'; p.bond=clamp(p.bond+15); cnt('partners'); if(cur&&!p.polyConvite?.ok){ cnt('cheats'); if(R.chance(.4)) cur.bond=clamp(cur.bond-40); } return `Rolou um clima. ${nm} e eu estamos ficando sério!`; } p.bond=clamp(p.bond-6); return `${nm} me deu um fora.`; }
     case 'pedido': { const [c]=extra; if(!canPay(c)) return 'Não tenho dinheiro para esse anel.'; m.money-=c; if(R.chance(clamp(p.bond+c/1000-30,5,97)/100)){ p.rel='noivo'; p.bond=clamp(p.bond+10); st('happy',15); log(`Fiquei ${m.gender==='F'?'noiva':'noivo'} de ${nm}.`,'good'); return `${nm} disse SIM!`; } p.bond=clamp(p.bond-20); st('happy',-12); return `${nm} disse que não está pront${a}.`; }
-    case 'casar': { const outro=people('conjuge').find(x=>x.id!==p.id); if(outro) return `Já sou casad${oa()} com ${outro.first}. Preciso me divorciar antes de casar de novo.`; if(p.rel!=='noivo') return 'Preciso estar noivo dessa pessoa antes da cerimônia.'; const [c,prenup]=extra; if(!canPay(c)) return 'Não tenho dinheiro para essa festa.'; m.money-=c; if(prenup){ S.flags['prenup'+p.id]=1; if(R.chance(.3)){ p.bond=clamp(p.bond-25); return `${nm} se ofendeu com o pacto antenupcial e adiou o casamento.`; } } p.rel='conjuge'; p.yrs=0; cnt('marriages'); st('happy',20); S.flags.movedOut=1; log(`Casei com ${fullName(p)}!`,'good'); return `Casei com ${nm}! ${c>30000?'A festa foi inesquecível.':''}`; }
+    case 'casar': { const outro=people('conjuge').find(x=>x.id!==p.id); if(outro&&!polyPodeOficializar(p)) return `Já sou casad${oa()} com ${outro.first}. Preciso do consentimento de todos antes de casar de novo.`; if(p.rel!=='noivo') return 'Preciso estar noivo dessa pessoa antes da cerimônia.'; const [c,prenup]=extra; if(!canPay(c)) return 'Não tenho dinheiro para essa festa.'; m.money-=c; if(prenup){ S.flags['prenup'+p.id]=1; if(R.chance(.3)){ p.bond=clamp(p.bond-25); return `${nm} se ofendeu com o pacto antenupcial e adiou o casamento.`; } } p.rel='conjuge'; p.yrs=0; cnt('marriages'); st('happy',20); S.flags.movedOut=1; log(`Casei com ${fullName(p)}!`,'good'); return `Casei com ${nm}! ${c>30000?'A festa foi inesquecível.':''}`; }
     case 'terminar': p.rel='ex'; st('happy',-8); log(`Terminei com ${nm}.`); return `Terminei com ${nm}.`;
     case 'divorcio': divorce(p,false); return `Me divorciei de ${nm}.`;
     case 'amor': { if(m.age<18||p.age<18) return 'Isso é coisa de adulto.'; if(tired) return `${nm} e eu já aproveitamos bastante este ano.`; const prot=!!extra; cnt('amor'); p.bond=clamp(p.bond+R.int(5,12)); st('happy',R.int(6,12)); primeiraVez(fullName(p));

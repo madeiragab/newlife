@@ -77,6 +77,13 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - Selo **Minha primeira vez**, ganho na hora (a partir dos 18 anos), com o nome da pessoa e a idade.
 - **Fazer amor** com quem você namora ou é casado (a partir dos 18): dá felicidade e, sem proteção, pode vir um bebê.
 
+### 💞 Namoros e casamentos plurais
+- Em **Amor → Relação com mais pessoas**, ou na ficha de um parceiro adulto, proponha incluir mais uma pessoa.
+- Cada parceiro responde conforme abertura, ciúme e vínculo. **Todos precisam aceitar**, e a pessoa nova também pode recusar.
+- Cada rodada libera uma inclusão. Com dois parceiros, os dois precisam aceitar antes de incluir o terceiro, e assim por diante.
+- Uma recusa impede a inclusão; só é possível retomar a conversa no próximo ano. Acordos e respostas ficam salvos.
+- Relacionamentos consentidos podem virar noivados e casamentos, sem punição automática de traição. Casos secretos continuam separados desses acordos.
+
 ### 🥋 Lutas e brigas
 - **9 artes marciais** (Judô, Jiu-jítsu, Karatê, Muay thai, Boxe, Taekwondo, Capoeira, Kung fu, Krav maga) com faixas, uma por ano, e um **golpe especial** na última.
 - **Briga por turnos**: você escolhe os golpes; alguns podem matar, e às vezes você bate para apagar e mata sem querer.

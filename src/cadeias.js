@@ -32,10 +32,15 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
   const out=[]; let next=null, delay=null;
   b0.own.concat(br.own).forEach(t=>{ let mm;
     if(mm=t.match(/^>(\w+)(?:@(\d+)(?:-(\d+))?)?$/)){ next=mm[1]; if(mm[2]!=null) delay=mm[3]!=null?R.int(+mm[2],+mm[3]):+mm[2]; }
-    else if(mm=t.match(/^vira:(\w+)$/)){ if(!d.pid||!P(d.pid)){ const p=meetP(d,mm[1],'n'); if(p){ d.pid=p.id; if(mm[1]==='irmao'&&p.age<3) p.last=m.last; } } else { const p=P(d.pid); if(p&&p.rel!==mm[1]&&!['mae','pai','irmao','filho','conjuge'].includes(p.rel)) p.rel=mm[1]==='namoro'&&partner()&&partner()!==p?'amigo':mm[1]; } }
+    else if(mm=t.match(/^vira:(\w+)$/)){
+      let p=d.pid&&P(d.pid); if(!p){ p=meetP(d,mm[1]==='namoro'?'amigo':mm[1],'n'); if(p){ d.pid=p.id; if(mm[1]==='irmao'&&p.age<3) p.last=m.last; } }
+      if(p&&p.rel!==mm[1]&&!['mae','pai','irmao','filho','conjuge'].includes(p.rel)){
+        if(mm[1]==='namoro'){ const erro=polyNamorar(p); if(erro) out.push(erro); } else { if(polyAmores().includes(p)) polyLimpar(p); p.rel=mm[1]; }
+      }
+    }
     else if(mm=t.match(/^\+cad:(\w+)$/)){ cadStart(mm[1],true); }
     else if(mm=t.match(/^emprego:(\w+)$/)){ const j=JOBS.find(x=>x.id===mm[1]); if(j&&!(m.job&&m.job.id===j.id)&&m.age>=16){ takeJob({id:j.id,co:companyName(),size:'média',mul:1}); out.push(`Agora sou ${jobTitle(m.job).toLowerCase()}.`); } }
-    else if(t==='noivar'||t==='casar'){ const p=d.pid&&P(d.pid); if(p&&p.alive&&['namoro','noivo'].includes(p.rel)&&(!partner()||partner()===p)){ if(t==='noivar'&&p.rel==='namoro'){ p.rel='noivo'; out.push(`Estou noiv${oa()} de ${p.first}!`); } else if(t==='casar'){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } } }
+    else if(t==='noivar'||t==='casar'){ const p=d.pid&&P(d.pid); if(p&&p.alive&&['namoro','noivo'].includes(p.rel)&&polyPodeOficializar(p)){ if(t==='noivar'&&p.rel==='namoro'){ p.rel='noivo'; out.push(`Estou noiv${oa()} de ${p.first}!`); } else if(t==='casar'){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } } }
     else if(t==='separar'){ const pp=partner(); if(pp){ if(pp.rel==='conjuge') divorce(pp,true); else { pp.rel='ex'; m.happy=clamp(m.happy-15); log(`${pp.first} terminou comigo.`,'bad'); } out.push(`${pp.first} foi embora.`); } }
     else if(mm=t.match(/^pbond([+-]\d+)$/)){ const pp=partner(); if(pp) pp.bond=clamp(pp.bond+ +mm[1]); }
     else if(mm=t.match(/^fome([+-]\d+)$/)){ if(m.criatura) m.fomeP=clamp((m.fomeP||0)+ +mm[1]); }

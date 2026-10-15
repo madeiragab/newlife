@@ -285,8 +285,8 @@ ev('papel_polemico',{k:'Cinema',min:16,cd:8,when:m=>m.job&&m.job.spc==='ator',t:
  ['Aceitar',{p:.5,y:{f:10,t:'Fui aclamad{o} pela crítica.'},n:{f:3,h:-6,t:'Recebi ameaças nas redes.'}}],
  ['Recusar',{t:'Prefiro papéis mais leves.'}]]});
 ev('casamento_real',{k:'Realeza',min:18,cd:20,when:m=>m.royal&&!m.royal.abd&&people('noivo').length,prep:m=>{ const p=people('noivo')[0]; return {pid:p.id,n:p.first,nl:p.last,nG:p.gender}; },t:'Casamento real',x:'O reino inteiro aguarda meu casamento com {n}.',ch:[
- ['Cerimônia de gala transmitida para o mundo',{h:20,f:10,fn:(m,d)=>{ const p=P(d.pid); p.rel='conjuge'; p.yrs=0; cnt('marriages'); m.royal.pop=clamp(m.royal.pop+15); return `Casei com ${p.first} diante de 2 bilhões de pessoas.`; }}],
- ['Cerimônia íntima',{h:12,fn:(m,d)=>{ const p=P(d.pid); p.rel='conjuge'; p.yrs=0; cnt('marriages'); m.royal.pop=clamp(m.royal.pop-5); return `Casei com ${p.first} em segredo. O povo ficou decepcionado.`; }}]]});
+ ['Cerimônia de gala transmitida para o mundo',{h:20,f:10,fn:(m,d)=>{ const p=P(d.pid); if(!polyPodeOficializar(p)) return 'A cerimônia foi adiada: falta o consentimento dos meus parceiros.'; p.rel='conjuge'; p.yrs=0; cnt('marriages'); m.royal.pop=clamp(m.royal.pop+15); return `Casei com ${p.first} diante de 2 bilhões de pessoas.`; }}],
+ ['Cerimônia íntima',{h:12,fn:(m,d)=>{ const p=P(d.pid); if(!polyPodeOficializar(p)) return 'A cerimônia foi adiada: falta o consentimento dos meus parceiros.'; p.rel='conjuge'; p.yrs=0; cnt('marriages'); m.royal.pop=clamp(m.royal.pop-5); return `Casei com ${p.first} em segredo. O povo ficou decepcionado.`; }}]]});
 ev('tabloide_real',{k:'Realeza',min:14,cd:6,when:m=>m.royal&&!m.royal.abd,t:'Escândalo no palácio',x:'Um tabloide publicou fotos minhas {situacao}.',prep:()=>({situacao:R.pick(['numa festa às 4h da manhã','de biquíni num iate','dormindo numa reunião oficial','comendo cachorro-quente na rua'])}),ch:[
  ['Emitir nota oficial',{fn:m=>{ m.royal.pop=clamp(m.royal.pop-3); return 'A nota acalmou os ânimos.'; }}],
  ['Assumir com bom humor',{fn:m=>{ m.royal.pop=clamp(m.royal.pop+R.int(-5,10)); return 'Metade do reino achou charmoso.'; }}],
