@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610151824'</script>
+<title>NewLife</title><script>window.NL_VER='2610151831'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -8902,7 +8902,7 @@ function cadReg(id,sid,st){ const [title,text,choices,so={}]=st;
     pick:(key,d)=>cadPick(id,sid,choices[+key],d)};
 }
 // separa os efeitos próprios das cadeias (>etapa, vira:, +cad:) dos efeitos normais do pack
-function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$|separar$|pbond[+-]\d+$|caso[+-]$|curar$|morder$|virar:\w+$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
+function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$|separar$|pbond[+-]\d+$|caso[+-]$|curar$|morder$|fome[+-]\d+$|virar:\w+$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
 function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me; const d=c?c.d:dPend;
   const parts=choice.split('|'); let fx1=parts[1]||'', t1=parts[2]||'', fx2=parts[3], t2=parts[4];
   const toks=fx1.trim().split(/\s+/); let chance=null, base='';
@@ -8920,6 +8920,7 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
     else if(t==='noivar'||t==='casar'){ const p=d.pid&&P(d.pid); if(p&&p.alive&&['namoro','noivo'].includes(p.rel)&&(!partner()||partner()===p)){ if(t==='noivar'&&p.rel==='namoro'){ p.rel='noivo'; out.push(`Estou noiv${oa()} de ${p.first}!`); } else if(t==='casar'){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } } }
     else if(t==='separar'){ const pp=partner(); if(pp){ if(pp.rel==='conjuge') divorce(pp,true); else { pp.rel='ex'; m.happy=clamp(m.happy-15); log(`${pp.first} terminou comigo.`,'bad'); } out.push(`${pp.first} foi embora.`); } }
     else if(mm=t.match(/^pbond([+-]\d+)$/)){ const pp=partner(); if(pp) pp.bond=clamp(pp.bond+ +mm[1]); }
+    else if(mm=t.match(/^fome([+-]\d+)$/)){ if(m.criatura) m.fomeP=clamp((m.fomeP||0)+ +mm[1]); }
     else if(t==='curar'){ if(m.criatura){ const tp0=m.criatura; m.criatura=null; m.fomeP=0; log(`Deixei de ser ${g(CRIATURA[tp0][0],m.gender).toLowerCase()}.`,'good'); } }
     else if(t==='morder'){ const pp=d.pid&&P(d.pid); if(pp&&m.criatura){ pp.criatura=m.criatura; out.push(`${pp.first} agora também carrega a maldição.`); } }
     else if(mm=t.match(/^virar:(\w+)$/)){ if(typeof virar==='function'&&!m.criatura&&CRIATURA[mm[1]]) out.push(virar(mm[1]).trim()); }
@@ -10868,6 +10869,213 @@ chain('casa_vizinha_vazia',{k:'Assombração',min:10,max:85,when:LIVRE,w:.35,gap
  b:['Sem energia','Mesmo sem energia, a luz acendeu de novo às oito.',['Entrar na casa|>c|A porta dos fundos estava destrancada.','Esquecer|>d@1|Fingir que não é comigo.']],
  c:['O jantar','Na cozinha, uma carta em cima da mesa: "Para quando você voltar."',['Ler a carta|>d|Uma esposa esperando o marido que nunca voltou da guerra.','Deixar onde estava|k+2 >d|Não é minha para ler.']],
  d:['O marido','Descobri que o marido morreu num hospital da cidade vizinha, sem que ela soubesse.',['Levar a notícia ao túmulo dela|k+8 h+6|Naquela noite, a luz da cozinha não acendeu.','Contar aos vizinhos|f+1 h+3|A rua inteira passou a deixar flores na porta.']],
+});
+
+// ===== Histórias em cadeia: a vida de vampiro (1) =====
+const VAMP=CRI('vampiro');
+chain('vamp_noite',{k:'Vampiro',min:16,max:200,when:VAMP,gap:[1,1]},{
+ a:['Viver de noite','O sol queima a minha pele. Preciso reorganizar a vida inteira para a noite.',['Arrumar um trabalho noturno|>b|Segurança, plantão, padaria de madrugada.','Fingir uma doença de pele|>c|"Fotossensibilidade grave", disse o atestado falso.']],
+ b:['O plantão','Trabalhar de madrugada é perfeito: pouca gente, muita escuridão.',['Fazer o melhor trabalho noturno da cidade|perf+10 $+3000 >d|O chefe nunca viu ninguém tão disposto às três da manhã.','Usar o plantão para caçar|fome-30 k-5 >e|Ninguém percebe quem some de madrugada.']],
+ c:['A doença inventada','A família acreditou na doença. Mas querem me levar a um especialista.',['Ir ao especialista|?40 >d|Hipnotizei o médico. Ele assinou o laudo que eu quis.|>e|O médico estranhou meu sangue.','Fugir das consultas|h-3 >d|Desculpa atrás de desculpa.']],
+ d:['A rotina','A vida noturna encontrou seu ritmo.',['Fazer amigos noturnos|h+6 >f|Taxistas, enfermeiras, padeiros: a cidade que ninguém vê.','Ficar sozinh{o}|h-4 >f|A noite é longa.']],
+ e:['Desconfiança','Alguém começou a reparar que eu nunca apareço de dia.',['Inventar um álibi diurno|?sm >d|Mandei fotos antigas de praia. Colou.|>f|O álibi não colou.','Mudar de cidade|$-4000 >d|Recomeço noturno.']],
+ f:['Anos depois','Os anos passam e o espelho continua vazio.',['Aceitar a noite|h+6|A lua virou meu sol.','Sentir saudade do sol|h-6|Às vezes vejo o amanhecer pela janela, pelas frestas, e choro.']],
+});
+chain('vamp_doador',{k:'Vampiro',min:18,max:200,when:VAMP,npc:1,gap:[1,1]},{
+ a:['Alguém que entende','{p}, que conheci num bar, percebeu o que eu sou. Não fugiu. Ofereceu o próprio sangue.',['Aceitar|fome-50 vira:amigo >b|Bebi pouco, com cuidado. {p} sorriu.','Recusar|k+3 >e@1|Não quero transformar alguém em refeição.']],
+ b:['O acordo','{p} quer ser meu doador fixo. Em troca, quer saber como é a eternidade.',['Contar histórias da noite|bond+10 >c|{p} ouve tudo fascinad{o2}.','Pagar pelo sangue|$-2000 fome-30 >c|Negócio é negócio.']],
+ c:['O vício','{p} começou a se viciar na mordida. Pede mais do que deveria dar.',['Diminuir as mordidas|k+5 bond-5 >d|{p} ficou irritad{o2}, mas mais saudável.','Continuar|fome-40 k-5 >f|{p} está cada vez mais pálid{o2}.']],
+ d:['O pedido','{p} quer ser transformad{o2}.',['Transformar|morder k-3 bond+15|Agora {p} é como eu. Uma companhia para a eternidade.','Recusar|bond-15 >e|{p} saiu chorando.']],
+ e:['A falta','Sem doador, a sede volta a apertar.',['Procurar outro jeito|fome+20 >g|Mercado negro, animais, hospitais.','Voltar a procurar {p}|>b@1|Talvez ainda dê.']],
+ f:['O desmaio','{p} desmaiou depois de uma mordida. Precisei levar ao hospital.',['Ficar no hospital até {ele} acordar|k+6 bond+10 >d|Prometi nunca mais exagerar.','Ir embora antes que perguntem|k-8 >e|{p} nunca mais me procurou.']],
+ g:['Outras fontes','Aprendi a me virar sem ninguém.',['Comprar sangue no mercado negro|$-3000 fome-40|Caro, mas seguro.','Caçar animais na mata|fome-25 h-2|Funciona. Mais ou menos.']],
+});
+chain('vamp_ancestral',{k:'Vampiro',min:18,max:200,when:VAMP,npc:1,age:[200,300],gap:[1,1]},{
+ a:['O mais velho','Um vampiro de quatrocentos anos, {p}, mandou me chamar. Diz que a cidade é território d{ele}.',['Ir ao encontro|>b|Um porão de mármore, velas e um cheiro de séculos.','Ignorar o chamado|>e|Ninguém ignora {p}.']],
+ b:['A oferta','{p} propõe proteção em troca de lealdade e de uma parte de tudo o que eu caçar.',['Aceitar|vira:amigo fome-20 >c|Agora sou súdit{o} de um vampiro ancião.','Recusar|vira:inimigo >e|{p} não gostou nada.']],
+ c:['As lições','{p} me ensinou a hipnotizar com o olhar e a me mover sem fazer barulho.',['Aprender tudo|fight+6 sm+3 >d|Aprendi a dominar a noite.','Desconfiar das lições|>d|Por que tanta generosidade?']],
+ d:['O preço','{p} pediu que eu elimine um caçador que está chegando perto d{ele}.',['Obedecer|?fight k-8 bond+15 >f|O caçador não vai mais incomodar.|hl-25 >f|O caçador era bom. Escapei por pouco.','Avisar o caçador para fugir|k+8 bond-20 >e|O caçador fugiu. {p} percebeu.']],
+ e:['A ira do ancião','{p} declarou guerra a mim. Três vampiros me esperam toda noite.',['Lutar|?fight f+0 >f|Venci os três. {p} me respeita agora, de longe.|hl-30 >g|Fui derrotad{o} e humilhad{o}.','Fugir da cidade|$-6000 h-4|Cidade nova, território livre.']],
+ f:['O herdeiro','{p} disse que está cansado da eternidade e quer que eu herde o território.',['Aceitar|f+0 h+10 k-2|A cidade agora é minha à noite.','Recusar|h+3|Liderar a noite não é para mim.']],
+ g:['Cicatrizes','A derrota deixou marcas que nem o sangue cura.',['Treinar para a revanche|fight+8 >e@2|Um dia volto.','Viver discretamente|h-2|Sumir é a melhor proteção.']],
+});
+chain('vamp_espelho',{k:'Vampiro',min:30,max:200,when:VAMP,gap:[2,3]},{
+ a:['Sem envelhecer','Meus amigos estão ficando grisalhos. Eu continuo igual ao dia da mordida.',['Usar maquiagem para parecer mais velh{o}|h-2 >b|Pó, rugas pintadas e um pouco de cinza no cabelo.','Dizer que é genética|>c|"Lá em casa ninguém envelhece."']],
+ b:['A farsa','A maquiagem funciona de longe. De perto, nem tanto.',['Manter a farsa|>d|Mais um ano de pó nas têmporas.','Contar a verdade para os mais próximos|>e|Escolhi três pessoas de confiança.']],
+ c:['As perguntas','Pessoas na rua começaram a perguntar meu segredo de juventude.',['Inventar um creme milagroso|$+5000 f+3 >d|Vendi um creme de farmácia como segredo. Vendeu muito.','Fugir das perguntas|>d|Melhor não chamar atenção.']],
+ d:['Hora de partir','Chegou a hora que todo vampiro conhece: sumir antes que percebam.',['Forjar a própria morte|$-10000 >f|Velório com caixão fechado. Assisti de longe.','Mudar de país|$-15000 >f|Nova língua, novo nome.']],
+ e:['Os três','Das três pessoas que contei, duas aceitaram. Uma nunca mais falou comigo.',['Ficar perto das que aceitaram|h+8 >d@3|Elas guardam meu segredo como um tesouro.','Ir embora mesmo assim|h-4 >d|Melhor não arriscar.']],
+ f:['Nova identidade','Comecei uma vida nova com outro nome.',['Recomeçar do zero|h+4 sm+3|Mais uma vida, entre tantas.','Visitar o próprio túmulo|h-6|Li meu nome na lápide. Estranho.']],
+});
+chain('vamp_padre',{k:'Vampiro',min:16,max:200,when:VAMP,npc:1,gn:'M',age:[15,35],gap:[1,1]},{
+ a:['O padre desconfia','O padre do bairro, {p}, me olhou de um jeito estranho e reparou que eu não entro na igreja.',['Evitar o padre|>b|Mudei o caminho de casa.','Tentar entrar na igreja para disfarçar|hl-15 >c|Senti a pele queimar na porta. Ele viu.']],
+ b:['A visita','O padre apareceu na minha porta com um crucifixo no bolso e um sorriso educado.',['Convidar para entrar|>d|Ele entrou devagar, de olho em tudo.','Não abrir a porta|>c|Ele deixou um bilhete: "Posso ajudar."']],
+ c:['O confronto','O padre me encurralou num beco com água benta.',['Lutar|?fight k-6 >e|Desarmei o padre e fugi. Não feri.|hl-20 >e|A água benta queimou meu rosto.','Pedir para conversar|>d|Ele baixou a garrafa.']],
+ d:['A conversa','O padre disse que não quer me destruir. Quer me salvar.',['Ouvir|k+5 >f|Ele falou de uma cura antiga, guardada num mosteiro.','Rir dele|>e|Ele foi embora triste.']],
+ e:['Vigiad{o}','Desde então, o padre me vigia de longe.',['Fazer as pazes|>d|Bati na porta da casa paroquial.','Mudar de bairro|$-3000 h+2|Melhor manter distância de quem tem água benta.']],
+ f:['O mosteiro','O padre me levou a um mosteiro nas montanhas. Os monges guardam um ritual de cura.',['Fazer o ritual|?40 curar h+25 k+10|Sete dias de jejum e reza. No oitavo, vi o sol nascer sem queimar.|hl-25 h-10|O ritual falhou. Quase morri de verdade.','Agradecer e recusar|k+3 h+3|Já aceitei quem eu sou. Mas virei amigo do padre.']],
+});
+chain('vamp_festa',{k:'Vampiro',min:16,max:200,when:VAMP,gap:[1,1]},{
+ a:['A festa lotada','Uma festa lotada, música alta, centenas de corações batendo ao meu redor. A sede apertou.',['Sair da festa|k+3 >b|Respirei o ar frio da rua.','Ficar e controlar|?will fome+10 h+4 >c|Dancei a noite inteira sem morder ninguém.|>d|A sede venceu.']],
+ b:['O alívio','Longe da festa, a sede diminuiu. Mas os amigos acharam estranho eu sumir.',['Inventar que passei mal|h+0|Todos acreditaram.','Voltar mais tarde|>c|Mais calm{o}.']],
+ c:['O controle','Consegui ficar a noite toda sem perder o controle.',['Me sentir orgulhos{o}|h+8|Estou aprendendo a viver com isso.','Ir embora antes de abusar da sorte|h+4|Não preciso provar nada.']],
+ d:['A mordida','Mordi alguém num canto escuro da festa. A pessoa desmaiou.',['Chamar ajuda e fugir|fome-50 k-6 >e|A ambulância levou a pessoa. Ela vai ficar bem.','Hipnotizar para esquecer|fome-50 k-4 >e|Ela acordou achando que bebeu demais.']],
+ e:['O dia seguinte','Na internet, alguém postou foto de uma "mordida estranha" no pescoço.',['Ficar quiet{o}|h-4|A foto sumiu da internet em uma semana.','Inventar que foi uma brincadeira de fantasia|?40 h+2|Colou.|f+2 h-6|Alguém ligou os pontos.']],
+});
+chain('vamp_jornalista',{k:'Vampiro',min:18,max:200,when:VAMP,npc:1,gap:[1,1]},{
+ a:['A reportagem','{p}, jornalista, está investigando "ataques noturnos" na cidade. Meu nome apareceu numa lista.',['Procurar {p} antes que publique|>b|Marquei um café. À noite, claro.','Ignorar|>c|Talvez não dê em nada.']],
+ b:['O café','{p} me olhou nos olhos: "Eu sei o que você é."',['Hipnotizar para esquecer|?50 h+4|{p} acordou sem lembrar da investigação.|>c|{p} usava lentes especiais. Não funcionou.','Contar a verdade|>d|{p} anotou tudo com a mão tremendo.']],
+ c:['A matéria','{p} publicou a matéria. Não citou meu nome, mas descreveu meus hábitos.',['Processar o jornal|$-5000 >e|O advogado nem entendeu o processo.','Sumir por um tempo|$-3000 h-3 >e|Fui para o interior.']],
+ d:['A exclusiva','{p} quer fazer uma série de reportagens contando a vida de um vampiro, sem revelar quem eu sou.',['Aceitar|f+8 vira:amigo >e|A série virou fenômeno. Ninguém sabe que é real.','Recusar|bond-10 >c|{p} publicou mesmo assim.']],
+ e:['Depois','A cidade agora tem uma lenda nova. E eu sou ela.',['Gostar da fama anônima|h+6|Ouço as pessoas falarem de mim no ônibus.','Ficar paranoic{o}|h-6|Todo jornalista agora me parece uma ameaça.']],
+});
+chain('vamp_sol',{k:'Vampiro',min:18,max:200,when:VAMP,gap:[2,3]},{
+ a:['Saudade do sol','Faz anos que não vejo o sol. Sonho com praia, com calor, com sombra de árvore.',['Assistir ao nascer do sol pela TV|h-2 >b|Não é a mesma coisa.','Procurar uma forma de ver o sol|>c|Deve existir um jeito.']],
+ b:['A tentação','Uma manhã, fiquei parad{o} na frente da janela fechada, com a mão na cortina.',['Abrir só um pouco|hl-15 h+6 >d|Um raio de sol queimou meu braço. Valeu a pena.','Fechar de vez|h-4|Não hoje.']],
+ c:['O tecido','Ouvi falar de um tecido especial que protege vampiros do sol.',['Comprar|$-15000 >d|Um manto preto, pesado, que cobre tudo menos os olhos.','Desconfiar|>b|Golpe, certeza.']],
+ d:['Uma tarde','Com o manto, saí ao sol pela primeira vez em anos.',['Ir à praia|?60 h+20 >e|Senti o calor através do tecido. Chorei de felicidade.|hl-20 h+5|O manto rasgou. Corri queimand{o} para a sombra.','Ficar só uns minutos no quintal|h+12 >e|Foi o suficiente.']],
+ e:['A lembrança','Aquela tarde de sol virou a melhor lembrança da minha eternidade.',['Guardar o manto para ocasiões especiais|h+5|Uma vez por ano, uma tarde de sol.','Dar o manto para outro vampiro|k+6|Alguém merece sentir o sol também.']],
+});
+chain('vamp_cria',{k:'Vampiro',min:20,max:200,when:VAMP,npc:1,gap:[1,1]},{
+ a:['Morrendo na calçada','Encontrei {p} esfaquead{o2} num beco, morrendo. Só eu posso salvar.',['Transformar {p}|vira:amigo morder k+2 >b|Salvei a vida d{ele}. Do meu jeito.','Chamar a ambulância|k+6 >e|Fiquei até a ambulância chegar.','Ir embora|k-8|Não é problema meu.']],
+ b:['O despertar','{p} acordou com sede e medo, sem entender o que aconteceu.',['Ensinar tudo com paciência|bond+15 >c|Ensinei a beber sem matar e a se esconder do sol.','Deixar {ele} se virar|bond-15 >d|{p} saiu sozinh{o2} pela noite.']],
+ c:['Família da noite','{p} me chama de mestre. Vivemos como uma família estranha.',['Aceitar o papel|h+10 bond+10 >f|Pela primeira vez, a eternidade não é solitária.','Pedir para {ele} seguir o próprio caminho|bond-5 >f|Todo vampiro precisa aprender sozinho um dia.']],
+ d:['Descontrole','{p} atacou pessoas sem controle. A polícia está investigando.',['Encontrar {p} e corrigir|?fight k+4 >c|Segurei {p} até a sede passar e recomecei a ensinar.|hl-15 >g|{p} me atacou.','Entregar {p} a caçadores|k-6 bond-30|Foi a decisão mais difícil da minha vida.']],
+ e:['O hospital','{p} sobreviveu. Me procurou depois para agradecer.',['Fazer amizade|vira:amigo h+6|Uma amizade humana. Rara.','Sumir|h+2|Melhor que não saiba nada de mim.']],
+ f:['A herança','Décadas depois, {p} transformou outra pessoa. A família cresce.',['Ficar orgulhos{o}|h+8|Minha linhagem continua.','Ficar preocupad{o}|h-2|Quantos vampiros a cidade aguenta?']],
+ g:['A briga','Lutar contra quem eu criei deixou feridas em nós dois.',['Fazer as pazes|bond+10 >c|Nós nos perdoamos.','Separar de vez|bond-20|{p} foi embora para sempre.']],
+});
+chain('vamp_cientista',{k:'Vampiro',min:18,max:200,when:VAMP,npc:1,gn:'F',gap:[1,1]},{
+ a:['A pesquisadora','{p}, uma cientista, descobriu meu segredo e quer estudar meu sangue.',['Aceitar participar|vira:amigo >b|Coleta de sangue, exames e muitas perguntas.','Fugir|>e|Não vou virar rato de laboratório.']],
+ b:['A descoberta','Meu sangue regenera células humanas em horas. Pode curar doenças.',['Doar sangue para a pesquisa|k+8 >c|Se pode salvar gente, que salve.','Exigir pagamento|$+20000 k-3 >c|Eternidade custa caro.']],
+ c:['O remédio','{p} criou um remédio que cura feridas graves usando meu sangue.',['Deixar publicar|f+5 k+8 >d|O mundo ganhou um remédio milagroso.','Pedir sigilo|k+3 >d|Ninguém pode saber de onde vem.']],
+ d:['A empresa','Uma grande empresa farmacêutica quer comprar a fórmula. E quer saber a fonte.',['Recusar a venda|k+5 >f|{p} ficou do meu lado.','Aceitar e sumir|$+50000 >e|Peguei a minha parte e desapareci.']],
+ e:['Caçad{o}','A empresa contratou gente para me encontrar.',['Fugir do país|$-10000 h-4|Nova vida, longe dos laboratórios.','Enfrentar|?fight >f|Os mercenários desistiram.|hl-25|Me pegaram por um tempo. Fugi na lua cheia.']],
+ f:['Parceria','{p} e eu continuamos a pesquisa em segredo, num laboratório escondido.',['Buscar a cura do vampirismo|?30 curar h+20|Funcionou. Voltei a ser humano.|h+4|Ainda não. Mas estamos perto.','Buscar a cura de doenças humanas|k+10 h+6|Já salvamos milhares de vidas.']],
+});
+
+// ===== Histórias em cadeia: a vida de vampiro (2) =====
+chain('vamp_banco_sangue',{k:'Vampiro',min:18,max:200,when:VAMP,gap:[1,1]},{
+ a:['A vaga perfeita','O banco de sangue do hospital está contratando para o turno da noite.',['Me candidatar|>b|Fui contratad{o} na hora: ninguém quer o turno da noite.','Achar arriscado demais|h+0|Muita tentação junta.']],
+ b:['A geladeira','Centenas de bolsas de sangue, a poucos metros de mim, toda noite.',['Pegar só as vencidas|fome-40 k+2 >c|Ninguém vai sentir falta do que ia para o lixo.','Pegar as boas|fome-60 k-8 >d|Sangue fresco. Perigoso.','Não tocar em nada|?will h+6 >c|Força de vontade de aço.|fome+20 >d|A sede venceu na terceira semana.']],
+ c:['O colega','Um colega reparou que eu nunca como no refeitório e nunca vejo o sol.',['Fazer amizade com ele|>e|Ele também trabalha só de noite. E também nunca come.','Evitar o colega|>d|Melhor não chamar atenção.']],
+ d:['A auditoria','O hospital abriu uma auditoria: estão faltando bolsas de sangue.',['Culpar um erro no sistema|?sm >f|A auditoria concluiu que foi falha de registro.|fire >f|Me demitiram por justa causa.','Pedir demissão antes|fire >f|Saí antes que me pegassem.']],
+ e:['Outro vampiro','O colega também é vampiro! Viramos parceiros de turno.',['Dividir o trabalho e as bolsas vencidas|fome-30 h+8 >f|Finalmente alguém para conversar às três da manhã.','Desconfiar dele|>d|Dois vampiros no mesmo lugar chamam atenção.']],
+ f:['Depois do hospital','Aprendi muito sobre sangue e sobre controle naquele emprego.',['Seguir na área da saúde|sm+3|Virei técnic{o} de laboratório noturno.','Mudar de ramo|h+3|Longe de tentação.']],
+});
+chain('vamp_morcego',{k:'Vampiro',min:16,max:200,when:VAMP,gap:[1,2]},{
+ a:['Algo novo','Uma noite, ao pular de um telhado, meu corpo se desfez numa nuvem de morcegos.',['Aprender a controlar|>b|Levei semanas para voltar inteir{o} na primeira tentativa.','Ficar com medo e evitar|h-3 >d@2|Prefiro andar com as pernas.']],
+ b:['Voando','Atravessei a cidade inteira voando como morcego.',['Explorar a noite|h+10 >c|Vi a cidade de um jeito que nenhum humano vê.','Usar para vigiar inimigos|sm+2 >c|Informação é poder.']],
+ c:['Visto','Um vídeo viral mostra uma nuvem de morcegos virando uma pessoa num telhado.',['Fingir que é montagem|h-2 >d|A internet decidiu que era efeito especial.','Ignorar|f+2 >d|Virei lenda urbana.']],
+ d:['Outros dons','Descobri que consigo ouvir pensamentos de quem está muito perto.',['Usar com responsabilidade|k+4 sm+3|Às vezes é melhor não saber o que os outros pensam.','Usar para ganhar dinheiro|$+8000 k-6|Nos negócios, eu sempre sei o que o outro vai oferecer.']],
+});
+chain('vamp_amor_humano',{k:'Vampiro',min:18,max:200,when:m=>VAMP(m)&&!partner(),npc:1,date:1,gap:[1,1]},{
+ a:['Um coração batendo','Me apaixonei por {p}, um ser humano comum. O coração d{ele} bate rápido quando está perto de mim.',['Me aproximar|vira:namoro >b|Comecei a namorar {p}, só de noite.','Me afastar para {ele} não correr perigo|h-6|Às vezes amar é ir embora.']],
+ b:['Os encontros','{p} acha estranho a gente só se ver à noite e eu nunca comer.',['Inventar desculpas|?40 >c|"Trabalho de noite e faço dieta." Colou.|>d|{p} começou a desconfiar.','Contar a verdade|>d|Melhor agora do que depois.']],
+ c:['O tempo','{p} está envelhecendo. Eu não.',['Pensar em transformar {p}|>e|Seria o jeito de ficarmos juntos para sempre.','Aceitar que um dia {ele} vai partir|h-6 >f|Cada dia vale mais.']],
+ d:['A verdade','{p} ouviu tudo em silêncio.',['Esperar a reação|?bond pbond+10 h+10 >c|"Eu já desconfiava. E não me importo."|separar h-15|{p} foi embora com medo.']],
+ e:['A escolha de {p}','Perguntei se {p} quer ser como eu.',['Respeitar a resposta|?50 morder h+15 bond+15|{p} aceitou. Agora a eternidade tem companhia.|h-4 >f|{p} quer viver e morrer como humano.']],
+ f:['Uma vida inteira','Fiquei ao lado de {p} até os cabelos brancos.',['Ficar até o fim|h+10 k+8|Segurei a mão de {p} no último dia. Ninguém amou tanto.','Ir embora antes de ver|h-8|Não aguentei.']],
+});
+chain('vamp_identidade',{k:'Vampiro',min:30,max:200,when:VAMP,gap:[1,1]},{
+ a:['Documentos vencidos','Meus documentos dizem que eu tenho sessenta anos. Meu rosto diz vinte e cinco.',['Procurar um falsificador|$-5000 >b|Um velho no porão de uma gráfica.','Viver sem documento|h-4 >d|Sem banco, sem emprego, sem nada.']],
+ b:['O falsificador','O falsificador olhou para mim e disse: "Você é o terceiro como você este mês."',['Perguntar dos outros|>c|Ele me deu um endereço.','Pegar os documentos e ir embora|>e|Nova identidade na mão.']],
+ c:['A rede','No endereço, uma rede de vampiros que ajuda uns aos outros com documentos, abrigo e sangue.',['Entrar para a rede|h+8 >e|Família de criaturas da noite.','Ficar sozinh{o}|>e|Prefiro não depender de ninguém.']],
+ d:['Na sombra','Sem documentos, vivo de bicos e escondid{o}.',['Procurar o falsificador agora|$-5000 >b|Não dá para viver assim.','Continuar assim|h-6|Invisível.']],
+ e:['Nova vida, de novo','Com nome novo, comecei mais uma vida.',['Escolher um nome bonito|h+5|Desta vez, escolhi eu mesm{o}.','Usar o nome de um antepassado|h+3|Uma homenagem discreta.']],
+});
+chain('vamp_tedio',{k:'Vampiro',min:40,max:200,when:VAMP,gap:[1,2]},{
+ a:['O peso da eternidade','Já vi tudo, li tudo, provei tudo. A eternidade ficou pesada.',['Procurar um propósito|>b|Deve existir algo que eu ainda não fiz.','Me trancar em casa|h-10 >c|Dias sem abrir as cortinas. Que já ficam fechadas.']],
+ b:['Um propósito','Decidi usar a eternidade para algo bom.',['Proteger a cidade à noite|k+8 fight+4 >d|Virei a lenda que assusta assaltantes.','Aprender todas as línguas do mundo|sm+8 >d|Já são onze.','Escrever minhas memórias|tal.writing+8 >d|Séculos de história, em capítulos.']],
+ c:['O fundo do poço','A tristeza ficou tão grande que pensei em ver o sol de propósito.',['Pedir ajuda|>b|Liguei para alguém que eu nem sabia que ainda se importava.','Abrir a cortina|?will h-5 >b|Na última hora, fechei.|hl-40 h-10 >b|Queimei feio, mas sobrevivi. E escolhi viver.']],
+ d:['Sentido','A eternidade voltou a ter cor.',['Seguir nesse caminho|h+12|Um dia de cada vez, mesmo que sejam infinitos.','Compartilhar com outros vampiros|k+6 h+8|Muitos sentem o mesmo peso.']],
+});
+chain('vamp_sangue_raro',{k:'Vampiro',min:18,max:200,when:VAMP,npc:1,gap:[1,1]},{
+ a:['O cheiro','Senti um cheiro de sangue diferente de tudo. Vinha de {p}, num ônibus.',['Seguir {p}|>b|Desci no mesmo ponto.','Descer no próximo ponto|?will k+4 >e|Fugi da tentação.|>b|Não consegui.']],
+ b:['Obsessão','O sangue de {p} não sai da minha cabeça. Sei onde mora, onde trabalha.',['Me aproximar como amig{o}|vira:amigo >c|Conversas, cafés, e a tentação sempre ali.','Contar tudo para um vampiro mais velho|>d|Ele disse: "Sangue assim é raro. E perigoso."']],
+ c:['A noite fatal','Uma noite, a sós com {p}, a sede ficou insuportável.',['Morder só um pouco|fome-60 k-6 bond-20 >d|{p} desmaiou. Acordou sem lembrar de nada.','Sair correndo|?will k+8 >e|Corri até amanhecer quase.|fome-60 k-10 >d|Voltei.']],
+ d:['O vício','Um gole daquele sangue me deixou viciad{o}. Preciso de mais.',['Procurar uma cura para o vício|$-8000 ?50 h+8|Uma bruxa me deu um chá horrível. Funcionou.|fome+30|Não funcionou.','Mudar de cidade, longe de {p}|$-5000 h-4|A distância é o único remédio.']],
+ e:['Livre','Venci a tentação. {p} nunca soube o perigo que correu.',['Me orgulhar|h+8 k+5|O monstro dentro de mim não manda em tudo.','Ficar de olho em {p} de longe|k+3|Protegendo de outros como eu.']],
+});
+chain('vamp_cacadora',{k:'Vampiro',min:16,max:200,when:VAMP,npc:1,gn:'F',age:[-5,15],gap:[1,1]},{
+ a:['A caçadora','Uma caçadora de vampiros, {p}, chegou à cidade. Já destruiu dois conhecidos meus.',['Me esconder|>b|Mudei de endereço três vezes em uma semana.','Ir atrás dela antes|>c|Melhor atacar primeiro.']],
+ b:['Encontrad{o}','{p} me encontrou. Estaca na mão.',['Lutar|?fight >d|Desarmei {p} e fugi.|hl-30 >e|A estaca passou a centímetros do coração.','Falar|>f|"Eu nunca matei ninguém." Ela hesitou.']],
+ c:['A emboscada','Preparei uma emboscada. Mas ela também.',['Lutar|?fight-10 k-4 >d|Venci. Deixei {p} amarrada e viva.|hl-30 >e|Ela venceu desta vez.']],
+ d:['A caçadora derrotada','{p} está desarmada na minha frente.',['Poupar a vida dela|k+10 >f|Ela me olhou com ódio e com dúvida.','Morder|fome-80 k-15 vira:inimigo morder|Agora ela é uma de nós. Ironia cruel.']],
+ e:['Ferid{o}','A ferida de estaca demora a fechar.',['Fugir da cidade|$-5000 h-4|Que ela fique com a cidade.','Treinar e voltar|fight+8 >b@1|Da próxima vez, estarei pront{o}.']],
+ f:['A trégua','{p} prometeu me deixar em paz se eu não matar ninguém.',['Aceitar a trégua|k+5 vira:amigo|Viramos uma dupla estranha: ela caça vampiros que matam, eu ajudo a encontrá-los.','Desconfiar|>b@2|Caçadora é caçadora.']],
+});
+chain('vamp_familia_humana',{k:'Vampiro',min:18,max:200,when:m=>VAMP(m)&&parents().length>0,who:'parent',gap:[1,1]},{
+ a:['Esconder da família','{p} quer saber por que eu nunca vou aos almoços de domingo.',['Ir aos jantares de domingo|>b|Jantar eu consigo. Fingindo comer.','Inventar trabalho|bond-5 >c|"Plantão de novo, desculpa."']],
+ b:['O jantar','No jantar, {p} reparou que eu não comi nada e estou pálid{o} demais.',['Dizer que estou de dieta|?40 >c|Colou.|>d|{p} não acreditou.','Contar a verdade|>d|Não aguento mais mentir para {p}.']],
+ c:['A distância','{p} se sente abandonad{o2}.',['Visitar à noite|bond+8 >e|Conversas longas na varanda, sob as estrelas.','Contar a verdade|>d|Melhor que a distância.']],
+ d:['A revelação','{p} ouviu tudo.',['Esperar a reação|?bond bond+15 h+10 >e|{p} me abraçou: "Você continua sendo da família." Gelad{o}, mas da família.|bond-20 h-12 >e|{p} pediu um tempo.']],
+ e:['A velhice de {p}','{p} está envelhecendo. Eu não.',['Ficar perto até o fim|bond+15 h+6|Segurei a mão de {p} nos últimos dias.','Oferecer a eternidade|?20 morder|{p} aceitou. Agora somos dois.|bond+5|{p} recusou: "Uma vida basta."']],
+});
+chain('vamp_guerra_lobo',{k:'Vampiro',min:18,max:200,when:VAMP,gap:[1,1]},{
+ a:['Território','Uma alcateia de lobisomens chegou à cidade. Vampiros e lobos nunca dividem território.',['Tentar uma trégua|>b|Marquei um encontro num terreno neutro.','Preparar para a guerra|fight+4 >c|Juntei outros vampiros.']],
+ b:['O encontro','O líder da alcateia me olhou com desprezo, mas aceitou ouvir.',['Propor dividir a cidade|?k k+6 >d|Rio como fronteira. Eles do lado de lá.|>c|Ele rosnou e foi embora.','Ameaçar|>c|Má ideia.']],
+ c:['A guerra','Na lua cheia, os lobos atacaram.',['Lutar|?fight f+0 k-4 >d|Expulsamos a alcateia.|hl-35 >e|Perdemos. Fugi ferid{o}.','Fugir com os mais fracos|k+6 >e|Salvei quem pude.']],
+ d:['A paz','A cidade foi dividida. Vampiros de um lado, lobos do outro.',['Respeitar a fronteira|h+6 k+3|Paz frágil, mas paz.','Atravessar escondid{o}|?40 h+4|Ninguém viu.|hl-20|Um lobo me pegou.']],
+ e:['Recomeçar','A cidade ficou com os lobos.',['Mudar de cidade|$-5000 h-3|Outra cidade, outro território.','Planejar a volta|fight+6 >c@2|Um dia, a noite volta a ser nossa.']],
+});
+chain('vamp_ensinar',{k:'Vampiro',min:20,max:200,when:VAMP,npc:1,gap:[1,1]},{
+ a:['Recém-transformad{o2}','Achei {p} escondid{o2} num porão, apavorad{o2}, transformad{o2} há três dias.',['Ajudar|vira:amigo >b|Levei {p} para minha casa antes do amanhecer.','Deixar|k-6|Cada um com a sua sina.']],
+ b:['As primeiras lições','{p} não sabe controlar a sede, nem fugir do sol.',['Ensinar com paciência|k+6 bond+10 >c|Primeira lição: nunca beber até o coração parar.','Ser dur{o} nas lições|bond-5 fight+3 >c|A noite não perdoa erros.']],
+ c:['A primeira caça','{p} quer caçar sozinh{o2} pela primeira vez.',['Ir junto|>d|Segui de longe.','Deixar ir|?50 >e|{p} voltou de manhã, satisfeit{o2} e sem ter matado ninguém.|>d|{p} não voltou.']],
+ d:['O erro','{p} perdeu o controle e atacou alguém.',['Salvar a vítima|k+8 >e|Levei a vítima para o hospital. {p} chorou de culpa.','Cobrir os rastros|k-6 >e|Ninguém vai saber.']],
+ e:['Independente','{p} aprendeu a viver sozinh{o2}.',['Despedir|h+6 k+4|Mais um vampiro que não vai virar monstro.','Continuar por perto|bond+8 h+5|Família da noite.']],
+});
+chain('vamp_alma',{k:'Vampiro',min:20,max:200,when:VAMP,gap:[2,3]},{
+ a:['A dúvida','Será que eu ainda tenho alma?',['Procurar respostas na religião|>b|Fui conversar com um líder religioso, à noite.','Procurar respostas em livros|sm+4 >c|Bibliotecas antigas, à luz de velas.']],
+ b:['A conversa','O líder religioso não se assustou. Disse que alma é o que a gente faz com a vida que tem.',['Concordar|k+6 >d|Saí de lá mais leve.','Discordar|>c|Preciso de mais.']],
+ c:['O manuscrito','Num manuscrito antigo, a história de um vampiro que conquistou a paz fazendo o bem por cem anos.',['Seguir o exemplo|k+10 >d|Cem anos é pouco para quem tem a eternidade.','Achar lenda|h-2|Mais uma história.']],
+ d:['Paz','Descobri que a resposta não importa tanto. Importa quem eu escolho ser.',['Fazer o bem todos os dias|k+12 h+10|Ajudo quem a noite esquece.','Viver em paz comigo|h+12|Sou vampiro. E sou eu.']],
+});
+
+// ===== Histórias em cadeia: a vida de vampiro (3) =====
+chain('vamp_policia',{k:'Vampiro',min:18,max:200,when:VAMP,npc:1,gn:'M',gap:[1,1]},{
+ a:['O detetive','O detetive {p} está investigando corpos encontrados sem sangue. E veio bater na minha porta.',['Responder às perguntas com calma|?sm >b|Ele foi embora sem nada.|>c|Ele percebeu que eu não respiro quando fico parad{o}.','Hipnotizar o detetive|?50 >b|Ele esqueceu por que veio.|>c|Ele piscou e o transe quebrou.']],
+ b:['A investigação continua','Os corpos continuam aparecendo. Não sou eu. Tem outro vampiro na cidade.',['Caçar o outro vampiro|>d|Se eu não parar, a culpa vai cair em mim.','Ficar na minha|>c|Não é problema meu.']],
+ c:['Suspeit{o}','O detetive me colocou como principal suspeit{o}.',['Ajudar a achar o verdadeiro culpado|>d|Precisei me revelar para {p}.','Fugir|$-5000 h-4|Saí da cidade antes da prisão.']],
+ d:['O verdadeiro assassino','Achei o outro vampiro: selvagem, sem controle, matando por prazer.',['Enfrentar|?fight k+10 f+0 >e|Venci. Os ataques pararam.|hl-35 >e|Venci por pouco, muito ferid{o}.','Avisar o detetive|>e|Contei onde ele dorme de dia.']],
+ e:['O acordo','O detetive {p} sabe o que eu sou. E sabe que eu salvei a cidade.',['Fazer um acordo de silêncio|vira:amigo k+5|Ele guarda meu segredo. Eu ajudo nos casos estranhos.','Sumir mesmo assim|h+2|Ninguém deve saber.']],
+});
+chain('vamp_casamento',{k:'Vampiro',min:20,max:200,when:m=>VAMP(m)&&!!partner(),who:'partner',gap:[1,1]},{
+ a:['A cerimônia','{p} quer casar na igreja, de manhã, com sol.',['Propor um casamento à noite|>b|"Casamento à luz de velas é muito mais romântico."','Tentar ir de manhã|hl-20 >c|Fiquei na sombra da porta, queimando.']],
+ b:['O casamento noturno','O casamento foi à meia-noite, num jardim cheio de velas.',['Fazer os votos|casar h+15 pbond+10 >d|O casamento mais bonito que os convidados já viram.','Desistir na última hora|pbond-20 h-8|Fugi com medo do que eu sou.']],
+ c:['O desmaio','Quase desmaiei de dor na porta da igreja.',['Contar a verdade para {p}|>d|Contei tudo, ali no carro.','Inventar uma alergia|?40 >b|Mudamos para a noite.|pbond-10 >d|{p} ficou desconfiad{o2}.']],
+ d:['A lua de mel','A lua de mel foi num lugar onde o inverno tem noites de vinte horas.',['Aproveitar|h+12 pbond+10|Noites sem fim, do jeito que eu gosto.','Contar a verdade antes|?bond pbond+10 h+10|{p} só disse: "Agora entendo tudo."|separar h-12|{p} não soube lidar.']],
+});
+chain('vamp_colecao',{k:'Vampiro',min:30,max:200,when:VAMP,gap:[2,3]},{
+ a:['Colecionador de séculos','Com a eternidade, comecei a juntar objetos que contam a minha história.',['Colecionar arte|$-10000 >b|Quadros de pintores que eu conheci pessoalmente.','Colecionar cartas antigas|>b|Cartas que escrevi para pessoas que já se foram.']],
+ b:['O valor','Um avaliador disse que minha coleção vale uma fortuna.',['Vender parte|$+60000 >c|Dinheiro para mais um século.','Guardar tudo|h+4 >c|Cada peça é uma lembrança.']],
+ c:['O museu','Um museu quer expor a coleção de um "colecionador anônimo".',['Emprestar|f+4 k+4 >d|As pessoas fazem fila para ver a minha história, sem saber.','Recusar|h+2|É pessoal demais.']],
+ d:['O retrato','Na exposição, uma visitante parou diante de um retrato de 1890 e olhou para mim.',['Sair antes que ela fale|h-2|Ela me reconheceu. Tenho certeza.','Sorrir para ela|h+6|Ela sorriu de volta e não disse nada.']],
+});
+chain('vamp_doacao',{k:'Vampiro',min:18,max:200,when:VAMP,gap:[1,1]},{
+ a:['Retribuir','Tirei tanto sangue do mundo que decidi devolver de algum jeito.',['Organizar campanhas de doação de sangue|k+8 >b|Ironia: um vampiro pedindo para as pessoas doarem sangue.','Doar dinheiro para hospitais|$-10000 k+8 >b|Anônimo, todo ano.']],
+ b:['A campanha','A campanha de doação bateu recorde na cidade.',['Fazer de novo todo ano|k+6 f+2 >c|Virou tradição.','Parar por aqui|h+3|Já fiz minha parte.']],
+ c:['A homenagem','O hospital quer homenagear quem organizou as campanhas.',['Aceitar, à noite|f+3 h+6|Uma cerimônia noturna, a pedido meu.','Recusar|k+3|Não preciso de homenagem.']],
+});
+chain('vamp_sede_crise',{k:'Vampiro',min:16,max:200,when:m=>VAMP(m)&&(m.fomeP||0)>=60,gap:[1,1]},{
+ a:['A sede apertou','A sede está no limite. Preciso resolver antes que eu machuque alguém.',['Ir ao mercado negro|$-3000 fome-50 >c|Um contato no porto vende bolsas de sangue.','Caçar animais|fome-25 >b|Não é suficiente, mas ajuda.','Morder alguém na rua|fome-70 k-10 >d|Num beco, rápido.']],
+ b:['Ainda com sede','Os animais não bastaram.',['Voltar à cidade e procurar sangue de verdade|$-3000 fome-40 >c|Mercado negro.','Me trancar até passar|?will h-6 >c|Passei três dias trancad{o}. A sede diminuiu.|fome+20 >d|Não consegui ficar trancad{o}.']],
+ c:['Controle','A sede passou. Por enquanto.',['Fazer um estoque|$-5000 fome-20|Geladeira cheia. Paz por um tempo.','Seguir assim|h+2|Um dia de cada vez.']],
+ d:['A vítima','A pessoa que eu mordi está no hospital.',['Visitar sem ser visto|k+3 >c|Ela vai sobreviver.','Esquecer|k-4 >c|Não posso me culpar por ser o que sou.']],
+});
+chain('vamp_noite_eterna',{k:'Vampiro',min:18,max:200,when:VAMP,npc:1,gn:'M',gap:[1,2]},{
+ a:['O velho amigo','Encontrei {p}, um amigo da minha vida humana, agora com sessenta anos. Ele me reconheceu na hora.',['Fingir ser filh{o} de mim mesm{o}|?50 >b|"Você é a cara do seu pai!" Colou.|>c|Ele não acreditou nem por um segundo.','Contar a verdade|>c|Ele sentou no meio-fio, sem ar.']],
+ b:['O filho fictício','{p} quer saber tudo sobre o "pai" que sumiu.',['Contar histórias verdadeiras como se fossem de outro|h+4 >d|Contei a minha vida em terceira pessoa.','Inventar uma morte para o "pai"|h-3 >d|{p} chorou pelo amigo.']],
+ c:['A verdade','{p} ouviu a verdade em silêncio. Depois riu: "Você sempre foi diferente."',['Retomar a amizade|vira:amigo h+10 >d|Conversas de madrugada, como nos velhos tempos.','Pedir segredo e se afastar|h-2 >d|É mais seguro para ele.']],
+ d:['A doença','{p} está doente. Os médicos dão poucos meses.',['Oferecer a eternidade|?30 vira:amigo morder h+8|Ele aceitou. Dois velhos amigos para sempre.|h-6 >e|Ele recusou: "Já vivi o que tinha para viver."','Ficar ao lado até o fim|k+8 >e|Visitei toda noite.']],
+ e:['Adeus','{p} partiu numa noite de lua cheia, segurando minha mão.',['Guardar a lembrança|h-6 k+4|Mais um adeus, numa vida feita de adeuses.','Escrever sobre ele|tal.writing+4 h-2|Ninguém vai saber que eu estava lá. Mas eu sei.']],
+});
+chain('vamp_bebe',{k:'Vampiro',min:20,max:200,when:VAMP,gap:[1,1]},{
+ a:['Ser pai ou mãe sendo vampiro','Sendo vampiro, ter filhos parece impossível. Mas a vontade não passa.',['Pensar em adoção|>b|Um bebê precisa de alguém. Mesmo que seja alguém da noite.','Desistir da ideia|h-6|A eternidade não combina com fraldas.']],
+ b:['A adoção','O processo de adoção exige entrevistas de dia.',['Usar o manto protetor e ir|$-3000 >c|Fui às entrevistas suando sob o manto.','Pedir entrevistas à noite|?k >c|A assistente social aceitou: "Trabalho noturno, entendo."|h-6|Negaram o pedido.']],
+ c:['A criança','Uma criança chegou em casa. Pequena, assustada e linda.',['Cuidar de tudo à noite e contratar ajuda de dia|$-8000 bebe h+20|Babá de dia, eu de noite. Funciona.','Contar a verdade quando ela crescer|bebe h+18 >d@8|Por enquanto, sou só o pai ou a mãe que trabalha de noite.']],
+ d:['A pergunta','A criança, crescida, perguntou por que eu nunca saio no sol.',['Contar a verdade|h+6 k+3|Ela ficou em silêncio, depois me abraçou: "Você é meu monstro favorito."','Inventar uma doença|h-2|Um dia eu conto.']],
 });
 
 // ===== Membros das equipes: clube ou time da escola, trabalho, carreira especial, equipe de heróis e grupo religioso =====
@@ -14287,6 +14495,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.17',d:'15/10/2026',t:'A vida de vampiro',itens:['Quase 150 eventos em sequência para quem é vampiro: viver de noite, doador de sangue, o vampiro ancião dono da cidade, o padre que desconfia, a caçadora, o jornalista, o detetive, a guerra com os lobisomens.','Também: amar um humano que envelhece, criar um vampiro novo, trabalhar no banco de sangue, virar nuvem de morcegos, não envelhecer na frente da família, trocar de identidade, o tédio da eternidade, adotar uma criança e a busca por uma cura.','As histórias mexem na barra de sede.']},
   {v:'1.16',d:'15/10/2026',t:'Paranormal para todo mundo',itens:['Quase 200 eventos paranormais em sequência que podem acontecer com qualquer pessoa: casa assombrada, tabuleiro Ouija, carona na estrada, quarto 13 do hotel, poltergeist, sonhos que se realizam, OVNI, maldição de família, médium, sereia, pacto na encruzilhada, cidade fantasma e muito mais.','Alguns encontros podem terminar em mordida: dá para virar vampiro ou lobisomem sem nunca ter investigado nada.']},
   {v:'1.15.2',d:'15/10/2026',t:'A morte em outro mundo',itens:['Morrer num mundo fictício mostra como o grupo daquele mundo recebeu a notícia: o comboio no apocalipse zumbi, os náufragos na ilha, o grupo em Eldoria, os colonos em Marte.','Desistir dentro de um mundo fictício mostra a reação do grupo, não da família.']},
   {v:'1.15.1',d:'15/10/2026',t:'Correção',itens:['Noite fora, investigar o paranormal e ter filhos com ajuda não aparecem mais dentro dos modos fictícios.']},
