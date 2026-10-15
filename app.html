@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610152035'</script>
+<title>NewLife</title><script>window.NL_VER='2610152049'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -1792,7 +1792,7 @@ const EVENTS={
   pick:k=>{ const m=S.me; if(k==='a'){ m.add.cigarro=clamp(m.add.cigarro+R.int(10,30)*(1.4-m.will/100)); return R.chance(.5)?'Tossi feito louco.':'Até que gostei. Isso pode ser um problema.'; } return 'Recusei numa boa.'; }},
  crush:{w:3,when:m=>m.age>=12&&m.age<=19&&inSchool(m)&&!partner(),prep:()=>{ const m=S.me; const gd=m.pref==='A'?(R.chance(.5)?'M':'F'):m.pref; const p=addP(mkPerson({rel:'colega',gender:gd,age:m.age+R.int(-1,1),bond:55})); return {p:p.id}; },
   show:d=>({k:'Coração',t:'Bilhete na mochila',x:`${fullName(P(d.p))}, da minha sala, disse que gosta de mim.`,ch:[['Pedir em namoro','n'],['Recusar com carinho','r'],['Rir da cara','x']]}),
-  pick:(k,d)=>{ const p=P(d.p); if(k==='n'){ p.rel='namoro'; p.bond=75; cnt('partners'); st('happy',10); return `Agora ${p.first} e eu estamos namorando.`; } if(k==='x'){ S.me.karma=clamp(S.me.karma-4); p.rel='inimigo'; p.bond=5; return `${p.first} saiu chorando. A escola inteira ficou sabendo.`; } p.bond=40; return `${p.first} entendeu.`; }},
+  pick:(k,d)=>{ const p=P(d.p); if(k==='n'){ const erro=polyNamorar(p); if(erro) return erro; p.bond=75; cnt('partners'); st('happy',10); return `Agora ${p.first} e eu estamos namorando.`; } if(k==='x'){ S.me.karma=clamp(S.me.karma-4); p.rel='inimigo'; p.bond=5; return `${p.first} saiu chorando. A escola inteira ficou sabendo.`; } p.bond=40; return `${p.first} entendeu.`; }},
  prova:{w:3,when:m=>m.age>=8&&m.edu.cur&&free(m),prep:()=>({s:R.pick(['matemática','química','história','física','biologia','português','geografia','inglês'])}),
   show:d=>({k:'Estudos',t:'Prova surpresa',x:`Prova surpresa de ${d.s}. Não estudei nada.`,ch:[['Colar do colega','c'],['Fazer do jeito que der','h'],['Entregar em branco','b']]}),
   pick:k=>{ const m=S.me,c=m.edu.cur; if(k==='c'){ if(R.chance(.25)){ c.grade=clamp(c.grade-15); m.karma=clamp(m.karma-2); return 'Fui pego colando e levei zero.'; } c.grade=clamp(c.grade+6); return 'Colei e tirei nota boa. Ninguém viu.'; } if(k==='b'){ c.grade=clamp(c.grade-10); return 'Zero.'; } const ok=R.chance(m.smarts/100); c.grade=clamp(c.grade+(ok?5:-5)); return ok?'Fui bem, por incrível que pareça.':'Fui mal.'; }},
@@ -1869,7 +1869,7 @@ const EVENTS={
   pick:(k,d)=>{ const p=P(d.p); st('happy',-12); if(k==='p'){ p.bond=clamp(p.bond+10); return 'Perdoei. Vamos ver no que dá.'; } if(p.rel==='conjuge'){ divorce(p,false); return `Acabou com ${p.first}.`; } p.rel='ex'; return k==='e'?'Joguei as roupas pela janela. O prédio inteiro assistiu.':`Terminei com ${p.first}.`; }},
  pedido:{w:2,when:m=>m.age>=18&&people('namoro').some(p=>p.yrs>=2&&p.bond>=65)&&free(m),prep:()=>({p:people('namoro').find(p=>p.yrs>=2&&p.bond>=65).id}),
   show:d=>({k:'Amor',t:'Ajoelhou!',x:`${P(d.p).first} se ajoelhou com um anel e me pediu em casamento.`,ch:[['Aceitar','a'],['Recusar','r']]}),
-  pick:(k,d)=>{ const p=P(d.p); if(k==='a'){ p.rel='noivo'; p.bond=clamp(p.bond+15); st('happy',15); return 'Estamos noivos!'; } p.bond=clamp(p.bond-35); return `${p.first} ficou arrasad${p.gender==='F'?'a':'o'}.`; }},
+  pick:(k,d)=>{ const p=P(d.p); if(k==='a'){ if(!polyPodeOficializar(p)) return 'Não aceitei: ainda falta o consentimento dos meus outros parceiros.'; p.rel='noivo'; p.bond=clamp(p.bond+15); st('happy',15); return 'Estamos noivos!'; } p.bond=clamp(p.bond-35); return `${p.first} ficou arrasad${p.gender==='F'?'a':'o'}.`; }},
  filho_rebelde:{w:2,when:m=>kids().some(k=>k.age>=12&&k.age<=17)&&free(m),prep:()=>{ const k=R.pick(kids().filter(k=>k.age>=12&&k.age<=17)); return {k:k.id,x:R.pick(['foi pego fumando atrás da escola','pichou o muro da escola','fugiu de casa por uma noite','tirou zero em tudo','foi pego bebendo numa festa','brigou com um colega'])}; },
   show:d=>({k:'Filhos',t:'Problemas em casa',x:`${P(d.k).first} ${d.x}.`,ch:[['Conversar com calma','c'],['Deixar de castigo','p'],['Fingir que não vi','i']]}),
   pick:(k,d)=>{ const c=P(d.k); if(k==='c'){ c.bond=clamp(c.bond+8); return 'Tivemos uma conversa longa e boa.'; } if(k==='p'){ c.bond=clamp(c.bond-8); return `${c.first} bateu a porta do quarto.`; } c.bond=clamp(c.bond-2); return 'Deixei passar.'; }},
@@ -1881,7 +1881,7 @@ const EVENTS={
   pick:(k,d)=>{ const p=P(d.p),m=S.me; if(k==='p'){ m.money-=d.v; p.bond=clamp(p.bond+20); m.karma=clamp(m.karma+5); if(R.chance(.75)){ p.health=clamp(p.health+30); return `${p.first} se recuperou!`; } } else if(k==='v'){ p.bond=clamp(p.bond+10); if(R.chance(.5)) return `${p.first} ficou feliz com a visita e melhorou.`; } else { m.karma=clamp(m.karma-5); if(R.chance(.5)) return `${p.first} se recuperou, sem mim.`; } p.alive=false; st('happy',-25); return `${relLabel(p)} ${p.first} morreu no hospital.`; }},
  ex_volta:{w:1.5,when:m=>!partner()&&people('ex').some(p=>p.age<80)&&free(m),prep:()=>({p:R.pick(people('ex')).id}),
   show:d=>({k:'Amor',t:'Mensagem de madrugada',x:`${P(d.p).first}, meu ex, mandou: "saudade de você..."`,ch:[['Voltar','v'],['Visualizar e não responder','n']]}),
-  pick:(k,d)=>{ const p=P(d.p); if(k==='v'){ p.rel='namoro'; p.bond=60; st('happy',6); return `Voltei com ${p.first}.`; } return 'Deixei no vácuo.'; }},
+  pick:(k,d)=>{ const p=P(d.p); if(k==='v'){ const erro=polyNamorar(p); if(erro) return erro; p.bond=60; st('happy',6); return `Voltei com ${p.first}.`; } return 'Deixei no vácuo.'; }},
  juri:{w:1,when:m=>m.age>=18&&free(m),prep:()=>({}),
   show:()=>({k:'Dever cívico',t:'Convocação para júri',x:'Fui convocad'+oa()+' para ser jurad'+oa()+' num julgamento.',ch:[['Comparecer','c'],['Faltar','f']]}),
   pick:k=>{ if(k==='c'){ S.me.karma=clamp(S.me.karma+2); return R.pick(['O réu foi condenado.','O réu foi absolvido.','O julgamento durou três semanas.']); } S.me.money-=1500; return 'Levei uma multa de $1.500.'; }},
@@ -2545,8 +2545,8 @@ ev('papel_polemico',{k:'Cinema',min:16,cd:8,when:m=>m.job&&m.job.spc==='ator',t:
  ['Aceitar',{p:.5,y:{f:10,t:'Fui aclamad{o} pela crítica.'},n:{f:3,h:-6,t:'Recebi ameaças nas redes.'}}],
  ['Recusar',{t:'Prefiro papéis mais leves.'}]]});
 ev('casamento_real',{k:'Realeza',min:18,cd:20,when:m=>m.royal&&!m.royal.abd&&people('noivo').length,prep:m=>{ const p=people('noivo')[0]; return {pid:p.id,n:p.first,nl:p.last,nG:p.gender}; },t:'Casamento real',x:'O reino inteiro aguarda meu casamento com {n}.',ch:[
- ['Cerimônia de gala transmitida para o mundo',{h:20,f:10,fn:(m,d)=>{ const p=P(d.pid); p.rel='conjuge'; p.yrs=0; cnt('marriages'); m.royal.pop=clamp(m.royal.pop+15); return `Casei com ${p.first} diante de 2 bilhões de pessoas.`; }}],
- ['Cerimônia íntima',{h:12,fn:(m,d)=>{ const p=P(d.pid); p.rel='conjuge'; p.yrs=0; cnt('marriages'); m.royal.pop=clamp(m.royal.pop-5); return `Casei com ${p.first} em segredo. O povo ficou decepcionado.`; }}]]});
+ ['Cerimônia de gala transmitida para o mundo',{h:20,f:10,fn:(m,d)=>{ const p=P(d.pid); if(!polyPodeOficializar(p)) return 'A cerimônia foi adiada: falta o consentimento dos meus parceiros.'; p.rel='conjuge'; p.yrs=0; cnt('marriages'); m.royal.pop=clamp(m.royal.pop+15); return `Casei com ${p.first} diante de 2 bilhões de pessoas.`; }}],
+ ['Cerimônia íntima',{h:12,fn:(m,d)=>{ const p=P(d.pid); if(!polyPodeOficializar(p)) return 'A cerimônia foi adiada: falta o consentimento dos meus parceiros.'; p.rel='conjuge'; p.yrs=0; cnt('marriages'); m.royal.pop=clamp(m.royal.pop-5); return `Casei com ${p.first} em segredo. O povo ficou decepcionado.`; }}]]});
 ev('tabloide_real',{k:'Realeza',min:14,cd:6,when:m=>m.royal&&!m.royal.abd,t:'Escândalo no palácio',x:'Um tabloide publicou fotos minhas {situacao}.',prep:()=>({situacao:R.pick(['numa festa às 4h da manhã','de biquíni num iate','dormindo numa reunião oficial','comendo cachorro-quente na rua'])}),ch:[
  ['Emitir nota oficial',{fn:m=>{ m.royal.pop=clamp(m.royal.pop-3); return 'A nota acalmou os ânimos.'; }}],
  ['Assumir com bom humor',{fn:m=>{ m.royal.pop=clamp(m.royal.pop+R.int(-5,10)); return 'Metade do reino achou charmoso.'; }}],
@@ -3804,11 +3804,13 @@ function candidate(app){
   return p;
 }
 function askOut(p){
+  const erro=polyEntrada(p); if(erro) return {ok:false,t:erro};
+  const anteriores=polyAmores();
   const m=S.me; const diff=(m.looks-p.looks)/120+(m.fame/300)+(m.money>200000?.08:0)+(m.age>=18?(m.job?.06:-.06):0);
   if(!R.chance(clamp((.42+diff)*100,5,95)/100)){ st('happy',-3); return {ok:false,t:R.pick([`${p.first} disse que não está procurando nada agora.`,`${p.first} riu e foi embora.`,`${p.first} me deu um número de telefone falso.`,`${p.first} disse que me vê só como amig${oa()}.`])}; }
   const cur=partner();
   p.rel='namoro'; S.people.push(p); cnt('partners'); st('happy',8);
-  if(cur){ cnt('cheats'); if(R.chance(.4)){ cur.bond=clamp(cur.bond-45); return {ok:true,t:`${p.first} topou. Mas ${cur.first} descobriu que estou saindo com outra pessoa!`}; } }
+  polyRegistrar(p,anteriores);
   log(`Comecei a namorar ${fullName(p)}.`,'good');
   return {ok:true,t:`${p.first} topou! Estamos namorando.`};
 }
@@ -3842,9 +3844,9 @@ function interact(p,k,extra){
     case 'piada': if(R.chance(.6)){ p.bond=clamp(p.bond+R.int(1,5)); return `${nm} riu muito da minha piada.`; } p.bond=clamp(p.bond-2); return `${nm} não achou graça nenhuma.`;
     case 'pegadinha': if(R.chance(.5)){ p.bond=clamp(p.bond+3); return `${nm} caiu na pegadinha e riu.`; } p.bond=clamp(p.bond-8); return `${nm} ficou furios${a} com a pegadinha.`;
     case 'amizade': if(R.chance(Math.min(.95,.08+frOf(p)/100*.9))){ p.fr=clamp(frOf(p)+8); p.rel='amigo'; p.bond=clamp(p.bond+10); return `Agora ${nm} é ${p.gender==='F'?'minha amiga':'meu amigo'}!`; } p.bond=clamp(p.bond-3); return `${nm} não deu muita bola.`;
-    case 'flertar': { const okPref=m.pref==='A'||m.pref===p.gender; if(!okPref) return `Não sinto atração por ${nm}.`; if(R.chance(clamp(p.bond*.5+(m.looks-p.looks)/2+20,5,90)/100)){ const cur=partner(); p.rel='namoro'; p.bond=clamp(p.bond+15); cnt('partners'); if(cur){ cnt('cheats'); if(R.chance(.4)) cur.bond=clamp(cur.bond-40); } return `Rolou um clima. ${nm} e eu estamos ficando sério!`; } p.bond=clamp(p.bond-6); return `${nm} me deu um fora.`; }
+    case 'flertar': { const okPref=m.pref==='A'||m.pref===p.gender; if(!okPref) return `Não sinto atração por ${nm}.`; if(R.chance(clamp(p.bond*.5+(m.looks-p.looks)/2+20,5,90)/100)){ const cur=partner(); p.rel='namoro'; p.bond=clamp(p.bond+15); cnt('partners'); if(cur&&!p.polyConvite?.ok){ cnt('cheats'); if(R.chance(.4)) cur.bond=clamp(cur.bond-40); } return `Rolou um clima. ${nm} e eu estamos ficando sério!`; } p.bond=clamp(p.bond-6); return `${nm} me deu um fora.`; }
     case 'pedido': { const [c]=extra; if(!canPay(c)) return 'Não tenho dinheiro para esse anel.'; m.money-=c; if(R.chance(clamp(p.bond+c/1000-30,5,97)/100)){ p.rel='noivo'; p.bond=clamp(p.bond+10); st('happy',15); log(`Fiquei ${m.gender==='F'?'noiva':'noivo'} de ${nm}.`,'good'); return `${nm} disse SIM!`; } p.bond=clamp(p.bond-20); st('happy',-12); return `${nm} disse que não está pront${a}.`; }
-    case 'casar': { const outro=people('conjuge').find(x=>x.id!==p.id); if(outro) return `Já sou casad${oa()} com ${outro.first}. Preciso me divorciar antes de casar de novo.`; if(p.rel!=='noivo') return 'Preciso estar noivo dessa pessoa antes da cerimônia.'; const [c,prenup]=extra; if(!canPay(c)) return 'Não tenho dinheiro para essa festa.'; m.money-=c; if(prenup){ S.flags['prenup'+p.id]=1; if(R.chance(.3)){ p.bond=clamp(p.bond-25); return `${nm} se ofendeu com o pacto antenupcial e adiou o casamento.`; } } p.rel='conjuge'; p.yrs=0; cnt('marriages'); st('happy',20); S.flags.movedOut=1; log(`Casei com ${fullName(p)}!`,'good'); return `Casei com ${nm}! ${c>30000?'A festa foi inesquecível.':''}`; }
+    case 'casar': { const outro=people('conjuge').find(x=>x.id!==p.id); if(outro&&!polyPodeOficializar(p)) return `Já sou casad${oa()} com ${outro.first}. Preciso do consentimento de todos antes de casar de novo.`; if(p.rel!=='noivo') return 'Preciso estar noivo dessa pessoa antes da cerimônia.'; const [c,prenup]=extra; if(!canPay(c)) return 'Não tenho dinheiro para essa festa.'; m.money-=c; if(prenup){ S.flags['prenup'+p.id]=1; if(R.chance(.3)){ p.bond=clamp(p.bond-25); return `${nm} se ofendeu com o pacto antenupcial e adiou o casamento.`; } } p.rel='conjuge'; p.yrs=0; cnt('marriages'); st('happy',20); S.flags.movedOut=1; log(`Casei com ${fullName(p)}!`,'good'); return `Casei com ${nm}! ${c>30000?'A festa foi inesquecível.':''}`; }
     case 'terminar': p.rel='ex'; st('happy',-8); log(`Terminei com ${nm}.`); return `Terminei com ${nm}.`;
     case 'divorcio': divorce(p,false); return `Me divorciei de ${nm}.`;
     case 'amor': { if(m.age<18||p.age<18) return 'Isso é coisa de adulto.'; if(tired) return `${nm} e eu já aproveitamos bastante este ano.`; const prot=!!extra; cnt('amor'); p.bond=clamp(p.bond+R.int(5,12)); st('happy',R.int(6,12)); primeiraVez(fullName(p));
@@ -4716,8 +4718,8 @@ V.person=p=>{
   if(love){
     if(a>=18&&p.age>=18) it.push({ic:'❤️‍🔥',l:'Fazer amor',s:'Felicidade · sem proteção pode vir um bebê',on:()=>modal({t:`Com ${p.first}`,x:'Como vai ser?',ch:[{l:'Com proteção',fn:()=>{ const r=interact(p,'amor',true); log(r); MQ.unshift({t:p.first,x:r}); }},{l:'Sem proteção',fn:()=>{ const r=interact(p,'amor',false); log(r); MQ.unshift({t:p.first,x:r}); }},{l:'Hoje não',cls:'alt'}]})});
     A('viagem','Viajar juntos',5000,a>=18,fmt(5000));
-    if(rel==='namoro'&&a>=16&&!people('conjuge','noivo').some(x=>x.id!==p.id)) it.push({l:'Pedir em casamento',on:()=>modal({t:'Qual anel?',ch:[[500,'Anel simples'],[5000,'Anel de ouro'],[40000,'Diamante enorme']].map(([c,l])=>({l:`${l} (${fmt(c)})`,fn:()=>{ const r=interact(p,'pedido',[c]); log(r); MQ.unshift({t:p.first,x:r}); }})).concat([{l:'Cancelar',cls:'alt'}])})});
-    if(rel==='noivo'&&!people('conjuge').some(x=>x.id!==p.id)) it.push({l:'Marcar o casamento',on:()=>modal({t:'Casamento',x:'Que tipo de cerimônia?',ch:[[800,'Só no cartório'],[25000,'Festa para os íntimos'],[150000,'Festão com 500 convidados']].flatMap(([c,l])=>[{l:`${l} (${fmt(c)})`,fn:()=>{ const r=interact(p,'casar',[c,false]); log(r); MQ.unshift({t:'Casamento',x:r}); }}]).concat([{l:'Com pacto antenupcial (protege meu dinheiro)',fn:()=>{ const r=interact(p,'casar',[800,true]); log(r); MQ.unshift({t:'Casamento',x:r}); }},{l:'Cancelar',cls:'alt'}])})});
+    if(rel==='namoro'&&a>=16&&polyPodeOficializar(p)) it.push({l:'Pedir em casamento',on:()=>modal({t:'Qual anel?',ch:[[500,'Anel simples'],[5000,'Anel de ouro'],[40000,'Diamante enorme']].map(([c,l])=>({l:`${l} (${fmt(c)})`,fn:()=>{ const r=interact(p,'pedido',[c]); log(r); MQ.unshift({t:p.first,x:r}); }})).concat([{l:'Cancelar',cls:'alt'}])})});
+    if(rel==='noivo'&&polyPodeOficializar(p)) it.push({l:'Marcar o casamento',on:()=>modal({t:'Casamento',x:'Que tipo de cerimônia?',ch:[[800,'Só no cartório'],[25000,'Festa para os íntimos'],[150000,'Festão com 500 convidados']].flatMap(([c,l])=>[{l:`${l} (${fmt(c)})`,fn:()=>{ const r=interact(p,'casar',[c,false]); log(r); MQ.unshift({t:'Casamento',x:r}); }}]).concat([{l:'Com pacto antenupcial (protege meu dinheiro)',fn:()=>{ const r=interact(p,'casar',[800,true]); log(r); MQ.unshift({t:'Casamento',x:r}); }},{l:'Cancelar',cls:'alt'}])})});
     if(rel!=='conjuge') A('terminar','Terminar');
     if(rel==='conjuge') it.push({l:'Pedir o divórcio',tone:'bad',on:()=>confirmBox('Divórcio?',S.flags['prenup'+p.id]?'Temos pacto antenupcial.':'Sem pacto, perco metade do dinheiro.','Divorciar',()=>act(()=>interact(p,'divorcio'),'Divórcio'))});
   }
@@ -8314,8 +8316,8 @@ scTok=(o=>function(tok,d,out){ const sc=S.scen; let mm; if(!sc||sc.id!=='heroi')
   if(tok==='famhurt'){ if(p) out.push(famHurt(p,rnd(25,45))); return true; }
   if(tok==='famdie'){ if(p) out.push(famDie(p,`por causa de ${sc.inimigo}`)); return true; }
   if(tok==='esc'){ if(p) p.esc=sc.dia+1; return true; }
-  if(tok==='rnoivo'){ if(p&&p.rel==='namoro'){ p.rel='noivo'; p.bond=clamp(p.bond+10); out.push(`Estou noiv${oa()} de ${p.first}!`); } return true; }
-  if(tok==='rcasar'){ if(p&&['namoro','noivo'].includes(p.rel)){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } return true; }
+  if(tok==='rnoivo'){ if(p&&p.rel==='namoro'&&polyPodeOficializar(p)){ p.rel='noivo'; p.bond=clamp(p.bond+10); out.push(`Estou noiv${oa()} de ${p.first}!`); } return true; }
+  if(tok==='rcasar'){ if(p&&['namoro','noivo'].includes(p.rel)&&polyPodeOficializar(p)){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } return true; }
   if(tok==='rgrav'){ if(p&&!sc.rgrav&&p.gender!==m.gender&&(m.gender==='F'?m:p).age<=46){ sc.rgrav={pid:p.id,due:sc.dia+1}; out.push(m.gender==='F'?'Estou grávida!':`${p.first} está grávida!`); } return true; }
   if(tok==='hcrew'){ const c=mkCrew(); out.push(`${c.first} agora patrulha comigo.`); return true; }
   return o(tok,d,out); })(scTok);
@@ -8923,10 +8925,15 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
   const out=[]; let next=null, delay=null;
   b0.own.concat(br.own).forEach(t=>{ let mm;
     if(mm=t.match(/^>(\w+)(?:@(\d+)(?:-(\d+))?)?$/)){ next=mm[1]; if(mm[2]!=null) delay=mm[3]!=null?R.int(+mm[2],+mm[3]):+mm[2]; }
-    else if(mm=t.match(/^vira:(\w+)$/)){ if(!d.pid||!P(d.pid)){ const p=meetP(d,mm[1],'n'); if(p){ d.pid=p.id; if(mm[1]==='irmao'&&p.age<3) p.last=m.last; } } else { const p=P(d.pid); if(p&&p.rel!==mm[1]&&!['mae','pai','irmao','filho','conjuge'].includes(p.rel)) p.rel=mm[1]==='namoro'&&partner()&&partner()!==p?'amigo':mm[1]; } }
+    else if(mm=t.match(/^vira:(\w+)$/)){
+      let p=d.pid&&P(d.pid); if(!p){ p=meetP(d,mm[1]==='namoro'?'amigo':mm[1],'n'); if(p){ d.pid=p.id; if(mm[1]==='irmao'&&p.age<3) p.last=m.last; } }
+      if(p&&p.rel!==mm[1]&&!['mae','pai','irmao','filho','conjuge'].includes(p.rel)){
+        if(mm[1]==='namoro'){ const erro=polyNamorar(p); if(erro) out.push(erro); } else { if(polyAmores().includes(p)) polyLimpar(p); p.rel=mm[1]; }
+      }
+    }
     else if(mm=t.match(/^\+cad:(\w+)$/)){ cadStart(mm[1],true); }
     else if(mm=t.match(/^emprego:(\w+)$/)){ const j=JOBS.find(x=>x.id===mm[1]); if(j&&!(m.job&&m.job.id===j.id)&&m.age>=16){ takeJob({id:j.id,co:companyName(),size:'média',mul:1}); out.push(`Agora sou ${jobTitle(m.job).toLowerCase()}.`); } }
-    else if(t==='noivar'||t==='casar'){ const p=d.pid&&P(d.pid); if(p&&p.alive&&['namoro','noivo'].includes(p.rel)&&(!partner()||partner()===p)){ if(t==='noivar'&&p.rel==='namoro'){ p.rel='noivo'; out.push(`Estou noiv${oa()} de ${p.first}!`); } else if(t==='casar'){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } } }
+    else if(t==='noivar'||t==='casar'){ const p=d.pid&&P(d.pid); if(p&&p.alive&&['namoro','noivo'].includes(p.rel)&&polyPodeOficializar(p)){ if(t==='noivar'&&p.rel==='namoro'){ p.rel='noivo'; out.push(`Estou noiv${oa()} de ${p.first}!`); } else if(t==='casar'){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } } }
     else if(t==='separar'){ const pp=partner(); if(pp){ if(pp.rel==='conjuge') divorce(pp,true); else { pp.rel='ex'; m.happy=clamp(m.happy-15); log(`${pp.first} terminou comigo.`,'bad'); } out.push(`${pp.first} foi embora.`); } }
     else if(mm=t.match(/^pbond([+-]\d+)$/)){ const pp=partner(); if(pp) pp.bond=clamp(pp.bond+ +mm[1]); }
     else if(mm=t.match(/^fome([+-]\d+)$/)){ if(m.criatura) m.fomeP=clamp((m.fomeP||0)+ +mm[1]); }
@@ -10501,17 +10508,77 @@ V.love=(o=>()=>{ const r=o(), m=S.me; if(!r||!r.items||m.age<18||S.scen) return 
     {ic:'🤰',l:'Barriga de aluguel',s:`${fmt(70000)} · o bebê nasce no ano seguinte`,on:()=>act(fertBarriga,'Barriga de aluguel')});
   return r; })(V.love);
 
-// ===== Vários amores ao mesmo tempo: casar só com uma pessoa, mas trair com várias, e lidar com o que vem =====
+// ===== Relações plurais: uma nova pessoa por rodada de consentimento =====
+const polyAmores=()=>people('namoro','noivo','conjuge');
+const polyChave=()=>polyAmores().map(p=>p.id).sort((a,b)=>a-b).join(',');
+function polyPerfil(p){
+  // Migração estável dos saves antigos: abrir a tela novamente não sorteia outra personalidade.
+  return p.polyPerfil||(p.polyPerfil={abertura:(p.id*37+(p.will||50)*13)%101,ciume:clamp((p.craze||0)*.65+(p.id*19%36))});
+}
+const polyChance=p=>{ const t=polyPerfil(p); return clamp(10+t.abertura*.75-t.ciume*.55+(p.bond-50)*.3,3,95)/100; };
+const polyGrupo=()=>{ const l=polyAmores(); return l.length<2||l.every(p=>l.every(q=>q.id===p.id||(p.polyCom||[]).includes(q.id))); };
+const polyRodada=()=>{ const r=S.me.polyRodada; return r&&r.chave===polyChave()?r:null; };
+const polyUnanime=()=>{ const l=polyAmores(),r=polyRodada(); return !!(l.length&&r&&l.every(p=>r.votos[p.id]===true)); };
+const polyPodeOficializar=p=>polyAmores().includes(p)&&(!polyAmores().some(q=>q.id!==p.id)||polyGrupo());
+function polyPropor(p){
+  const l=polyAmores(); if(!S.me.alive||S.scen||S.me.age<18||!l.includes(p)||l.some(q=>q.age<18)) return 'Essa conversa só está disponível entre parceiros adultos na vida normal.';
+  let r=polyRodada(); if(!r) r=S.me.polyRodada={chave:polyChave(),votos:{},anos:{}};
+  if(r.votos[p.id]===true) return `${p.first} já concordou com a entrada de mais uma pessoa nesta rodada.`;
+  if(r.anos[p.id]===S.year||p.polyRecusa===S.year) return `${p.first} já recusou esta proposta. Vou respeitar a resposta; só podemos conversar de novo no próximo ano.`;
+  r.anos[p.id]=S.year; r.votos[p.id]=R.chance(polyChance(p));
+  if(!r.votos[p.id]){ p.polyRecusa=S.year; return `${p.first} não aceitou ter mais uma pessoa na relação. Sem a concordância de todos, não vou começar outro namoro nem casamento.`; }
+  if(polyUnanime()){ S.pending=S.pending.filter(e=>e.id!=='amantes'); l.forEach(q=>q.polyCom=l.filter(x=>x!==q).map(x=>x.id)); return `${p.first} aceitou. Todos concordaram: podemos incluir mais uma pessoa, desde que ela também aceite. Depois disso, qualquer nova inclusão exige outra conversa com todos.`; }
+  return `${p.first} aceitou a ideia. Ainda preciso conversar com ${l.filter(q=>r.votos[q.id]!==true).map(q=>q.first).join(', ')}. Uma pessoa aceitar não decide pelas outras.`;
+}
+function polyEntrada(p){
+  const l=polyAmores().filter(q=>q.id!==p.id); if(!l.length) return '';
+  if(S.me.age<18||p.age<18||l.some(q=>q.age<18)) return 'Relações plurais estão disponíveis apenas entre adultos.';
+  if(!polyUnanime()) return 'Antes de começar outro relacionamento, preciso propor a ideia e receber o sim de todos os meus parceiros atuais.';
+  const chave=polyChave(),v=p.polyConvite;
+  if(v&&v.chave===chave&&v.ano===S.year) return v.ok?'':`${p.first} não quer entrar numa relação com outras pessoas. Vou respeitar essa decisão.`;
+  const ok=R.chance(polyChance(p)); p.polyConvite={chave,ano:S.year,ok};
+  return ok?'':`${p.first} soube dos meus outros relacionamentos e não aceitou entrar. Ninguém vai ser incluído escondido.`;
+}
+function polyRegistrar(p,anteriores){
+  if(!anteriores.length){ p.polyCom=[]; return; }
+  const l=polyAmores(); l.forEach(q=>q.polyCom=l.filter(x=>x.id!==q.id).map(x=>x.id));
+  delete S.me.polyRodada;
+  log(`${p.first} entrou na relação com o consentimento de ${anteriores.map(q=>q.first).join(', ')}. Para incluir outra pessoa, vamos conversar novamente.`,'good');
+}
+function polyLimpar(p){ delete S.me.polyRodada; p.polyCom=[]; delete p.polyConvite; polyAmores().forEach(q=>q.polyCom=(q.polyCom||[]).filter(id=>id!==p.id)); }
+V.poly=()=>{ const l=polyAmores(),r=polyRodada(); return {title:'Relação com mais pessoas',items:[
+  {html:'<div class="card"><p>Cada parceiro decide por si. Todos precisam aceitar a entrada de mais uma pessoa; a pessoa nova também será informada e poderá recusar. Acordos aceitos não contam como traição.</p><p>'+ (polyUnanime()?'Todos concordaram com mais uma pessoa.':'Converse com cada parceiro abaixo.')+'</p><p>Uma recusa impede a inclusão. Não é possível insistir no mesmo ano.</p></div>'},
+  ...l.map(p=>{ const t=polyPerfil(p),v=r&&r.votos[p.id];return {ic:'💬',l:'Conversar com '+p.first,s:`${relLabel(p)} · Abertura ${t.abertura}% · Ciúme ${t.ciume}% · ${v===true?'Aceitou':v===false?'Recusou':'Ainda não conversamos'}`,on:()=>act(()=>polyPropor(p),'Proposta')}; }),
+  ...(!l.length?[{html:'Primeiro preciso estar em um relacionamento.'}]:[])
+]}; };
+V.person=(o=>function(p){ const r=o(p); if(r&&r.items&&S.me.age>=18&&p.age>=18&&!S.scen&&polyAmores().includes(p)) r.items.push({ic:'💞',l:'Propor relação com mais pessoas',s:'Conversa e consentimento de todos',on:()=>UI.push(V.poly)}); return r; })(V.person);
+V.love=(o=>()=>{ const r=o(); if(S.me.age>=18&&!S.scen&&polyAmores().length) r.items.unshift({ic:'💞',l:'Relação com mais pessoas',s:polyUnanime()?'Todos aceitaram mais uma pessoa':'Conversar com meus parceiros',on:()=>UI.push(V.poly)}); return r; })(V.love);
+// Término ou divórcio invalida a rodada, sem desfazer os acordos entre quem ficou.
+divorce=(o=>function(p){ const r=o.apply(this,arguments); polyLimpar(p); return r; })(divorce);
+
+// Eventos e histórias usam a mesma autorização que os encontros da interface.
+function polyNamorar(p){
+  if(polyAmores().includes(p)) return '';
+  const erro=polyEntrada(p); if(erro) return erro;
+  const antes=polyAmores(); p.rel='namoro'; polyRegistrar(p,antes); return '';
+}
+
+// ===== Vários amores ao mesmo tempo: acordos plurais ou casos secretos, e lidar com o que vem =====
 const amores=()=>people('namoro','noivo','conjuge');
 const casad=()=>people('conjuge')[0]||null;
-// um casamento (e um noivado) por vez
-interact=(o=>function(p,k,extra){ const m=S.me;
-  if(k==='pedido'){ const c=casad(), n=people('noivo').find(x=>x!==p); if(c&&c!==p) return `Já sou casad${oa()} com ${c.first}. Para casar de novo, preciso me divorciar primeiro.`; if(n) return `Já estou noiv${oa()} de ${n.first}.`; }
-  if(k==='casar'){ const c=casad(); if(c&&c!==p) return `Já sou casad${oa()} com ${c.first}. Bigamia é crime.`; }
-  return o.apply(this,arguments); })(interact);
+// Oficializar só é permitido quando os relacionamentos atuais têm acordo mútuo.
+interact=(o=>function(p,k,extra){
+  if((k==='pedido'||k==='casar')&&!polyPodeOficializar(p)) return 'Preciso do consentimento de todos os meus parceiros antes de oficializar outro relacionamento.';
+  const anteriores=polyAmores().filter(q=>q.id!==p.id), novo=['flertar','reatar'].includes(k)&&!polyAmores().includes(p);
+  if(novo){ const erro=polyEntrada(p); if(erro) return erro; }
+  const r=o.apply(this,arguments);
+  if(novo&&p.rel==='namoro') polyRegistrar(p,anteriores);
+  if(k==='terminar'&&p.rel==='ex') polyLimpar(p);
+  return r;
+})(interact);
 // todo ano, quem tem mais de um amor corre risco
 yearMoney=(o=>function(){ const r=o.apply(this,arguments); const m=S.me; try{ if(m.alive&&!S.scen&&!m.prison){ const L=amores();
-  if(L.length>=2&&!S.pending.some(e=>e.id==='amantes')&&R.chance(Math.min(.75,.28+.12*(L.length-2)))){
+  if(L.length>=2&&!polyGrupo()&&!S.pending.some(e=>e.id==='amantes')&&R.chance(Math.min(.75,.28+.12*(L.length-2)))){
     const c=casad(), outros=L.filter(p=>p!==c), tipos=[['chantagem',3],['conta',3],['encontro',2],['ultimato',2]]; if(c) tipos.push(['descobre',3]);
     const t=R.wpick(tipos), quem=t==='descobre'?c:R.pick(outros.length?outros:L);
     queue('amantes',{t,pid:quem.id,v:Math.max(3000,Math.round(Math.max(0,m.money)*R.int(8,20)/100/100)*100)}); } } }catch(e){ console.error(e); } return r; })(yearMoney);
@@ -10524,7 +10591,7 @@ EVENTS.amantes={show:d=>{ const p=P(d.pid), m=S.me, L=amores(); const nomes=L.fi
       ultimato:[`${p.first} desconfia que existe mais alguém e deu um ultimato: "Ou só eu, ou ninguém."`,[['Ficar só com '+p.first,'s'],['Prometer e continuar escondendo','m'],['Terminar com '+p.first,'t']]],
       descobre:[`${p.first}, com quem sou casad${oa()}, achou as mensagens com ${nomes||'outra pessoa'}. Sabe de tudo.`,[['Pedir perdão e terminar com o resto','p'],['Negar até o fim','n'],['Pedir o divórcio','d']]]}[d.t];
     return {k:'Amor',t:{chantagem:'Chantagem',conta:'Vai contar tudo',encontro:'O restaurante',ultimato:'O ultimato',descobre:'Descobriu tudo'}[d.t],x:X[0],ch:X[1]}; },
-  pick:(k,d)=>{ const p=P(d.pid), m=S.me; if(!p||!p.alive) return ''; const outros=()=>amores().filter(x=>x!==p);
+  pick:(k,d)=>{ const p=P(d.pid), m=S.me; if(polyGrupo()) return 'Conversamos: os relacionamentos atuais foram combinados por todos. Não houve traição.'; if(!p||!p.alive) return ''; const outros=()=>amores().filter(x=>x!==p);
     if(d.t==='chantagem'){ if(k==='p'){ m.money-=d.v; p.bond=clamp(p.bond-10); if(R.chance(.35)) queue('amantes',{t:'chantagem',pid:p.id,v:Math.round(d.v*1.5)}); return `Paguei ${fmt(d.v)}. ${p.first} prometeu silêncio. Prometeu.`; }
       if(k==='t'){ amorSai(p,'cansou de dividir'); if(R.chance(.5)) return 'Terminei, mas antes de sair, '+p.first+' contou para todo mundo: '+amorContaTudo(p); return `Terminei com ${p.first}, que foi embora sem dizer nada a ninguém.`; }
       return `${p.first} cumpriu a ameaça: ${amorContaTudo(p)}`; }
@@ -11433,7 +11500,7 @@ yearMoney=(o=>function(){ const r=o.apply(this,arguments); try{ grpAuto(); }catc
 // tokens: pamigo pnamoro pinimigo psai (o {p}) · glv±n gsai gmorre gcrew (o morador {mor})
 extTok=(o=>function(tok,d,out){ const m=S.me, p=d&&typeof d.pid==='number'?P(d.pid):null; let mm;
   if(tok==='pamigo'){ if(p&&p.alive&&p.rel!=='amigo'){ if(p.rel==='colega') p.fromTurma=1; if(p.rel==='colegaT') p.fromJob=1; p.rel='amigo'; p.bond=clamp(p.bond+10); out.push(`${p.first} agora é ${p.gender==='F'?'minha amiga':'meu amigo'}.`); } return true; }
-  if(tok==='pnamoro'){ if(p&&p.alive&&m.age>=16&&p.age>=16){ if(partner()&&partner()!==p){ p.bond=clamp(p.bond+8); out.push('Mas eu já tenho alguém. Ficou no ar.'); } else { p.rel='namoro'; p.bond=clamp(p.bond+15); cnt('partners'); log(`Comecei a namorar ${fullName(p)}.`,'good'); out.push(`Estou namorando ${p.first}!`); } } return true; }
+  if(tok==='pnamoro'){ if(p&&p.alive&&m.age>=16&&p.age>=16){ const erro=polyNamorar(p); if(erro){ out.push(erro); } else { p.bond=clamp(p.bond+15); cnt('partners'); log(`Comecei a namorar ${fullName(p)}.`,'good'); out.push(`Estou namorando ${p.first}!`); } } return true; }
   if(tok==='pinimigo'){ if(p&&p.alive){ p.rel='inimigo'; p.bond=clamp(p.bond-20); out.push(`${p.first} virou ${p.gender==='F'?'minha inimiga':'meu inimigo'}.`); } return true; }
   if(tok==='psai'){ if(p&&p.alive&&['equipe','colegaT','colega','prof','chefe'].includes(p.rel)){ p.alive=false; out.push(`${p.first} saiu.`); } return true; }
   const sc=S.scen, L=sc&&d&&d.gkey&&sc.pp?sc.pp[d.gkey]:null, gp=L?L.find(x=>x.id===d.gid):null;
@@ -14708,6 +14775,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.20',d:'15/10/2026',t:'Amores com consentimento',itens:['Namoros e casamentos com mais de uma pessoa: proponha a ideia em Amor ou na ficha de um parceiro.','Cada pessoa aceita ou recusa conforme sua abertura, ciúme e vínculo. Todos os parceiros atuais precisam aceitar; a pessoa nova também decide se quer participar.','Cada acordo libera a entrada de uma pessoa. Para uma terceira, quarta ou mais, é preciso conversar de novo com todos.','Uma recusa bloqueia a inclusão, e não dá para insistir no mesmo ano. Relações consentidas não geram punição automática por traição.','Os acordos são salvos; términos, divórcios e mudanças no grupo invalidam a rodada de novas inclusões.']},
   {v:'1.19.1',d:'15/10/2026',t:'Changelogs completos e correções',itens:['Casamento: proteção reforçada na cerimônia e opções de noivado e casamento ocultas quando já existe outro cônjuge; casos extraconjugais continuam possíveis.','A epidemia pode ser contida: infecção pode cair e dois anos sob controle encerram o surto sem apocalipse. O limite que forçava o colapso em sete anos foi removido.','Diagnóstico econômico: 200 vidas por estratégia por padrão, contagem dos sobreviventes por idade e interrupção com contexto em caso de erro.','O histórico agora mostra os textos completos das novidades de cada versão, incluindo os lançamentos 1.0, 1.1 e 1.2.','As notas originais dos lançamentos foram recuperadas e podem ser lidas dentro do jogo.','Navegue das primeiras versões às mais recentes em Menu → Novidades.']},
   {v:'1.19',d:'15/10/2026',t:'Investigação paranormal profissional',itens:['Carreira autônoma com pedidos de clientes, reputação, fama, equipamentos e pagamento por contrato.','Minijogo de exploração: cômodos, seis equipamentos, provas, sanidade, bateria, caçadas, esconderijos e rituais de expulsão.','Bestiário com oito entidades, combinações de evidências e registro dos casos identificados.','Quatro doenças exclusivas de vampiros e lobisomens, com sintomas e clínica sobrenatural.','Histórico completo de alterações recuperado do Git desde o primeiro registro, com navegação por páginas.']},
   {v:'1.18',d:'15/10/2026',t:'A vida de lobisomem',itens:['Quase 140 eventos em sequência para quem é lobisomem: lua cheia na reunião do trabalho, o fazendeiro que perdeu o gado, a disputa pela liderança da alcateia, o par que vê a transformação, a alergia à prata, o filhote perdido na mata.','Também: dominar a fera sem lua, acordar no zoológico, a investigadora desconfiada, o atleta forte demais para o antidoping, defender a floresta, a guerra com os vampiros, o faro que acha desaparecidos, a família de caçadores, a curandeira, a lua de sangue e o casamento em noite de lua cheia.']},
@@ -15336,6 +15404,7 @@ function selfTest(){
       assert(nlNotas().some(x=>x.v==='1.0'&&x.body.includes('Primeira versão')),'changelog sem lançamento inicial');
     } finally { R.chance=chance; }
   });
+  T('poligamia consentida',polySelfTest);
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
@@ -15642,6 +15711,32 @@ function qualityReport(){
   out.push('\nIDADES: eventos com faixa de idade suspeita (<10 ou >85):'); Object.entries(evAge).filter(([k,a])=>a.min<10&&a.max>30).forEach(([k,a])=>out.push(`  ${k} ${a.t} ${a.min}-${a.max}`));
   const o=document.createElement('pre'); o.id='out'; o.textContent=out.join('\n'); o.style.cssText='position:fixed;inset:0;z-index:999;background:#fff;color:#000;overflow:auto;padding:10px;font-size:11px;white-space:pre-wrap';
   document.body.appendChild(o); document.title='QUALIDADE OK';
+}
+
+// Regressão curta: consentimento unânime, novas rodadas e persistência.
+function polySelfTest(){
+  const antigo=S,chance=R.chance,noSave=window.NO_SAVE; window.NO_SAVE=true;
+  const ok=(v,t)=>{ if(!v) throw Error(t); };
+  try{
+    newLife({});S.me.age=30;S.me.money=1000000;S.me.pref='A';S.scen=null;
+    let a=mkPerson({rel:'noivo',age:30,bond:90}),b=mkPerson({rel:'amigo',age:29,bond:90});S.people.push(a,b);
+    R.chance=()=>true;interact(a,'casar',[800,false]);ok(a.rel==='conjuge','primeiro casamento');
+    R.chance=()=>false;polyPropor(a);R.chance=()=>true;polyPropor(a);interact(b,'flertar');ok(b.rel==='amigo','recusa deve impedir namoro e insistência');
+    S.year++;polyPropor(a);ok(polyUnanime(),'primeira autorização');
+    R.chance=()=>false;interact(b,'flertar');ok(b.rel==='amigo','nova pessoa pode recusar');R.chance=()=>true;interact(b,'flertar');ok(b.rel==='amigo','recusa da nova pessoa deve persistir');
+    S.year++;const amorA=a.bond,traicoes=S.me.c.cheats||0;interact(b,'flertar');ok(b.rel==='namoro'&&polyGrupo(),'segundo namoro consentido');ok(a.bond===amorA&&(S.me.c.cheats||0)===traicoes,'acordo não é traição');
+    interact(b,'pedido',[500]);interact(b,'casar',[800,false]);ok(people('conjuge').length===2,'segundo casamento');ok(!polyUnanime(),'autorização deve ser consumida');
+    const c=candidate(false);c.age=30;ok(!askOut(c).ok,'terceira pessoa sem nova rodada');polyPropor(a);ok(!polyUnanime(),'um sim não basta');
+    R.chance=()=>false;polyPropor(b);R.chance=()=>true;ok(!askOut(c).ok,'uma recusa bloqueia terceira pessoa');
+    S=JSON.parse(JSON.stringify(S));a=P(a.id);b=P(b.id);ok(polyRodada().votos[b.id]===false,'recusa perdida no save');
+    S.year++;polyPropor(b);ok(polyUnanime(),'dois consentimentos');ok(askOut(c).ok&&polyAmores().length===3,'terceiro namoro');
+    interact(c,'pedido',[500]);interact(c,'casar',[800,false]);ok(people('conjuge').length===3,'terceiro casamento');
+    polyPropor(a);polyPropor(b);ok(!polyUnanime(),'terceiro parceiro também precisa aceitar');polyPropor(c);ok(polyUnanime(),'três consentimentos');
+    divorce(b,false);ok(!polyUnanime()&&polyAmores().length===2&&polyGrupo(),'divórcio invalida rodada e preserva acordos restantes');
+    ok(polyChance({id:1,bond:80,polyPerfil:{abertura:100,ciume:0}})>polyChance({id:2,bond:80,polyPerfil:{abertura:0,ciume:100}}),'personalidade não influencia');
+    V.poly().items.map(rowHtml);V.person(a).items.map(rowHtml);
+    return 'PASSOU: recusa, personalidade, save, 2 e 3 casamentos, unanimidade renovada, sem punição de traição e divórcio.';
+  }finally{ S=antigo;R.chance=chance;window.NO_SAVE=noSave; }
 }
 
 startApp();
