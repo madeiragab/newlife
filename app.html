@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610151837'</script>
+<title>NewLife</title><script>window.NL_VER='2610152020'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -1504,6 +1504,7 @@ function yearHealth(){
     if(m.dis.find(d=>d.id===id)) continue;
     if(def.min&&m.age<def.min||def.max&&m.age>def.max||def.g&&def.g!==m.gender) continue;
     if(def.country&&!def.country.split(',').includes(m.country)) continue;
+    if(def.criatura&&(S.scen||def.criatura!==m.criatura)) continue;
     let p=def.p*mult; if(def.smoke&&m.add.cigarro>40) p*=8;
     if(R.chance(p)){ addDisease(id); break; }
   }
@@ -14699,6 +14700,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+  {v:'1.19',d:'15/10/2026',t:'Investigação paranormal profissional',itens:['Carreira autônoma com pedidos de clientes, reputação, fama, equipamentos e pagamento por contrato.','Minijogo de exploração: cômodos, seis equipamentos, provas, sanidade, bateria, caçadas, esconderijos e rituais de expulsão.','Bestiário com oito entidades, combinações de evidências e registro dos casos identificados.','Quatro doenças exclusivas de vampiros e lobisomens, com sintomas e clínica sobrenatural.','Histórico completo de alterações recuperado do Git desde o primeiro registro, com navegação por páginas.']},
   {v:'1.18',d:'15/10/2026',t:'A vida de lobisomem',itens:['Quase 140 eventos em sequência para quem é lobisomem: lua cheia na reunião do trabalho, o fazendeiro que perdeu o gado, a disputa pela liderança da alcateia, o par que vê a transformação, a alergia à prata, o filhote perdido na mata.','Também: dominar a fera sem lua, acordar no zoológico, a investigadora desconfiada, o atleta forte demais para o antidoping, defender a floresta, a guerra com os vampiros, o faro que acha desaparecidos, a família de caçadores, a curandeira, a lua de sangue e o casamento em noite de lua cheia.']},
   {v:'1.17',d:'15/10/2026',t:'A vida de vampiro',itens:['Quase 150 eventos em sequência para quem é vampiro: viver de noite, doador de sangue, o vampiro ancião dono da cidade, o padre que desconfia, a caçadora, o jornalista, o detetive, a guerra com os lobisomens.','Também: amar um humano que envelhece, criar um vampiro novo, trabalhar no banco de sangue, virar nuvem de morcegos, não envelhecer na frente da família, trocar de identidade, o tédio da eternidade, adotar uma criança e a busca por uma cura.','As histórias mexem na barra de sede.']},
   {v:'1.16',d:'15/10/2026',t:'Paranormal para todo mundo',itens:['Quase 200 eventos paranormais em sequência que podem acontecer com qualquer pessoa: casa assombrada, tabuleiro Ouija, carona na estrada, quarto 13 do hotel, poltergeist, sonhos que se realizam, OVNI, maldição de família, médium, sereia, pacto na encruzilhada, cidade fantasma e muito mais.','Alguns encontros podem terminar em mordida: dá para virar vampiro ou lobisomem sem nunca ter investigado nada.']},
@@ -14993,10 +14995,305 @@ function econDiag(n=24,pols){ const out=['ESTRATÉGIA | patrimônio mediano aos 
     out.push(`${ECON_POL[p].n} | herança média ${fmt(econAvg(r.map(x=>x.her||0))||0)} | salário somado ${fmt(econAvg(r.map(x=>x.sal||0))||0)} | ${fmt(econMed(r.map(x=>x.w45))||0)} | ${fmt(econMed(r.map(x=>x.w65))||0)} | ${fmt(econAvg(r.map(x=>x.w65))||0)} | ${Math.round(r.filter(x=>x.alive65).length/r.length*100)}%`); }
   return out.join('\n'); }
 
+// ===== Profissão paranormal: contratos, exploração, dedução e bestiário =====
+const PN_PISTAS={emf:'EMF nível 5',frio:'Temperatura negativa',voz:'Voz no rádio',escrita:'Escrita fantasma',orbe:'Orbes na câmera',uv:'Marcas ultravioletas'};
+const PN_FERRAMENTAS={emf:['Medidor EMF','📟'],frio:['Termômetro','🌡️'],voz:['Rádio de espíritos','📻'],escrita:['Caderno ritual','📓'],orbe:['Câmera noturna','📹'],uv:['Lanterna UV','🔦']};
+const PN_ENTIDADES=[
+ {id:'errante',n:'Espírito errante',ic:'👻',p:['frio','voz','escrita'],rit:'memoria',txt:'Repete os últimos momentos da vida. O nome e um objeto afetivo permitem a despedida.'},
+ {id:'poltergeist',n:'Poltergeist',ic:'🪑',p:['emf','escrita','uv'],rit:'selo',txt:'Arremessa objetos e deixa marcas nas portas. Um círculo de contenção prende sua energia.'},
+ {id:'sombra',n:'Sombra',ic:'🌑',p:['frio','orbe','uv'],rit:'luz',txt:'Se move nas bordas da visão. Luz consagrada desfaz o esconderijo.'},
+ {id:'banshee',n:'Banshee',ic:'🕯️',p:['voz','orbe','uv'],rit:'memoria',txt:'Seu lamento procura alguém perdido. Descobrir a história interrompe o chamado.'},
+ {id:'demonio',n:'Demônio',ic:'👹',p:['frio','escrita','uv'],rit:'exorcismo',txt:'Reage com violência à presença humana. Exige exorcismo e proteção antes da invocação.'},
+ {id:'revenant',n:'Revenant',ic:'⚰️',p:['emf','frio','orbe'],rit:'selo',txt:'Persegue quem corre pelos corredores. Contenção e esconderijos são essenciais.'},
+ {id:'vampiro',n:'Vampiro',ic:'🧛',p:['voz','escrita','uv'],rit:'luz',txt:'Uma criatura de carne e sangue. A luz permite expulsá-la do local, sem curar sua maldição.'},
+ {id:'lobisomem',n:'Lobisomem',ic:'🐺',p:['emf','voz','orbe'],rit:'selo',txt:'Rosnados e marcas nas paredes denunciam a fera. Contenha a passagem até amanhecer.'}
+];
+const PN_RITOS={memoria:'Despedida com objeto afetivo',selo:'Círculo de contenção',luz:'Luz consagrada',exorcismo:'Exorcismo'};
+const pn=()=>{ const p=para(); return p.prof||(p.prof={ativa:false,rep:0,fe:12,resolvidos:0,ganhos:0,ano:null,ofertas:[],best:{},kit:0,caso:null}); };
+const pnPode=()=>S.me.alive&&S.me.age>=18&&!S.me.prison&&!S.scen;
+const pnCargo=p=>p.rep>=80?'Referência nacional':p.rep>=50?'Especialista em assombrações':p.rep>=20?'Investigador conhecido':'Investigador iniciante';
+function pnEntrar(){ if(!pnPode()) return 'Preciso ter 18 anos e estar livre, na vida normal.'; pn().ativa=true; return 'Abri minha agenda de investigação paranormal. O equipamento básico é emprestado; cada contrato concluído ajuda a construir meu nome.'; }
+function pnOfertas(){ const p=pn(); if(!p.ativa||p.ano===S.year) return p.ofertas; p.ano=S.year;
+ const n=2+Math.floor(p.rep/25)+Math.floor(p.fe/50); p.ofertas=Array.from({length:n},(_,i)=>{ const nivel=1+Math.min(2,Math.floor(p.rep/30)), ex=p.rep>=20&&R.chance(.45);
+ return {id:S.year+':'+i,cliente:R.pick(['Uma família do bairro','Uma dona de pousada','Um zelador','Uma pessoa da comunidade religiosa','Um comerciante','Uma família que viu minhas entrevistas']),local:R.pick(['Sobrado da estação','Pousada da serra','Capela antiga','Fazenda do lago','Apartamento 13']),nivel,ex,pago:(ex?1200:500)*nivel+R.int(0,4)*100,aceito:false}; }); return p.ofertas; }
+function pnAceitar(id){ const p=pn(); if(!pnPode()||!p.ativa) return 'Não posso investigar agora.'; if(p.caso) return 'Preciso terminar o contrato atual.';
+ const o=pnOfertas().find(x=>x.id===id); if(!o||o.aceito) return 'Esse pedido não está mais disponível.'; o.aceito=true;
+ const e=R.pick(PN_ENTIDADES); p.caso={...o,ent:e.id,quarto:R.int(1,4),pos:0,san:100,bat:100,turno:0,caca:0,pistas:[],testes:{},protecao:false,rito:false,msg:'Cheguei ao local. A van é segura. Procure o cômodo com atividade e cruze as provas no bestiário.'}; return 'Contrato aceito. A investigação pode ser interrompida e retomada, inclusive depois de fechar o jogo.'; }
+function pnPasso(){ const c=pn().caso; c.turno++; if(c.pos===0) return;
+ c.san=Math.max(0,c.san-(3+c.nivel)); c.bat=Math.max(0,c.bat-Math.max(1,3-pn().kit));
+ if(c.caca){ c.caca--; c.san=Math.max(0,c.san-8); st('health',-5); c.msg+=' A entidade me alcançou no corredor. Perdi saúde!'; }
+ else if(c.san<65&&R.chance(.12+c.nivel*.05)){ c.caca=2; c.msg+=' As luzes piscaram. Começou uma caçada: esconda-se ou volte para a van!'; }
+ if(c.san<=0||S.me.health<=5){ c.msg+=' Precisei abandonar a missão.'; const r=pnFinalizar(null,true); return r; }
+}
+function pnAcao(tipo,val){ const p=pn(), c=p.caso; if(!c||!pnPode()) return 'Não há investigação disponível.';
+ if(tipo==='mover'){ if(!Number.isInteger(val)||val<0||val>4) return ''; c.pos=val; c.msg=val===c.quarto?'Um arrepio atravessou o cômodo. Há atividade aqui.':val===0?'Voltei para a van. Aqui posso avaliar as provas.':'O cômodo está silencioso.'; }
+ else if(tipo==='esconder'){ if(!c.pos) return 'Já estou em segurança na van.'; if(c.caca){ c.caca=0; c.san=Math.max(0,c.san-5); c.msg='Apaguei a lanterna e segurei a respiração no armário. Os passos se afastaram.'; save(); return c.msg; } c.msg='Esperei no esconderijo, ouvindo o corredor.'; }
+ else if(tipo==='descansar'){ if(c.pos) return 'Só posso trocar pilhas e descansar na van.'; if(c.descanso) return 'Já usei as pilhas e o descanso de emergência deste contrato.'; c.descanso=true; c.bat=100; c.san=Math.min(100,c.san+25); c.msg='Troquei as pilhas e recuperei o fôlego.'; }
+ else if(tipo==='proteger'){ if(c.pos!==c.quarto) return 'Preciso achar o cômodo com atividade primeiro.'; if(c.protecao) return 'A proteção já está pronta.'; c.protecao=true; c.msg='Preparei o círculo de proteção antes do ritual.'; }
+ else if(tipo==='medir'){ if(!PN_PISTAS[val]) return ''; if(!c.pos) return 'Entre na casa para usar o equipamento.'; if(c.bat<5) return 'Sem bateria. Volte para a van.';
+ const key=c.pos+':'+val; if(c.testes[key]) return 'Já registrei a leitura deste equipamento neste cômodo.'; c.testes[key]=true; c.bat-=5;
+ const e=PN_ENTIDADES.find(x=>x.id===c.ent); if(c.pos===c.quarto&&e.p.includes(val)){ if(!c.pistas.includes(val)) c.pistas.push(val); c.msg='Prova confirmada: '+PN_PISTAS[val]+'.'; } else c.msg='Nenhum sinal de '+PN_PISTAS[val].toLowerCase()+' neste cômodo.';
+ } else if(tipo==='rito'){ if(!PN_RITOS[val]) return ''; if(c.rito) return 'Já tentei o ritual deste contrato.'; if(c.pos!==c.quarto||c.pistas.length<3) return 'Preciso reunir três provas e estar no cômodo da entidade.';
+ c.rito=true; const e=PN_ENTIDADES.find(x=>x.id===c.ent); c.expulsa=val===e.rit&&c.protecao&&!c.caca;
+ c.msg=c.expulsa?'O ritual funcionou. A presença deixou o local. Volte à van para entregar o relatório.':'O ritual falhou. Era preciso escolher o rito correto, preparar a proteção e esperar a caçada terminar.';
+ if(!c.expulsa){ c.san=Math.max(0,c.san-25); st('health',-10); }
+ } else return '';
+ const fim=pnPasso(); save(); return fim||c.msg;
+}
+function pnFinalizar(id,abandono=false){ const p=pn(),c=p.caso; if(!c||(!abandono&&!pnPode())) return 'Não há contrato para concluir.'; if(!abandono&&c.pos!==0) return 'Volte para a van antes de entregar o relatório.';
+ const certo=!abandono&&id===c.ent&&c.pistas.length===3, completo=certo&&(!c.ex||c.expulsa), valor=completo?c.pago:certo?Math.floor(c.pago*.4):0;
+ p.caso=null; S.me.money+=valor; p.ganhos+=valor; p.rep=clamp(p.rep+(completo?7:certo?2:-4)); p.fe=clamp(p.fe+(completo?5:-2));
+ if(certo){ p.resolvidos++; p.best[c.ent]=(p.best[c.ent]||0)+1; para().vistos[c.ent]=1; para().prova+=3; S.me.fame=clamp((S.me.fame||0)+(completo?2:1)); }
+ const e=PN_ENTIDADES.find(x=>x.id===c.ent), msg=abandono?'Abandonei o contrato. Ninguém pagou, mas voltei com vida.':completo?`Identifiquei ${e.n.toLowerCase()} e concluí o pedido. Recebi ${fmt(valor)}. O cliente vai me recomendar.`:certo?`Identifiquei a entidade, mas faltou expulsá-la. Recebi ${fmt(valor)} pela investigação.`:'O relatório não comprovou a entidade correta. Sem pagamento; minha reputação caiu.';
+ log(msg,completo?'good':'warn'); save(); return msg;
+}
+function pnKit(){ const p=pn(),c=1500*(p.kit+1); if(!pnPode()||!p.ativa||p.kit>=3) return 'Não há melhoria disponível.'; if(!canPay(c)) return `Preciso de ${fmt(c)}.`; S.me.money-=c; p.kit++; return 'Melhorei a autonomia dos equipamentos. A bateria agora dura mais durante as investigações.'; }
+V.paraProf=()=>{ const p=pn(),it=[{html:`<div class="card"><p>Clientes que acreditam no sobrenatural procuram ajuda. Junte provas, identifique a entidade e cumpra o pedido para receber.</p>${kv('Carreira',pnCargo(p))}${kv('Reputação',p.rep+'/100')}${kv('Confiança dos clientes',p.fe+'/100')}${kv('Casos identificados',p.resolvidos)}${kv('Recebido',fmt(p.ganhos))}</div>`}];
+ if(!pnPode()) return {title:'Investigação profissional',items:[{html:'Disponível a partir dos 18 anos, fora da prisão e dos mundos fictícios.'}]};
+ if(!p.ativa) it.push({ic:'👻',l:'Abrir agenda de investigador',s:'Equipamento básico emprestado · sem custo',on:()=>act(pnEntrar,'Nova profissão')});
+ else { if(p.caso) it.push({ic:'🔦',l:'Retomar investigação',s:p.caso.local,on:()=>UI.push(V.paraCaso)});
+ it.push({sec:'Pedidos deste ano'}); pnOfertas().forEach(o=>it.push({ic:o.ex?'🕯️':'🏚️',l:o.local,s:`${o.cliente} · ${o.ex?'Identificar e expulsar':'Investigar'} · perigo ${o.nivel}/3 · ${fmt(o.pago)}`,dis:o.aceito||!!p.caso,on:()=>act(()=>pnAceitar(o.id),'Contrato')}));
+ it.push({ic:'🧰',l:'Melhorar equipamento',s:p.kit>=3?'Nível máximo':`Nível ${p.kit}/3 · ${fmt(1500*(p.kit+1))}`,dis:p.kit>=3,on:()=>act(pnKit,'Equipamento')}); }
+ it.push({ic:'📖',l:'Bestiário e diário de provas',on:()=>UI.push(V.paraBest)}); return {title:'Investigação profissional',items:it}; };
+V.paraBest=()=>{ const p=pn(); return {title:'Bestiário paranormal',items:[{html:'O guia ajuda na dedução; os registros confirmados são desbloqueados ao entregar relatórios corretos.'},...PN_ENTIDADES.map(e=>({html:`<div class="card"><h3>${e.ic} ${e.n}</h3><p>${e.txt}</p><p>Provas: ${e.p.map(k=>PN_PISTAS[k]).join(' · ')}</p>${kv('Ritual',PN_RITOS[e.rit])}${kv('Casos confirmados',p.best[e.id]||0)}</div>`}))]}; };
+V.paraCaso=()=>{ const c=pn().caso; if(!c) return {title:'Contrato encerrado',items:[{html:'O resultado ficou no diário. Novos pedidos aparecem a cada ano.'}]};
+ const quartos=['Van','Sala','Cozinha','Quarto','Porão'],it=[{html:`<div class="card"><p>${esc(c.local)} · ${c.ex?'Identificar e expulsar':'Identificar a entidade'}</p>${kv('Local',quartos[c.pos])}${bar('Sanidade',c.san)}${bar('Bateria',c.bat)}<p>${esc(c.msg)}</p><p>${c.caca?'⚠️ Caçada em andamento!':'Explore com cuidado.'}</p><p>Provas: ${c.pistas.map(k=>PN_PISTAS[k]).join(' · ')||'Nenhuma'}</p></div>`},
+ {btns:quartos.map((q,i)=>({l:q,dis:c.pos===i,on:()=>act(()=>pnAcao('mover',i),'Exploração')}))},
+ {btns:[{l:'Esconder',on:()=>act(()=>pnAcao('esconder'),'Esconderijo')},{l:'Descansar na van',dis:c.pos!==0||c.descanso,on:()=>act(()=>pnAcao('descansar'),'Pausa')}]}, {sec:'Equipamentos'}];
+ Object.entries(PN_FERRAMENTAS).forEach(([k,[n,ic]])=>it.push({ic,l:n,s:c.testes[c.pos+':'+k]?'Leitura registrada':'Procurar '+PN_PISTAS[k].toLowerCase(),dis:!c.pos||!!c.testes[c.pos+':'+k],on:()=>act(()=>pnAcao('medir',k),n)}));
+ it.push({ic:'📖',l:'Consultar bestiário',on:()=>UI.push(V.paraBest)},{sec:'Ritual opcional — obrigatório nos pedidos de expulsão'}, {l:'Preparar proteção',dis:c.protecao,on:()=>act(()=>pnAcao('proteger'),'Proteção')});
+ Object.entries(PN_RITOS).forEach(([k,n])=>it.push({l:n,dis:c.rito||c.pistas.length<3,on:()=>act(()=>pnAcao('rito',k),'Ritual')}));
+ it.push({sec:'Entregar relatório na van'}); PN_ENTIDADES.forEach(e=>it.push({ic:e.ic,l:'Identificar: '+e.n,dis:c.pos!==0||c.pistas.length<3,on:()=>confirmBox('Entregar relatório?',`Minha conclusão é: ${e.n}. Um erro compromete o pagamento.`, 'Entregar',()=>act(()=>pnFinalizar(e.id),'Resultado'))}));
+ it.push({l:'Abandonar contrato',s:'Sem pagamento',on:()=>confirmBox('Abandonar investigação?','Vou sair sem pagamento e perder reputação.','Abandonar',()=>act(()=>pnFinalizar(null,true),'Contrato'))}); return {title:'Investigação paranormal',items:it}; };
+V.paranormal=(o=>()=>{ const r=o(); r.items.unshift({ic:'🔦',l:'Trabalhar com investigação paranormal',s:'Contratos, fama, exorcismos e bestiário',on:()=>UI.push(V.paraProf)}, {ic:'📖',l:'Bestiário',on:()=>UI.push(V.paraBest)}); return r; })(V.paranormal);
+V.career=(o=>()=>{ const r=o(); if(pnPode()&&r&&r.items) r.items.push({ic:'👻',l:'Investigador paranormal',s:'Carreira autônoma · pagamento por contrato',on:()=>UI.push(V.paraProf)}); return r; })(V.career);
+yearMoney=(o=>function(){ const r=o.apply(this,arguments); if(pnPode()&&S.me.para&&S.me.para.prof&&pn().ativa){ const p=pn(); if(p.caso) pnFinalizar(null,true); pnOfertas(); log(p.rep>=20?'Meu nome circulou entre quem acredita no sobrenatural. Chegaram novos pedidos de investigação e expulsão.':'Chegaram novos pedidos à minha agenda de investigação paranormal.'); } return r; })(yearMoney);
+
+// ===== Enfermidades fictícias exclusivas de criaturas =====
+const PN_DOENCAS={
+ sangue_cinzento:{n:'Síndrome do sangue cinzento',criatura:'vampiro',dmg:9,hap:3,p:.045,cure:'doc',doc:0,trat:'Transfusão alquímica',c:1800,sx:'O sangue que bebo perdeu o gosto e minhas veias ficaram acinzentadas.'},
+ necrose_solar:{n:'Necrose solar',criatura:'vampiro',dmg:12,p:.035,cure:'doc',doc:0,trat:'Bálsamo noturno',c:1200,sx:'As queimaduras de sol não fecham, mesmo depois de noites em repouso.'},
+ febre_lunar:{n:'Febre lunar',criatura:'lobisomem',dmg:8,hap:4,p:.05,cure:'doc',doc:0,trat:'Infusão de acônito encantado',c:900,sx:'Tenho febre e meus ossos estalam mesmo longe da lua cheia.'},
+ prata_sangue:{n:'Intoxicação argêntea',criatura:'lobisomem',dmg:13,p:.03,cure:'doc',doc:0,trat:'Extração ritual da prata',c:1600,sx:'Uma ferida antiga arde e veios prateados surgiram sob minha pele.'}
+};
+Object.entries(PN_DOENCAS).forEach(([id,d])=>{ DISEASES[id]=d; SINT[id]=[d.sx]; });
+addDisease=(o=>function(id){ const d=PN_DOENCAS[id]; if(d&&(S.scen||S.me.criatura!==d.criatura)) return; return o(id); })(addDisease);
+function pnTratar(id){ const m=S.me,d=m.dis.find(x=>x.id===id),def=PN_DOENCAS[id]; if(!d||!def||!m.alive) return 'Não tenho essa doença.';
+ if(!canPay(def.c)) return `O tratamento custa ${fmt(def.c)}.`; if(use('pn_trat_'+id)>1) return 'Só posso fazer um tratamento deste tipo por ano.'; m.money-=def.c; d.k=true;
+ if(R.chance(.8)){ m.dis=m.dis.filter(x=>x!==d); st('health',10); return `${def.trat}: me curei de ${def.n.toLowerCase()}.`; } return `${def.trat}: a doença foi identificada, mas o tratamento não funcionou desta vez.`; }
+treat=(o=>function(where,d){ if(PN_DOENCAS[d.id]) return 'A medicina comum não reconhece essa enfermidade. Procure a clínica sobrenatural no menu Saúde.'; return o(where,d); })(treat);
+V.health=(o=>()=>{ const r=o(); if(S.me.criatura) r.items.push({ic:'🧪',l:'Clínica sobrenatural',s:'Doenças de vampiros e lobisomens',on:()=>UI.push(V.paraSaude)}); return r; })(V.health);
+V.paraSaude=()=>({title:'Clínica sobrenatural',items:[{html:'Enfermidades da maldição exigem tratamentos próprios. Cada tratamento tem 80% de chance e pode ser tentado uma vez por ano.'},...S.me.dis.filter(d=>PN_DOENCAS[d.id]).map(d=>{ const def=PN_DOENCAS[d.id]; return {ic:'🧪',l:d.k===false?'Investigar sintomas sobrenaturais':def.n,s:`${d.k===false?d.sx:def.trat} · ${fmt(def.c)}`,on:()=>act(()=>pnTratar(d.id),'Clínica sobrenatural')}; }),...(!S.me.dis.some(d=>PN_DOENCAS[d.id])?[{html:'Não há sintomas sobrenaturais para tratar.'}]:[])]});
+yearHealth=(o=>function(){ const m=S.me; m.dis=m.dis.filter(d=>!PN_DOENCAS[d.id]||PN_DOENCAS[d.id].criatura===m.criatura); return o.apply(this,arguments); })(yearHealth);
+
+// Histórico real do repositório; entradas anteriores ao changelog também são preservadas.
+const NL_HISTORICO=[
+  {
+    "h": "8a6e4ea",
+    "d": "2026-10-15",
+    "t": "v1.18: quase 140 eventos em cadeia para lobisomens"
+  },
+  {
+    "h": "870cc47",
+    "d": "2026-10-15",
+    "t": "v1.17: quase 150 eventos em cadeia para vampiros"
+  },
+  {
+    "h": "4374cbc",
+    "d": "2026-10-15",
+    "t": "v1.16: quase 200 eventos paranormais em cadeia para qualquer pessoa"
+  },
+  {
+    "h": "bc68b64",
+    "d": "2026-10-15",
+    "t": "v1.15.2: reações do grupo ao morrer ou desistir num mundo fictício"
+  },
+  {
+    "h": "cde6dd9",
+    "d": "2026-10-15",
+    "t": "v1.15.1: opções da vida real não aparecem nos modos fictícios"
+  },
+  {
+    "h": "ad8ce00",
+    "d": "2026-10-15",
+    "t": "v1.15: identidade e orientação, fertilidade, vários amores, tratamentos longos e empresas mais difíceis"
+  },
+  {
+    "h": "323808f",
+    "d": "2026-10-14",
+    "t": "v1.14.1: economia mais equilibrada (custo de vida, cripto e ações)"
+  },
+  {
+    "h": "eb0472d",
+    "d": "2026-10-14",
+    "t": "v1.14: traição, divórcio com guarda e pensão, sede e fome das criaturas"
+  },
+  {
+    "h": "f5936b0",
+    "d": "2026-10-14",
+    "t": "v1.13: epidemia zumbi dinâmica e simulador de economia"
+  },
+  {
+    "h": "a8b1aee",
+    "d": "2026-10-14",
+    "t": "v1.12.1: 800 etapas em 160 histórias em cadeia"
+  },
+  {
+    "h": "3f91ac5",
+    "d": "2026-10-14",
+    "t": "v1.12: histórias em cadeia, saúde com sintomas e save mais seguro"
+  },
+  {
+    "h": "a292379",
+    "d": "2026-10-14",
+    "t": "v1.11: IDs de eventos estáveis, teste que barra a publicação e rodinha de atualização"
+  },
+  {
+    "h": "0543615",
+    "d": "2026-10-14",
+    "t": "Corrige o topo da tela inicial cortado em celulares de tela pequena"
+  },
+  {
+    "h": "a4dd340",
+    "d": "2026-10-14",
+    "t": "v1.10: aventuras que chegam aos poucos e formação que vale"
+  },
+  {
+    "h": "17dfa0d",
+    "d": "2026-10-14",
+    "t": "v1.9: empregos por faculdade, carro dos pais, comerciantes e consequências dos mundos"
+  },
+  {
+    "h": "d2b4ea3",
+    "d": "2026-10-14",
+    "t": "v1.8: visual novo"
+  },
+  {
+    "h": "75117ba",
+    "d": "2026-10-14",
+    "t": "v1.7: conquistas, selos novos e fazer amor"
+  },
+  {
+    "h": "1d11ac8",
+    "d": "2026-10-14",
+    "t": "v1.6.2: tela de atualização com anel de progresso e música"
+  },
+  {
+    "h": "4744a25",
+    "d": "2026-10-14",
+    "t": "v1.6.1: novidades depois de cada atualização"
+  },
+  {
+    "h": "ac3cc8f",
+    "d": "2026-10-14",
+    "t": "v1.6: atualização automática nos apps"
+  },
+  {
+    "h": "8f10a88",
+    "d": "2026-10-14",
+    "t": "v1.5.4: mais 300 eventos com os membros"
+  },
+  {
+    "h": "fc3e391",
+    "d": "2026-10-14",
+    "t": "v1.5.3: eventos com os membros das equipes"
+  },
+  {
+    "h": "f2ca833",
+    "d": "2026-10-14",
+    "t": "v1.5.2: membros aleatórios em tudo"
+  },
+  {
+    "h": "acd506d",
+    "d": "2026-10-13",
+    "t": "v1.5.1: membros da equipe no trabalho"
+  },
+  {
+    "h": "e124a6d",
+    "d": "2026-10-13",
+    "t": "v1.5: 200 eventos por sistema, seita com cargos e fé, equipes com membros"
+  },
+  {
+    "h": "0d2e1c4",
+    "d": "2026-10-13",
+    "t": "v1.4: seita, polícia, golpe de Estado, paranormal e reações ao desistir"
+  },
+  {
+    "h": "0afae67",
+    "d": "2026-10-13",
+    "t": "v1.3: romance nos modos, vida de herói por ano e rostos por gênero"
+  },
+  {
+    "h": "cc81eee",
+    "d": "2026-10-13",
+    "t": "publish-web: acentos corretos no PowerShell 5"
+  },
+  {
+    "h": "8160f74",
+    "d": "2026-10-13",
+    "t": "Pesadelo zumbi sem fim, morte real no isekai e eventos com efeito de verdade"
+  },
+  {
+    "h": "0ae5a54",
+    "d": "2026-10-13",
+    "t": "publish-web: mensagem de commit com acentos corretos"
+  },
+  {
+    "h": "981161c",
+    "d": "2026-10-13",
+    "t": "Ignora arquivos gerados pelo build"
+  },
+  {
+    "h": "82a166a",
+    "d": "2026-10-13",
+    "t": "Modos fictícios refeitos como aventuras em dias"
+  },
+  {
+    "h": "2cb96fa",
+    "d": "2026-10-13",
+    "t": "Links para jogar no navegador e baixar a release; script para publicar a versão web"
+  },
+  {
+    "h": "de8e932",
+    "d": "2026-10-13",
+    "t": "NewLife: simulador de vida para Windows e Android"
+  }
+];
+
+V.historico=(pagina=0)=>()=>{ const total=Math.ceil(NL_HISTORICO.length/12),p=Math.max(0,Math.min(total-1,pagina)); return {title:'Histórico desde o início',items:[{html:'Registros originais do desenvolvimento, do primeiro commit até a versão 1.18. As novidades da 1.19 estão na tela anterior. Datas e descrições preservadas do Git.'},{btns:[{l:'Mais recentes',dis:p===0,on:()=>{ UI.back(); UI.push(V.historico(p-1)); }},{l:'Desde o início',dis:p===total-1,on:()=>{ UI.back(); UI.push(V.historico(total-1)); }}]},...NL_HISTORICO.slice(p*12,p*12+12).map(e=>({html:'<div class="card"><p>'+esc(e.t)+'</p><small>'+esc(e.d)+' · '+esc(e.h)+'</small></div>'})),{html:'Página '+(p+1)+' de '+total},{btns:[{l:'Anteriores',dis:p===total-1,on:()=>{ UI.back(); UI.push(V.historico(p+1)); }},{l:'Posteriores',dis:p===0,on:()=>{ UI.back(); UI.push(V.historico(p-1)); }}]}]}; };
+V.novidades=(o=>()=>{ const r=o(); r.items.unshift({ic:'📜',l:'Ver histórico desde o início',s:NL_HISTORICO.length+' registros, incluindo versões antigas e correções',on:()=>UI.push(V.historico())}); return r; })(V.novidades);
+
 // ===== Teste automático (abre com #teste no endereço) =====
 function selfTest(){
   const errs={},lives=[]; let years=0,events=0,actions=0;
   const T=(name,fn)=>{ window.__T=name; (window.__TR=window.__TR||[]).push(name); if(window.__TR.length>30) window.__TR.shift(); try{ actions++; const r=fn(); if(S&&S.me&&!isFinite(S.me.money)){ const k='NaN após '+name; errs[k]=(errs[k]||0)+1; S.me.money=0; } return r; }catch(e){ const k=name+': '+e.message; errs[k]=(errs[k]||0)+1; if(errs[k]===1) errs[k+' @']=(e.stack||'').split('\n').slice(1,3).join(' | '); } };
+  T('paranormal profissional',()=>{
+    const assert=(ok,msg)=>{ if(!ok) throw Error(msg); };
+    newLife({}); S.me.age=25; S.me.money=100000; S.me.health=100; S.me.prison=null; S.scen=null;
+    pnEntrar(); assert(pn().ativa,'carreira'); const ofertas=pnOfertas(); assert(ofertas===pnOfertas(),'ofertas mudaram no mesmo ano');
+    const chance=R.chance; try { R.chance=()=>false;
+      for(const e of PN_ENTIDADES){
+        pn().ofertas=[{id:'teste',cliente:'Cliente',local:'Casa',nivel:1,ex:true,pago:1000,aceito:false}];pn().ano=S.year;
+        pnAceitar('teste'); const c=pn().caso; c.ent=e.id;c.quarto=1; const antes=S.me.money;
+        pnAcao('mover',1); for(const k of Object.keys(PN_PISTAS)) pnAcao('medir',k);
+        assert(c.pistas.length===3,'três provas '+e.id); const bateria=c.bat;pnAcao('medir',e.p[0]);assert(c.bat===bateria,'repetição consumiu bateria');
+        c.caca=2;pnAcao('esconder');assert(!c.caca,'esconderijo');
+        pnAcao('proteger');pnAcao('rito',e.rit);assert(c.expulsa,'rito '+e.id);pnAcao('mover',0);
+        S=JSON.parse(JSON.stringify(S)); assert(pn().caso.pistas.length===3,'save perdeu pistas');
+        pnFinalizar(e.id);assert(S.me.money===antes+1000,'pagamento');pnFinalizar(e.id);assert(S.me.money===antes+1000,'pagamento duplicado');assert(pn().best[e.id]===1,'bestiário');
+      }
+      pn().ofertas=[{id:'erro',local:'Casa',nivel:1,ex:false,pago:1000}]; pnAceitar('erro');let saldo=S.me.money;pnFinalizar('inexistente');assert(S.me.money===saldo,'erro pagou');
+      pn().ofertas=[{id:'fuga',local:'Casa',nivel:1,ex:true,pago:1000}];pnAceitar('fuga');pn().caso.san=1;pnAcao('mover',1);assert(!pn().caso,'sanidade zero não encerrou');
+      pn().ofertas=[{id:'parcial',local:'Casa',nivel:1,ex:true,pago:1000}];pnAceitar('parcial');pn().caso.ent='errante';pn().caso.pistas=['frio','voz','escrita'];saldo=S.me.money;pnFinalizar('errante');assert(S.me.money===saldo+400,'pagamento parcial');
+      S.me.criatura=null;addDisease('febre_lunar');assert(!S.me.dis.some(d=>d.id==='febre_lunar'),'humano com doença lunar');
+      S.me.criatura='vampiro';addDisease('febre_lunar');assert(!S.me.dis.some(d=>d.id==='febre_lunar'),'vampiro com doença lunar');addDisease('sangue_cinzento');assert(S.me.dis.some(d=>d.id==='sangue_cinzento'),'doença vampiro');
+      const dinheiro=S.me.money;pnTratar('sangue_cinzento');assert(S.me.money===dinheiro-1800,'custo tratamento');pnTratar('sangue_cinzento');assert(S.me.money===dinheiro-1800,'tratamento repetido');
+      S.me.criatura=null;yearHealth();assert(!S.me.dis.some(d=>PN_DOENCAS[d.id]),'doença após cura da maldição');
+      S.me.age=12;pn().ativa=false;pnEntrar();assert(!pn().ativa,'menor profissional');S.me.age=25;
+      [V.paraProf,V.paraCaso,V.paraBest,V.paraSaude,V.novidades,V.historico(),V.historico(999)].forEach(v=>v().items.map(rowHtml));
+      assert(NL_HISTORICO.some(x=>x.h==='de8e932'),'histórico sem início');
+    } finally { R.chance=chance; }
+  });
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
