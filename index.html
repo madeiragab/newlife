@@ -14698,6 +14698,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.38',d:'16/10/2026',t:'Escândalos atingem a vida pessoal',itens:['Parceiros, familiares e amigos reagem individualmente: podem apoiar uma apuração justa, colaborar com a investigação, afastar-se ou terminar.','Lealdade, ambição, ciúme e vínculo influenciam as respostas; todos os parceiros são considerados.','Seguidores e fiéis podem se afastar. O jornal distingue fama de reputação pública e registra a repercussão.']},
  {v:'1.37',d:'16/10/2026',t:'Doações, denúncias e contas bloqueadas',itens:['Desvios do culto entram na mesma investigação usada para crimes e corrupção política.','A Justiça pode bloquear valores pessoais envolvidos e suspender saídas do caixa religioso.','Absolvição e arquivamento liberam recursos; condenações permitem ressarcimento. Doações legítimas não viram patrimônio do líder.']},
  {v:'1.36',d:'16/10/2026',t:'Escândalos políticos e investigação',itens:['Desvios públicos deixam registros e podem gerar denúncia, investigação, processo e julgamento.','Aprovação cai durante o escândalo; presidentes e outros governantes podem perder o mandato por votação.','Colaborar, contratar defesa ou interferir muda a apuração. O poder não garante impunidade, e investigação não significa condenação.']},
  {v:'1.35',d:'16/10/2026',t:'As notícias chegaram',itens:['Uma barra branca no topo mostra a bandeira do país e a manchete mais recente.','Sua ascensão à fama, mandatos, prisões e acontecimentos do mundo viram notícias.','Toque na barra para abrir o jornal, ler as matérias e consultar o histórico, que continua entre gerações.']},
@@ -15240,6 +15241,21 @@ justicaAno=(o=>function(){const r=o.apply(this,arguments);for(const c of justica
 trial=(o=>function(k,d){const r=o.apply(this,arguments);if(d.justicaId){const c=justica().casos.find(x=>x.id===d.justicaId);if(c)justicaLiberar(c);}return r;})(trial);
 EVENTS.seita_policia={show:()=>({k:'Justiça',t:'Denúncia contra a liderança religiosa',x:'A polícia recebeu denúncias sobre o grupo. A investigação deve distinguir suspeitas, doações legítimas e desvios comprovados.',ch:[['Colaborar','colaborar'],['Contratar assessoria ($12.000)','defesa'],['Tentar interferir','interferir']]}),pick:k=>{let c=justica().casos.find(c=>c.fonte==='culto'&&!['arquivado','absolvido','condenado'].includes(c.etapa));if(!c){c=justicaRegistrar('denúncias sobre a gestão do grupo',0,'culto');c.semRegistro=true;c.provas=5;}justicaAbrir(c);S.pending=S.pending.filter(e=>!(e.id==='justica_resposta'&&e.d.cid===c.id));return justicaResponder(c.id,k);}};
 V.justica=(o=>()=>{const r=o();const c=justica().casos.reduce((n,c)=>n+(c.retido||0),0);r.items.unshift({html:'<div class="card">'+kv('Recursos pessoais bloqueados',fmt(c))+'<p>Recursos bloqueados ficam fora do saldo disponível. Absolvição ou arquivamento libera o bloqueio; condenação pode destiná-los ao ressarcimento.</p></div>'});return r;})(V.justica);
+
+// Repercussão não é sinônimo de culpa: pessoas reagem à investigação e aos vínculos.
+function escandaloReagir(c){if(!c.publico||c.reacoes)return;c.reacoes=[];const m=S.me;m.reputacao=clamp((m.reputacao??60)-12);if(m.social)m.social.f=Math.max(0,Math.round(m.social.f*.9));if(seita()){seita().fieis=Math.round(seita().fieis*.88);seita().devo=clamp(seita().devo-8);}
+ const proximos=people('namoro','noivo','conjuge','amigo','mae','pai','irmao','filho','adot');
+ for(const p of proximos){if(p.age<18){p.bond=clamp(p.bond-2);continue;}const t=npcPerfil(p);let tipo='afastou-se';
+ if(t.lealdade>=70&&p.bond>=60){tipo='pediu uma apuração justa';p.bond=clamp(p.bond+2);}
+ else if(t.ambicao>65&&t.lealdade<45){tipo='entregou informações à investigação';if(!c.semRegistro)c.provas=clamp(c.provas+5);p.bond=clamp(p.bond-12);}
+ else if(partners().includes(p)&&(p.bond<35||(t.ciume>75&&t.lealdade<40))){tipo='decidiu terminar o relacionamento';relFim(p);}
+ else{p.bond=clamp(p.bond-8);relMemoria(p,'conflito');}
+ p.publicoReacao={ano:S.year,cid:c.id,tipo};c.reacoes.push({pid:p.id,n:p.first,tipo});}
+ if(c.reacoes.length)noticia('Pessoas próximas reagem ao caso de '+m.first,c.reacoes.slice(0,8).map(x=>x.n+' '+x.tipo+'.').join(' '),'repercussao');
+}
+justicaAbrir=(o=>function(c){const r=o.apply(this,arguments);escandaloReagir(c);return r;})(justicaAbrir);
+V.person=(o=>function(p){const r=o(p);if(r&&p.publicoReacao)r.items.push({l:'Reação ao escândalo',s:p.publicoReacao.ano+' · '+p.publicoReacao.tipo});return r;})(V.person);
+V.jornal=(o=>()=>{const r=o();r.items.unshift({html:'<div class="card">'+bar('Reputação pública',S.me.reputacao??60)+'<p>Fama mede visibilidade. Reputação mede confiança: um escândalo pode tornar alguém conhecido e menos confiável.</p></div>'});return r;})(V.jornal);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
