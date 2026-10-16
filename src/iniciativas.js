@@ -3,8 +3,8 @@ function npcAtivos(){return people('amigo','mae','pai','irmao','filho','adot','n
 function npcIniciativa(){
  if(!S.me.alive||S.scen||S.me.prison||S.pending.some(e=>e.id==='npc_convite'))return;
  const l=npcAtivos().filter(p=>p.npcAno!==S.year);if(!l.length||!R.chance(.3))return;
- const p=R.pick(l);p.npcAno=S.year;
- if(p.age>=18&&R.chance(.35)){p.npcProjeto=R.pick(['curso de formação','projeto de trabalho','grupo de voluntariado']);p.smarts=clamp(p.smarts+2);log(p.first+' começou um '+p.npcProjeto+' por iniciativa própria.','good');}
+ const p=R.wpick(l.map(p=>[p,1+npcPerfil(p).ambicao/100]));p.npcAno=S.year;
+ if(p.age>=18&&R.chance(.15+npcPerfil(p).ambicao/200)){p.npcProjeto=(npcPerfil(p).ambicao>65?'projeto de trabalho em ':npcPerfil(p).lealdade>65?'grupo comunitário de ':'curso de ')+npcPerfil(p).interesse;p.smarts=clamp(p.smarts+2);log(p.first+' começou um '+p.npcProjeto+' por iniciativa própria.','good');}
  else queue('npc_convite',{pid:p.id});
 }
 function npcResponder(p,k){if(!p||!p.alive)return 'Não foi possível combinar o encontro.';
