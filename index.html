@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610152049'</script>
+<title>NewLife</title><script>window.NL_VER='2610160545'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -1192,7 +1192,12 @@ const REL_LABEL={mae:'Mãe',pai:'Pai',irmao:'Irmão|Irmã',avo:'Avô|Avó',filho
   colega:'Colega de classe',colegaT:'Colega de trabalho',namoro:'Namorado|Namorada',noivo:'Noivo|Noiva',conjuge:'Marido|Esposa',ex:'Ex',
   pet:'',inimigo:'Desafeto',chefe:'Chefe',adot:'Filho adotivo|Filha adotiva'};
 let relLabel=p=>p.rel==='pet'?g(p.species,p.gender):g(REL_LABEL[p.rel]||p.rel,p.gender);
-const partner=()=>people('namoro','noivo','conjuge')[0]||null;
+const partners=(test=()=>true)=>people('namoro','noivo','conjuge').filter(test);
+const pickPartner=(test)=>R.pick(partners(test))||null;
+// Compatibilidade com saves e ferramentas antigas; fluxos novos usam lista ou alvo explícito.
+const partner=()=>partners()[0]||null;
+function storyPartner(d){ if(!Object.hasOwn(d,'partnerId')){ const alvo=P(d.pid); d.partnerId=(alvo&&partners().includes(alvo)?alvo:pickPartner())?.id??null; } const p=P(d.partnerId); return p&&partners().includes(p)?p:null; }
+
 const kids=()=>people('filho','adot');
 
 // ---------- utilidades do personagem ----------
@@ -1341,7 +1346,7 @@ function yearStats(){
   if(a>=32) st('looks',-(a>60?R.int(1,3):a>45?R.int(0,2):R.int(0,1))); if(a>=13&&a<=18) st('looks',R.int(-2,3));
   if(a>=30) st('health',-(a>80?R.int(1,4):a>65?R.int(0,3):a>45?R.int(0,2):R.int(0,1)));
   if(a<55&&!m.dis.some(d=>DISEASES[d.id].dmg>=8)&&m.add.alcool<40&&m.add.cigarro<40) st('health',R.int(0,a<30?3:2));
-  let target=58+(m.money>1e5?6:m.money<0?-12:0)+(partner()?6:0)+(m.job||m.edu.cur||m.ret?4:a>=18?-10:0)-(m.prison?28:0)-(m.dis.length*3)+(m.karma-50)/10;
+  let target=58+(m.money>1e5?6:m.money<0?-12:0)+(partners().length?6:0)+(m.job||m.edu.cur||m.ret?4:a>=18?-10:0)-(m.prison?28:0)-(m.dis.length*3)+(m.karma-50)/10;
   m.happy=clamp(m.happy+(target-m.happy)*.2+R.int(-6,6));
   const ad=m.add;
   if(ad.alcool>40){ st('health',-R.int(1,4)); st('smarts',-1); if(ad.alcool>75&&R.chance(.05)&&!m.dis.find(d=>d.id==='cirrose')) addDisease('cirrose'); }
@@ -1554,7 +1559,7 @@ function yearSummary(){
     else if(j.perf>=30&&j.perf<55&&gap('job',2)) L.push(R.pick([`Meu desempenho na ${j.co} caiu. Preciso me esforçar.`,`Levei uma advertência por atraso na ${j.co}.`,`Meu chefe anda me olhando torto.`]));
     else if(j.perf<30) L.push(`Estou na corda bamba na ${j.co}. Qualquer erro e sou ${m.gender==='F'?'demitida':'demitido'}.`); }
   else if(a>=19&&a<62&&!m.job&&!m.edu.cur&&!m.prison&&!m.office&&!m.biz&&!(m.royal&&!m.royal.abd)&&R.chance(.6)&&gap('semjob',2)) L.push(R.pick(['Passei mais um ano sem emprego.','Mandei currículo para tudo que é lugar.','Fiquei em casa procurando vagas na internet.','Fiz uns bicos para pagar as contas.','Fui a três entrevistas e ninguém me chamou de volta.']));
-  const pr=partner();
+  const pr=pickPartner();
   if(pr&&R.chance(.6)&&(pr.bond<45?gap('par',2):gap('par',3))){ const yrs=pr.yrs; const lbl=pr.rel==='conjuge'?'casad'+o:pr.rel==='noivo'?'noiv'+o:'namorando';
     L.push(pr.bond>=75?R.pick([`Completei ${yrs} ${yrs===1?'ano':'anos'} ${lbl==='namorando'?'de namoro':'com'} ${pr.first}. Estamos mais apaixonados do que nunca.`,`${pr.first} me fez uma surpresa no meu aniversário.`,`Viajamos, ${pr.first} e eu, só nós dois.`,`${pr.first} ainda me faz rir todos os dias.`])
       :pr.bond>=45?R.pick([`${yrs} ${yrs===1?'ano':'anos'} ${lbl==='namorando'?'de namoro com':'ao lado de'} ${pr.first}. Uma relação estável.`,`${pr.first} e eu caímos na rotina, mas estamos bem.`,`Discutimos por besteira, ${pr.first} e eu, mas passou.`])
@@ -1690,7 +1695,7 @@ const EVENTS={
  cigarro:{w:2,when:m=>m.age>=13&&m.age<=30&&free(m)&&m.add.cigarro<30,prep:()=>({t:R.pick(['um cigarro','um vape de menta','um charuto','um cigarro de palha'])}),
   show:d=>({k:'Tentação',t:'Quer um trago?',x:`Um conhecido me ofereceu ${d.t}.`,ch:[['Aceitar','a'],['Recusar','r']]}),
   pick:k=>{ const m=S.me; if(k==='a'){ m.add.cigarro=clamp(m.add.cigarro+R.int(10,30)*(1.4-m.will/100)); return R.chance(.5)?'Tossi feito louco.':'Até que gostei. Isso pode ser um problema.'; } return 'Recusei numa boa.'; }},
- crush:{w:3,when:m=>m.age>=12&&m.age<=19&&inSchool(m)&&!partner(),prep:()=>{ const m=S.me; const gd=m.pref==='A'?(R.chance(.5)?'M':'F'):m.pref; const p=addP(mkPerson({rel:'colega',gender:gd,age:m.age+R.int(-1,1),bond:55})); return {p:p.id}; },
+ crush:{w:3,when:m=>m.age>=12&&m.age<=19&&inSchool(m)&&!partners().length,prep:()=>{ const m=S.me; const gd=m.pref==='A'?(R.chance(.5)?'M':'F'):m.pref; const p=addP(mkPerson({rel:'colega',gender:gd,age:m.age+R.int(-1,1),bond:55})); return {p:p.id}; },
   show:d=>({k:'Coração',t:'Bilhete na mochila',x:`${fullName(P(d.p))}, da minha sala, disse que gosta de mim.`,ch:[['Pedir em namoro','n'],['Recusar com carinho','r'],['Rir da cara','x']]}),
   pick:(k,d)=>{ const p=P(d.p); if(k==='n'){ const erro=polyNamorar(p); if(erro) return erro; p.bond=75; cnt('partners'); st('happy',10); return `Agora ${p.first} e eu estamos namorando.`; } if(k==='x'){ S.me.karma=clamp(S.me.karma-4); p.rel='inimigo'; p.bond=5; return `${p.first} saiu chorando. A escola inteira ficou sabendo.`; } p.bond=40; return `${p.first} entendeu.`; }},
  prova:{w:3,when:m=>m.age>=8&&m.edu.cur&&free(m),prep:()=>({s:R.pick(['matemática','química','história','física','biologia','português','geografia','inglês'])}),
@@ -1748,7 +1753,7 @@ const EVENTS={
   pick:(k,d)=>{ const j=S.me.job; if(k==='a'){ endJob(); S.me.job=Object.assign({},j,{co:d.c,mul:(j.mul||1)*(1+d.p/100),yrs:0,perf:55}); return `Mudei para a ${d.c}.`; } if(k==='u'){ if(R.chance(.5)){ j.mul=(j.mul||1)*(1+d.p/200); return 'Meu chefe cobriu parte da proposta.'; } j.perf=clamp(j.perf-10); return 'Meu chefe não gostou nada da chantagem.'; } return 'Recusei e fiquei onde estou.'; }},
  flerte_trab:{w:1.5,when:m=>m.job&&m.age>=18&&free(m),prep:()=>{ const m=S.me; const gd=m.pref==='A'?(R.chance(.5)?'M':'F'):m.pref; const p=addP(mkPerson({rel:'colegaT',gender:gd,age:clamp(m.age+R.int(-6,6),18,90),bond:55})); return {p:p.id}; },
   show:d=>({k:'Trabalho',t:'Clima no escritório',x:`${fullName(P(d.p))}, ${P(d.p).age} anos, colega de trabalho, está claramente flertando comigo.`,ch:[['Corresponder','c'],['Cortar o clima','r']]}),
-  pick:(k,d)=>{ const p=P(d.p); if(k==='r') return 'Deixei claro que não rola.'; const cur=partner(); if(cur){ cnt('cheats'); if(R.chance(.35)){ cur.bond=clamp(cur.bond-40); return `${cur.first} descobriu tudo. A casa caiu.`; } st('happy',6); return `Tive um caso escondido com ${p.first}.`; } p.rel='namoro'; p.bond=70; cnt('partners'); st('happy',8); return `Comecei a namorar ${p.first}.`; }},
+  pick:(k,d)=>{ const p=P(d.p); if(k==='r') return 'Deixei claro que não rola.'; const cur=pickPartner(); if(cur){ cnt('cheats'); if(R.chance(.35)){ cur.bond=clamp(cur.bond-40); return `${cur.first} descobriu tudo. A casa caiu.`; } st('happy',6); return `Tive um caso escondido com ${p.first}.`; } p.rel='namoro'; p.bond=70; cnt('partners'); st('happy',8); return `Comecei a namorar ${p.first}.`; }},
  socio:{w:1.5,when:m=>m.age>=22&&m.money>5000&&free(m),prep:()=>({v:amt(3000,Math.min(200000,Math.max(5000,S.me.money*.6))),n:R.pick(['uma hamburgueria artesanal','um aplicativo de delivery de pet','uma loja de açaí','uma marca de roupas','uma cervejaria','uma startup de inteligência artificial','um food truck','uma franquia de lavanderia']),f:friendName()||'Um conhecido'}),
   show:d=>({k:'Negócio',t:'Proposta de sociedade',x:`${d.f} quer abrir ${d.n} e me chamou para investir ${fmt(d.v)}.`,ch:[['Investir','i'],['Recusar','r']]}),
   pick:(k,d)=>{ const m=S.me; if(k==='r') return 'Recusei.'; m.money-=d.v; const r=R.f(); if(r<.25){ const g2=Math.round(d.v*R.int(2,6)); m.money+=g2; st('happy',15); return `O negócio bombou! Recebi ${fmt(g2)}.`; } if(r<.55){ const g2=Math.round(d.v*1.2); m.money+=g2; return `Deu um lucro modesto: recebi ${fmt(g2)}.`; } st('happy',-10); return 'O negócio faliu em oito meses. Perdi tudo.'; }},
@@ -1764,7 +1769,7 @@ const EVENTS={
  pet_doente:{w:2,when:m=>people('pet').length&&free(m),prep:()=>({p:R.pick(people('pet')).id,v:amt(200,4000)}),
   show:d=>({k:'Bicho',t:`${P(d.p).first} está doente`,x:`${P(d.p).first} parou de comer. O veterinário cobra ${fmt(d.v)}.`,ch:[['Levar ao veterinário','v'],['Esperar melhorar','e']]}),
   pick:(k,d)=>{ const p=P(d.p),m=S.me; if(k==='v'){ m.money-=d.v; if(R.chance(.85)) return `${p.first} se recuperou!`; } else if(R.chance(.6)) return `${p.first} melhorou sozinho.`; p.alive=false; st('happy',-12); return `${p.first} não resistiu.`; }},
- traicao:{w:1,when:m=>partner()&&partner().bond<55&&free(m),prep:()=>({p:partner().id}),
+ traicao:{w:1,when:m=>partners(p=>p.bond<55).length&&free(m),prep:()=>({p:pickPartner(p=>p.bond<55).id}),
   show:d=>({k:'Amor',t:'Mensagens suspeitas',x:`Vi mensagens no celular de ${P(d.p).first}. Estou sendo traíd${oa()}.`,ch:[['Perdoar','p'],['Terminar na hora','t'],['Fazer um escândalo','e']]}),
   pick:(k,d)=>{ const p=P(d.p); st('happy',-12); if(k==='p'){ p.bond=clamp(p.bond+10); return 'Perdoei. Vamos ver no que dá.'; } if(p.rel==='conjuge'){ divorce(p,false); return `Acabou com ${p.first}.`; } p.rel='ex'; return k==='e'?'Joguei as roupas pela janela. O prédio inteiro assistiu.':`Terminei com ${p.first}.`; }},
  pedido:{w:2,when:m=>m.age>=18&&people('namoro').some(p=>p.yrs>=2&&p.bond>=65)&&free(m),prep:()=>({p:people('namoro').find(p=>p.yrs>=2&&p.bond>=65).id}),
@@ -1779,7 +1784,7 @@ const EVENTS={
  pais_doentes:{w:2,when:m=>m.age>=18&&parents().some(p=>p.age>=60)&&free(m),prep:()=>{ const p=R.pick(parents().filter(p=>p.age>=60)); return {p:p.id,v:amt(5000,80000),d:R.pick(['um problema no coração','um câncer','uma infecção grave','uma doença nos rins'])}; },
   show:d=>({k:'Família',t:'Notícia ruim',x:`${relLabel(P(d.p))} está com ${d.d}. O tratamento custa ${fmt(d.v)}.`,ch:[['Pagar o tratamento','p'],['Visitar no hospital','v'],['Não fazer nada','n']]}),
   pick:(k,d)=>{ const p=P(d.p),m=S.me; if(k==='p'){ m.money-=d.v; p.bond=clamp(p.bond+20); m.karma=clamp(m.karma+5); if(R.chance(.75)){ p.health=clamp(p.health+30); return `${p.first} se recuperou!`; } } else if(k==='v'){ p.bond=clamp(p.bond+10); if(R.chance(.5)) return `${p.first} ficou feliz com a visita e melhorou.`; } else { m.karma=clamp(m.karma-5); if(R.chance(.5)) return `${p.first} se recuperou, sem mim.`; } p.alive=false; st('happy',-25); return `${relLabel(p)} ${p.first} morreu no hospital.`; }},
- ex_volta:{w:1.5,when:m=>!partner()&&people('ex').some(p=>p.age<80)&&free(m),prep:()=>({p:R.pick(people('ex')).id}),
+ ex_volta:{w:1.5,when:m=>!partners().length&&people('ex').some(p=>p.age<80)&&free(m),prep:()=>({p:R.pick(people('ex')).id}),
   show:d=>({k:'Amor',t:'Mensagem de madrugada',x:`${P(d.p).first}, meu ex, mandou: "saudade de você..."`,ch:[['Voltar','v'],['Visualizar e não responder','n']]}),
   pick:(k,d)=>{ const p=P(d.p); if(k==='v'){ const erro=polyNamorar(p); if(erro) return erro; p.bond=60; st('happy',6); return `Voltei com ${p.first}.`; } return 'Deixei no vácuo.'; }},
  juri:{w:1,when:m=>m.age>=18&&free(m),prep:()=>({}),
@@ -1818,7 +1823,7 @@ const EVENTS={
  casamento_amigo:{w:1.5,when:m=>m.age>=20&&people('amigo').some(p=>p.age>=20)&&free(m),prep:()=>({p:R.pick(people('amigo').filter(p=>p.age>=20)).id}),
   show:d=>({k:'Festa',t:'Convite de casamento',x:`${P(d.p).first} vai se casar e me convidou.`,ch:[['Ir e dar um presente ($300)','i'],['Ir sem presente','s'],['Não ir','n']]}),
   pick:(k,d)=>{ const p=P(d.p); if(k==='i'){ S.me.money-=300; p.bond=clamp(p.bond+12); cnt('gifts'); st('happy',5); return R.chance(.3)?'Peguei o buquê!':'Festa linda.'; } if(k==='s'){ p.bond=clamp(p.bond+3); return 'Fui e comi muito bem.'; } p.bond=clamp(p.bond-15); return `${p.first} ficou chatead${p.gender==='F'?'a':'o'}.`; }},
- gravidez:{w:1.5,when:m=>m.gender==='F'&&m.age>=16&&m.age<=44&&partner()&&free(m)&&!S.births.length,prep:()=>({p:partner().id}),
+ gravidez:{w:1.5,when:m=>m.gender==='F'&&m.age>=16&&m.age<=44&&partners(p=>sexoDe(p)!==sexoDe(m)).length&&free(m)&&!S.births.length,prep:()=>({p:pickPartner(p=>sexoDe(p)!==sexoDe(S.me)).id}),
   show:()=>({k:'Família',t:'Teste positivo',x:'Estou grávida!',ch:[['Ter o bebê','t'],['Entregar para adoção ao nascer','a']]}),
   pick:(k,d)=>{ if(k==='t'){ S.births.push({with:d.p}); st('happy',8); return 'O bebê nasce no ano que vem.'; } st('happy',-6); return 'O bebê vai para uma família que espera por ele.'; }},
  missao:{w:3,when:m=>m.job&&m.job.spc==='militar'&&free(m),prep:()=>({l:R.pick(['uma missão de paz no exterior','a fronteira norte','uma operação de resgate após um terremoto','uma missão em zona de conflito'])}),
@@ -1854,9 +1859,9 @@ const EVENTS={
  mudanca:{w:1,when:m=>m.age>=20&&m.age<=60&&free(m),prep:()=>({c:R.pick(countryOf(S.me.country).cities.filter(x=>x!==S.me.city))}),
   show:d=>({k:'Mudança',t:'Mudar de cidade?',x:`Um amigo diz que a vida em ${d.c} é muito melhor.`,ch:[['Me mudar','m'],['Ficar onde estou','f']]}),
   pick:(k,d)=>{ if(k==='f') return 'Fiquei.'; S.me.city=d.c; S.me.money-=5000; st('happy',R.int(-4,10)); if(S.me.job&&R.chance(.6)){ endJob(); return `Me mudei para ${d.c} e larguei o emprego.`; } return `Me mudei para ${d.c}.`; }},
- bebe_noite:{w:2,when:m=>kids().some(k=>k.age<=1)&&free(m),prep:()=>({}),
+ bebe_noite:{w:2,when:m=>kids().some(k=>k.age<=1)&&free(m),prep:()=>({parentId:R.pick(kids().filter(k=>k.age<=1)).parentId}),
   show:()=>({k:'Filhos',t:'Choro às 3h',x:'O bebê não para de chorar de madrugada.',ch:[['Levantar e cuidar','c'],['Fingir que estou dormindo','d']]}),
-  pick:k=>{ const p=partner(); if(k==='c'){ st('health',-2); if(p) p.bond=clamp(p.bond+5); return 'Ninei até o sol nascer.'; } if(p){ p.bond=clamp(p.bond-8); return `${p.first} percebeu e ficou furios${p.gender==='F'?'a':'o'}.`; } return 'O bebê dormiu sozinho, uma hora depois.'; }},
+  pick:(k,d)=>{ const p=P(d.parentId); if(k==='c'){ st('health',-2); if(p) p.bond=clamp(p.bond+5); return 'Ninei até o sol nascer.'; } if(p){ p.bond=clamp(p.bond-8); return `${p.first} percebeu e ficou furios${p.gender==='F'?'a':'o'}.`; } return 'O bebê dormiu sozinho, uma hora depois.'; }},
 };
 
 // eventos que o sistema força
@@ -1940,7 +1945,7 @@ function strangers(m,o){
 // Transforma o desconhecido do evento em uma pessoa de verdade na lista de relações (uma vez só por evento).
 function meetP(d,rel='amigo',key='n',o={}){
   const m=S.me; if(d['met_'+key]&&P(d['met_'+key])) return P(d['met_'+key]);
-  if(!d[key]) return null; if(rel==='namoro'&&partner()) rel='amigo';
+  if(!d[key]) return null; if(rel==='namoro'&&partners().length) rel='amigo';
   const kid=m.age<18, age=o.age??(key==='n'&&d.nAge?d.nAge:null)??clamp(m.age+(kid?R.int(-1,1):R.int(-7,7)),Math.max(1,kid?m.age-2:18),99);
   const p=mkPerson(Object.assign({rel,first:d[key],last:d[key+'l'],gender:d[key+'G'],age,bond:R.int(55,75)},o));
   if(key==='n'&&d.nFace){ p.genes=d.nFace.genes; p.look=d.nFace.look; }
@@ -2160,7 +2165,7 @@ ev('vestibular_ansiedade',{k:'Estudos',min:17,max:18,once:1,t:'Véspera do vesti
 
 // ===== Eventos: vida adulta, velhice, prisão e carreiras =====
 const hasJob=m=>m.job&&!m.job.spc;
-const single=m=>!partner();
+const single=m=>!partners().length;
 
 // ---------- vida adulta ----------
 ev('reporter_rua',{k:'TV',min:16,cd:8,t:'Entrevista na rua',x:'Um repórter me parou na rua para perguntar sobre {tema}.',prep:()=>({tema:R.pick(['o preço da gasolina','o calor','o trânsito','a final do campeonato','a nova lei do celular nas escolas'])}),ch:[
@@ -2236,7 +2241,7 @@ ev('vazamento',{k:'Casa',min:18,cd:10,when:m=>S.flags.movedOut,t:'Vazamento',x:'
 ev('golpe_amor',{k:'Internet',min:18,cd:12,when:single,t:'Amor virtual',x:'Uma pessoa linda que conheci na internet diz estar presa no exterior e precisa de {v}.',v:[1000,15000],ch:[
  ['Mandar o dinheiro',{$:'-v',h:-10,t:'Nunca mais tive notícias. Era golpe.'}],
  ['Pedir uma videochamada',{sm:1,t:'A câmera "sempre estava quebrada". Bloqueei.'}]]});
-ev('dia_namorados',{k:'Amor',min:15,cd:3,when:m=>partner(),prep:m=>{ const p=partner(); return {pid:p.id,n:p.first,nl:p.last,nG:p.gender}; },t:'Dia dos Namorados',x:'Dia dos Namorados chegando. O que fazer com {n}?',ch:[
+ev('dia_namorados',{k:'Amor',min:15,cd:3,when:m=>partners().length,prep:m=>{ const p=pickPartner(); return {pid:p.id,n:p.first,nl:p.last,nG:p.gender}; },t:'Dia dos Namorados',x:'Dia dos Namorados chegando. O que fazer com {n}?',ch:[
  ['Jantar caro',{$:-600,bond:10,h:5,t:'Um jantar inesquecível com {n}.'}],
  ['Algo feito à mão',{bond:7,k:1,t:'{n} chorou com o presente.'}],
  ['Esquecer a data',{bond:-12,t:'{n} não fala comigo há três dias.'}]]});
@@ -2492,10 +2497,10 @@ const spcIs=id=>m=>m.job&&m.job.spc===id;
 const studying=(...types)=>m=>m.edu.cur&&types.includes(m.edu.cur.type);
 const courseIn=(...ids)=>m=>m.edu.cur&&m.edu.cur.type==='uni'&&ids.includes(m.edu.cur.id);
 const WHO={
-  partner:()=>partner(), sib:()=>R.pick(people('irmao')), parent:()=>R.pick(parents()), friend:()=>R.pick(people('amigo')),
+  partner:()=>pickPartner(), partnerDating:()=>pickPartner(p=>p.rel==='namoro'), partnerEngaged:()=>pickPartner(p=>p.rel==='noivo'), partnerUnhappy:()=>pickPartner(p=>p.bond<55), partnerSecret:()=>pickPartner(p=>S.scen&&S.scen.sab&&S.scen.sab[p.id]), partnerFertile:()=>pickPartner(p=>sexoDe(p)!==sexoDe(S.me)), sib:()=>R.pick(people('irmao')), parent:()=>R.pick(parents()), friend:()=>R.pick(people('amigo')),
   boss:()=>people('chefe')[0], colega:()=>R.pick(people('colegaT')), classmate:()=>R.pick(people('colega')), grandkid:()=>R.pick(people('neto')), pet:()=>R.pick(people('pet')),
   kid:()=>R.pick(kids()), baby:()=>R.pick(kids().filter(k=>k.age<=2)), child:()=>R.pick(kids().filter(k=>k.age>=3&&k.age<=12)), teen:()=>R.pick(kids().filter(k=>k.age>=13&&k.age<=17)), adultkid:()=>R.pick(kids().filter(k=>k.age>=18)),
-  ex:()=>R.pick(people('ex')), spouse:()=>people('conjuge')[0],
+  ex:()=>R.pick(people('ex')), spouse:()=>pickPartner(p=>p.rel==='conjuge'),
 };
 function dslChance(tok){
   const mm=tok.match(/^\?([a-z]+(?:\.[a-z]+)?|\d+)([+-]\d+)?$/i); if(!mm) return .5;
@@ -2833,7 +2838,7 @@ pack({k:'Casamento',who:'spouse',when:m=>people('conjuge').length},[
  ['Filhos?','{p} quer ter filhos agora.',['Concordar|bond+8|Vamos tentar!','Pedir mais tempo|bond-5|Ainda não estou pront{o}.'],{when:m=>m.age<45&&!kids().length}],
  ['Caso extraconjugal','Alguém do trabalho está dando em cima de mim descaradamente.',['Cortar na hora|k+3 bond+2|Deixei claro que sou casad{o}.','Ceder|c:cheats ?50 h+5|Ninguém descobriu. Ainda.|bond-40|{p} descobriu.']],
 ]);
-pack({k:'Amor',when:m=>m.age>=20&&m.age<60&&!partner()},[
+pack({k:'Amor',when:m=>m.age>=20&&m.age<60&&!partners().length},[
  ['Amigos casando','Todos os meus amigos estão casando e eu continuo solteir{o}.',['Entrar num aplicativo de namoro|h+2|Baixei. Vamos ver.','Curtir a vida de solteir{o}|h+4|Liberdade total.']],
  ['Encontro às cegas','Uma amiga quer me apresentar a {n}.',['Ir ao encontro|?lk h+6 meet:namoro|Foi ótimo! Começamos a namorar.|h-3|Foi o encontro mais constrangedor da minha vida.','Recusar|h+0|Não gosto de encontros armados.']],
  ['Solidão','Hoje bateu uma solidão forte.',['Ligar para um amigo|h+4|Conversamos por horas.','Sair para dançar|h+5|A noite foi animada.','Ficar em casa|h-4|Comi sorvete vendo filme triste.']],
@@ -2843,7 +2848,7 @@ pack({k:'Amor',who:'ex',min:18,when:m=>people('ex').length},[
  ['Encontro com ex','Encontrei {p} no supermercado.',['Cumprimentar educadamente|k+2|Foi estranho, mas civilizado.','Me esconder atrás das prateleiras|h-2|{ele} me viu mesmo assim.']],
  ['Pensão','Estou em briga judicial com {p}.',['Fazer acordo|$-v|Assinamos um acordo de {v}.','Brigar até o fim|?50|Ganhei na justiça.|$-v2|Perdi e paguei {v2}.'],{v:[2000,20000],when:m=>(m.c.divorces||0)>0}],
 ]);
-pack({k:'Luto',when:m=>(m.c.widow||0)>0&&!partner()},[
+pack({k:'Luto',when:m=>(m.c.widow||0)>0&&!partners().length},[
  ['Saudade','Hoje faria aniversário de casamento.',['Visitar o túmulo|h-4 k+1|Levei flores e conversei um pouco.','Olhar fotos antigas|h-6|Chorei e sorri ao mesmo tempo.']],
  ['Seguir em frente?','Meus amigos dizem que é hora de conhecer alguém novo.',['Tentar|h+3|Aceitei um café com alguém. Foi bom.','Ainda não|h-2|Meu coração não está pronto.']],
 ]);
@@ -3009,7 +3014,7 @@ EVENTS[Object.keys(EVENTS).filter(k=>/^p\d+$/.test(k)).pop()];
 pack({k:'Realeza',when:m=>m.royal&&!m.royal.abd},[
  ['Banquete de Estado','Um rei estrangeiro vem jantar no palácio.',['Ser um anfitrião impecável|pop+5 f+2|O banquete foi elogiado no mundo todo.','Fazer uma piada diplomática|?50 pop+6|Ele riu muito.|pop-8|Ele não riu. Crise diplomática.']],
  ['Etiqueta real','Errei o protocolo e cumprimentei um embaixador do jeito errado.',['Pedir desculpas|pop-1|Ficou tudo bem.','Fingir que foi de propósito|?50 pop+3|Virou moda.|pop-4|Os jornais riram.']],
- ['Plebeu apaixonado','Me apaixonei por alguém comum, sem sangue nobre.',['Assumir o romance|pop+6 h+8|O povo adorou a história de amor.','Esconder|h-6|O palácio não aprovaria.'],{when:m=>m.royal&&!partner()&&m.age>=18}],
+ ['Plebeu apaixonado','Me apaixonei por alguém comum, sem sangue nobre.',['Assumir o romance|pop+6 h+8|O povo adorou a história de amor.','Esconder|h-6|O palácio não aprovaria.'],{when:m=>m.royal&&!partners().length&&m.age>=18}],
  ['Herança da coroa','Preciso decidir quem herda as joias da família.',['Doar a um museu|pop+8 k+4|O povo aplaudiu o gesto.','Guardar tudo|h+1|Estão no cofre.']],
  ['Visita a hospital','Visitei crianças num hospital público.',['Passar o dia com elas|pop+6 k+5 h+4|Saí de lá transformad{o}.','Mandar um representante|pop-4|O povo reparou na ausência.','Ir só para as fotos|?50 pop+3|A foto ficou ótima.|pop-6|Um jornal mostrou que fiquei só 10 minutos.']],
  ['Manifestação antimonarquia','Grupos pedem o fim da monarquia.',['Dialogar com os manifestantes|?pop pop+8|Ganhei o respeito de muitos.|pop-5|Fui vaiad{o}.','Ignorar|pop-4|Os protestos cresceram.'],{when:m=>m.royal&&m.royal.reign}],
@@ -3468,7 +3473,7 @@ function trial(k,d){
   if(m.edu.cur&&!m.prison.juv){ log(`Perdi a vaga ${eduOf(m.edu.cur)} por causa da prisão.`,'bad'); m.edu.cur=null; m.edu.club=null; }
   endJob(); m.office=null; S.flags.movedOut=1;
   if(m.c.pres) m.c.prisonAfterPres=1; if(m.royal&&!m.royal.abd){ m.royal.pop=clamp(m.royal.pop-30); }
-  const prt=partner(); if(prt&&R.chance(.4)){ if(prt.rel==='conjuge') divorce(prt,true); else { prt.rel='ex'; log(`${prt.first} terminou comigo depois da condenação.`,'bad'); } }
+  for(const prt of partners()){ if(R.chance(.4)){ if(prt.rel==='conjuge') divorce(prt,true); else { prt.rel='ex'; log(`${prt.first} terminou comigo depois da condenação.`,'bad'); } } }
   st('happy',-30);
   return note+`Fui condenad${oa()} a ${yrs} ${yrs>1?'anos':'ano'} de ${m.age<18?'internação numa unidade socioeducativa':'prisão'}.`;
 }
@@ -3708,7 +3713,7 @@ function askOut(p){
   const anteriores=polyAmores();
   const m=S.me; const diff=(m.looks-p.looks)/120+(m.fame/300)+(m.money>200000?.08:0)+(m.age>=18?(m.job?.06:-.06):0);
   if(!R.chance(clamp((.42+diff)*100,5,95)/100)){ st('happy',-3); return {ok:false,t:R.pick([`${p.first} disse que não está procurando nada agora.`,`${p.first} riu e foi embora.`,`${p.first} me deu um número de telefone falso.`,`${p.first} disse que me vê só como amig${oa()}.`])}; }
-  const cur=partner();
+  const cur=pickPartner();
   p.rel='namoro'; S.people.push(p); cnt('partners'); st('happy',8);
   polyRegistrar(p,anteriores);
   log(`Comecei a namorar ${fullName(p)}.`,'good');
@@ -3721,7 +3726,7 @@ function hookup(){
   primeiraVez(fullName(p));
   let t=`Fiquei com ${p.first}, ${p.age} anos, que conheci ${R.pick(['numa balada','num bar','num aplicativo','num show','na praia'])}.`;
   if(R.chance(.06)){ const id=R.chance(.25)?'herpes':'ist'; addDisease(id); t+=' Depois descobri que peguei uma infecção.'; }
-  const pr=partner(); if(pr&&R.chance(.3)){ pr.bond=clamp(pr.bond-40); t+=` ${pr.first} descobriu.`; }
+  for(const pr of partners()) if(R.chance(.3)){ pr.bond=clamp(pr.bond-40); t+=` ${pr.first} descobriu.`; }
   if(R.chance(.03)&&m.age<50&&p.gender!==m.gender&&!S.births.length){ p.rel='ex'; addP(p); S.births.push({with:p.id}); t+=' Meses depois, a notícia: vem um bebê aí.'; }
   return t;
 }
@@ -3744,7 +3749,7 @@ function interact(p,k,extra){
     case 'piada': if(R.chance(.6)){ p.bond=clamp(p.bond+R.int(1,5)); return `${nm} riu muito da minha piada.`; } p.bond=clamp(p.bond-2); return `${nm} não achou graça nenhuma.`;
     case 'pegadinha': if(R.chance(.5)){ p.bond=clamp(p.bond+3); return `${nm} caiu na pegadinha e riu.`; } p.bond=clamp(p.bond-8); return `${nm} ficou furios${a} com a pegadinha.`;
     case 'amizade': if(R.chance(Math.min(.95,.08+frOf(p)/100*.9))){ p.fr=clamp(frOf(p)+8); p.rel='amigo'; p.bond=clamp(p.bond+10); return `Agora ${nm} é ${p.gender==='F'?'minha amiga':'meu amigo'}!`; } p.bond=clamp(p.bond-3); return `${nm} não deu muita bola.`;
-    case 'flertar': { const okPref=m.pref==='A'||m.pref===p.gender; if(!okPref) return `Não sinto atração por ${nm}.`; if(R.chance(clamp(p.bond*.5+(m.looks-p.looks)/2+20,5,90)/100)){ const cur=partner(); p.rel='namoro'; p.bond=clamp(p.bond+15); cnt('partners'); if(cur&&!p.polyConvite?.ok){ cnt('cheats'); if(R.chance(.4)) cur.bond=clamp(cur.bond-40); } return `Rolou um clima. ${nm} e eu estamos ficando sério!`; } p.bond=clamp(p.bond-6); return `${nm} me deu um fora.`; }
+    case 'flertar': { const okPref=m.pref==='A'||m.pref===p.gender; if(!okPref) return `Não sinto atração por ${nm}.`; if(R.chance(clamp(p.bond*.5+(m.looks-p.looks)/2+20,5,90)/100)){ const cur=pickPartner(); p.rel='namoro'; p.bond=clamp(p.bond+15); cnt('partners'); if(cur&&!p.polyConvite?.ok){ cnt('cheats'); if(R.chance(.4)) cur.bond=clamp(cur.bond-40); } return `Rolou um clima. ${nm} e eu estamos ficando sério!`; } p.bond=clamp(p.bond-6); return `${nm} me deu um fora.`; }
     case 'pedido': { const [c]=extra; if(!canPay(c)) return 'Não tenho dinheiro para esse anel.'; m.money-=c; if(R.chance(clamp(p.bond+c/1000-30,5,97)/100)){ p.rel='noivo'; p.bond=clamp(p.bond+10); st('happy',15); log(`Fiquei ${m.gender==='F'?'noiva':'noivo'} de ${nm}.`,'good'); return `${nm} disse SIM!`; } p.bond=clamp(p.bond-20); st('happy',-12); return `${nm} disse que não está pront${a}.`; }
     case 'casar': { const outro=people('conjuge').find(x=>x.id!==p.id); if(outro&&!polyPodeOficializar(p)) return `Já sou casad${oa()} com ${outro.first}. Preciso do consentimento de todos antes de casar de novo.`; if(p.rel!=='noivo') return 'Preciso estar noivo dessa pessoa antes da cerimônia.'; const [c,prenup]=extra; if(!canPay(c)) return 'Não tenho dinheiro para essa festa.'; m.money-=c; if(prenup){ S.flags['prenup'+p.id]=1; if(R.chance(.3)){ p.bond=clamp(p.bond-25); return `${nm} se ofendeu com o pacto antenupcial e adiou o casamento.`; } } p.rel='conjuge'; p.yrs=0; cnt('marriages'); st('happy',20); S.flags.movedOut=1; log(`Casei com ${fullName(p)}!`,'good'); return `Casei com ${nm}! ${c>30000?'A festa foi inesquecível.':''}`; }
     case 'terminar': p.rel='ex'; st('happy',-8); log(`Terminei com ${nm}.`); return `Terminei com ${nm}.`;
@@ -3836,7 +3841,7 @@ function travel(dest,cost){
   const r=R.f();
   if(r<.12) return `Fui para ${dest}, mas a companhia aérea perdeu minha mala.`;
   if(r<.2){ st('health',-6); return `Fui para ${dest} e passei metade da viagem com intoxicação alimentar.`; }
-  if(r<.3&&!partner()&&m.age<70){ const p=candidate(true); p.rel='namoro'; S.people.push(p); cnt('partners'); return `Fui para ${dest} e me apaixonei por ${fullName(p)}! Estamos namorando.`; }
+  if(r<.3&&!partners().length&&m.age<70){ const p=candidate(true); p.rel='namoro'; S.people.push(p); cnt('partners'); return `Fui para ${dest} e me apaixonei por ${fullName(p)}! Estamos namorando.`; }
   if(r<.36){ const l=amt(100,2000); m.money-=l; return `Fui para ${dest} e fui roubad${oa()} na rua. Perdi ${fmt(l)}.`; }
   return `Fui para ${dest}. ${R.pick(['Foi a melhor viagem da minha vida.','Comi coisas que nem sei o nome.','Tirei mil fotos.','Voltei com outra visão do mundo.','Choveu todos os dias, mas valeu.','Fiz amizade com um grupo de mochileiros.'])}`;
 }
@@ -7975,7 +7980,7 @@ const romPar=()=>{ const sc=S.scen; if(!sc||!sc.par) return null; const c=crewBy
 const romSt=c=>c.par==='casado'?`Casad${oaG(c.gender)} comigo`:c.par==='noivo'?`Noiv${oaG(c.gender)}`:c.par==='namoro'?'Namorando':'';
 const romPrefG=()=>{ const m=S.me; return !m.pref||m.pref==='A'?(R.chance(.5)?'F':'M'):m.pref; };
 function romAm(c,n){ c.am=Math.max(0,Math.min(100,(c.am||10)+n)); }
-function romStart(c){ const sc=S.scen; sc.par=c.id; c.par='namoro'; c.parD=sc.dia; c.ex=0; c.lv=Math.min(100,c.lv+10); romAm(c,10); cnt('partners'); const r=partner(); if(r&&!sc.trai){ sc.trai=r.id; return ` Lá na vida real, ${r.first} nem imagina.`; } return ''; }
+function romStart(c){ const sc=S.scen; sc.par=c.id; c.par='namoro'; c.parD=sc.dia; c.ex=0; c.lv=Math.min(100,c.lv+10); romAm(c,10); cnt('partners'); const r=partners(); if(r.length&&!sc.trai){ sc.trai=r.map(p=>p.id); return ` Lá na vida real, ${r.map(p=>p.first).join(', ')} nem imaginam.`; } return ''; }
 function romEnd(c){ const sc=S.scen; if(sc.par===c.id) sc.par=null; if(sc.grav&&sc.grav.pid===c.id) sc.grav=null; c.par=null; c.ex=1; c.am=Math.min(c.am||0,10); c.lv=Math.max(0,c.lv-20); }
 const romCanBaby=c=>{ const m=S.me; if(c.gender===m.gender) return false; const mae=m.gender==='F'?m:c; return mae.age>=16&&mae.age<=46; };
 function romGrav(c){ const sc=S.scen; if(sc.grav) return 'Já tem um bebê a caminho.'; if(!romCanBaby(c)) return null; if(!R.chance(.4)) return 'Ainda não foi desta vez.'; sc.grav={pid:c.id,due:sc.dia+(sc.id==='heroi'?1:rnd(5,8))};
@@ -8011,13 +8016,13 @@ function romItems(c){ const sc=S.scen, it=[], rm=ROM[sc.id]||ROM.zumbi, once=k=>
 V.scMember=(o=>c=>{ const r=o(c); if(!r) return r; if(romOK(c)||c.par) { const i=r.items.findIndex(x=>x.l==='Deixar para trás'); const add=romItems(c); if(i>=0) r.items.splice(i,0,...add); else r.items.push(...add); }
   if(c.filho) r.items.splice(1,0,{html:`<div class="card"><p>${c.gender==='F'?'Minha filha':'Meu filho'}. Se a aventura terminar bem, ${c.gender==='F'?'ela':'ele'} vem comigo para a vida real.</p></div>`});
   return r; })(V.scMember);
-V.scCrew=(o=>()=>{ const r=o(); const sc=S.scen; if(!sc) return r; const it=[{sec:'Amor'}], p=romPar(), real=partner();
+V.scCrew=(o=>()=>{ const r=o(); const sc=S.scen; if(!sc) return r; const it=[{sec:'Amor'}], p=romPar(), real=partners();
   if(p) it.push({face:faceSVG(p,40),l:`${p.first} ${p.last}`,s:`${romSt(p)} · paixão ${p.am||0}%`,bars:[['💗',p.am||0,'#E5487D']],on:()=>UI.push(()=>V.scMember(p))});
-  else if(sc.id==='heroi'&&real) it.push({face:faceSVG(real,40),l:`${real.first} ${real.last}`,s:`${relLabel(real)}${sc.sab&&sc.sab[real.id]?' · sabe quem eu sou':''}`,bars:[['❤️',real.bond,'#E5487D']],on:()=>UI.push(()=>V.hPessoa(real))});
+  else if(sc.id==='heroi'&&real.length) real.forEach(real=>it.push({face:faceSVG(real,40),l:`${real.first} ${real.last}`,s:`${relLabel(real)}${sc.sab&&sc.sab[real.id]?' · sabe quem eu sou':''}`,bars:[['❤️',real.bond,'#E5487D']],on:()=>UI.push(()=>V.hPessoa(real))}));
   else it.push({html:'<div class="card"><p style="color:var(--muted)">Sem ninguém por enquanto.</p></div>'});
   if(sc.grav){ const g=crewById(sc.grav.pid); it.push({ic:'🤰',l:'Bebê a caminho',s:`Nasce em ${Math.max(1,sc.grav.due-sc.dia)} dia(s)${g?' · com '+g.first:''}`,dis:true,why:'Falta pouco.'}); }
   if(sc.id!=='heroi') it.push({ic:'💘',l:'Procurar romance',s:'1 de energia',dis:sc.ap<1||!!sc.done.rprocura,why:sc.done.rprocura?'Já procurei hoje.':'Sem energia hoje.',on:()=>scAct(()=>{ if(!spend('rprocura',1)) return 'Sem energia.'; return romProcurar(); },'Romance')});
-  if(real&&sc.id!=='heroi') it.push({face:faceSVG(real,40),l:`${real.first} ${real.last}`,s:`${relLabel(real)} na vida real · a vida real está pausada`,dis:true,why:`${real.first} está lá na vida real, esperando eu voltar.`});
+  if(real.length&&sc.id!=='heroi') real.forEach(real=>it.push({face:faceSVG(real,40),l:`${real.first} ${real.last}`,s:`${relLabel(real)} na vida real · a vida real está pausada`,dis:true,why:`${real.first} está lá na vida real, esperando eu voltar.`}));
   r.items.splice(Math.min(r.items.length,1),0,...it,{sec:sc.id==='heroi'?'Aliados':'Grupo'}); return r; })(V.scCrew);
 // ---------- efeitos diários e eventos ----------
 function romDay(sc){ const p=romPar(); if(p){ scStat('san',p.par==='casado'?3:2); romAm(p,p.lv<35?-3:-1); if((p.am||0)<12&&!sc.rfim){ sc.rfim=1; queue('rom_fim',{cid:p.id}); } }
@@ -8039,12 +8044,12 @@ EVENTS.rom_parto={scen:'*',show:d=>{ const c=crewById(d.cid), me=S.me.gender==='
     const b=romBaby(d.cid); scStat('san',20); crew().forEach(x=>x.lv=Math.min(100,x.lv+5));
     return `${t}${b.gender==='F'?'Nasceu uma menina':'Nasceu um menino'}: ${b.first}. ${R.pick(['O grupo inteiro chorou.','Ninguém lembrou do perigo por uma noite.','Um choro forte no meio do silêncio. Esperança tem som.'])}`; }};
 // ---------- de volta à vida real ----------
-function romBring(list){ const m=S.me, out=[]; const par=list.find(c=>c.par);
-  if(par){ const old=partner(); if(old){ if(old.rel==='conjuge'&&typeof divorce==='function') divorce(old,true); else old.rel='ex'; log(`Terminei com ${old.first}. Voltei com outra pessoa no coração.`,'warn'); }
-    const p=mkPerson({rel:par.par==='casado'?'conjuge':par.par==='noivo'?'noivo':'namoro',gender:par.gender,age:par.age,first:par.first,last:par.last,bond:Math.max(65,par.am||0)}); if(par.genes) p.genes=par.genes; S.people.push(p);
-    if(p.rel==='conjuge'){ cnt('marriages'); S.flags.movedOut=1; } out.push(`${par.first} veio comigo para a vida real.`); }
-  list.filter(c=>c.filho).forEach(c=>{ const k=mkPerson({rel:'filho',gender:c.gender,age:c.age,first:c.first,last:m.last,bond:95,parentId:par?null:null}); if(c.genes) k.genes=c.genes; S.people.push(k); out.push(`${c.first}, ${c.gender==='F'?'minha filha':'meu filho'}, também.`); });
-  if(out.length) log(out.join(' '),'good'); }
+function romBring(list){ const m=S.me,out=[],par=list.find(c=>c.par);let responsavel=null;
+ if(par){ const antes=partners(),p=mkPerson({rel:'amigo',gender:par.gender,age:par.age,first:par.first,last:par.last,bond:Math.max(65,par.am||0)});if(par.genes)p.genes=par.genes;S.people.push(p);responsavel=p;
+   const erro=polyEntrada(p);if(!erro){p.rel=par.par==='casado'?'conjuge':par.par==='noivo'?'noivo':'namoro';polyRegistrar(p,antes);if(p.rel==='conjuge'){cnt('marriages');S.flags.movedOut=1;}out.push(par.first+' veio comigo para a vida real.');}
+   else out.push(par.first+' voltou comigo, mas o relacionamento não foi oficializado: '+erro);
+ }
+ list.filter(c=>c.filho).forEach(c=>{const k=mkPerson({rel:'filho',gender:c.gender,age:c.age,first:c.first,last:m.last,bond:95,parentId:responsavel?.id??null});if(c.genes)k.genes=c.genes;S.people.push(k);out.push(c.first+', '+(c.gender==='F'?'minha filha':'meu filho')+', também.');});if(out.length)log(out.join(' '),'good'); }
 scenEnd=(o=>function(win,txt){ const sc=S.scen; const keep=sc&&win?crew().filter(c=>c.par||c.filho):[]; const r=o.apply(this,arguments); if(keep.length&&S.me.alive&&!S.scen) romBring(keep); return r; })(scenEnd);
 // ---------- linguagem dos eventos de romance ----------
 // am±n (paixão do {c}) · namorar noivar casar terminar (com o {c}) · grav (tenta engravidar com o {c}) · filho (nasce um bebê do casal)
@@ -8122,7 +8127,7 @@ V.hPessoa=p=>{ const sc=S.scen; if(!p||!p.alive) return null; const base=V.perso
 // Aliados: equipe, vida pessoal e amor da vida real
 V.scCrew=(o=>()=>{ const r=o(); const sc=S.scen; if(!sc||sc.id!=='heroi') return r; hEnsure(sc); const m=S.me, t=hTeam(), it=[];
   it.push({sec:'Equipe'}); if(t) it.push({ic:t.ic,l:t.n,s:`${jobTitle(m.job)} · ${fmt(jobSalary(m.job))}/ano`,on:()=>UI.push(V.hTeam)}); else it.push({ic:'🛡️',l:'Entrar para uma equipe',s:'Conta como emprego',on:()=>UI.push(V.hTeams)});
-  it.push({sec:'Vida pessoal'}); const fam=famAll().filter(p=>!['namoro','noivo','conjuge'].includes(p.rel)||p!==partner());
+  it.push({sec:'Vida pessoal'}); const fam=famAll().filter(p=>!['namoro','noivo','conjuge'].includes(p.rel)||!partners().includes(p));
   fam.forEach(p=>it.push({face:faceSVG(p,40),l:`${p.first} ${p.last}`,s:`${relLabel(p)}${sc.sab[p.id]||sc.rev?' · sabe quem eu sou':''}${p.esc>=sc.dia?' · escondid'+oaG(p.gender):''}`,bars:[['❤️',p.bond,'#E5487D']],on:()=>UI.push(()=>V.hPessoa(p))}));
   if(!fam.length) it.push({html:'<div class="card"><p style="color:var(--muted)">Sem família por perto.</p></div>'});
   it.push({ic:'👥',l:'Todas as relações',s:'Amigos, colegas, ex',on:()=>UI.push(V.relReal)});
@@ -8468,7 +8473,7 @@ function voltaConseq(id,d,win,junto){ junto=junto||[]; const m=S.me, L=[], adult
   // cargo político
   if(m.office){ m.office.appr=clamp(m.office.appr-Math.min(40,d)); if(d>=5) L.push(`🏛️ A imprensa descobriu que sumi por ${d} dias. Minha aprovação caiu.`); }
   // relacionamento
-  const p=partner();
+  for(const p of partners()){
   if(p&&junto.includes(p.id)) L.push(`❤️ ${p.first} viveu tudo isso comigo. Agora a gente tem uma história que ninguém mais acredita.`);
   else if(p){ const tempo=voltaTempo(d), casado=p.rel==='conjuge';
     p.bond=clamp(p.bond-Math.min(60,Math.round(d*.8)));
@@ -8481,6 +8486,7 @@ function voltaConseq(id,d,win,junto){ junto=junto||[]; const m=S.me, L=[], adult
       else { p.rel='ex'; st('happy',-15); log(`${p.first} terminou comigo enquanto eu estava ${onde}.`,'bad'); L.push('💔 '+txt); } }
     else if(d>=60){ p.bond=clamp(p.bond+15); L.push('❤️ '+R.pick([`${p.first} esperou ${tempo} sem desistir. Quando me viu, não disse nada: só me abraçou.`,`Todo mundo mandou ${p.first} seguir em frente. ${p.first} não seguiu. Esperou.`])); }
     else if(d>=5) L.push('❤️ '+R.pick([`${p.first} chorou, gritou e depois me abraçou por um tempão.`,`${p.first} me deu um gelo de uma semana. Justo.`,`${p.first} quer saber onde eu estava. Não sei como contar.`])); }
+  }
   // família
   const ps=parents();
   if(ps.length&&ps.every(x=>junto.includes(x.id))) L.push('👪 Minha família inteira voltou comigo. Os vizinhos olham para a gente como se fôssemos fantasmas.');
@@ -8622,15 +8628,14 @@ function prolStart(id){ const m=S.me, v=INICIOS[id]?R.pick(INICIOS[id]).k:null;
   m.prol={id,v,fase:0,b:{},junto:[],ano:m.age}; log(`${SCEN[id].ic} Algo começou a mudar na minha vida…`,'warn'); prolStep(); }
 function prolCancel(txt){ const m=S.me, id=m.prol&&m.prol.id; m.prol=null; if(txt) log(txt,'warn'); }
 // quem pode ir junto
-function prolGente(){ const p=partner(), ks=kids().filter(k=>k.alive), ps=parents(), irm=people('irmao');
-  return {p,ks,fam:[p].concat(ks).filter(Boolean),todos:[p].concat(ks,ps,irm).filter(Boolean).slice(0,6)}; }
-function prolCompCh(pr,max,next,verbo){ const g=prolGente(), ch=[], v=verbo||'Ir';
-  ch.push({l:`${v} sozinh${oa()}`,fn:()=>{ pr.junto=[]; next(); }});
-  if(max>=1&&g.p) ch.push({l:`${v} com ${g.p.first}`,fn:()=>{ pr.junto=[g.p.id]; next(); }});
-  if(max>=2&&g.ks.length) ch.push({l:g.p?`${v} com ${g.p.first} e as crianças`:`${v} com meus filhos`,fn:()=>{ pr.junto=g.fam.slice(0,6).map(x=>x.id); next(); }});
-  if(max>=3&&g.todos.length>g.fam.length) ch.push({l:`${v} com a família toda`,fn:()=>{ pr.junto=g.todos.map(x=>x.id); next(); }});
-  if(max===1&&!g.p){ const f=people('amigo')[0]; if(f) ch.push({l:`${v} com ${f.first}`,fn:()=>{ pr.junto=[f.id]; next(); }}); }
-  return ch; }
+function prolGente(){ const pares=partners(),ks=kids().filter(k=>k.alive),ps=parents(),irm=people('irmao');
+ return {pares,ks,fam:[...pares,...ks],todos:[...pares,...ks,...ps,...irm]}; }
+function prolCompCh(pr,max,next,verbo){ const g=prolGente(),ch=[],v=verbo||'Ir';
+ ch.push({l:v+' sozinh'+oa(),fn:()=>{pr.junto=[];next();}});
+ if(max>=1) g.pares.forEach(p=>ch.push({l:v+' com '+p.first,fn:()=>{pr.junto=[p.id];next();}}));
+ if(max>=2&&g.fam.length>1) ch.push({l:v+' com todos os parceiros e filhos',fn:()=>{pr.junto=g.fam.map(p=>p.id);next();}});
+ if(max>=3&&g.todos.length>g.fam.length) ch.push({l:v+' com a família toda',fn:()=>{pr.junto=g.todos.map(p=>p.id);next();}});
+ if(max===1&&!g.pares.length){ const f=people('amigo')[0];if(f) ch.push({l:v+' com '+f.first,fn:()=>{pr.junto=[f.id];next();}}); } return ch; }
 const prolAdv=pr=>()=>{ pr.fase++; };
 const prolPago=(v,o)=>S.me.money>=v?Object.assign(o,{l:`${o.l} (${fmt(v)})`}):null;
 function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; const id=pr.id, f=pr.fase, b=pr.b, adv=prolAdv(pr);
@@ -8834,17 +8839,18 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
     else if(mm=t.match(/^\+cad:(\w+)$/)){ cadStart(mm[1],true); }
     else if(mm=t.match(/^emprego:(\w+)$/)){ const j=JOBS.find(x=>x.id===mm[1]); if(j&&!(m.job&&m.job.id===j.id)&&m.age>=16){ takeJob({id:j.id,co:companyName(),size:'média',mul:1}); out.push(`Agora sou ${jobTitle(m.job).toLowerCase()}.`); } }
     else if(t==='noivar'||t==='casar'){ const p=d.pid&&P(d.pid); if(p&&p.alive&&['namoro','noivo'].includes(p.rel)&&polyPodeOficializar(p)){ if(t==='noivar'&&p.rel==='namoro'){ p.rel='noivo'; out.push(`Estou noiv${oa()} de ${p.first}!`); } else if(t==='casar'){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } } }
-    else if(t==='separar'){ const pp=partner(); if(pp){ if(pp.rel==='conjuge') divorce(pp,true); else { pp.rel='ex'; m.happy=clamp(m.happy-15); log(`${pp.first} terminou comigo.`,'bad'); } out.push(`${pp.first} foi embora.`); } }
-    else if(mm=t.match(/^pbond([+-]\d+)$/)){ const pp=partner(); if(pp) pp.bond=clamp(pp.bond+ +mm[1]); }
+    else if(t==='separar'){ const pp=storyPartner(d); if(pp){ if(pp.rel==='conjuge') divorce(pp,true); else { pp.rel='ex'; m.happy=clamp(m.happy-15); log(`${pp.first} terminou comigo.`,'bad'); } out.push(`${pp.first} foi embora.`); } }
+    else if(mm=t.match(/^pbond([+-]\d+)$/)){ const pp=storyPartner(d); if(pp) pp.bond=clamp(pp.bond+ +mm[1]); }
     else if(mm=t.match(/^fome([+-]\d+)$/)){ if(m.criatura) m.fomeP=clamp((m.fomeP||0)+ +mm[1]); }
     else if(t==='curar'){ if(m.criatura){ const tp0=m.criatura; m.criatura=null; m.fomeP=0; log(`Deixei de ser ${g(CRIATURA[tp0][0],m.gender).toLowerCase()}.`,'good'); } }
     else if(t==='morder'){ const pp=d.pid&&P(d.pid); if(pp&&m.criatura){ pp.criatura=m.criatura; out.push(`${pp.first} agora também carrega a maldição.`); } }
     else if(mm=t.match(/^virar:(\w+)$/)){ if(typeof virar==='function'&&!m.criatura&&CRIATURA[mm[1]]) out.push(virar(mm[1]).trim()); }
     else if(t==='caso+'){ m.caso={pid:d.pid||null,n:d.p,ini:m.age}; } else if(t==='caso-'){ m.caso=null; }
-    else if(t==='bebe'){ const par=partner(); if(m.age>=18&&m.age<=50){ const gd=R.chance(.5)?'M':'F'; const k=mkPerson({rel:'filho',gender:gd,age:0,last:m.last,bond:R.int(85,100),parentId:par?par.id:null,from:par?[m,par]:undefined}); uniqFirst(k); S.people.push(k); cnt('kids'); out.push(`Nasceu ${gd==='F'?'minha filha':'meu filho'} ${k.first}!`); } } });
+    else if(t==='bebe'){ const par=storyPartner(d); if(m.age>=18&&m.age<=50){ const gd=R.chance(.5)?'M':'F'; const k=mkPerson({rel:'filho',gender:gd,age:0,last:m.last,bond:R.int(85,100),parentId:par?par.id:null,from:par?[m,par]:undefined}); uniqFirst(k); S.people.push(k); cnt('kids'); out.push(`Nasceu ${gd==='F'?'minha filha':'meu filho'} ${k.first}!`); } } });
   if(c){ if(next&&next!=='fim'&&CHAINS[id].steps[next]){ const g=CHAINS[id].o.gap||[1,3]; c.s=next; c.due=m.age+(delay!=null?delay:R.int(g[0],g[1])); c.n=(c.n||0)+1; }
     else { delete st.on[id]; st.done[id]=(st.done[id]||0)+1; cnt('historias'); } }
   const r0=dslApply(b0.rest,d), r1=dslApply(br.rest,d);
+  storyPartner(d);
   cadPerson(d);
   return [tp(ok?t1:(t2||'Não deu certo.'),d),r0,r1].concat(out).filter(Boolean).join(' '); }
 // pode começar esta história agora?
@@ -9208,7 +9214,7 @@ chain('headhunter',{k:'Carreira',min:23,max:60,when:TRAB,gap:[1,1]},{
  d:['Empresa nova','A empresa nova paga melhor, mas cobra o dobro.',['Mostrar serviço|perf+10 >e@1|Primeiro a chegar, último a sair.','Ir no meu ritmo|h+4 >e@1|Ganhar mais não significa viver para o trabalho.']],
  e:['Valeu a pena?','Um ano depois da troca, faço o balanço.',['Valeu|?perf promo h+8|Fui promovid{o} no primeiro ano.|h+4|Ganho mais e aprendi muito.','Sinto falta da antiga|h-4|Às vezes o dinheiro não compensa.']],
 });
-chain('romance_trabalho',{k:'Amor',min:20,max:55,who:'colega',when:m=>TRAB(m)&&!partner(),gap:[1,1]},{
+chain('romance_trabalho',{k:'Amor',min:20,max:55,who:'colega',when:m=>TRAB(m)&&!partners().length,gap:[1,1]},{
  a:['Olhares no escritório','Comecei a perceber que {p}, do trabalho, sempre aparece na copa quando eu chego.',['Puxar conversa no café|bond+8 >b|Falamos de tudo, menos de trabalho.','Manter o profissionalismo|>e|Trabalho é trabalho.']],
  b:['O happy hour','Fomos ao happy hour da equipe e acabamos conversando sozinhos até o bar fechar.',['Chamar para sair de verdade|?lk vira:namoro h+12 >c|Começamos a namorar, em segredo.|bond-5 >e|{p} disse que não mistura trabalho e amor.','Deixar acontecer naturalmente|bond+6 >c@0|Sem pressa.']],
  c:['Segredo de escritório','Ninguém na empresa sabe do nosso namoro. Ainda.',['Contar para o chefe|?50 h+6 >d|Ele riu: "Todo mundo já sabia."|perf-6 >d|A empresa não gostou. Tivemos que mudar de setor.','Continuar escondendo|?40 h+4 >d|Sobrevivemos a uma festa de fim de ano inteira sem sermos descobertos.|h-6 >d|Fomos flagrados no estacionamento.']],
@@ -9278,7 +9284,7 @@ chain('promocao_disputa',{k:'Carreira',min:22,max:60,who:'colega',when:TRAB,gap:
 });
 
 // ===== Histórias em cadeia: amor e casamento =====
-const SOLTEIR=m=>!partner();
+const SOLTEIR=m=>!partners().length;
 chain('app_namoro',{k:'Amor',min:18,max:60,npc:1,date:1,when:SOLTEIR,gap:[1,1]},{
  a:['Deu match','Instalei um aplicativo de namoro. Deu match com {p}, que tem um perfil divertido e fotos com cachorro.',['Mandar uma mensagem engraçada|?lk h+5 >b|{p} respondeu com três emojis rindo.|h-2 >c|Visualizou e não respondeu.','Esperar {ele} falar primeiro|?40 >b|{p} mandou um "oi" tímido.|>c|Ninguém falou nada.']],
  b:['Conversa boa','Faz duas semanas que eu e {p} conversamos todo dia.',['Marcar um encontro|>d|Um café num sábado à tarde.','Pedir uma videochamada antes|?70 >d|Era a pessoa das fotos mesmo.|>e|A câmera "estava quebrada". Estranho.']],
@@ -9288,7 +9294,7 @@ chain('app_namoro',{k:'Amor',min:18,max:60,npc:1,date:1,when:SOLTEIR,gap:[1,1]},
  f:['Namoro de aplicativo','O namoro com {p} está ficando sério.',['Conhecer a família d{ele}|?50 bond+10 h+6 >g|A família me adorou.|bond-3 >g|A sogra me olhou de cima a baixo.','Manter só entre nós|bond+4 >g|Sem pressão.']],
  g:['Contar como se conheceram','Num jantar, alguém perguntou como eu e {p} nos conhecemos.',['Contar a verdade: aplicativo|h+5 bond+5|Hoje em dia todo mundo se conhece assim.','Inventar uma história romântica|h+6 bond+6|"Foi numa livraria, numa tarde de chuva..." Combinamos de contar sempre assim.']],
 });
-chain('pedido',{k:'Amor',min:22,max:55,who:'partner',when:m=>{ const p=partner(); return !!p&&p.rel==='namoro'; },gap:[1,1]},{
+chain('pedido',{k:'Amor',min:22,max:55,who:'partnerDating',when:m=>{ const p=pickPartner(p=>p.rel==='namoro'); return !!p&&p.rel==='namoro'; },gap:[1,1]},{
  a:['Pensar no futuro','Faz tempo que eu e {p} estamos juntos. Comecei a pensar em casamento.',['Comprar uma aliança|$-3000 >b|Escondi a caixinha numa meia velha.','Conversar sobre o assunto|>c|Perguntei, de leve, o que {ele} pensa de casamento.','Não é a hora|h+0|Ainda não.']],
  b:['O pedido','Chegou o dia. A aliança está no bolso e o coração na boca.',['Pedir num restaurante|?bond noivar h+15 >d|{p} disse sim chorando!|h-15 bond-10 >e|{p} disse que não está pront{o2}.','Pedir num lugar especial para nós dois|?bond+10 noivar h+15 >d|SIM!|h-12 >e|{p} pediu um tempo para pensar.']],
  c:['A conversa séria','{p} disse que pensa em casar, mas não agora.',['Respeitar o tempo d{ele}|k+3 bond+5 >b@1-2|Esperei. Valeu a pena esperar.','Dar um ultimato|?40 bond-5 >b@0|{p} entendeu o recado.|breakup h-15|Terminamos.']],
@@ -9848,7 +9854,7 @@ chain('terapia',{k:'Mente',min:16,max:85,npc:1,age:[5,25],gap:[1,1]},{
  c:['O padrão','{p} me mostrou um padrão que eu repito em todos os relacionamentos.',['Trabalhar nisso|$-1600 h+8 k+3 >d|Comecei a perceber quando faço de novo.','Negar|h-3 >d|Saí da sessão irritad{o}.']],
  d:['A alta','Depois de dois anos, {p} disse que estou bem para seguir sozinh{o}.',['Agradecer|h+12 sm+3|Saí mais leve do que entrei.','Continuar mesmo assim|$-1600 h+6|Terapia virou um hábito bom.']],
 });
-chain('casamento_simples',{k:'Amor',min:22,max:60,who:'partner',when:m=>{ const p=partner(); return !!p&&p.rel==='noivo'; },gap:[1,1]},{
+chain('casamento_simples',{k:'Amor',min:22,max:60,who:'partnerEngaged',when:m=>{ const p=pickPartner(p=>p.rel==='noivo'); return !!p&&p.rel==='noivo'; },gap:[1,1]},{
  a:['A data','Eu e {p} estamos noivos há tempo demais. Precisamos marcar a data.',['Marcar para o ano que vem|bond+6 >b|Data no calendário, frio na barriga.','Fugir e casar escondido|casar h+15 bond+10|Casamos só nós dois numa praia ao pôr do sol.']],
  b:['O orçamento','O orçamento da festa ficou três vezes maior do que o planejado.',['Cortar convidados|bond+3 >c|A lista caiu de 300 para 80.','Fazer um empréstimo|$-20000 >c|Vamos pagar por anos.','Simplificar tudo|bond+6 >c|Churrasco no quintal com quem importa.']],
  c:['O casamento','O grande dia chegou.',['Dizer sim|casar h+20 bond+15|Casamos! Dançamos até o sol nascer.','Ter um ataque de riso no altar|casar h+22 bond+12|O padre riu junto.']],
@@ -10045,7 +10051,7 @@ chain('maquina_cafe',{k:'Trabalho',min:18,max:65,when:m=>!!m.job,gap:[1,1]},{
 
 // ===== Traição, noites fora, divórcio com guarda e pensão =====
 // Noite fora (boate, boate adulta, bar): diversão, gasto e, para quem tem par, risco de ciúme e de começar um caso.
-function noiteFora(tipo){ const m=S.me, p=partner();
+function noiteFora(tipo){ const m=S.me, p=pickPartner();
   if(use('noite')>2) return 'Já saí demais este ano. Meu fígado e meu bolso pediram pausa.';
   const custo={boate:250,adulta:600,bar:120}[tipo]; m.money-=custo;
   if(tipo==='adulta'){ cnt('boateAdulta'); st('happy',R.int(3,8)); if(p){ m.susp=(m.susp||0)+R.int(15,30); if(R.chance(.25)) queue('par_descobre_boate',{pid:p.id}); }
@@ -10057,7 +10063,7 @@ function noiteFora(tipo){ const m=S.me, p=partner();
 function add_bebida(){ const m=S.me; m.add.alcool=clamp((m.add.alcool||0)+2*(1.3-m.will/100)); }
 V.activities=(o=>()=>{ const r=o(); const m=S.me; if(!r||!r.items||m.prison||m.age<16||S.scen) return r;
   r.items.push({ic:'🪩',l:'Noite fora',s:'Boate, bar' + (m.age>=18?' ou boate adulta':''),on:()=>UI.push(()=>({title:'Noite fora',items:[
-    {html:`<div class="card"><p>Diversão garantida. ${partner()?'Mas quem tem par em casa pode arrumar encrenca.':'Quem sabe você conhece alguém.'}</p></div>`},
+    {html:`<div class="card"><p>Diversão garantida. ${partners().length?'Mas quem tem par em casa pode arrumar encrenca.':'Quem sabe você conhece alguém.'}</p></div>`},
     {ic:'🪩',l:'Boate',s:fmt(250),on:()=>act(()=>noiteFora('boate'),'Boate')},
     {ic:'🍻',l:'Bar com os amigos',s:fmt(120),on:()=>act(()=>noiteFora('bar'),'Bar')},
     Object.assign({ic:'💋',l:'Boate adulta',s:fmt(600)+' · só maiores de 18',on:()=>act(()=>noiteFora('adulta'),'Boate adulta')},m.age<18?{dis:true,why:'Só depois dos 18.'}:{})]}))});
@@ -10069,7 +10075,7 @@ EVENTS.par_descobre_boate={show:d=>({k:'Amor',t:'A fatura do cartão',x:`${P(d.p
     p.bond=clamp(p.bond-25); m.susp=(m.susp||0)+20; if(p.bond<15&&R.chance(.5)){ if(p.rel==='conjuge') divorce(p,true); else p.rel='ex'; return `${p.first} descobriu a mentira e foi embora.`; } return 'A mentira não colou. A briga durou a semana inteira.'; }};
 // caso secreto: quanto mais tempo, maior a chance de ser descoberto
 yearMoney=(o=>function(){ const r=o.apply(this,arguments); const m=S.me; try{ if(m.alive&&!S.scen){
-  const p=partner();
+  const p=pickPartner();
   if(m.caso&&p){ m.susp=(m.susp||0)+R.int(10,25); if(R.chance(Math.min(.8,m.susp/120))&&!S.pending.some(e=>e.id==='caso_descoberto')) queue('caso_descoberto',{pid:p.id}); }
   else if(m.caso&&!p) m.caso=null;
   if(m.susp>0&&!m.caso) m.susp=Math.max(0,m.susp-8);
@@ -10097,14 +10103,14 @@ EVENTS.guarda={show:d=>({k:'Família',t:'A guarda das crianças',x:`O divórcio 
     if(k==='c'){ m.pensao={paga:true,valor:Math.round(valor*.5),kids:ks.map(k=>k.id)}; ks.forEach(k=>k.bond=clamp(k.bond+3)); return 'Guarda compartilhada: uma semana comigo, outra lá. Pensão menor, ninguém sai perdendo tanto.'; }
     m.pensao={paga:true,valor,kids:ks.map(k=>k.id)}; ks.forEach(k=>k.bond=clamp(k.bond-10)); st('happy',-8); return `As crianças ficaram com ${p?p.first:'o outro lado'}. Pago pensão todo mês.`; }};
 // histórias da traição (as duas mãos)
-chain('caso_extra',{k:'Amor',min:18,max:70,npc:1,date:1,when:m=>!!partner()&&!m.caso,w:.6,gap:[1,1]},{
+chain('caso_extra',{k:'Amor',min:18,max:70,npc:1,date:1,when:m=>!!partners().length&&!m.caso,w:.6,gap:[1,1]},{
  a:['Olhares','{p} começou a puxar conversa comigo sempre que pode. Eu sei onde isso pode dar.',['Cortar logo|k+4 pbond+3|Falei que tenho alguém em casa. {p} entendeu.','Deixar rolar|>b@0|Só uma conversa. Por enquanto.']],
  b:['O primeiro passo','Uma noite, depois de umas bebidas, {p} me beijou.',['Afastar e ir embora|k+2|Fui para casa com o coração disparado e a culpa no bolso.','Corresponder|k-8 caso+ h+6 >c|Comecei um caso.']],
  c:['A vida dupla','Mensagens apagadas, desculpas no trabalho, encontros escondidos.',['Terminar o caso|caso- k+3 h-4 >e|Disse para {p} que acabou. Doeu nos dois.','Continuar|h+4 k-4 >d|Mais um mês. Só mais um.']],
  d:['{p} quer mais','{p} quer que eu largue tudo para ficar com {ele}.',['Largar meu par e ficar com {p}|caso- separar vira:namoro h+4|Saí de casa com duas malas. Ninguém saiu inteiro dessa.','Terminar com {p}|caso- h-6 vira:inimigo >e|{p} ficou furios{o2} e ameaçou contar tudo.','Enrolar mais um pouco|k-3 >d@1|Promessas que eu não sei se vou cumprir.']],
  e:['O peso','O caso acabou, mas a culpa ficou.',['Confessar ao meu par|?bond k+5 pbond-25 h-6|Contei tudo. {p} não sabe, mas meu par me deu uma chance.|separar h-12|Contei tudo e fui deixad{o}.','Guardar para sempre|h-5|Algumas coisas a gente leva para o túmulo.']],
 });
-chain('traicao_parceiro',{k:'Amor',min:20,max:75,who:'partner',when:m=>{ const p=partner(); return !!p&&p.bond<55; },gap:[1,1]},{
+chain('traicao_parceiro',{k:'Amor',min:20,max:75,who:'partnerUnhappy',when:m=>{ const p=pickPartner(p=>p.bond<55); return !!p&&p.bond<55; },gap:[1,1]},{
  a:['Algo estranho','{p} anda escondendo o celular e chegando tarde com desculpas esquisitas.',['Perguntar diretamente|>b|{p} desconversou.','Investigar escondido|>c|Esperei {ele} dormir.','Confiar|pbond+3|Prefiro não pensar besteira.']],
  b:['A desconfiança','A desconfiança está me consumindo.',['Pedir para ver o celular|?50 >c|{p} entregou o celular tremendo.|pbond-8 >d|{p} se ofendeu e saiu batendo a porta.','Propor terapia de casal|$-1200 ?bond pbond+10|A terapia mostrou que era só uma fase ruim.|>c|Na terapia, a verdade apareceu.']],
  c:['A verdade','{p} estava tendo um caso.',['Terminar na hora|separar h-15 k+2|Peguei minhas coisas naquela noite.','Tentar perdoar|?bond pbond-15 h-8 >e|Decidimos tentar de novo. Vai levar tempo.|separar h-15|Tentamos, mas a confiança não voltou.','Dar o troco|k-8 >d|Se {ele} pode, eu também posso.']],
@@ -10381,32 +10387,34 @@ newLife=(o=>function(opt={}){ if(window.__nlId){ opt=Object.assign({},opt,window
 
 // ===== Ter filhos com ajuda: fertilização in vitro, barriga de aluguel, e as encrencas disso =====
 // FIV com implante de embrião: só para quem tem útero (sexo biológico feminino). Barriga de aluguel: qualquer pessoa.
-function fertFIV(){ const m=S.me, c=18000; if(m.age<18) return 'Só depois dos 18.'; if(sexoDe(m)!=='F') return 'Esse tratamento é para quem pode engravidar.';
+function fertFIV(pid){ if(pid===undefined&&partners().length>1) return 'Escolha com quem planejar o bebê.'; if(pid!=null&&!partners().some(p=>p.id===pid)) return 'Essa pessoa não é mais meu parceiro.'; const m=S.me, c=18000; if(m.age<18) return 'Só depois dos 18.'; if(sexoDe(m)!=='F') return 'Esse tratamento é para quem pode engravidar.';
   if(m.age>50) return 'O médico disse que, na minha idade, o implante não tem chance.'; if(S.births.length||m.barriga) return 'Já tem um bebê a caminho.';
   if(use('fiv')>2) return 'O corpo precisa descansar entre as tentativas. Só no ano que vem.'; if(!canPay(c)) return `Cada tentativa custa ${fmt(c)}.`; m.money-=c; cnt('fiv');
   const ch=clamp((m.fert||60)-(m.age>35?(m.age-35)*4:0),5,75)/100;
-  if(R.chance(ch)){ const p=partner(); S.births.push({with:p?p.id:null}); st('happy',15); return 'O implante de embrião deu certo. O teste deu positivo! Vem um bebê aí.'; }
+  if(R.chance(ch)){ S.births.push({with:pid===undefined?(partners()[0]?.id??null):pid}); st('happy',15); return 'O implante de embrião deu certo. O teste deu positivo! Vem um bebê aí.'; }
   st('happy',-8); return R.pick(['O embrião não pegou. O médico disse para tentar de novo com calma.','Mais uma tentativa sem sucesso. Chorei no carro antes de entrar em casa.']); }
-function fertBarriga(){ const m=S.me, c=70000; if(m.age<21) return 'A clínica só aceita a partir dos 21.'; if(m.age>60) return 'A clínica não aceita mais na minha idade.';
+function fertBarriga(pid){ if(pid===undefined&&partners().length>1) return 'Escolha com quem planejar o bebê.'; if(pid!=null&&!partners().some(p=>p.id===pid)) return 'Essa pessoa não é mais meu parceiro.'; const m=S.me, c=70000; if(m.age<21) return 'A clínica só aceita a partir dos 21.'; if(m.age>60) return 'A clínica não aceita mais na minha idade.';
   if(S.births.length||m.barriga) return 'Já tem um bebê a caminho.'; if(!canPay(c)) return `O processo custa ${fmt(c)}.`; m.money-=c; cnt('barriga');
   const st0=stranger({gender:'F'}); const mae=mkPerson({rel:'tmp',gender:'F',first:st0.first,last:st0.last,age:clamp(m.age+R.int(-10,2),22,40)});
-  m.barriga={n:mae.first,nl:mae.last,ano:m.age};
+  m.barriga={n:mae.first,nl:mae.last,ano:m.age,with:pid===undefined?(partners()[0]?.id??null):pid};
   return `Conheci ${mae.first}, que vai gestar o nosso bebê. Contrato assinado, exames feitos. Agora é esperar.`; }
 // no ano seguinte: o bebê nasce, ou a mãe de aluguel tenta fugir (raro)
 yearMoney=(o=>function(){ const r=o.apply(this,arguments); const m=S.me; try{ if(m.alive&&m.barriga&&m.age>m.barriga.ano&&!S.scen){
   if(R.chance(.05)&&!m.barriga.fuga){ m.barriga.fuga=1; queue('barriga_fuga',{n:m.barriga.n}); }
-  else if(!m.barriga.fuga){ const p=partner(); S.births.push({with:p?p.id:null}); log(`${m.barriga.n} deu à luz o nosso bebê. Segurei pela primeira vez no corredor da maternidade.`,'good'); m.barriga=null; } } }catch(e){} return r; })(yearMoney);
+  else if(!m.barriga.fuga){ S.births.push({with:m.barriga?.with??null}); log(`${m.barriga.n} deu à luz o nosso bebê. Segurei pela primeira vez no corredor da maternidade.`,'good'); m.barriga=null; } } }catch(e){} return r; })(yearMoney);
 EVENTS.barriga_fuga={show:d=>({k:'Família',t:'A mãe de aluguel sumiu',x:`${d.n}, a mãe de aluguel, parou de atender o telefone. A clínica diz que ela se mudou e quer ficar com o bebê.`,ch:[['Entrar na justiça ($15.000 de advogado)','j'],['Ir atrás dela e conversar','c'],['Deixar ela ficar com o bebê','d']]}),
-  pick:(k,d)=>{ const m=S.me; const nascer=()=>{ const p=partner(); S.births.push({with:p?p.id:null}); m.barriga=null; };
+  pick:(k,d)=>{ const m=S.me; const nascer=()=>{ S.births.push({with:m.barriga?.with??null}); m.barriga=null; };
     if(k==='j'){ m.money-=15000; if(R.chance(.8)){ nascer(); st('happy',10); return 'O juiz deu ganho de causa no mesmo mês. O bebê veio para casa.'; } m.barriga=null; st('happy',-25); return 'A justiça demorou demais e o juiz decidiu pelo vínculo com a mãe que gestou. Perdi o bebê.'; }
     if(k==='c'){ if(R.chance(.55)){ nascer(); st('happy',8); return `Encontrei ${d.n} num hotel de beira de estrada, chorando. Ela tinha medo de se arrepender. Conversamos e ela me entregou o bebê.`; } m.barriga=null; st('happy',-20); return `${d.n} fugiu de novo antes que eu chegasse. Nunca mais soube dela.`; }
     m.barriga=null; st('happy',-15); m.karma=clamp(m.karma+8); return `Deixei ${d.n} ficar com o bebê. Doeu como nada na vida.`; }};
 // no menu do amor
 V.love=(o=>()=>{ const r=o(), m=S.me; if(!r||!r.items||m.age<18||S.scen) return r;
   r.items.push({sec:'Ter filhos com ajuda'},
-    Object.assign({ic:'🧫',l:'Implante de embrião (FIV)',s:`${fmt(18000)} por tentativa · para quem pode engravidar`,on:()=>act(fertFIV,'Clínica de fertilidade')},sexoDe(m)!=='F'?{dis:true,why:'O implante é para quem tem útero. A barriga de aluguel serve para qualquer pessoa.'}:{}),
-    {ic:'🤰',l:'Barriga de aluguel',s:`${fmt(70000)} · o bebê nasce no ano seguinte`,on:()=>act(fertBarriga,'Barriga de aluguel')});
+    Object.assign({ic:'🧫',l:'Implante de embrião (FIV)',s:`${fmt(18000)} por tentativa · para quem pode engravidar`,on:()=>fertEscolher(fertFIV,'Clínica de fertilidade')},sexoDe(m)!=='F'?{dis:true,why:'O implante é para quem tem útero. A barriga de aluguel serve para qualquer pessoa.'}:{}),
+    {ic:'🤰',l:'Barriga de aluguel',s:`${fmt(70000)} · o bebê nasce no ano seguinte`,on:()=>fertEscolher(fertBarriga,'Barriga de aluguel')});
   return r; })(V.love);
+
+function fertEscolher(fn,titulo){ const l=partners(); if(l.length<2) return act(()=>fn(l[0]?.id??null),titulo); modal({t:'Com quem planejar o bebê?',ch:[...l.map(p=>({l:p.first,fn:()=>act(()=>fn(p.id),titulo)})),{l:'Sem outro responsável',fn:()=>act(()=>fn(null),titulo)},{l:'Cancelar'}]}); }
 
 // ===== Relações plurais: uma nova pessoa por rodada de consentimento =====
 const polyAmores=()=>people('namoro','noivo','conjuge');
@@ -10945,7 +10953,7 @@ chain('vamp_morcego',{k:'Vampiro',min:16,max:200,when:VAMP,gap:[1,2]},{
  c:['Visto','Um vídeo viral mostra uma nuvem de morcegos virando uma pessoa num telhado.',['Fingir que é montagem|h-2 >d|A internet decidiu que era efeito especial.','Ignorar|f+2 >d|Virei lenda urbana.']],
  d:['Outros dons','Descobri que consigo ouvir pensamentos de quem está muito perto.',['Usar com responsabilidade|k+4 sm+3|Às vezes é melhor não saber o que os outros pensam.','Usar para ganhar dinheiro|$+8000 k-6|Nos negócios, eu sempre sei o que o outro vai oferecer.']],
 });
-chain('vamp_amor_humano',{k:'Vampiro',min:18,max:200,when:m=>VAMP(m)&&!partner(),npc:1,date:1,gap:[1,1]},{
+chain('vamp_amor_humano',{k:'Vampiro',min:18,max:200,when:m=>VAMP(m)&&!partners().length,npc:1,date:1,gap:[1,1]},{
  a:['Um coração batendo','Me apaixonei por {p}, um ser humano comum. O coração d{ele} bate rápido quando está perto de mim.',['Me aproximar|vira:namoro >b|Comecei a namorar {p}, só de noite.','Me afastar para {ele} não correr perigo|h-6|Às vezes amar é ir embora.']],
  b:['Os encontros','{p} acha estranho a gente só se ver à noite e eu nunca comer.',['Inventar desculpas|?40 >c|"Trabalho de noite e faço dieta." Colou.|>d|{p} começou a desconfiar.','Contar a verdade|>d|Melhor agora do que depois.']],
  c:['O tempo','{p} está envelhecendo. Eu não.',['Pensar em transformar {p}|>e|Seria o jeito de ficarmos juntos para sempre.','Aceitar que um dia {ele} vai partir|h-6 >f|Cada dia vale mais.']],
@@ -11017,7 +11025,7 @@ chain('vamp_policia',{k:'Vampiro',min:18,max:200,when:VAMP,npc:1,gn:'M',gap:[1,1
  d:['O verdadeiro assassino','Achei o outro vampiro: selvagem, sem controle, matando por prazer.',['Enfrentar|?fight k+10 f+0 >e|Venci. Os ataques pararam.|hl-35 >e|Venci por pouco, muito ferid{o}.','Avisar o detetive|>e|Contei onde ele dorme de dia.']],
  e:['O acordo','O detetive {p} sabe o que eu sou. E sabe que eu salvei a cidade.',['Fazer um acordo de silêncio|vira:amigo k+5|Ele guarda meu segredo. Eu ajudo nos casos estranhos.','Sumir mesmo assim|h+2|Ninguém deve saber.']],
 });
-chain('vamp_casamento',{k:'Vampiro',min:20,max:200,when:m=>VAMP(m)&&!!partner(),who:'partner',gap:[1,1]},{
+chain('vamp_casamento',{k:'Vampiro',min:20,max:200,when:m=>VAMP(m)&&!!partners().length,who:'partner',gap:[1,1]},{
  a:['A cerimônia','{p} quer casar na igreja, de manhã, com sol.',['Propor um casamento à noite|>b|"Casamento à luz de velas é muito mais romântico."','Tentar ir de manhã|hl-20 >c|Fiquei na sombra da porta, queimando.']],
  b:['O casamento noturno','O casamento foi à meia-noite, num jardim cheio de velas.',['Fazer os votos|casar h+15 pbond+10 >d|O casamento mais bonito que os convidados já viram.','Desistir na última hora|pbond-20 h-8|Fugi com medo do que eu sou.']],
  c:['O desmaio','Quase desmaiei de dor na porta da igreja.',['Contar a verdade para {p}|>d|Contei tudo, ali no carro.','Inventar uma alergia|?40 >b|Mudamos para a noite.|pbond-10 >d|{p} ficou desconfiad{o2}.']],
@@ -11081,7 +11089,7 @@ chain('lobo_alcateia_lider',{k:'Lobisomem',min:18,max:120,when:LOBO,npc:1,gap:[1
  e:['O novo líder','O novo líder começou a quebrar as regras antigas e atacar humanos.',['Desafiar de novo|>b@1|Não posso deixar isso continuar.','Avisar os caçadores|k+4 >f|Traição à alcateia, para salvar humanos.']],
  f:['A alcateia','A alcateia sobrevive e se fortalece.',['Fazer uma reunião na lua cheia|h+8|Correr junto com a família.','Treinar os jovens|fight+3 k+3|Os filhotes aprendem rápido.']],
 });
-chain('lobo_par',{k:'Lobisomem',min:18,max:120,when:m=>LOBO(m)&&!!partner(),who:'partner',gap:[1,1]},{
+chain('lobo_par',{k:'Lobisomem',min:18,max:120,when:m=>LOBO(m)&&!!partners().length,who:'partner',gap:[1,1]},{
  a:['A noite em que viu','{p} acordou no meio da noite de lua cheia e me viu me transformando no quintal.',['Correr para a floresta|>b|Não queria que {ele} me visse daquele jeito.','Ficar e deixar {ele} ver|>c|Os olhos d{ele} encontraram os meus.']],
  b:['A manhã seguinte','Voltei de manhã, cobert{o} de lama. {p} estava na cozinha, esperando.',['Contar tudo|>c|Sentei e contei desde a mordida.','Negar|?30 pbond-10|{p} fingiu acreditar.|pbond-20 >d|{p} disse: "Eu vi."']],
  c:['A reação','{p} ficou em silêncio por muito tempo.',['Esperar|?bond pbond+15 h+10 >e|{p} me abraçou: "A gente dá um jeito."|>d|{p} pediu um tempo.']],
@@ -11209,7 +11217,7 @@ chain('lobo_sentidos',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,2]},{
  c:['O excesso','O barulho da cidade me deixa irritad{o} e com dor de cabeça.',['Mudar para o interior|$-5000 h+8 >d|Silêncio, mato e passarinhos.','Usar protetor de ouvido|h+2 >d|Ajuda um pouco.']],
  d:['Equilíbrio','Aprendi a ligar e desligar os sentidos como um rádio.',['Usar com sabedoria|sm+3 h+5|Um dom, não uma maldição.','Ajudar a polícia a achar pessoas|k+6|Meu faro já salvou gente.']],
 });
-chain('lobo_casamento_lua',{k:'Lobisomem',min:20,max:120,when:m=>LOBO(m)&&!!partner()&&partner().rel==='noivo',who:'partner',gap:[1,1]},{
+chain('lobo_casamento_lua',{k:'Lobisomem',min:20,max:120,when:m=>LOBO(m)&&partners(p=>p.rel==='noivo').length,who:'partnerEngaged',gap:[1,1]},{
  a:['A data do casamento','A data do casamento caiu justo numa noite de lua cheia.',['Mudar a data|pbond-3 >b|"Vamos adiar uma semana, amor?"','Casar de manhã e fugir antes do anoitecer|>c|Corrida contra o sol.']],
  b:['A explicação','{p} quer saber por que mudar a data.',['Contar a verdade|?bond pbond+10 >c|{p} riu e chorou: "Então é por isso que você some todo mês!"|separar h-12|{p} não aguentou a verdade.','Inventar desculpa|>c|A desculpa colou.']],
  c:['O grande dia','O casamento foi lindo. A lua nasceu durante a valsa.',['Correr para a mata antes da transformação|casar h+15 pbond+8|Saí correndo da festa. Os convidados acharam romântico.','Ficar até o fim|casar ?will h+18 pbond+10|Segurei a fera até o último convidado ir embora.|casar h+5 f+3|Me transformei na pista de dança. Disseram que foi a fantasia mais realista que já viram.']],
@@ -14413,13 +14421,13 @@ pack({k:'Amor',w:1.3,cd:25,scen:'heroi',who:'partner',when:HW(()=>true)},[
   ['{p} desconfia','{p} acha que suas saídas no meio da noite são traição.',['Contar que é {codinome}|sab ?60 bond+12 h+6|{p} riu, chorou e me beijou. "Era isso? Achei que fosse outra pessoa."|bond-10 sec-10|{p} não acreditou e contou para as amigas que estou louc{o}.','Inventar desculpas|?car bond-2|Colou, por enquanto.|bond-15|{p} jogou minhas roupas pela janela.']],
   ['Jantar de aniversário de namoro','Hoje é aniversário de namoro com {p}, mas {inimigo} está atacando o porto.',['Ficar no jantar|bond+12 crime+8 h+6|A cidade sobreviveu. Nosso amor também.','Sair correndo|bond-12 rep+8|{p} jantou sozinh{o2}. De novo.','Resolver rápido e voltar|?sc.pw bond+8 rep+6|Voltei antes da sobremesa!|bond-8 hl-6|Voltei sujo de fuligem, duas horas depois.']],
   ['{p} em perigo','{p} estava no prédio que {inimigo} explodiu hoje.',['Salvar {p} primeiro|?pwr bond+15 rep-2|Tirei {p} dos escombros. Outros ficaram sem ajuda.|famhurt|Cheguei tarde.','Salvar todo mundo por ordem|?pwr rep+12 bond+6|Salvei todos, inclusive {p}.|famhurt rep+8|Salvei quase todos. {p} se feriu.']],
-  ['{p} sabe demais','{p} sabe quem você é e vive pedindo para você usar o poder em casa.',['Usar o poder para lavar a louça|h+6 bond+8|Lavei duzentos pratos em três segundos.','Explicar que não é brinquedo|bond-4|{p} fez bico.'],{when:HW(sc=>{ const p=partner(); return !!p&&!!sc.sab[p.id]; })}],
-  ['Pedido de casamento','Você pensa em pedir {p} em casamento, mas teme que vire alvo.',['Pedir mesmo assim|?55 rnoivo h+12|{p} disse sim!|bond-6|{p} disse que precisa pensar.','Esperar a paz|bond-4|Quando {inimigo} cair.'],{when:HW(()=>{ const p=partner(); return !!p&&p.rel==='namoro'; })}],
-  ['Casamento de herói','{p} quer casar logo. Você quer, mas a cerimônia vai ser um alvo.',['Casar em segredo|rcasar h+15|Casamos num cartório de bairro, com dois aliados de testemunha.','Casar em grande estilo|$-30000 rcasar h+12 sec-8|Festa linda. A imprensa toda na porta.','Adiar|bond-8|{p} ficou magoad{o2}.'],{when:HW(()=>{ const p=partner(); return !!p&&p.rel==='noivo'; })}],
-  ['Filho de herói','{p} quer ter um filho. Você pensa nos vilões.',['Topar|rgrav bond+10|Vamos ter um bebê!','Pedir para esperar|bond-8|{p} entendeu, mas ficou triste.'],{when:HW(sc=>{ const p=partner(); return !!p&&p.gender!==S.me.gender&&!sc.rgrav; })}],
+  ['{p} sabe demais','{p} sabe quem você é e vive pedindo para você usar o poder em casa.',['Usar o poder para lavar a louça|h+6 bond+8|Lavei duzentos pratos em três segundos.','Explicar que não é brinquedo|bond-4|{p} fez bico.'],{who:'partnerSecret',when:HW(sc=>partners(p=>!!sc.sab[p.id]).length)}],
+  ['Pedido de casamento','Você pensa em pedir {p} em casamento, mas teme que vire alvo.',['Pedir mesmo assim|?55 rnoivo h+12|{p} disse sim!|bond-6|{p} disse que precisa pensar.','Esperar a paz|bond-4|Quando {inimigo} cair.'],{who:'partnerDating',when:HW(()=>partners(p=>p.rel==='namoro').length)}],
+  ['Casamento de herói','{p} quer casar logo. Você quer, mas a cerimônia vai ser um alvo.',['Casar em segredo|rcasar h+15|Casamos num cartório de bairro, com dois aliados de testemunha.','Casar em grande estilo|$-30000 rcasar h+12 sec-8|Festa linda. A imprensa toda na porta.','Adiar|bond-8|{p} ficou magoad{o2}.'],{who:'partnerEngaged',when:HW(()=>partners(p=>p.rel==='noivo').length)}],
+  ['Filho de herói','{p} quer ter um filho. Você pensa nos vilões.',['Topar|rgrav bond+10|Vamos ter um bebê!','Pedir para esperar|bond-8|{p} entendeu, mas ficou triste.'],{who:'partnerFertile',when:HW(sc=>!sc.rgrav&&partners(p=>sexoDe(p)!==sexoDe(S.me)).length)}],
   ['Ciúmes de aliado','{p} está com ciúmes de alguém da sua equipe.',['Apresentar os dois|?car bond+6|Viraram amigos.|bond-8|Foi um desastre.','Dizer que é só trabalho|bond-2|Meio verdade.']],
   ['Encontro sem máscara','Você e {p} conseguem um dia inteiro sem alarmes.',['Piquenique no parque|bond+12 h+10|O dia mais normal e mais feliz em meses.','Passar o dia no sofá|bond+8 h+8|Pizza, filme e celular desligado.']],
-  ['{p} quer terminar','{p} diz que não aguenta mais dividir você com a cidade inteira.',['Prometer mais tempo juntos|?car bond+10|{p} me deu mais uma chance.|breakup h-15|Acabou.','Aceitar|breakup h-12|Doeu, mas eu entendo.'],{when:HW(()=>{ const p=partner(); return !!p&&p.bond<45; })}],
+  ['{p} quer terminar','{p} diz que não aguenta mais dividir você com a cidade inteira.',['Prometer mais tempo juntos|?car bond+10|{p} me deu mais uma chance.|breakup h-15|Acabou.','Aceitar|breakup h-12|Doeu, mas eu entendo.'],{who:'partnerUnhappy',when:HW(()=>partners(p=>p.bond<45).length)}],
   ['Vilã apaixonada','Uma vilã se declarou para {codinome} ao vivo. {p} assistiu.',['Explicar|?car bond+2|{p} riu da situação.|bond-12|{p} não achou graça.','Prender a vilã na frente das câmeras|rep+8 bond+4|Recado dado.']],
   ['Viagem romântica','{p} comprou passagens para um fim de semana na praia.',['Ir|bond+14 h+12 crime+10|Dois dias sem uniforme. A cidade não acabou.','Ir, mas levar o rádio da polícia|bond+4 h+4|{p} jogou o rádio no mar.']],
 ]);
@@ -14675,6 +14683,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.21',d:'16/10/2026',t:'Todos os parceiros fazem parte da vida',itens:['Viagens e retorno de aventuras consideram todos os parceiros, com consequências individuais.','Histórias escolhem parceiros elegíveis e mantêm a pessoa envolvida entre etapas, em vez de usar sempre a primeira da lista.','Na reprodução assistida, escolha o outro responsável: essa escolha fica salva até o nascimento, mesmo após separação.','Todos os parceiros aparecem na vida pessoal de herói. Voltar de uma aventura com um novo amor não termina automaticamente um casamento anterior.']},
   {v:'1.20',d:'15/10/2026',t:'Amores com consentimento',itens:['Namoros e casamentos com mais de uma pessoa: proponha a ideia em Amor ou na ficha de um parceiro.','Cada pessoa aceita ou recusa conforme sua abertura, ciúme e vínculo. Todos os parceiros atuais precisam aceitar; a pessoa nova também decide se quer participar.','Cada acordo libera a entrada de uma pessoa. Para uma terceira, quarta ou mais, é preciso conversar de novo com todos.','Uma recusa bloqueia a inclusão, e não dá para insistir no mesmo ano. Relações consentidas não geram punição automática por traição.','Os acordos são salvos; términos, divórcios e mudanças no grupo invalidam a rodada de novas inclusões.']},
   {v:'1.19.1',d:'15/10/2026',t:'Changelogs completos e correções',itens:['Casamento: proteção reforçada na cerimônia e opções de noivado e casamento ocultas quando já existe outro cônjuge; casos extraconjugais continuam possíveis.','A epidemia pode ser contida: infecção pode cair e dois anos sob controle encerram o surto sem apocalipse. O limite que forçava o colapso em sete anos foi removido.','Diagnóstico econômico: 200 vidas por estratégia por padrão, contagem dos sobreviventes por idade e interrupção com contexto em caso de erro.','O histórico agora mostra os textos completos das novidades de cada versão, incluindo os lançamentos 1.0, 1.1 e 1.2.','As notas originais dos lançamentos foram recuperadas e podem ser lidas dentro do jogo.','Navegue das primeiras versões às mais recentes em Menu → Novidades.']},
   {v:'1.19',d:'15/10/2026',t:'Investigação paranormal profissional',itens:['Carreira autônoma com pedidos de clientes, reputação, fama, equipamentos e pagamento por contrato.','Minijogo de exploração: cômodos, seis equipamentos, provas, sanidade, bateria, caçadas, esconderijos e rituais de expulsão.','Bestiário com oito entidades, combinações de evidências e registro dos casos identificados.','Quatro doenças exclusivas de vampiros e lobisomens, com sintomas e clínica sobrenatural.','Histórico completo de alterações recuperado do Git desde o primeiro registro, com navegação por páginas.']},
