@@ -421,7 +421,7 @@ function yearMoney(){
   const iv=m.inv;
   if(iv.poup) iv.poup=Math.round(iv.poup*1.04);
   if(iv.acoes){ const r=R.norm(.065,.18); iv.acoes=Math.max(0,Math.round(iv.acoes*(1+r))); if(Math.abs(r)>.2) log(`Minhas ações ${r>0?'subiram':'caíram'} ${Math.round(Math.abs(r)*100)}% este ano.`,r>0?'good':'bad'); }
-  if(iv.cripto){ const r=R.chance(.45)?R.f()*1.3:-R.f()*.65; /* a maioria perde um pouco, poucos ganham muito */ iv.cripto=Math.max(0,Math.round(iv.cripto*(1+r))); log(`Minhas criptomoedas ${r>0?'valorizaram':'derreteram'} ${Math.round(Math.abs(r)*100)}%.`,r>0?'good':'bad'); }
+  if(iv.cripto){ const r=R.chance(.4)?R.f()*(1.05/(1+Math.max(0,Math.log10(Math.max(1,iv.cripto)/1e6))*.2)):-R.f()*.8; /* a maioria perde um pouco, poucos ganham muito */ iv.cripto=Math.max(0,Math.round(iv.cripto*(1+r))); log(`Minhas criptomoedas ${r>0?'valorizaram':'derreteram'} ${Math.round(Math.abs(r)*100)}%.`,r>0?'good':'bad'); }
   if(m.money<-20000&&R.chance(.3)) queue('divida',{});
 }
 function yearPrison(){

@@ -195,7 +195,7 @@ function buy(kind,l,financed){
 }
 function sellAsset(a){ const m=S.me; if(a.stolen&&R.chance(.12)){ m.assets=m.assets.filter(x=>x!==a); arrest('receptação de produto roubado',0,2); return `O comprador era policial disfarçado. Perdi ${a.n.toLowerCase()} e fui pres${oa()}.`; } const v=Math.round(a.value*(a.stolen?.45:1)*(a.k==='casa'?(.75+a.cond/400):(.5+a.cond/220))); m.money+=v-(a.loan||0); m.assets=m.assets.filter(x=>x!==a); log(`Vendi ${a.n.toLowerCase()} por ${fmt(v)}.`); return `Vendi por ${fmt(v)}${a.loan?` (quitei ${fmt(a.loan)} de financiamento)`:''}.`; }
 function fixAsset(a){ const m=S.me; const c=Math.round(a.value*(100-a.cond)/100*(a.k==='casa'?.25:.4)); if(!canPay(c)) return `A reforma custa ${fmt(c)} e eu não tenho.`; m.money-=c; a.cond=100; a.value=Math.round(a.value*1.04); return `${a.k==='casa'?'Reformei':'Consertei'} por ${fmt(c)}.`; }
-function invest(k,v){ const m=S.me; if(v>0&&!canPay(v)) return 'Não tenho esse dinheiro.'; if(v<0&&m.inv[k]<-v) v=-m.inv[k]; m.money-=v; m.inv[k]+=v; return v>0?`Investi ${fmt(v)}.`:`Resgatei ${fmt(-v)}.`; }
+function invest(k,v){ const m=S.me; if(!['poup','acoes','cripto'].includes(k)||!Number.isFinite(v)) return 'Investimento inválido.'; if(v>0&&!canPay(v)) return 'Não tenho esse dinheiro.'; if(v<0&&m.inv[k]<-v) v=-m.inv[k]; m.money-=v; m.inv[k]+=v; return v>0?`Investi ${fmt(v)}.`:`Resgatei ${fmt(-v)}.`; }
 
 // ---------- mente e corpo ----------
 function body(k,extra){
