@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610160545'</script>
+<title>NewLife</title><script>window.NL_VER='2610160546'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -10426,7 +10426,7 @@ function polyPerfil(p){
 const polyChance=p=>{ const t=polyPerfil(p); return clamp(10+t.abertura*.75-t.ciume*.55+(p.bond-50)*.3,3,95)/100; };
 const polyGrupo=()=>{ const l=polyAmores(); return l.length<2||l.every(p=>l.every(q=>q.id===p.id||(p.polyCom||[]).includes(q.id))); };
 const polyRodada=()=>{ const r=S.me.polyRodada; return r&&r.chave===polyChave()?r:null; };
-const polyUnanime=()=>{ const l=polyAmores(),r=polyRodada(); return !!(l.length&&r&&l.every(p=>r.votos[p.id]===true)); };
+const polyUnanime=()=>{ const l=polyAmores(),r=polyRodada(); return !!(l.length&&r&&l.every(p=>r.votos[p.id]===true&&!p.polyPausa)); };
 const polyPodeOficializar=p=>polyAmores().includes(p)&&(!polyAmores().some(q=>q.id!==p.id)||polyGrupo());
 function polyPropor(p){
   const l=polyAmores(); if(!S.me.alive||S.scen||S.me.age<18||!l.includes(p)||l.some(q=>q.age<18)) return 'Essa conversa só está disponível entre parceiros adultos na vida normal.';
@@ -10435,6 +10435,7 @@ function polyPropor(p){
   if(r.anos[p.id]===S.year||p.polyRecusa===S.year) return `${p.first} já recusou esta proposta. Vou respeitar a resposta; só podemos conversar de novo no próximo ano.`;
   r.anos[p.id]=S.year; r.votos[p.id]=R.chance(polyChance(p));
   if(!r.votos[p.id]){ p.polyRecusa=S.year; return `${p.first} não aceitou ter mais uma pessoa na relação. Sem a concordância de todos, não vou começar outro namoro nem casamento.`; }
+  p.polyPausa=false;
   if(polyUnanime()){ S.pending=S.pending.filter(e=>e.id!=='amantes'); l.forEach(q=>q.polyCom=l.filter(x=>x!==q).map(x=>x.id)); return `${p.first} aceitou. Todos concordaram: podemos incluir mais uma pessoa, desde que ela também aceite. Depois disso, qualquer nova inclusão exige outra conversa com todos.`; }
   return `${p.first} aceitou a ideia. Ainda preciso conversar com ${l.filter(q=>r.votos[q.id]!==true).map(q=>q.first).join(', ')}. Uma pessoa aceitar não decide pelas outras.`;
 }
@@ -14683,6 +14684,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.22',d:'16/10/2026',t:'Convivência e novos acordos',itens:['Parceiros em relações plurais podem sentir ciúme, pedir atenção e iniciar uma conversa sobre limites.','Ouvir, ignorar, pausar novas inclusões ou terminar afeta apenas o relacionamento envolvido.','Rever o acordo permite pausar novas pessoas sem desfazer os casamentos existentes nem transformar um acordo anterior em traição.']},
  {v:'1.21',d:'16/10/2026',t:'Todos os parceiros fazem parte da vida',itens:['Viagens e retorno de aventuras consideram todos os parceiros, com consequências individuais.','Histórias escolhem parceiros elegíveis e mantêm a pessoa envolvida entre etapas, em vez de usar sempre a primeira da lista.','Na reprodução assistida, escolha o outro responsável: essa escolha fica salva até o nascimento, mesmo após separação.','Todos os parceiros aparecem na vida pessoal de herói. Voltar de uma aventura com um novo amor não termina automaticamente um casamento anterior.']},
   {v:'1.20',d:'15/10/2026',t:'Amores com consentimento',itens:['Namoros e casamentos com mais de uma pessoa: proponha a ideia em Amor ou na ficha de um parceiro.','Cada pessoa aceita ou recusa conforme sua abertura, ciúme e vínculo. Todos os parceiros atuais precisam aceitar; a pessoa nova também decide se quer participar.','Cada acordo libera a entrada de uma pessoa. Para uma terceira, quarta ou mais, é preciso conversar de novo com todos.','Uma recusa bloqueia a inclusão, e não dá para insistir no mesmo ano. Relações consentidas não geram punição automática por traição.','Os acordos são salvos; términos, divórcios e mudanças no grupo invalidam a rodada de novas inclusões.']},
   {v:'1.19.1',d:'15/10/2026',t:'Changelogs completos e correções',itens:['Casamento: proteção reforçada na cerimônia e opções de noivado e casamento ocultas quando já existe outro cônjuge; casos extraconjugais continuam possíveis.','A epidemia pode ser contida: infecção pode cair e dois anos sob controle encerram o surto sem apocalipse. O limite que forçava o colapso em sete anos foi removido.','Diagnóstico econômico: 200 vidas por estratégia por padrão, contagem dos sobreviventes por idade e interrupção com contexto em caso de erro.','O histórico agora mostra os textos completos das novidades de cada versão, incluindo os lançamentos 1.0, 1.1 e 1.2.','As notas originais dos lançamentos foram recuperadas e podem ser lidas dentro do jogo.','Navegue das primeiras versões às mais recentes em Menu → Novidades.']},
@@ -15073,6 +15075,19 @@ treat=(o=>function(where,d){ if(PN_DOENCAS[d.id]) return 'A medicina comum não 
 V.health=(o=>()=>{ const r=o(); if(S.me.criatura) r.items.push({ic:'🧪',l:'Clínica sobrenatural',s:'Doenças de vampiros e lobisomens',on:()=>UI.push(V.paraSaude)}); return r; })(V.health);
 V.paraSaude=()=>({title:'Clínica sobrenatural',items:[{html:'Enfermidades da maldição exigem tratamentos próprios. Cada tratamento tem 80% de chance e pode ser tentado uma vez por ano.'},...S.me.dis.filter(d=>PN_DOENCAS[d.id]).map(d=>{ const def=PN_DOENCAS[d.id]; return {ic:'🧪',l:d.k===false?'Investigar sintomas sobrenaturais':def.n,s:`${d.k===false?d.sx:def.trat} · ${fmt(def.c)}`,on:()=>act(()=>pnTratar(d.id),'Clínica sobrenatural')}; }),...(!S.me.dis.some(d=>PN_DOENCAS[d.id])?[{html:'Não há sintomas sobrenaturais para tratar.'}]:[])]});
 yearHealth=(o=>function(){ const m=S.me; m.dis=m.dis.filter(d=>!PN_DOENCAS[d.id]||PN_DOENCAS[d.id].criatura===m.criatura); return o.apply(this,arguments); })(yearHealth);
+
+// ===== Convivência e renegociação em relações plurais =====
+function relPausar(p){ if(!p||!partners().includes(p)) return 'Esse relacionamento terminou.'; p.polyPausa=true;delete S.me.polyRodada;log(p.first+' pediu uma pausa na entrada de novas pessoas. Os relacionamentos atuais continuam.','warn');return 'Combinamos não incluir ninguém novo até conversar novamente. O acordo não transforma o passado em traição.'; }
+function relFim(p){ if(!p||!partners().includes(p))return 'Esse relacionamento já terminou.';if(p.rel==='conjuge')divorce(p,true);else{p.rel='ex';polyLimpar(p);st('happy',-12);log(p.first+' terminou comigo.','bad');}return 'O relacionamento com '+p.first+' terminou. Os demais parceiros continuam livres para decidir sobre suas próprias relações.'; }
+function relResolver(p,acao){if(!p||!partners().includes(p))return 'Já não estamos juntos.';p.relConflitos=(p.relConflitos||0)+1;p.relUltimoConflito=S.year;
+ if(acao==='pausa')return relPausar(p);
+ if(acao==='fim')return relFim(p);
+ if(acao==='ouvir'){const chance=clamp(35+p.bond*.5-polyPerfil(p).ciume*.15,10,90)/100;if(R.chance(chance)){p.bond=clamp(p.bond+12);p.relConflitos=Math.max(0,p.relConflitos-1);return 'Ouvi '+p.first+' sem minimizar o que sentia. Combinamos tempo juntos e limites mais claros.';}p.bond=clamp(p.bond-5);return relPausar(p);}
+ p.bond=clamp(p.bond-15);if(p.bond<25&&R.chance(.55))return relFim(p);return p.first+' se sentiu ignorad'+(p.gender==='F'?'a':'o')+'. A conversa ficou pendente.';
+}
+EVENTS.poly_conflito={when:m=>partners().length>1,show:d=>{const p=P(d.pid);return {k:'Relacionamentos',t:'Precisamos conversar',x:(p?p.first:'Meu parceiro')+' sente ciúme e acha que nosso tempo juntos diminuiu. Ter aceitado uma relação plural não significa deixar de ter limites.',ch:[['Ouvir e combinar tempo juntos','ouvir'],['Pausar novas inclusões','pausa'],['Terminar este relacionamento','fim'],['Ignorar a conversa','ignorar']]};},pick:(k,d)=>relResolver(P(d.pid),k)};
+yearMoney=(o=>function(){const r=o.apply(this,arguments);if(S.me.alive&&!S.scen&&partners().length>1&&polyGrupo()&&!S.pending.some(e=>e.id==='poly_conflito')){const l=partners(p=>R.chance((polyPerfil(p).ciume/100)*.18+(p.bond<55?.2:.03)));if(l.length)queue('poly_conflito',{pid:R.pick(l).id});}return r;})(yearMoney);
+V.person=(o=>function(p){const r=o(p);if(r&&partners().includes(p)&&S.me.age>=18&&p.age>=18&&!S.scen)r.items.push({ic:'🤝',l:'Rever o acordo da relação',s:p.polyPausa?'Novas inclusões pausadas':'Conversar sobre limites e convivência',on:()=>modal({t:'Rever o acordo com '+p.first,ch:[{l:'Pausar novas inclusões',fn:()=>act(()=>relPausar(p),'Acordo')},{l:'Conversar sobre incluir mais alguém',fn:()=>act(()=>polyPropor(p),'Conversa')},{l:'Cancelar'}]})});return r;})(V.person);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
