@@ -10,10 +10,10 @@ const spcIs=id=>m=>m.job&&m.job.spc===id;
 const studying=(...types)=>m=>m.edu.cur&&types.includes(m.edu.cur.type);
 const courseIn=(...ids)=>m=>m.edu.cur&&m.edu.cur.type==='uni'&&ids.includes(m.edu.cur.id);
 const WHO={
-  partner:()=>partner(), sib:()=>R.pick(people('irmao')), parent:()=>R.pick(parents()), friend:()=>R.pick(people('amigo')),
+  partner:()=>pickPartner(), partnerDating:()=>pickPartner(p=>p.rel==='namoro'), partnerEngaged:()=>pickPartner(p=>p.rel==='noivo'), partnerUnhappy:()=>pickPartner(p=>p.bond<55), partnerSecret:()=>pickPartner(p=>S.scen&&S.scen.sab&&S.scen.sab[p.id]), partnerFertile:()=>pickPartner(p=>sexoDe(p)!==sexoDe(S.me)), sib:()=>R.pick(people('irmao')), parent:()=>R.pick(parents()), friend:()=>R.pick(people('amigo')),
   boss:()=>people('chefe')[0], colega:()=>R.pick(people('colegaT')), classmate:()=>R.pick(people('colega')), grandkid:()=>R.pick(people('neto')), pet:()=>R.pick(people('pet')),
   kid:()=>R.pick(kids()), baby:()=>R.pick(kids().filter(k=>k.age<=2)), child:()=>R.pick(kids().filter(k=>k.age>=3&&k.age<=12)), teen:()=>R.pick(kids().filter(k=>k.age>=13&&k.age<=17)), adultkid:()=>R.pick(kids().filter(k=>k.age>=18)),
-  ex:()=>R.pick(people('ex')), spouse:()=>people('conjuge')[0],
+  ex:()=>R.pick(people('ex')), spouse:()=>pickPartner(p=>p.rel==='conjuge'),
 };
 function dslChance(tok){
   const mm=tok.match(/^\?([a-z]+(?:\.[a-z]+)?|\d+)([+-]\d+)?$/i); if(!mm) return .5;

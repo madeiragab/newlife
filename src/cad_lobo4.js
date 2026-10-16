@@ -13,7 +13,7 @@ chain('lobo_sentidos',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,2]},{
  c:['O excesso','O barulho da cidade me deixa irritad{o} e com dor de cabeça.',['Mudar para o interior|$-5000 h+8 >d|Silêncio, mato e passarinhos.','Usar protetor de ouvido|h+2 >d|Ajuda um pouco.']],
  d:['Equilíbrio','Aprendi a ligar e desligar os sentidos como um rádio.',['Usar com sabedoria|sm+3 h+5|Um dom, não uma maldição.','Ajudar a polícia a achar pessoas|k+6|Meu faro já salvou gente.']],
 });
-chain('lobo_casamento_lua',{k:'Lobisomem',min:20,max:120,when:m=>LOBO(m)&&!!partner()&&partner().rel==='noivo',who:'partner',gap:[1,1]},{
+chain('lobo_casamento_lua',{k:'Lobisomem',min:20,max:120,when:m=>LOBO(m)&&partners(p=>p.rel==='noivo').length,who:'partnerEngaged',gap:[1,1]},{
  a:['A data do casamento','A data do casamento caiu justo numa noite de lua cheia.',['Mudar a data|pbond-3 >b|"Vamos adiar uma semana, amor?"','Casar de manhã e fugir antes do anoitecer|>c|Corrida contra o sol.']],
  b:['A explicação','{p} quer saber por que mudar a data.',['Contar a verdade|?bond pbond+10 >c|{p} riu e chorou: "Então é por isso que você some todo mês!"|separar h-12|{p} não aguentou a verdade.','Inventar desculpa|>c|A desculpa colou.']],
  c:['O grande dia','O casamento foi lindo. A lua nasceu durante a valsa.',['Correr para a mata antes da transformação|casar h+15 pbond+8|Saí correndo da festa. Os convidados acharam romântico.','Ficar até o fim|casar ?will h+18 pbond+10|Segurei a fera até o último convidado ir embora.|casar h+5 f+3|Me transformei na pista de dança. Disseram que foi a fantasia mais realista que já viram.']],

@@ -82,7 +82,7 @@ pack({k:'Casamento',who:'spouse',when:m=>people('conjuge').length},[
  ['Filhos?','{p} quer ter filhos agora.',['Concordar|bond+8|Vamos tentar!','Pedir mais tempo|bond-5|Ainda não estou pront{o}.'],{when:m=>m.age<45&&!kids().length}],
  ['Caso extraconjugal','Alguém do trabalho está dando em cima de mim descaradamente.',['Cortar na hora|k+3 bond+2|Deixei claro que sou casad{o}.','Ceder|c:cheats ?50 h+5|Ninguém descobriu. Ainda.|bond-40|{p} descobriu.']],
 ]);
-pack({k:'Amor',when:m=>m.age>=20&&m.age<60&&!partner()},[
+pack({k:'Amor',when:m=>m.age>=20&&m.age<60&&!partners().length},[
  ['Amigos casando','Todos os meus amigos estão casando e eu continuo solteir{o}.',['Entrar num aplicativo de namoro|h+2|Baixei. Vamos ver.','Curtir a vida de solteir{o}|h+4|Liberdade total.']],
  ['Encontro às cegas','Uma amiga quer me apresentar a {n}.',['Ir ao encontro|?lk h+6 meet:namoro|Foi ótimo! Começamos a namorar.|h-3|Foi o encontro mais constrangedor da minha vida.','Recusar|h+0|Não gosto de encontros armados.']],
  ['Solidão','Hoje bateu uma solidão forte.',['Ligar para um amigo|h+4|Conversamos por horas.','Sair para dançar|h+5|A noite foi animada.','Ficar em casa|h-4|Comi sorvete vendo filme triste.']],
@@ -92,7 +92,7 @@ pack({k:'Amor',who:'ex',min:18,when:m=>people('ex').length},[
  ['Encontro com ex','Encontrei {p} no supermercado.',['Cumprimentar educadamente|k+2|Foi estranho, mas civilizado.','Me esconder atrás das prateleiras|h-2|{ele} me viu mesmo assim.']],
  ['Pensão','Estou em briga judicial com {p}.',['Fazer acordo|$-v|Assinamos um acordo de {v}.','Brigar até o fim|?50|Ganhei na justiça.|$-v2|Perdi e paguei {v2}.'],{v:[2000,20000],when:m=>(m.c.divorces||0)>0}],
 ]);
-pack({k:'Luto',when:m=>(m.c.widow||0)>0&&!partner()},[
+pack({k:'Luto',when:m=>(m.c.widow||0)>0&&!partners().length},[
  ['Saudade','Hoje faria aniversário de casamento.',['Visitar o túmulo|h-4 k+1|Levei flores e conversei um pouco.','Olhar fotos antigas|h-6|Chorei e sorri ao mesmo tempo.']],
  ['Seguir em frente?','Meus amigos dizem que é hora de conhecer alguém novo.',['Tentar|h+3|Aceitei um café com alguém. Foi bom.','Ainda não|h-2|Meu coração não está pronto.']],
 ]);

@@ -17,7 +17,7 @@ function trial(k,d){
   if(m.edu.cur&&!m.prison.juv){ log(`Perdi a vaga ${eduOf(m.edu.cur)} por causa da prisão.`,'bad'); m.edu.cur=null; m.edu.club=null; }
   endJob(); m.office=null; S.flags.movedOut=1;
   if(m.c.pres) m.c.prisonAfterPres=1; if(m.royal&&!m.royal.abd){ m.royal.pop=clamp(m.royal.pop-30); }
-  const prt=partner(); if(prt&&R.chance(.4)){ if(prt.rel==='conjuge') divorce(prt,true); else { prt.rel='ex'; log(`${prt.first} terminou comigo depois da condenação.`,'bad'); } }
+  for(const prt of partners()){ if(R.chance(.4)){ if(prt.rel==='conjuge') divorce(prt,true); else { prt.rel='ex'; log(`${prt.first} terminou comigo depois da condenação.`,'bad'); } } }
   st('happy',-30);
   return note+`Fui condenad${oa()} a ${yrs} ${yrs>1?'anos':'ano'} de ${m.age<18?'internação numa unidade socioeducativa':'prisão'}.`;
 }
@@ -257,7 +257,7 @@ function askOut(p){
   const anteriores=polyAmores();
   const m=S.me; const diff=(m.looks-p.looks)/120+(m.fame/300)+(m.money>200000?.08:0)+(m.age>=18?(m.job?.06:-.06):0);
   if(!R.chance(clamp((.42+diff)*100,5,95)/100)){ st('happy',-3); return {ok:false,t:R.pick([`${p.first} disse que não está procurando nada agora.`,`${p.first} riu e foi embora.`,`${p.first} me deu um número de telefone falso.`,`${p.first} disse que me vê só como amig${oa()}.`])}; }
-  const cur=partner();
+  const cur=pickPartner();
   p.rel='namoro'; S.people.push(p); cnt('partners'); st('happy',8);
   polyRegistrar(p,anteriores);
   log(`Comecei a namorar ${fullName(p)}.`,'good');
@@ -270,7 +270,7 @@ function hookup(){
   primeiraVez(fullName(p));
   let t=`Fiquei com ${p.first}, ${p.age} anos, que conheci ${R.pick(['numa balada','num bar','num aplicativo','num show','na praia'])}.`;
   if(R.chance(.06)){ const id=R.chance(.25)?'herpes':'ist'; addDisease(id); t+=' Depois descobri que peguei uma infecção.'; }
-  const pr=partner(); if(pr&&R.chance(.3)){ pr.bond=clamp(pr.bond-40); t+=` ${pr.first} descobriu.`; }
+  for(const pr of partners()) if(R.chance(.3)){ pr.bond=clamp(pr.bond-40); t+=` ${pr.first} descobriu.`; }
   if(R.chance(.03)&&m.age<50&&p.gender!==m.gender&&!S.births.length){ p.rel='ex'; addP(p); S.births.push({with:p.id}); t+=' Meses depois, a notícia: vem um bebê aí.'; }
   return t;
 }
@@ -293,7 +293,7 @@ function interact(p,k,extra){
     case 'piada': if(R.chance(.6)){ p.bond=clamp(p.bond+R.int(1,5)); return `${nm} riu muito da minha piada.`; } p.bond=clamp(p.bond-2); return `${nm} não achou graça nenhuma.`;
     case 'pegadinha': if(R.chance(.5)){ p.bond=clamp(p.bond+3); return `${nm} caiu na pegadinha e riu.`; } p.bond=clamp(p.bond-8); return `${nm} ficou furios${a} com a pegadinha.`;
     case 'amizade': if(R.chance(Math.min(.95,.08+frOf(p)/100*.9))){ p.fr=clamp(frOf(p)+8); p.rel='amigo'; p.bond=clamp(p.bond+10); return `Agora ${nm} é ${p.gender==='F'?'minha amiga':'meu amigo'}!`; } p.bond=clamp(p.bond-3); return `${nm} não deu muita bola.`;
-    case 'flertar': { const okPref=m.pref==='A'||m.pref===p.gender; if(!okPref) return `Não sinto atração por ${nm}.`; if(R.chance(clamp(p.bond*.5+(m.looks-p.looks)/2+20,5,90)/100)){ const cur=partner(); p.rel='namoro'; p.bond=clamp(p.bond+15); cnt('partners'); if(cur&&!p.polyConvite?.ok){ cnt('cheats'); if(R.chance(.4)) cur.bond=clamp(cur.bond-40); } return `Rolou um clima. ${nm} e eu estamos ficando sério!`; } p.bond=clamp(p.bond-6); return `${nm} me deu um fora.`; }
+    case 'flertar': { const okPref=m.pref==='A'||m.pref===p.gender; if(!okPref) return `Não sinto atração por ${nm}.`; if(R.chance(clamp(p.bond*.5+(m.looks-p.looks)/2+20,5,90)/100)){ const cur=pickPartner(); p.rel='namoro'; p.bond=clamp(p.bond+15); cnt('partners'); if(cur&&!p.polyConvite?.ok){ cnt('cheats'); if(R.chance(.4)) cur.bond=clamp(cur.bond-40); } return `Rolou um clima. ${nm} e eu estamos ficando sério!`; } p.bond=clamp(p.bond-6); return `${nm} me deu um fora.`; }
     case 'pedido': { const [c]=extra; if(!canPay(c)) return 'Não tenho dinheiro para esse anel.'; m.money-=c; if(R.chance(clamp(p.bond+c/1000-30,5,97)/100)){ p.rel='noivo'; p.bond=clamp(p.bond+10); st('happy',15); log(`Fiquei ${m.gender==='F'?'noiva':'noivo'} de ${nm}.`,'good'); return `${nm} disse SIM!`; } p.bond=clamp(p.bond-20); st('happy',-12); return `${nm} disse que não está pront${a}.`; }
     case 'casar': { const outro=people('conjuge').find(x=>x.id!==p.id); if(outro&&!polyPodeOficializar(p)) return `Já sou casad${oa()} com ${outro.first}. Preciso do consentimento de todos antes de casar de novo.`; if(p.rel!=='noivo') return 'Preciso estar noivo dessa pessoa antes da cerimônia.'; const [c,prenup]=extra; if(!canPay(c)) return 'Não tenho dinheiro para essa festa.'; m.money-=c; if(prenup){ S.flags['prenup'+p.id]=1; if(R.chance(.3)){ p.bond=clamp(p.bond-25); return `${nm} se ofendeu com o pacto antenupcial e adiou o casamento.`; } } p.rel='conjuge'; p.yrs=0; cnt('marriages'); st('happy',20); S.flags.movedOut=1; log(`Casei com ${fullName(p)}!`,'good'); return `Casei com ${nm}! ${c>30000?'A festa foi inesquecível.':''}`; }
     case 'terminar': p.rel='ex'; st('happy',-8); log(`Terminei com ${nm}.`); return `Terminei com ${nm}.`;
@@ -385,7 +385,7 @@ function travel(dest,cost){
   const r=R.f();
   if(r<.12) return `Fui para ${dest}, mas a companhia aérea perdeu minha mala.`;
   if(r<.2){ st('health',-6); return `Fui para ${dest} e passei metade da viagem com intoxicação alimentar.`; }
-  if(r<.3&&!partner()&&m.age<70){ const p=candidate(true); p.rel='namoro'; S.people.push(p); cnt('partners'); return `Fui para ${dest} e me apaixonei por ${fullName(p)}! Estamos namorando.`; }
+  if(r<.3&&!partners().length&&m.age<70){ const p=candidate(true); p.rel='namoro'; S.people.push(p); cnt('partners'); return `Fui para ${dest} e me apaixonei por ${fullName(p)}! Estamos namorando.`; }
   if(r<.36){ const l=amt(100,2000); m.money-=l; return `Fui para ${dest} e fui roubad${oa()} na rua. Perdi ${fmt(l)}.`; }
   return `Fui para ${dest}. ${R.pick(['Foi a melhor viagem da minha vida.','Comi coisas que nem sei o nome.','Tirei mil fotos.','Voltei com outra visão do mundo.','Choveu todos os dias, mas valeu.','Fiz amizade com um grupo de mochileiros.'])}`;
 }

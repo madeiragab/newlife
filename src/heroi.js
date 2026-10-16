@@ -59,7 +59,7 @@ V.hPessoa=p=>{ const sc=S.scen; if(!p||!p.alive) return null; const base=V.perso
 // Aliados: equipe, vida pessoal e amor da vida real
 V.scCrew=(o=>()=>{ const r=o(); const sc=S.scen; if(!sc||sc.id!=='heroi') return r; hEnsure(sc); const m=S.me, t=hTeam(), it=[];
   it.push({sec:'Equipe'}); if(t) it.push({ic:t.ic,l:t.n,s:`${jobTitle(m.job)} · ${fmt(jobSalary(m.job))}/ano`,on:()=>UI.push(V.hTeam)}); else it.push({ic:'🛡️',l:'Entrar para uma equipe',s:'Conta como emprego',on:()=>UI.push(V.hTeams)});
-  it.push({sec:'Vida pessoal'}); const fam=famAll().filter(p=>!['namoro','noivo','conjuge'].includes(p.rel)||p!==partner());
+  it.push({sec:'Vida pessoal'}); const fam=famAll().filter(p=>!['namoro','noivo','conjuge'].includes(p.rel)||!partners().includes(p));
   fam.forEach(p=>it.push({face:faceSVG(p,40),l:`${p.first} ${p.last}`,s:`${relLabel(p)}${sc.sab[p.id]||sc.rev?' · sabe quem eu sou':''}${p.esc>=sc.dia?' · escondid'+oaG(p.gender):''}`,bars:[['❤️',p.bond,'#E5487D']],on:()=>UI.push(()=>V.hPessoa(p))}));
   if(!fam.length) it.push({html:'<div class="card"><p style="color:var(--muted)">Sem família por perto.</p></div>'});
   it.push({ic:'👥',l:'Todas as relações',s:'Amigos, colegas, ex',on:()=>UI.push(V.relReal)});

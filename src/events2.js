@@ -15,7 +15,7 @@ function strangers(m,o){
 // Transforma o desconhecido do evento em uma pessoa de verdade na lista de relações (uma vez só por evento).
 function meetP(d,rel='amigo',key='n',o={}){
   const m=S.me; if(d['met_'+key]&&P(d['met_'+key])) return P(d['met_'+key]);
-  if(!d[key]) return null; if(rel==='namoro'&&partner()) rel='amigo';
+  if(!d[key]) return null; if(rel==='namoro'&&partners().length) rel='amigo';
   const kid=m.age<18, age=o.age??(key==='n'&&d.nAge?d.nAge:null)??clamp(m.age+(kid?R.int(-1,1):R.int(-7,7)),Math.max(1,kid?m.age-2:18),99);
   const p=mkPerson(Object.assign({rel,first:d[key],last:d[key+'l'],gender:d[key+'G'],age,bond:R.int(55,75)},o));
   if(key==='n'&&d.nFace){ p.genes=d.nFace.genes; p.look=d.nFace.look; }

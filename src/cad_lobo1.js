@@ -25,7 +25,7 @@ chain('lobo_alcateia_lider',{k:'Lobisomem',min:18,max:120,when:LOBO,npc:1,gap:[1
  e:['O novo líder','O novo líder começou a quebrar as regras antigas e atacar humanos.',['Desafiar de novo|>b@1|Não posso deixar isso continuar.','Avisar os caçadores|k+4 >f|Traição à alcateia, para salvar humanos.']],
  f:['A alcateia','A alcateia sobrevive e se fortalece.',['Fazer uma reunião na lua cheia|h+8|Correr junto com a família.','Treinar os jovens|fight+3 k+3|Os filhotes aprendem rápido.']],
 });
-chain('lobo_par',{k:'Lobisomem',min:18,max:120,when:m=>LOBO(m)&&!!partner(),who:'partner',gap:[1,1]},{
+chain('lobo_par',{k:'Lobisomem',min:18,max:120,when:m=>LOBO(m)&&!!partners().length,who:'partner',gap:[1,1]},{
  a:['A noite em que viu','{p} acordou no meio da noite de lua cheia e me viu me transformando no quintal.',['Correr para a floresta|>b|Não queria que {ele} me visse daquele jeito.','Ficar e deixar {ele} ver|>c|Os olhos d{ele} encontraram os meus.']],
  b:['A manhã seguinte','Voltei de manhã, cobert{o} de lama. {p} estava na cozinha, esperando.',['Contar tudo|>c|Sentei e contei desde a mordida.','Negar|?30 pbond-10|{p} fingiu acreditar.|pbond-20 >d|{p} disse: "Eu vi."']],
  c:['A reação','{p} ficou em silêncio por muito tempo.',['Esperar|?bond pbond+15 h+10 >e|{p} me abraçou: "A gente dá um jeito."|>d|{p} pediu um tempo.']],

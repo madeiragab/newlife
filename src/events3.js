@@ -1,6 +1,6 @@
 // ===== Eventos: vida adulta, velhice, prisão e carreiras =====
 const hasJob=m=>m.job&&!m.job.spc;
-const single=m=>!partner();
+const single=m=>!partners().length;
 
 // ---------- vida adulta ----------
 ev('reporter_rua',{k:'TV',min:16,cd:8,t:'Entrevista na rua',x:'Um repórter me parou na rua para perguntar sobre {tema}.',prep:()=>({tema:R.pick(['o preço da gasolina','o calor','o trânsito','a final do campeonato','a nova lei do celular nas escolas'])}),ch:[
@@ -76,7 +76,7 @@ ev('vazamento',{k:'Casa',min:18,cd:10,when:m=>S.flags.movedOut,t:'Vazamento',x:'
 ev('golpe_amor',{k:'Internet',min:18,cd:12,when:single,t:'Amor virtual',x:'Uma pessoa linda que conheci na internet diz estar presa no exterior e precisa de {v}.',v:[1000,15000],ch:[
  ['Mandar o dinheiro',{$:'-v',h:-10,t:'Nunca mais tive notícias. Era golpe.'}],
  ['Pedir uma videochamada',{sm:1,t:'A câmera "sempre estava quebrada". Bloqueei.'}]]});
-ev('dia_namorados',{k:'Amor',min:15,cd:3,when:m=>partner(),prep:m=>{ const p=partner(); return {pid:p.id,n:p.first,nl:p.last,nG:p.gender}; },t:'Dia dos Namorados',x:'Dia dos Namorados chegando. O que fazer com {n}?',ch:[
+ev('dia_namorados',{k:'Amor',min:15,cd:3,when:m=>partners().length,prep:m=>{ const p=pickPartner(); return {pid:p.id,n:p.first,nl:p.last,nG:p.gender}; },t:'Dia dos Namorados',x:'Dia dos Namorados chegando. O que fazer com {n}?',ch:[
  ['Jantar caro',{$:-600,bond:10,h:5,t:'Um jantar inesquecível com {n}.'}],
  ['Algo feito à mão',{bond:7,k:1,t:'{n} chorou com o presente.'}],
  ['Esquecer a data',{bond:-12,t:'{n} não fala comigo há três dias.'}]]});

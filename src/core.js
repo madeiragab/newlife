@@ -100,7 +100,12 @@ const REL_LABEL={mae:'Mãe',pai:'Pai',irmao:'Irmão|Irmã',avo:'Avô|Avó',filho
   colega:'Colega de classe',colegaT:'Colega de trabalho',namoro:'Namorado|Namorada',noivo:'Noivo|Noiva',conjuge:'Marido|Esposa',ex:'Ex',
   pet:'',inimigo:'Desafeto',chefe:'Chefe',adot:'Filho adotivo|Filha adotiva'};
 let relLabel=p=>p.rel==='pet'?g(p.species,p.gender):g(REL_LABEL[p.rel]||p.rel,p.gender);
-const partner=()=>people('namoro','noivo','conjuge')[0]||null;
+const partners=(test=()=>true)=>people('namoro','noivo','conjuge').filter(test);
+const pickPartner=(test)=>R.pick(partners(test))||null;
+// Compatibilidade com saves e ferramentas antigas; fluxos novos usam lista ou alvo explícito.
+const partner=()=>partners()[0]||null;
+function storyPartner(d){ if(!Object.hasOwn(d,'partnerId')){ const alvo=P(d.pid); d.partnerId=(alvo&&partners().includes(alvo)?alvo:pickPartner())?.id??null; } const p=P(d.partnerId); return p&&partners().includes(p)?p:null; }
+
 const kids=()=>people('filho','adot');
 
 // ---------- utilidades do personagem ----------
@@ -249,7 +254,7 @@ function yearStats(){
   if(a>=32) st('looks',-(a>60?R.int(1,3):a>45?R.int(0,2):R.int(0,1))); if(a>=13&&a<=18) st('looks',R.int(-2,3));
   if(a>=30) st('health',-(a>80?R.int(1,4):a>65?R.int(0,3):a>45?R.int(0,2):R.int(0,1)));
   if(a<55&&!m.dis.some(d=>DISEASES[d.id].dmg>=8)&&m.add.alcool<40&&m.add.cigarro<40) st('health',R.int(0,a<30?3:2));
-  let target=58+(m.money>1e5?6:m.money<0?-12:0)+(partner()?6:0)+(m.job||m.edu.cur||m.ret?4:a>=18?-10:0)-(m.prison?28:0)-(m.dis.length*3)+(m.karma-50)/10;
+  let target=58+(m.money>1e5?6:m.money<0?-12:0)+(partners().length?6:0)+(m.job||m.edu.cur||m.ret?4:a>=18?-10:0)-(m.prison?28:0)-(m.dis.length*3)+(m.karma-50)/10;
   m.happy=clamp(m.happy+(target-m.happy)*.2+R.int(-6,6));
   const ad=m.add;
   if(ad.alcool>40){ st('health',-R.int(1,4)); st('smarts',-1); if(ad.alcool>75&&R.chance(.05)&&!m.dis.find(d=>d.id==='cirrose')) addDisease('cirrose'); }
@@ -462,7 +467,7 @@ function yearSummary(){
     else if(j.perf>=30&&j.perf<55&&gap('job',2)) L.push(R.pick([`Meu desempenho na ${j.co} caiu. Preciso me esforçar.`,`Levei uma advertência por atraso na ${j.co}.`,`Meu chefe anda me olhando torto.`]));
     else if(j.perf<30) L.push(`Estou na corda bamba na ${j.co}. Qualquer erro e sou ${m.gender==='F'?'demitida':'demitido'}.`); }
   else if(a>=19&&a<62&&!m.job&&!m.edu.cur&&!m.prison&&!m.office&&!m.biz&&!(m.royal&&!m.royal.abd)&&R.chance(.6)&&gap('semjob',2)) L.push(R.pick(['Passei mais um ano sem emprego.','Mandei currículo para tudo que é lugar.','Fiquei em casa procurando vagas na internet.','Fiz uns bicos para pagar as contas.','Fui a três entrevistas e ninguém me chamou de volta.']));
-  const pr=partner();
+  const pr=pickPartner();
   if(pr&&R.chance(.6)&&(pr.bond<45?gap('par',2):gap('par',3))){ const yrs=pr.yrs; const lbl=pr.rel==='conjuge'?'casad'+o:pr.rel==='noivo'?'noiv'+o:'namorando';
     L.push(pr.bond>=75?R.pick([`Completei ${yrs} ${yrs===1?'ano':'anos'} ${lbl==='namorando'?'de namoro':'com'} ${pr.first}. Estamos mais apaixonados do que nunca.`,`${pr.first} me fez uma surpresa no meu aniversário.`,`Viajamos, ${pr.first} e eu, só nós dois.`,`${pr.first} ainda me faz rir todos os dias.`])
       :pr.bond>=45?R.pick([`${yrs} ${yrs===1?'ano':'anos'} ${lbl==='namorando'?'de namoro com':'ao lado de'} ${pr.first}. Uma relação estável.`,`${pr.first} e eu caímos na rotina, mas estamos bem.`,`Discutimos por besteira, ${pr.first} e eu, mas passou.`])

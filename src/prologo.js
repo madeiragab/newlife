@@ -30,15 +30,14 @@ function prolStart(id){ const m=S.me, v=INICIOS[id]?R.pick(INICIOS[id]).k:null;
   m.prol={id,v,fase:0,b:{},junto:[],ano:m.age}; log(`${SCEN[id].ic} Algo começou a mudar na minha vida…`,'warn'); prolStep(); }
 function prolCancel(txt){ const m=S.me, id=m.prol&&m.prol.id; m.prol=null; if(txt) log(txt,'warn'); }
 // quem pode ir junto
-function prolGente(){ const p=partner(), ks=kids().filter(k=>k.alive), ps=parents(), irm=people('irmao');
-  return {p,ks,fam:[p].concat(ks).filter(Boolean),todos:[p].concat(ks,ps,irm).filter(Boolean).slice(0,6)}; }
-function prolCompCh(pr,max,next,verbo){ const g=prolGente(), ch=[], v=verbo||'Ir';
-  ch.push({l:`${v} sozinh${oa()}`,fn:()=>{ pr.junto=[]; next(); }});
-  if(max>=1&&g.p) ch.push({l:`${v} com ${g.p.first}`,fn:()=>{ pr.junto=[g.p.id]; next(); }});
-  if(max>=2&&g.ks.length) ch.push({l:g.p?`${v} com ${g.p.first} e as crianças`:`${v} com meus filhos`,fn:()=>{ pr.junto=g.fam.slice(0,6).map(x=>x.id); next(); }});
-  if(max>=3&&g.todos.length>g.fam.length) ch.push({l:`${v} com a família toda`,fn:()=>{ pr.junto=g.todos.map(x=>x.id); next(); }});
-  if(max===1&&!g.p){ const f=people('amigo')[0]; if(f) ch.push({l:`${v} com ${f.first}`,fn:()=>{ pr.junto=[f.id]; next(); }}); }
-  return ch; }
+function prolGente(){ const pares=partners(),ks=kids().filter(k=>k.alive),ps=parents(),irm=people('irmao');
+ return {pares,ks,fam:[...pares,...ks],todos:[...pares,...ks,...ps,...irm]}; }
+function prolCompCh(pr,max,next,verbo){ const g=prolGente(),ch=[],v=verbo||'Ir';
+ ch.push({l:v+' sozinh'+oa(),fn:()=>{pr.junto=[];next();}});
+ if(max>=1) g.pares.forEach(p=>ch.push({l:v+' com '+p.first,fn:()=>{pr.junto=[p.id];next();}}));
+ if(max>=2&&g.fam.length>1) ch.push({l:v+' com todos os parceiros e filhos',fn:()=>{pr.junto=g.fam.map(p=>p.id);next();}});
+ if(max>=3&&g.todos.length>g.fam.length) ch.push({l:v+' com a família toda',fn:()=>{pr.junto=g.todos.map(p=>p.id);next();}});
+ if(max===1&&!g.pares.length){ const f=people('amigo')[0];if(f) ch.push({l:v+' com '+f.first,fn:()=>{pr.junto=[f.id];next();}}); } return ch; }
 const prolAdv=pr=>()=>{ pr.fase++; };
 const prolPago=(v,o)=>S.me.money>=v?Object.assign(o,{l:`${o.l} (${fmt(v)})`}):null;
 function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; const id=pr.id, f=pr.fase, b=pr.b, adv=prolAdv(pr);

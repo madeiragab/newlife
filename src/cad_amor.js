@@ -1,5 +1,5 @@
 // ===== Histórias em cadeia: amor e casamento =====
-const SOLTEIR=m=>!partner();
+const SOLTEIR=m=>!partners().length;
 chain('app_namoro',{k:'Amor',min:18,max:60,npc:1,date:1,when:SOLTEIR,gap:[1,1]},{
  a:['Deu match','Instalei um aplicativo de namoro. Deu match com {p}, que tem um perfil divertido e fotos com cachorro.',['Mandar uma mensagem engraçada|?lk h+5 >b|{p} respondeu com três emojis rindo.|h-2 >c|Visualizou e não respondeu.','Esperar {ele} falar primeiro|?40 >b|{p} mandou um "oi" tímido.|>c|Ninguém falou nada.']],
  b:['Conversa boa','Faz duas semanas que eu e {p} conversamos todo dia.',['Marcar um encontro|>d|Um café num sábado à tarde.','Pedir uma videochamada antes|?70 >d|Era a pessoa das fotos mesmo.|>e|A câmera "estava quebrada". Estranho.']],
@@ -9,7 +9,7 @@ chain('app_namoro',{k:'Amor',min:18,max:60,npc:1,date:1,when:SOLTEIR,gap:[1,1]},
  f:['Namoro de aplicativo','O namoro com {p} está ficando sério.',['Conhecer a família d{ele}|?50 bond+10 h+6 >g|A família me adorou.|bond-3 >g|A sogra me olhou de cima a baixo.','Manter só entre nós|bond+4 >g|Sem pressão.']],
  g:['Contar como se conheceram','Num jantar, alguém perguntou como eu e {p} nos conhecemos.',['Contar a verdade: aplicativo|h+5 bond+5|Hoje em dia todo mundo se conhece assim.','Inventar uma história romântica|h+6 bond+6|"Foi numa livraria, numa tarde de chuva..." Combinamos de contar sempre assim.']],
 });
-chain('pedido',{k:'Amor',min:22,max:55,who:'partner',when:m=>{ const p=partner(); return !!p&&p.rel==='namoro'; },gap:[1,1]},{
+chain('pedido',{k:'Amor',min:22,max:55,who:'partnerDating',when:m=>{ const p=pickPartner(p=>p.rel==='namoro'); return !!p&&p.rel==='namoro'; },gap:[1,1]},{
  a:['Pensar no futuro','Faz tempo que eu e {p} estamos juntos. Comecei a pensar em casamento.',['Comprar uma aliança|$-3000 >b|Escondi a caixinha numa meia velha.','Conversar sobre o assunto|>c|Perguntei, de leve, o que {ele} pensa de casamento.','Não é a hora|h+0|Ainda não.']],
  b:['O pedido','Chegou o dia. A aliança está no bolso e o coração na boca.',['Pedir num restaurante|?bond noivar h+15 >d|{p} disse sim chorando!|h-15 bond-10 >e|{p} disse que não está pront{o2}.','Pedir num lugar especial para nós dois|?bond+10 noivar h+15 >d|SIM!|h-12 >e|{p} pediu um tempo para pensar.']],
  c:['A conversa séria','{p} disse que pensa em casar, mas não agora.',['Respeitar o tempo d{ele}|k+3 bond+5 >b@1-2|Esperei. Valeu a pena esperar.','Dar um ultimato|?40 bond-5 >b@0|{p} entendeu o recado.|breakup h-15|Terminamos.']],

@@ -32,7 +32,7 @@ const romPar=()=>{ const sc=S.scen; if(!sc||!sc.par) return null; const c=crewBy
 const romSt=c=>c.par==='casado'?`Casad${oaG(c.gender)} comigo`:c.par==='noivo'?`Noiv${oaG(c.gender)}`:c.par==='namoro'?'Namorando':'';
 const romPrefG=()=>{ const m=S.me; return !m.pref||m.pref==='A'?(R.chance(.5)?'F':'M'):m.pref; };
 function romAm(c,n){ c.am=Math.max(0,Math.min(100,(c.am||10)+n)); }
-function romStart(c){ const sc=S.scen; sc.par=c.id; c.par='namoro'; c.parD=sc.dia; c.ex=0; c.lv=Math.min(100,c.lv+10); romAm(c,10); cnt('partners'); const r=partner(); if(r&&!sc.trai){ sc.trai=r.id; return ` Lá na vida real, ${r.first} nem imagina.`; } return ''; }
+function romStart(c){ const sc=S.scen; sc.par=c.id; c.par='namoro'; c.parD=sc.dia; c.ex=0; c.lv=Math.min(100,c.lv+10); romAm(c,10); cnt('partners'); const r=partners(); if(r.length&&!sc.trai){ sc.trai=r.map(p=>p.id); return ` Lá na vida real, ${r.map(p=>p.first).join(', ')} nem imaginam.`; } return ''; }
 function romEnd(c){ const sc=S.scen; if(sc.par===c.id) sc.par=null; if(sc.grav&&sc.grav.pid===c.id) sc.grav=null; c.par=null; c.ex=1; c.am=Math.min(c.am||0,10); c.lv=Math.max(0,c.lv-20); }
 const romCanBaby=c=>{ const m=S.me; if(c.gender===m.gender) return false; const mae=m.gender==='F'?m:c; return mae.age>=16&&mae.age<=46; };
 function romGrav(c){ const sc=S.scen; if(sc.grav) return 'Já tem um bebê a caminho.'; if(!romCanBaby(c)) return null; if(!R.chance(.4)) return 'Ainda não foi desta vez.'; sc.grav={pid:c.id,due:sc.dia+(sc.id==='heroi'?1:rnd(5,8))};
@@ -68,13 +68,13 @@ function romItems(c){ const sc=S.scen, it=[], rm=ROM[sc.id]||ROM.zumbi, once=k=>
 V.scMember=(o=>c=>{ const r=o(c); if(!r) return r; if(romOK(c)||c.par) { const i=r.items.findIndex(x=>x.l==='Deixar para trás'); const add=romItems(c); if(i>=0) r.items.splice(i,0,...add); else r.items.push(...add); }
   if(c.filho) r.items.splice(1,0,{html:`<div class="card"><p>${c.gender==='F'?'Minha filha':'Meu filho'}. Se a aventura terminar bem, ${c.gender==='F'?'ela':'ele'} vem comigo para a vida real.</p></div>`});
   return r; })(V.scMember);
-V.scCrew=(o=>()=>{ const r=o(); const sc=S.scen; if(!sc) return r; const it=[{sec:'Amor'}], p=romPar(), real=partner();
+V.scCrew=(o=>()=>{ const r=o(); const sc=S.scen; if(!sc) return r; const it=[{sec:'Amor'}], p=romPar(), real=partners();
   if(p) it.push({face:faceSVG(p,40),l:`${p.first} ${p.last}`,s:`${romSt(p)} · paixão ${p.am||0}%`,bars:[['💗',p.am||0,'#E5487D']],on:()=>UI.push(()=>V.scMember(p))});
-  else if(sc.id==='heroi'&&real) it.push({face:faceSVG(real,40),l:`${real.first} ${real.last}`,s:`${relLabel(real)}${sc.sab&&sc.sab[real.id]?' · sabe quem eu sou':''}`,bars:[['❤️',real.bond,'#E5487D']],on:()=>UI.push(()=>V.hPessoa(real))});
+  else if(sc.id==='heroi'&&real.length) real.forEach(real=>it.push({face:faceSVG(real,40),l:`${real.first} ${real.last}`,s:`${relLabel(real)}${sc.sab&&sc.sab[real.id]?' · sabe quem eu sou':''}`,bars:[['❤️',real.bond,'#E5487D']],on:()=>UI.push(()=>V.hPessoa(real))}));
   else it.push({html:'<div class="card"><p style="color:var(--muted)">Sem ninguém por enquanto.</p></div>'});
   if(sc.grav){ const g=crewById(sc.grav.pid); it.push({ic:'🤰',l:'Bebê a caminho',s:`Nasce em ${Math.max(1,sc.grav.due-sc.dia)} dia(s)${g?' · com '+g.first:''}`,dis:true,why:'Falta pouco.'}); }
   if(sc.id!=='heroi') it.push({ic:'💘',l:'Procurar romance',s:'1 de energia',dis:sc.ap<1||!!sc.done.rprocura,why:sc.done.rprocura?'Já procurei hoje.':'Sem energia hoje.',on:()=>scAct(()=>{ if(!spend('rprocura',1)) return 'Sem energia.'; return romProcurar(); },'Romance')});
-  if(real&&sc.id!=='heroi') it.push({face:faceSVG(real,40),l:`${real.first} ${real.last}`,s:`${relLabel(real)} na vida real · a vida real está pausada`,dis:true,why:`${real.first} está lá na vida real, esperando eu voltar.`});
+  if(real.length&&sc.id!=='heroi') real.forEach(real=>it.push({face:faceSVG(real,40),l:`${real.first} ${real.last}`,s:`${relLabel(real)} na vida real · a vida real está pausada`,dis:true,why:`${real.first} está lá na vida real, esperando eu voltar.`}));
   r.items.splice(Math.min(r.items.length,1),0,...it,{sec:sc.id==='heroi'?'Aliados':'Grupo'}); return r; })(V.scCrew);
 // ---------- efeitos diários e eventos ----------
 function romDay(sc){ const p=romPar(); if(p){ scStat('san',p.par==='casado'?3:2); romAm(p,p.lv<35?-3:-1); if((p.am||0)<12&&!sc.rfim){ sc.rfim=1; queue('rom_fim',{cid:p.id}); } }
@@ -96,12 +96,12 @@ EVENTS.rom_parto={scen:'*',show:d=>{ const c=crewById(d.cid), me=S.me.gender==='
     const b=romBaby(d.cid); scStat('san',20); crew().forEach(x=>x.lv=Math.min(100,x.lv+5));
     return `${t}${b.gender==='F'?'Nasceu uma menina':'Nasceu um menino'}: ${b.first}. ${R.pick(['O grupo inteiro chorou.','Ninguém lembrou do perigo por uma noite.','Um choro forte no meio do silêncio. Esperança tem som.'])}`; }};
 // ---------- de volta à vida real ----------
-function romBring(list){ const m=S.me, out=[]; const par=list.find(c=>c.par);
-  if(par){ const old=partner(); if(old){ if(old.rel==='conjuge'&&typeof divorce==='function') divorce(old,true); else old.rel='ex'; log(`Terminei com ${old.first}. Voltei com outra pessoa no coração.`,'warn'); }
-    const p=mkPerson({rel:par.par==='casado'?'conjuge':par.par==='noivo'?'noivo':'namoro',gender:par.gender,age:par.age,first:par.first,last:par.last,bond:Math.max(65,par.am||0)}); if(par.genes) p.genes=par.genes; S.people.push(p);
-    if(p.rel==='conjuge'){ cnt('marriages'); S.flags.movedOut=1; } out.push(`${par.first} veio comigo para a vida real.`); }
-  list.filter(c=>c.filho).forEach(c=>{ const k=mkPerson({rel:'filho',gender:c.gender,age:c.age,first:c.first,last:m.last,bond:95,parentId:par?null:null}); if(c.genes) k.genes=c.genes; S.people.push(k); out.push(`${c.first}, ${c.gender==='F'?'minha filha':'meu filho'}, também.`); });
-  if(out.length) log(out.join(' '),'good'); }
+function romBring(list){ const m=S.me,out=[],par=list.find(c=>c.par);let responsavel=null;
+ if(par){ const antes=partners(),p=mkPerson({rel:'amigo',gender:par.gender,age:par.age,first:par.first,last:par.last,bond:Math.max(65,par.am||0)});if(par.genes)p.genes=par.genes;S.people.push(p);responsavel=p;
+   const erro=polyEntrada(p);if(!erro){p.rel=par.par==='casado'?'conjuge':par.par==='noivo'?'noivo':'namoro';polyRegistrar(p,antes);if(p.rel==='conjuge'){cnt('marriages');S.flags.movedOut=1;}out.push(par.first+' veio comigo para a vida real.');}
+   else out.push(par.first+' voltou comigo, mas o relacionamento não foi oficializado: '+erro);
+ }
+ list.filter(c=>c.filho).forEach(c=>{const k=mkPerson({rel:'filho',gender:c.gender,age:c.age,first:c.first,last:m.last,bond:95,parentId:responsavel?.id??null});if(c.genes)k.genes=c.genes;S.people.push(k);out.push(c.first+', '+(c.gender==='F'?'minha filha':'meu filho')+', também.');});if(out.length)log(out.join(' '),'good'); }
 scenEnd=(o=>function(win,txt){ const sc=S.scen; const keep=sc&&win?crew().filter(c=>c.par||c.filho):[]; const r=o.apply(this,arguments); if(keep.length&&S.me.alive&&!S.scen) romBring(keep); return r; })(scenEnd);
 // ---------- linguagem dos eventos de romance ----------
 // am±n (paixão do {c}) · namorar noivar casar terminar (com o {c}) · grav (tenta engravidar com o {c}) · filho (nasce um bebê do casal)

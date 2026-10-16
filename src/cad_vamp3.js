@@ -6,7 +6,7 @@ chain('vamp_policia',{k:'Vampiro',min:18,max:200,when:VAMP,npc:1,gn:'M',gap:[1,1
  d:['O verdadeiro assassino','Achei o outro vampiro: selvagem, sem controle, matando por prazer.',['Enfrentar|?fight k+10 f+0 >e|Venci. Os ataques pararam.|hl-35 >e|Venci por pouco, muito ferid{o}.','Avisar o detetive|>e|Contei onde ele dorme de dia.']],
  e:['O acordo','O detetive {p} sabe o que eu sou. E sabe que eu salvei a cidade.',['Fazer um acordo de silêncio|vira:amigo k+5|Ele guarda meu segredo. Eu ajudo nos casos estranhos.','Sumir mesmo assim|h+2|Ninguém deve saber.']],
 });
-chain('vamp_casamento',{k:'Vampiro',min:20,max:200,when:m=>VAMP(m)&&!!partner(),who:'partner',gap:[1,1]},{
+chain('vamp_casamento',{k:'Vampiro',min:20,max:200,when:m=>VAMP(m)&&!!partners().length,who:'partner',gap:[1,1]},{
  a:['A cerimônia','{p} quer casar na igreja, de manhã, com sol.',['Propor um casamento à noite|>b|"Casamento à luz de velas é muito mais romântico."','Tentar ir de manhã|hl-20 >c|Fiquei na sombra da porta, queimando.']],
  b:['O casamento noturno','O casamento foi à meia-noite, num jardim cheio de velas.',['Fazer os votos|casar h+15 pbond+10 >d|O casamento mais bonito que os convidados já viram.','Desistir na última hora|pbond-20 h-8|Fugi com medo do que eu sou.']],
  c:['O desmaio','Quase desmaiei de dor na porta da igreja.',['Contar a verdade para {p}|>d|Contei tudo, ali no carro.','Inventar uma alergia|?40 >b|Mudamos para a noite.|pbond-10 >d|{p} ficou desconfiad{o2}.']],

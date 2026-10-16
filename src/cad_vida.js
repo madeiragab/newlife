@@ -40,7 +40,7 @@ chain('terapia',{k:'Mente',min:16,max:85,npc:1,age:[5,25],gap:[1,1]},{
  c:['O padrão','{p} me mostrou um padrão que eu repito em todos os relacionamentos.',['Trabalhar nisso|$-1600 h+8 k+3 >d|Comecei a perceber quando faço de novo.','Negar|h-3 >d|Saí da sessão irritad{o}.']],
  d:['A alta','Depois de dois anos, {p} disse que estou bem para seguir sozinh{o}.',['Agradecer|h+12 sm+3|Saí mais leve do que entrei.','Continuar mesmo assim|$-1600 h+6|Terapia virou um hábito bom.']],
 });
-chain('casamento_simples',{k:'Amor',min:22,max:60,who:'partner',when:m=>{ const p=partner(); return !!p&&p.rel==='noivo'; },gap:[1,1]},{
+chain('casamento_simples',{k:'Amor',min:22,max:60,who:'partnerEngaged',when:m=>{ const p=pickPartner(p=>p.rel==='noivo'); return !!p&&p.rel==='noivo'; },gap:[1,1]},{
  a:['A data','Eu e {p} estamos noivos há tempo demais. Precisamos marcar a data.',['Marcar para o ano que vem|bond+6 >b|Data no calendário, frio na barriga.','Fugir e casar escondido|casar h+15 bond+10|Casamos só nós dois numa praia ao pôr do sol.']],
  b:['O orçamento','O orçamento da festa ficou três vezes maior do que o planejado.',['Cortar convidados|bond+3 >c|A lista caiu de 300 para 80.','Fazer um empréstimo|$-20000 >c|Vamos pagar por anos.','Simplificar tudo|bond+6 >c|Churrasco no quintal com quem importa.']],
  c:['O casamento','O grande dia chegou.',['Dizer sim|casar h+20 bond+15|Casamos! Dançamos até o sol nascer.','Ter um ataque de riso no altar|casar h+22 bond+12|O padre riu junto.']],

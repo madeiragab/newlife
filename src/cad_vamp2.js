@@ -13,7 +13,7 @@ chain('vamp_morcego',{k:'Vampiro',min:16,max:200,when:VAMP,gap:[1,2]},{
  c:['Visto','Um vídeo viral mostra uma nuvem de morcegos virando uma pessoa num telhado.',['Fingir que é montagem|h-2 >d|A internet decidiu que era efeito especial.','Ignorar|f+2 >d|Virei lenda urbana.']],
  d:['Outros dons','Descobri que consigo ouvir pensamentos de quem está muito perto.',['Usar com responsabilidade|k+4 sm+3|Às vezes é melhor não saber o que os outros pensam.','Usar para ganhar dinheiro|$+8000 k-6|Nos negócios, eu sempre sei o que o outro vai oferecer.']],
 });
-chain('vamp_amor_humano',{k:'Vampiro',min:18,max:200,when:m=>VAMP(m)&&!partner(),npc:1,date:1,gap:[1,1]},{
+chain('vamp_amor_humano',{k:'Vampiro',min:18,max:200,when:m=>VAMP(m)&&!partners().length,npc:1,date:1,gap:[1,1]},{
  a:['Um coração batendo','Me apaixonei por {p}, um ser humano comum. O coração d{ele} bate rápido quando está perto de mim.',['Me aproximar|vira:namoro >b|Comecei a namorar {p}, só de noite.','Me afastar para {ele} não correr perigo|h-6|Às vezes amar é ir embora.']],
  b:['Os encontros','{p} acha estranho a gente só se ver à noite e eu nunca comer.',['Inventar desculpas|?40 >c|"Trabalho de noite e faço dieta." Colou.|>d|{p} começou a desconfiar.','Contar a verdade|>d|Melhor agora do que depois.']],
  c:['O tempo','{p} está envelhecendo. Eu não.',['Pensar em transformar {p}|>e|Seria o jeito de ficarmos juntos para sempre.','Aceitar que um dia {ele} vai partir|h-6 >f|Cada dia vale mais.']],

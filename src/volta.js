@@ -18,7 +18,7 @@ function voltaConseq(id,d,win,junto){ junto=junto||[]; const m=S.me, L=[], adult
   // cargo político
   if(m.office){ m.office.appr=clamp(m.office.appr-Math.min(40,d)); if(d>=5) L.push(`🏛️ A imprensa descobriu que sumi por ${d} dias. Minha aprovação caiu.`); }
   // relacionamento
-  const p=partner();
+  for(const p of partners()){
   if(p&&junto.includes(p.id)) L.push(`❤️ ${p.first} viveu tudo isso comigo. Agora a gente tem uma história que ninguém mais acredita.`);
   else if(p){ const tempo=voltaTempo(d), casado=p.rel==='conjuge';
     p.bond=clamp(p.bond-Math.min(60,Math.round(d*.8)));
@@ -31,6 +31,7 @@ function voltaConseq(id,d,win,junto){ junto=junto||[]; const m=S.me, L=[], adult
       else { p.rel='ex'; st('happy',-15); log(`${p.first} terminou comigo enquanto eu estava ${onde}.`,'bad'); L.push('💔 '+txt); } }
     else if(d>=60){ p.bond=clamp(p.bond+15); L.push('❤️ '+R.pick([`${p.first} esperou ${tempo} sem desistir. Quando me viu, não disse nada: só me abraçou.`,`Todo mundo mandou ${p.first} seguir em frente. ${p.first} não seguiu. Esperou.`])); }
     else if(d>=5) L.push('❤️ '+R.pick([`${p.first} chorou, gritou e depois me abraçou por um tempão.`,`${p.first} me deu um gelo de uma semana. Justo.`,`${p.first} quer saber onde eu estava. Não sei como contar.`])); }
+  }
   // família
   const ps=parents();
   if(ps.length&&ps.every(x=>junto.includes(x.id))) L.push('👪 Minha família inteira voltou comigo. Os vizinhos olham para a gente como se fôssemos fantasmas.');

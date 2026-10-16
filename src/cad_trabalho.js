@@ -24,7 +24,7 @@ chain('headhunter',{k:'Carreira',min:23,max:60,when:TRAB,gap:[1,1]},{
  d:['Empresa nova','A empresa nova paga melhor, mas cobra o dobro.',['Mostrar serviço|perf+10 >e@1|Primeiro a chegar, último a sair.','Ir no meu ritmo|h+4 >e@1|Ganhar mais não significa viver para o trabalho.']],
  e:['Valeu a pena?','Um ano depois da troca, faço o balanço.',['Valeu|?perf promo h+8|Fui promovid{o} no primeiro ano.|h+4|Ganho mais e aprendi muito.','Sinto falta da antiga|h-4|Às vezes o dinheiro não compensa.']],
 });
-chain('romance_trabalho',{k:'Amor',min:20,max:55,who:'colega',when:m=>TRAB(m)&&!partner(),gap:[1,1]},{
+chain('romance_trabalho',{k:'Amor',min:20,max:55,who:'colega',when:m=>TRAB(m)&&!partners().length,gap:[1,1]},{
  a:['Olhares no escritório','Comecei a perceber que {p}, do trabalho, sempre aparece na copa quando eu chego.',['Puxar conversa no café|bond+8 >b|Falamos de tudo, menos de trabalho.','Manter o profissionalismo|>e|Trabalho é trabalho.']],
  b:['O happy hour','Fomos ao happy hour da equipe e acabamos conversando sozinhos até o bar fechar.',['Chamar para sair de verdade|?lk vira:namoro h+12 >c|Começamos a namorar, em segredo.|bond-5 >e|{p} disse que não mistura trabalho e amor.','Deixar acontecer naturalmente|bond+6 >c@0|Sem pressa.']],
  c:['Segredo de escritório','Ninguém na empresa sabe do nosso namoro. Ainda.',['Contar para o chefe|?50 h+6 >d|Ele riu: "Todo mundo já sabia."|perf-6 >d|A empresa não gostou. Tivemos que mudar de setor.','Continuar escondendo|?40 h+4 >d|Sobrevivemos a uma festa de fim de ano inteira sem sermos descobertos.|h-6 >d|Fomos flagrados no estacionamento.']],

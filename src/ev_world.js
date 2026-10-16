@@ -91,7 +91,7 @@ EVENTS[Object.keys(EVENTS).filter(k=>/^p\d+$/.test(k)).pop()];
 pack({k:'Realeza',when:m=>m.royal&&!m.royal.abd},[
  ['Banquete de Estado','Um rei estrangeiro vem jantar no palácio.',['Ser um anfitrião impecável|pop+5 f+2|O banquete foi elogiado no mundo todo.','Fazer uma piada diplomática|?50 pop+6|Ele riu muito.|pop-8|Ele não riu. Crise diplomática.']],
  ['Etiqueta real','Errei o protocolo e cumprimentei um embaixador do jeito errado.',['Pedir desculpas|pop-1|Ficou tudo bem.','Fingir que foi de propósito|?50 pop+3|Virou moda.|pop-4|Os jornais riram.']],
- ['Plebeu apaixonado','Me apaixonei por alguém comum, sem sangue nobre.',['Assumir o romance|pop+6 h+8|O povo adorou a história de amor.','Esconder|h-6|O palácio não aprovaria.'],{when:m=>m.royal&&!partner()&&m.age>=18}],
+ ['Plebeu apaixonado','Me apaixonei por alguém comum, sem sangue nobre.',['Assumir o romance|pop+6 h+8|O povo adorou a história de amor.','Esconder|h-6|O palácio não aprovaria.'],{when:m=>m.royal&&!partners().length&&m.age>=18}],
  ['Herança da coroa','Preciso decidir quem herda as joias da família.',['Doar a um museu|pop+8 k+4|O povo aplaudiu o gesto.','Guardar tudo|h+1|Estão no cofre.']],
  ['Visita a hospital','Visitei crianças num hospital público.',['Passar o dia com elas|pop+6 k+5 h+4|Saí de lá transformad{o}.','Mandar um representante|pop-4|O povo reparou na ausência.','Ir só para as fotos|?50 pop+3|A foto ficou ótima.|pop-6|Um jornal mostrou que fiquei só 10 minutos.']],
  ['Manifestação antimonarquia','Grupos pedem o fim da monarquia.',['Dialogar com os manifestantes|?pop pop+8|Ganhei o respeito de muitos.|pop-5|Fui vaiad{o}.','Ignorar|pop-4|Os protestos cresceram.'],{when:m=>m.royal&&m.royal.reign}],
