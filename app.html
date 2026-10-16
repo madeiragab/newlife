@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610160546'</script>
+<title>NewLife</title><script>window.NL_VER='2610160548'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -1703,12 +1703,13 @@ function royalTitle(){ const m=S.me,r=m.royal; if(!r||r.abd) return null; return
 function yearBiz(){
   const m=S.me,b=m.biz; if(!b) return;
   b.yrs++; const sec=BIZ_SECTORS.find(s=>s.n===b.sector)||BIZ_SECTORS[0];
-  const r=R.norm(.03+(m.smarts-50)/800+(b.mkt||0)+(b.bonus||0),sec.risk*1.15); b.mkt=0; b.bonus=0;
+  const escala=Math.max(0,Math.log10(Math.max(1,b.value)/1e6));
+  const r=Math.max(-.65,Math.min(.35,R.norm(.03+(m.smarts-50)/800+Math.min(.15,b.mkt||0)+Math.min(.15,b.bonus||0)-escala*.025,sec.risk*1.15))); b.mkt=0; b.bonus=0;
   b.value=Math.max(0,Math.round(b.value*(1+r)));
   b.emp=Math.max(1,Math.round(b.emp*(1+r*.8)+R.int(-1,2)));
   m.c.bizMax=Math.max(m.c.bizMax||0,b.value);
   if(m.prison){ b.value=Math.round(b.value*.8); }
-  if(r>0&&!m.prison){ const p=Math.round(b.value*R.f()*.04*diff().$); m.money+=p; if(p>1000) log(`A ${b.n} lucrou e me rendeu ${fmt(p)}.`,'good'); }
+  if(r>0&&!m.prison){ const p=Math.round(b.value*Math.min(.025,Math.max(0,r)*.2)*R.f()*diff().$); m.money+=p; if(p>1000) log(`A ${b.n} lucrou e me rendeu ${fmt(p)}.`,'good'); }
   else if(r<-.2) log(`A ${b.n} teve um ano péssimo.`,'bad');
   if((b.value<b.start*.3&&R.chance(.35))||(r<-.3&&R.chance(sec.risk*.4))){ log(`A ${b.n} faliu.`,'bad'); st('happy',-15); cnt('falencias'); if(R.chance(.5)){ const div=Math.round(b.start*R.f()*.5); m.money-=div; log(`Fiquei com ${fmt(div)} em dívidas da empresa.`,'bad'); } m.biz=null; }
   if(b.value>1e8) m.fame=clamp(Math.max(m.fame,30+Math.log10(b.value)*4));
@@ -4009,11 +4010,11 @@ function openBiz(sec,name){
 }
 function bizAct(k,v){
   const m=S.me,b=m.biz; if(!b) return;
-  if(k==='invest'){ if(!canPay(v)) return 'Não tenho esse dinheiro.'; m.money-=v; b.value+=Math.round(v*(.8+R.f()*.5)); b.emp+=Math.max(1,Math.round(v/60000)); return `Investi ${fmt(v)} na ${b.n}.`; }
+  if(k==='invest'){ if(!Number.isFinite(v)||v<=0) return 'Informe um investimento positivo.'; if(!canPay(v)) return 'Não tenho esse dinheiro.'; m.money-=v; b.value+=Math.round(v*(.85+R.f()*.15)); b.emp+=Math.max(1,Math.round(v/60000)); return `Investi ${fmt(v)} na ${b.n}.`; }
   if(k==='mkt'){ if(use('mkt')>1) return 'Já fiz campanha este ano.'; const c=Math.max(2000,Math.round(b.value*.05)); if(!canPay(c)) return `A campanha custa ${fmt(c)}.`; m.money-=c; b.mkt=R.chance(.7)?R.f()*.12:-.03; return b.mkt>0?'A campanha de marketing foi um sucesso.':'A campanha virou piada na internet.'; }
   if(k==='lucro'){ if(use('lucro')>1) return 'Já retirei lucros este ano.'; const v2=Math.round(b.value*.1); b.value-=v2; m.money+=v2; return `Retirei ${fmt(v2)} da empresa.`; }
-  if(k==='vender'){ const v2=Math.round(b.value*(.75+R.f()*.5)); m.money+=v2; log(`Vendi a ${b.n} por ${fmt(v2)}.`,'good'); m.biz=null; st('happy',8); return `Vendi a ${b.n} por ${fmt(v2)}!`; }
-  if(k==='ipo'){ if(b.value<5e7) return 'A empresa precisa valer pelo menos $50 milhões para abrir capital.'; if(b.pub) return 'A empresa já está na bolsa.'; b.pub=true; b.value=Math.round(b.value*(1.2+R.f()*.8)); m.fame=clamp(m.fame+10); log(`A ${b.n} estreou na bolsa de valores!`,'good'); return 'A empresa abriu capital na bolsa! As ações dispararam.'; }
+  if(k==='vender'){ const v2=Math.round(b.value*(.75+R.f()*.25)); m.money+=v2; log(`Vendi a ${b.n} por ${fmt(v2)}.`,'good'); m.biz=null; st('happy',8); return `Vendi a ${b.n} por ${fmt(v2)}!`; }
+  if(k==='ipo'){ if(b.value<5e7) return 'A empresa precisa valer pelo menos $50 milhões para abrir capital.'; if(b.pub) return 'A empresa já está na bolsa.'; b.pub=true; b.value=Math.round(b.value*(.95+R.f()*.15)); m.fame=clamp(m.fame+10); log(`A ${b.n} estreou na bolsa de valores!`,'good'); return 'A empresa abriu capital na bolsa! O valor foi ajustado pela avaliação do mercado.'; }
   if(k==='fechar'){ log(`Fechei a ${b.n}.`); m.biz=null; return 'Fechei a empresa.'; }
 }
 const BIZ_NAMES=['Sabor & Cia','Nova Onda','Ponto Certo','Bem-Te-Vi','Estrela Guia','Raiz Forte','Maré Cheia','Vila Real','Céu Aberto','Pé de Moleque','Mandacaru','Tropicália','Faro Fino','Mão Amiga','Lua Nova','Pé na Estrada'];
@@ -14784,6 +14785,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.23',d:'16/10/2026',t:'Empresas com crescimento sustentável',itens:['Grandes empresas enfrentam saturação de mercado; crescimento anual e dividendos acompanham o desempenho.','Investir e vender imediatamente não cria dinheiro. Investimentos inválidos são recusados.','Abrir capital passa por uma avaliação moderada, sem multiplicar automaticamente a fortuna.']},
  {v:'1.22',d:'16/10/2026',t:'Convivência e novos acordos',itens:['Parceiros em relações plurais podem sentir ciúme, pedir atenção e iniciar uma conversa sobre limites.','Ouvir, ignorar, pausar novas inclusões ou terminar afeta apenas o relacionamento envolvido.','Rever o acordo permite pausar novas pessoas sem desfazer os casamentos existentes nem transformar um acordo anterior em traição.']},
  {v:'1.21',d:'16/10/2026',t:'Todos os parceiros fazem parte da vida',itens:['Viagens e retorno de aventuras consideram todos os parceiros, com consequências individuais.','Histórias escolhem parceiros elegíveis e mantêm a pessoa envolvida entre etapas, em vez de usar sempre a primeira da lista.','Na reprodução assistida, escolha o outro responsável: essa escolha fica salva até o nascimento, mesmo após separação.','Todos os parceiros aparecem na vida pessoal de herói. Voltar de uma aventura com um novo amor não termina automaticamente um casamento anterior.']},
   {v:'1.20',d:'15/10/2026',t:'Amores com consentimento',itens:['Namoros e casamentos com mais de uma pessoa: proponha a ideia em Amor ou na ficha de um parceiro.','Cada pessoa aceita ou recusa conforme sua abertura, ciúme e vínculo. Todos os parceiros atuais precisam aceitar; a pessoa nova também decide se quer participar.','Cada acordo libera a entrada de uma pessoa. Para uma terceira, quarta ou mais, é preciso conversar de novo com todos.','Uma recusa bloqueia a inclusão, e não dá para insistir no mesmo ano. Relações consentidas não geram punição automática por traição.','Os acordos são salvos; términos, divórcios e mudanças no grupo invalidam a rodada de novas inclusões.']},
