@@ -2,11 +2,11 @@
 # Precisa do Android SDK em %LOCALAPPDATA%\Android\Sdk (platforms;android-34 e build-tools;34.0.0) e de um JDK 17.
 $ErrorActionPreference = 'Continue'
 $root = $PSScriptRoot
-$sdk = "$env:LOCALAPPDATA\Android\Sdk"; $bt = "$sdk\build-tools\34.0.0"; $jar = "$sdk\platforms\android-34\android.jar"
+$sdk = if ($env:ANDROID_SDK_ROOT) { $env:ANDROID_SDK_ROOT } else { "$env:LOCALAPPDATA\Android\Sdk" }
+$bt = "$sdk\build-tools\34.0.0"; $jar = "$sdk\platforms\android-34\android.jar"
 if (-not $env:JAVA_HOME) { $env:JAVA_HOME = (Get-ChildItem "$env:ProgramFiles\Eclipse Adoptium" -Directory | Select-Object -First 1).FullName }
 $jbin = "$env:JAVA_HOME\bin"
-$A = Join-Path $root 'android'; $O = Join-Path $env:LOCALAPPDATA 'Temp\outravida-build\apk'
-if (Test-Path $O) { Remove-Item $O -Recurse -Force }
+$A = Join-Path $root 'android'; $O = Join-Path $env:LOCALAPPDATA ('Temp\outravida-build\apk-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Force "$O\gen","$O\classes","$O\dex","$O\assets" | Out-Null
 
 # 1) página do jogo (fontes embutidas, sem o modo desktop)
@@ -21,7 +21,7 @@ $nlv = [regex]::Match($html, "NL_VER='(\d+)'").Groups[1].Value
 $py = "$env:LOCALAPPDATA\Temp\outravida-build\env\Scripts\python.exe"
 $ico = "$env:LOCALAPPDATA\Temp\outravida-build\icon-src.png"
 if (-not (Test-Path $ico)) { throw 'Rode make-exe.ps1 antes (ele gera icon-src.png).' }
-Copy-Item "$A\res" "$O\res" -Recurse -Force
+if (Test-Path "$A\res") { Copy-Item "$A\res" "$O\res" -Recurse -Force }
 & $py (Join-Path $A 'make_icons.py') $ico "$O\res" | Out-Null
 
 # 3) recursos e manifesto (a versão sobe sozinha a cada compilação, para instalar por cima)
