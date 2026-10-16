@@ -17,6 +17,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
+import org.json.JSONObject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -71,14 +73,32 @@ public class MainActivity extends Activity {
         } catch (Exception e) { return ""; }
     }
 
+    private String sha(byte[] data) throws Exception {
+        StringBuilder out = new StringBuilder();
+        for (byte b : MessageDigest.getInstance("SHA-256").digest(data)) out.append(String.format("%02x", b & 255));
+        return out.toString();
+    }
+    private boolean valid(File f, String ver, String hash) {
+        try { byte[] data = readAll(new FileInputStream(f)); return data.length > 100000 && new String(data,"UTF-8").contains("NL_VER='"+ver+"'") && (hash.isEmpty() || sha(data).equals(hash)); }
+        catch (Exception e) { return false; }
+    }
     private String downloadedVer() { return gameFile().exists() ? prefs().getString("ver", "") : ""; }
 
     /** Abre a versão mais nova que existir no aparelho: a baixada do site ou a que veio no app. */
     private void loadGame() {
         String b = bundledVer(), d = downloadedVer();
+        if (!valid(gameFile(), d, prefs().getString("sha", ""))) {
+            File bak = new File(getFilesDir(), "game.bak");
+            String bv = prefs().getString("bakVer", ""), bh = prefs().getString("bakSha", "");
+            if (valid(bak, bv, bh)) {
+                try { byte[] bytes = readAll(new FileInputStream(bak)); FileOutputStream out = new FileOutputStream(gameFile()); out.write(bytes); out.close(); prefs().edit().putString("ver",bv).putString("sha",bh).commit(); d=bv; }
+                catch (Exception e) { d=""; }
+            } else d="";
+        }
         if (d.length() > 0 && d.compareTo(b) > 0) {
             try {
                 String html = new String(readAll(new FileInputStream(gameFile())), "UTF-8");
+                html = html.replace("<script>window.DESKTOP=1</script>", "");
                 loadedVer = d;
                 web.loadDataWithBaseURL(BASE_URL, html, "text/html", "UTF-8", null);
                 return;
@@ -103,15 +123,24 @@ public class MainActivity extends Activity {
                     final long size = ms.find() ? Long.parseLong(ms.group(1)) : 2500000L;
                     startedAt = System.currentTimeMillis();
                     progress(remote, 0);
-                    String html = new String(download(SITE + "app.html?t=" + System.currentTimeMillis(), remote, size), "UTF-8");
+                    byte[] bytes = download(SITE + "app.html?t=" + System.currentTimeMillis(), remote, size);
+                    String hash = new JSONObject(json).getString("sha256");
+                    if (bytes.length != size || !hash.matches("[0-9a-f]{64}") || !sha(bytes).equals(hash)) throw new Exception("Integridade inválida");
+                    String html = new String(bytes, "UTF-8");
                     if (html.length() < 100000 || !html.contains("NL_VER='" + remote + "'")) return;
-                    html = html.replace("<script>window.DESKTOP=1</script>", "");
                     File tmp = new File(getFilesDir(), "game.tmp");
                     FileOutputStream out = new FileOutputStream(tmp);
-                    out.write(html.getBytes("UTF-8"));
+                    out.write(bytes);
+                    out.getFD().sync();
                     out.close();
-                    if (!tmp.renameTo(gameFile())) { gameFile().delete(); if (!tmp.renameTo(gameFile())) return; }
-                    prefs().edit().putString("ver", remote).apply();
+                    if (valid(gameFile(), downloadedVer(), prefs().getString("sha", ""))) {
+                        byte[] prev = readAll(new FileInputStream(gameFile()));
+                        FileOutputStream backup = new FileOutputStream(new File(getFilesDir(), "game.bak"));
+                        backup.write(prev); backup.getFD().sync(); backup.close();
+                        prefs().edit().putString("bakVer", downloadedVer()).putString("bakSha", sha(prev)).commit();
+                    }
+                    prefs().edit().putString("ver", remote).putString("sha", hash).commit();
+                    if (!tmp.renameTo(gameFile())) throw new Exception("Instalação interrompida");
                     // a rodinha aparece girando pelo menos uma volta, mesmo com download rápido
                     long wait = Math.max(1200, 2500 - (System.currentTimeMillis() - startedAt));
                     try { Thread.sleep(wait); } catch (InterruptedException ie) { }
@@ -125,7 +154,7 @@ public class MainActivity extends Activity {
                             });
                         }
                     });
-                } catch (Exception e) { /* sem internet: segue com a versão que já tem */ }
+                } catch (Exception e) { runOnUiThread(new Runnable(){public void run(){web.evaluateJavascript("window.UPD&&UPD.close('Atualização não instalada. Continuando com a versão atual.')",null);}}); }
             }
         }).start();
     }

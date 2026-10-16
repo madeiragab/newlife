@@ -6,6 +6,8 @@ além do armazenamento interno do navegador.
 Sempre que abre, o app confere no site se existe uma versão mais nova do jogo. Se existir, baixa para
 %LOCALAPPDATA%\\OutraVida\\jogo e recarrega a janela; sem internet, usa a versão mais nova que já tiver.
 """
+import hashlib
+import shutil
 import json
 import os
 import re
@@ -32,6 +34,17 @@ def html_version(path):
         return m.group(1) if m else ""
     except OSError:
         return ""
+
+
+def valid_game(path):
+    try:
+        data = open(path, 'rb').read()
+        if len(data) < 100000 or not html_version(path):
+            return False
+        digest_path = path + '.sha256'
+        return not os.path.exists(digest_path) or hashlib.sha256(data).hexdigest() == open(digest_path).read().strip()
+    except (OSError, ValueError):
+        return False
 
 
 def page_url(path):
@@ -111,13 +124,24 @@ def check_update(window, game_file, current):
                     last = got
                     js(min(0.99, got / size))
         js(1)
-        html = b"".join(parts).decode("utf-8")
+        data = b"".join(parts)
+        if len(data) != size or not re.fullmatch(r"[0-9a-f]{64}", str(info.get('sha256', ''))) or hashlib.sha256(data).hexdigest() != info['sha256']:
+            raise ValueError('Integridade da atualização inválida')
+        html = data.decode("utf-8")
         if len(html) < 100000 or ("NL_VER='%s'" % remote) not in html:
             return
         os.makedirs(os.path.dirname(game_file), exist_ok=True)
         tmp = game_file + ".tmp"
-        with open(tmp, "w", encoding="utf-8") as f:
-            f.write(html)
+        with open(tmp, "wb") as f:
+            f.write(data)
+            f.flush()
+            os.fsync(f.fileno())
+        if valid_game(game_file):
+            shutil.copy2(game_file, game_file + '.bak')
+            with open(game_file + '.bak.sha256', 'w') as f:
+                f.write(hashlib.sha256(open(game_file, 'rb').read()).hexdigest())
+        with open(game_file + '.sha256', 'w') as f:
+            f.write(info['sha256'])
         os.replace(tmp, game_file)
         try:
             window.evaluate_js("try{save()}catch(e){}")
@@ -126,7 +150,10 @@ def check_update(window, game_file, current):
         time.sleep(max(1.2, 2.5 - (time.time() - t_start)))  # a rodinha aparece girando pelo menos uma volta
         window.load_url(page_url(game_file))
     except Exception:
-        pass  # sem internet ou site fora do ar: segue com a versão que já tem
+        try:
+            window.evaluate_js("window.UPD&&UPD.close('Atualização não instalada. Continuando com a versão atual.')")
+        except Exception:
+            pass
 
 
 def main():
@@ -137,9 +164,13 @@ def main():
     os.makedirs(data_dir, exist_ok=True)
     bundled = resource("outra-vida.html")
     game_file = os.path.join(data_dir, "jogo", "outra-vida.html")
+    if not valid_game(game_file) and valid_game(game_file + '.bak'):
+        shutil.copy2(game_file + '.bak', game_file)
+        with open(game_file + '.sha256', 'w') as f:
+            f.write(hashlib.sha256(open(game_file, 'rb').read()).hexdigest())
     flags = [f for f in ("--teste", "--demo", "--autoano") if f in sys.argv]
     # usa a versão mais nova que existir no computador (a baixada do site ou a que veio no .exe)
-    use_downloaded = not flags and os.path.exists(game_file) and html_version(game_file) > html_version(bundled)
+    use_downloaded = not flags and valid_game(game_file) and html_version(game_file) > html_version(bundled)
     path = game_file if use_downloaded else bundled
     current = html_version(path)
     page = page_url(path)

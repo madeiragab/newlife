@@ -65,7 +65,7 @@ async function nlAppUpdateCheck(){ if(!nlIsApp()||/teste|aventura|demo|qualidade
     if(!u.native) u.set(1);
   }catch(e){ if(!u.native){ u.close('Não deu para baixar a atualização agora. Ela entra na próxima vez que você abrir o app com internet.'); return; } }
   // se o app não recarregar em 25 s, a versão nova entra na próxima abertura
-  setTimeout(()=>{ if(UPD) UPD.close('A versão nova foi baixada e entra na próxima vez que você abrir o app.'); },25000); }
+  setTimeout(()=>{ if(UPD) UPD.close('A atualização ainda não foi confirmada pelo aplicativo. Continue jogando; ele tentará novamente na próxima abertura.'); },25000); }
 window.addEventListener('load',()=>setTimeout(()=>{ nlAppUpdateCheck().catch(()=>{}); },700));
 // demonstração para conferir o visual (#demo-atualizando)
 if(/demo-atualizando/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ const u=updOverlay(NLV()||'2610141200'); let p=0; const t=setInterval(()=>{ p+=.07; u.set(Math.min(.62,p)); if(p>=.62) clearInterval(t); },120); },900));
