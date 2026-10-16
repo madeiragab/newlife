@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610161927'</script>
+<title>NewLife</title><script>window.NL_VER='2610161928'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -1492,7 +1492,7 @@ function yearMoney(){
   if(m.job){ gross+=jobSalary(m.job); }
   if(m.office) gross+=OFFICES.find(o=>o.id===m.office.id).sal;
   if(m.ret) gross+=m.ret.pension;
-  net=Math.round((gross-tax(gross))*diff().$); m.money+=net;
+  net=Math.round((gross-tax(gross))*diff().$); m.money+=net; if(typeof origemEntrada==='function')origemEntrada(net,'legitima','Salário, mandato e aposentadoria líquidos');
   if(m.social&&m.social.f>20000){ const sp=Math.round(m.social.f*R.f()*.08); m.money+=sp; if(sp>2000&&R.chance(.45)) log(R.pick([`Ganhei ${fmt(sp)} com publicidade nas redes.`,`Fechei parceria com uma marca de ${R.pick(['tênis','cosméticos','energético','celular','roupas'])} e ganhei ${fmt(sp)}.`,`Meus posts patrocinados renderam ${fmt(sp)} este ano.`]),'good'); }
   if(m.age<18&&S.flags.cls!=='pobre'&&parents().length&&m.age>=8){ const a={media:300,rica:2000,milionaria:12000,realeza:50000}[S.flags.cls]||0; m.money+=a; }
   if(m.age>=18){
@@ -14698,6 +14698,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.41',d:'16/10/2026',t:'Dinheiro deixa rastros',itens:['Bens mostra patrimônio legítimo identificado, origem ilícita, valores antigos não classificados e doações do grupo.','Desvios, assaltos e receitas formais deixam registros; comprar bens ou investir não apaga a origem.','Bloqueios e ressarcimentos usam os valores envolvidos no caso. Recursos religiosos permanecem separados do patrimônio pessoal.']},
  {v:'1.40',d:'16/10/2026',t:'Aliados têm ambições próprias',itens:['NPCs acumulam influência para concorrer à presidência, liderar o culto, administrar empresas ou denunciar crimes.','Candidaturas têm nomes e disputam votos; grupos religiosos podem escolher outro líder.','Propostas de gestão podem ser aceitas, negociadas ou recusadas, com consequências no vínculo.']},
  {v:'1.39',d:'16/10/2026',t:'Proteção entre sistemas',itens:['Regressão curta combina presidência, liderança religiosa, desvio, bloqueio judicial e dois casamentos.','Verifica persistência do save, perda do mandato na prisão, ressarcimento único, morte e herança.','O filho mantém seu parentesco e o histórico público, sem herdar prisão nem cargo político.']},
  {v:'1.38',d:'16/10/2026',t:'Escândalos atingem a vida pessoal',itens:['Parceiros, familiares e amigos reagem individualmente: podem apoiar uma apuração justa, colaborar com a investigação, afastar-se ou terminar.','Lealdade, ambição, ciúme e vínculo influenciam as respostas; todos os parceiros são considerados.','Seguidores e fiéis podem se afastar. O jornal distingue fama de reputação pública e registra a repercussão.']},
@@ -15276,6 +15277,24 @@ yearPeople=(o=>function(){const r=o.apply(this,arguments);npcPoderAno();return r
 runFor=(o=>function(cargo){const rival=npcRival(cargo.id),n=S.me.c['office_'+cargo.id]||0,r=o.apply(this,arguments);if(rival){const ganhou=(S.me.c['office_'+cargo.id]||0)>n;rival.npcPoder.ativo=false;rival.npcPoder.concluido=true;if(!ganhou){rival.cargoPublico=cargo.id;mundo().presidente=rival.id;noticia(rival.first+' vence a disputa eleitoral','A candidatura do personagem foi derrotada.','politica');}}return r;})(runFor);
 EVENTS.reeleicao.when=m=>!!m.office;
 V.person=(o=>function(p){const r=o(p);if(r&&p.npcPoder)r.items.push({l:'Objetivo próprio',s:NPC_METAS[p.npcPoder.tipo]+' · '+(p.npcPoder.concluido?'concluído':p.npcPoder.ativo?'candidatura ativa':Math.round(p.npcPoder.progresso)+'%')});return r;})(V.person);
+
+// Patrimônio por origem: movimentar entre caixa, aplicações e bens não limpa a origem.
+function origemTotal(){return Math.max(0,netWorth()+(S.me.biz?.value||0)+justica().casos.reduce((n,c)=>n+(c.retido||0),0));}
+function origem(){return S.me.origem||(S.me.origem={legitima:0,ilicita:0,naoClassificada:origemTotal(),extrato:[],doacoes:0});}
+function origemSync(){const o=origem(),total=origemTotal(),soma=o.legitima+o.ilicita+o.naoClassificada;if(total>soma)o.naoClassificada+=total-soma;else if(total<soma&&soma>0){const f=total/soma;o.legitima*=f;o.ilicita*=f;o.naoClassificada=Math.max(0,total-o.legitima-o.ilicita);}return o;}
+function origemEntrada(v,tipo,motivo){if(!Number.isFinite(v)||v<=0)return;const o=origem();o[tipo]+=v;o.extrato.unshift({ano:S.year,v,tipo,motivo});o.extrato=o.extrato.slice(0,60);}
+function origemMovimento(fn,tipo,motivo){origemSync();const antes=S.me.money,r=fn();if(S.me.money>antes)origemEntrada(S.me.money-antes,tipo,motivo);origemSync();return r;}
+officeAct=(o=>function(k){return origemMovimento(()=>o.apply(this,arguments),'ilicita','Desvio público');})(officeAct);
+seitaAcao=(o=>function(k){origemSync();const antes=S.me.money,caixa=seita()?.caixa||0,r=o.apply(this,arguments);if(k==='sacar'&&S.me.money>antes)origemEntrada(S.me.money-antes,'ilicita','Desvio de doações');if(k==='dizimo'&&seita()&&seita().caixa>caixa){const v=seita().caixa-caixa;origem().doacoes+=v;origem().extrato.unshift({ano:S.year,v,tipo:'grupo',motivo:'Doações ao caixa religioso'});}origemSync();return r;})(seitaAcao);
+crime=(o=>function(c){return origemMovimento(()=>o.apply(this,arguments),'ilicita',c.n);})(crime);
+murder=(o=>function(p){return origemMovimento(()=>o.apply(this,arguments),'ilicita','Recursos obtidos após homicídio');})(murder);
+mgFinish=(o=>function(fn){return o.call(this,()=>{origemSync();const saldo=S.me.money,n=S.me.rec.crimes,r=fn();if(S.me.rec.crimes>n&&S.me.money>saldo){const v=S.me.money-saldo;origemEntrada(v,'ilicita','Produto do assalto');if(!S.pending.some(e=>e.id==='julgamento'))justicaRegistrar('assalto',v,'crime');}origemSync();return r;});})(mgFinish);
+yearMoney=(o=>function(){origemSync();const r=o.apply(this,arguments);origemSync();return r;})(yearMoney);
+seitaAno=(o=>function(){const antes=seita()?.caixa||0,r=o.apply(this,arguments);if(seita()&&seita().caixa>antes)origem().doacoes+=seita().caixa-antes;return r;})(seitaAno);
+justicaLiberar=(o=>function(c){origemSync();const antes=c.confiscado||0,r=o.apply(this,arguments),v=(c.confiscado||0)-antes;if(v>0)origem().ilicita=Math.max(0,origem().ilicita-v);origemSync();return r;})(justicaLiberar);
+seitaDominar=(o=>function(){if(cultoBloqueado())return 'O caixa está sob bloqueio judicial.';return o.apply(this,arguments);})(seitaDominar);
+V.origem=()=>{const o=origemSync();return {title:'Origem do patrimônio',items:[{html:'<div class="card">'+kv('Legítimo identificado',fmt(o.legitima))+kv('Origem ilícita identificada',fmt(o.ilicita))+kv('Anterior ou não classificado',fmt(o.naoClassificada))+kv('Doações recebidas pelo grupo',fmt(o.doacoes))+'<p>Doações pertencem ao grupo e ficam separadas do patrimônio pessoal. Saldo anterior e receitas sem registro específico não são declarados legítimos automaticamente.</p><p>Comprar bens e aplicações preserva a origem. Perdas e despesas reduzem as parcelas proporcionalmente; os valores representam rastreamento do patrimônio, não o saldo de uma conta separada.</p></div>'},...o.extrato.map(e=>({l:e.motivo,s:e.ano+' · '+(e.tipo==='grupo'?'Caixa religioso':e.tipo==='ilicita'?'Origem ilícita':'Receita legítima'),r:fmt(e.v)}))]};};
+V.assets=(o=>()=>{const r=o();r.items.unshift({ic:'🧾',l:'Origem do patrimônio',s:'Recursos legítimos, ilícitos e doações',on:()=>UI.push(V.origem)});return r;})(V.assets);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
