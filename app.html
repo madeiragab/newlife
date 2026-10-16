@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610160549'</script>
+<title>NewLife</title><script>window.NL_VER='2610160550'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -14785,6 +14785,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.25',d:'16/10/2026',t:'Atualizações com integridade',itens:['Publicação inclui tamanho exato e SHA-256 do jogo para validar o download.','Novos instaladores verificam a integridade e guardam a versão anterior para recuperar arquivos corrompidos. Essa proteção nativa exige instalar o aplicativo recompilado.','A tela não afirma mais que a atualização foi instalada sem confirmação do aplicativo.']},
  {v:'1.24',d:'16/10/2026',t:'Proteções para famílias e saves',itens:['Regressão curta cobre múltiplos casamentos, divórcio individual e pausa dos acordos.','Corrigido o outro responsável virar avô e aparecer duplicado ao continuar como filho; nascimento e herança também têm regressão.','Saves anteriores aos acordos continuam reconhecendo cônjuges e recebem personalidade estável.']},
  {v:'1.23',d:'16/10/2026',t:'Empresas com crescimento sustentável',itens:['Grandes empresas enfrentam saturação de mercado; crescimento anual e dividendos acompanham o desempenho.','Investir e vender imediatamente não cria dinheiro. Investimentos inválidos são recusados.','Abrir capital passa por uma avaliação moderada, sem multiplicar automaticamente a fortuna.']},
  {v:'1.22',d:'16/10/2026',t:'Convivência e novos acordos',itens:['Parceiros em relações plurais podem sentir ciúme, pedir atenção e iniciar uma conversa sobre limites.','Ouvir, ignorar, pausar novas inclusões ou terminar afeta apenas o relacionamento envolvido.','Rever o acordo permite pausar novas pessoas sem desfazer os casamentos existentes nem transformar um acordo anterior em traição.']},
@@ -14904,7 +14905,7 @@ async function nlAppUpdateCheck(){ if(!nlIsApp()||/teste|aventura|demo|qualidade
     if(!u.native) u.set(1);
   }catch(e){ if(!u.native){ u.close('Não deu para baixar a atualização agora. Ela entra na próxima vez que você abrir o app com internet.'); return; } }
   // se o app não recarregar em 25 s, a versão nova entra na próxima abertura
-  setTimeout(()=>{ if(UPD) UPD.close('A versão nova foi baixada e entra na próxima vez que você abrir o app.'); },25000); }
+  setTimeout(()=>{ if(UPD) UPD.close('A atualização ainda não foi confirmada pelo aplicativo. Continue jogando; ele tentará novamente na próxima abertura.'); },25000); }
 window.addEventListener('load',()=>setTimeout(()=>{ nlAppUpdateCheck().catch(()=>{}); },700));
 // demonstração para conferir o visual (#demo-atualizando)
 if(/demo-atualizando/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ const u=updOverlay(NLV()||'2610141200'); let p=0; const t=setInterval(()=>{ p+=.07; u.set(Math.min(.62,p)); if(p>=.62) clearInterval(t); },120); },900));
