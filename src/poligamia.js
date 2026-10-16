@@ -8,7 +8,7 @@ function polyPerfil(p){
 const polyChance=p=>{ const t=polyPerfil(p); return clamp(10+t.abertura*.75-t.ciume*.55+(p.bond-50)*.3,3,95)/100; };
 const polyGrupo=()=>{ const l=polyAmores(); return l.length<2||l.every(p=>l.every(q=>q.id===p.id||(p.polyCom||[]).includes(q.id))); };
 const polyRodada=()=>{ const r=S.me.polyRodada; return r&&r.chave===polyChave()?r:null; };
-const polyUnanime=()=>{ const l=polyAmores(),r=polyRodada(); return !!(l.length&&r&&l.every(p=>r.votos[p.id]===true)); };
+const polyUnanime=()=>{ const l=polyAmores(),r=polyRodada(); return !!(l.length&&r&&l.every(p=>r.votos[p.id]===true&&!p.polyPausa)); };
 const polyPodeOficializar=p=>polyAmores().includes(p)&&(!polyAmores().some(q=>q.id!==p.id)||polyGrupo());
 function polyPropor(p){
   const l=polyAmores(); if(!S.me.alive||S.scen||S.me.age<18||!l.includes(p)||l.some(q=>q.age<18)) return 'Essa conversa só está disponível entre parceiros adultos na vida normal.';
@@ -17,6 +17,7 @@ function polyPropor(p){
   if(r.anos[p.id]===S.year||p.polyRecusa===S.year) return `${p.first} já recusou esta proposta. Vou respeitar a resposta; só podemos conversar de novo no próximo ano.`;
   r.anos[p.id]=S.year; r.votos[p.id]=R.chance(polyChance(p));
   if(!r.votos[p.id]){ p.polyRecusa=S.year; return `${p.first} não aceitou ter mais uma pessoa na relação. Sem a concordância de todos, não vou começar outro namoro nem casamento.`; }
+  p.polyPausa=false;
   if(polyUnanime()){ S.pending=S.pending.filter(e=>e.id!=='amantes'); l.forEach(q=>q.polyCom=l.filter(x=>x!==q).map(x=>x.id)); return `${p.first} aceitou. Todos concordaram: podemos incluir mais uma pessoa, desde que ela também aceite. Depois disso, qualquer nova inclusão exige outra conversa com todos.`; }
   return `${p.first} aceitou a ideia. Ainda preciso conversar com ${l.filter(q=>r.votos[q.id]!==true).map(q=>q.first).join(', ')}. Uma pessoa aceitar não decide pelas outras.`;
 }
