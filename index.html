@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610160548'</script>
+<title>NewLife</title><script>window.NL_VER='2610160549'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -4832,13 +4832,13 @@ function showDeath(){
 function continueAs(k){
   const old=S.me; const inherit=Math.max(0,Math.round(old.money*.85)); const assets=old.assets, inv=old.inv;
   const eldestK=kids().slice().sort((a,b)=>b.age-a.age)[0]===k;
-  const other=P(k.parentId);
+  const other=P(k.parentId), grandparents=parents().slice();
   const keep=[];
   const oldP=mkPerson({rel:old.gender==='F'?'mae':'pai',gender:old.gender,first:old.first,last:old.last,age:old.age,bond:k.bond}); oldP.alive=false; keep.push(oldP);
   if(other){ other.rel=other.gender==='F'?'mae':'pai'; other.bond=R.int(50,90); keep.push(other); }
   kids().filter(x=>x!==k).forEach(x=>{ x.rel='irmao'; keep.push(x); });
   S.people.filter(p=>p.alive&&p.rel==='neto'&&p.parentId===k.id).forEach(x=>{ x.rel='filho'; keep.push(x); });
-  parents().forEach(x=>{ x.rel='avo'; keep.push(x); });
+  grandparents.forEach(x=>{ x.rel='avo'; keep.push(x); });
   people('pet').forEach(x=>keep.push(x));
   const c=countryOf(old.country);
   const m={ first:k.first,last:k.last,gender:k.gender,age:k.age,country:old.country,city:old.city,born:S.year-k.age,
@@ -14685,6 +14685,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.24',d:'16/10/2026',t:'Proteções para famílias e saves',itens:['Regressão curta cobre múltiplos casamentos, divórcio individual e pausa dos acordos.','Corrigido o outro responsável virar avô e aparecer duplicado ao continuar como filho; nascimento e herança também têm regressão.','Saves anteriores aos acordos continuam reconhecendo cônjuges e recebem personalidade estável.']},
  {v:'1.23',d:'16/10/2026',t:'Empresas com crescimento sustentável',itens:['Grandes empresas enfrentam saturação de mercado; crescimento anual e dividendos acompanham o desempenho.','Investir e vender imediatamente não cria dinheiro. Investimentos inválidos são recusados.','Abrir capital passa por uma avaliação moderada, sem multiplicar automaticamente a fortuna.']},
  {v:'1.22',d:'16/10/2026',t:'Convivência e novos acordos',itens:['Parceiros em relações plurais podem sentir ciúme, pedir atenção e iniciar uma conversa sobre limites.','Ouvir, ignorar, pausar novas inclusões ou terminar afeta apenas o relacionamento envolvido.','Rever o acordo permite pausar novas pessoas sem desfazer os casamentos existentes nem transformar um acordo anterior em traição.']},
  {v:'1.21',d:'16/10/2026',t:'Todos os parceiros fazem parte da vida',itens:['Viagens e retorno de aventuras consideram todos os parceiros, com consequências individuais.','Histórias escolhem parceiros elegíveis e mantêm a pessoa envolvida entre etapas, em vez de usar sempre a primeira da lista.','Na reprodução assistida, escolha o outro responsável: essa escolha fica salva até o nascimento, mesmo após separação.','Todos os parceiros aparecem na vida pessoal de herói. Voltar de uma aventura com um novo amor não termina automaticamente um casamento anterior.']},
@@ -15330,7 +15331,7 @@ function selfTest(){
       assert(nlNotas().some(x=>x.v==='1.0'&&x.body.includes('Primeira versão')),'changelog sem lançamento inicial');
     } finally { R.chance=chance; }
   });
-  T('poligamia consentida',polySelfTest);
+  T('família e saves',familySelfTest);
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
@@ -15663,6 +15664,18 @@ function polySelfTest(){
     V.poly().items.map(rowHtml);V.person(a).items.map(rowHtml);
     return 'PASSOU: recusa, personalidade, save, 2 e 3 casamentos, unanimidade renovada, sem punição de traição e divórcio.';
   }finally{ S=antigo;R.chance=chance;window.NO_SAVE=noSave; }
+}
+function familySelfTest(){
+ const before=S,meta=JSON.stringify(META),snaps=SNAPS,chance=R.chance,noSave=window.NO_SAVE;window.NO_SAVE=true;
+ const ok=(v,t)=>{if(!v)throw Error(t)};
+ try{polySelfTest();newLife({});S.me.age=30;R.chance=()=>false;
+ const a=mkPerson({rel:'conjuge',age:30}),b=mkPerson({rel:'conjuge',age:30});S.people.push(a,b);a.polyCom=[b.id];b.polyCom=[a.id];
+ S.births.push({with:b.id});S=JSON.parse(JSON.stringify(S));fixSave(S);yearPeople();let k=kids()[0];ok(k&&k.parentId===b.id,'filiação após salvar');
+ relPausar(P(a.id));ok(polyGrupo()&&!polyUnanime(),'pausa preserva acordo');divorce(P(a.id),false);ok(partners().length===1&&P(b.id).rel==='conjuge','divórcio individual');
+ S.me.money=100000;S.me.alive=false;k.age=20;continueAs(k);ok(S.me.money===85000,'herança');ok(P(b.id)&&['mae','pai'].includes(P(b.id).rel),'outro responsável na nova geração');
+ newLife({});const p=mkPerson({rel:'conjuge',age:30});S.people.push(p);delete p.polyCom;delete p.polyPerfil;delete S.me.polyRodada;S=JSON.parse(JSON.stringify(S));fixSave(S);ok(partners().length===1&&polyGrupo(),'save anterior aos acordos');ok(Number.isFinite(polyPerfil(P(p.id)).ciume),'perfil antigo');
+ return 'PASSOU: casamentos, divórcio, filiação, herança e save antigo';
+ }finally{S=before;META=JSON.parse(meta);SNAPS=snaps;R.chance=chance;window.NO_SAVE=noSave;}
 }
 
 startApp();
