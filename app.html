@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610160550'</script>
+<title>NewLife</title><script>window.NL_VER='2610161414'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -14785,6 +14785,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.26',d:'16/10/2026',t:'Pessoas com iniciativa',itens:['Amigos, parceiros e familiares podem procurar você para passar tempo juntos.','NPCs adultos também começam cursos, projetos de trabalho e voluntariado; o projeto aparece na ficha.','Aceitar, adiar com cuidado ou ignorar convites afeta o vínculo.']},
  {v:'1.25',d:'16/10/2026',t:'Atualizações com integridade',itens:['Publicação inclui tamanho exato e SHA-256 do jogo para validar o download.','Novos instaladores verificam a integridade e guardam a versão anterior para recuperar arquivos corrompidos. Essa proteção nativa exige instalar o aplicativo recompilado.','A tela não afirma mais que a atualização foi instalada sem confirmação do aplicativo.']},
  {v:'1.24',d:'16/10/2026',t:'Proteções para famílias e saves',itens:['Regressão curta cobre múltiplos casamentos, divórcio individual e pausa dos acordos.','Corrigido o outro responsável virar avô e aparecer duplicado ao continuar como filho; nascimento e herança também têm regressão.','Saves anteriores aos acordos continuam reconhecendo cônjuges e recebem personalidade estável.']},
  {v:'1.23',d:'16/10/2026',t:'Empresas com crescimento sustentável',itens:['Grandes empresas enfrentam saturação de mercado; crescimento anual e dividendos acompanham o desempenho.','Investir e vender imediatamente não cria dinheiro. Investimentos inválidos são recusados.','Abrir capital passa por uma avaliação moderada, sem multiplicar automaticamente a fortuna.']},
@@ -15192,6 +15193,24 @@ function relResolver(p,acao){if(!p||!partners().includes(p))return 'Já não est
 EVENTS.poly_conflito={when:m=>partners().length>1,show:d=>{const p=P(d.pid);return {k:'Relacionamentos',t:'Precisamos conversar',x:(p?p.first:'Meu parceiro')+' sente ciúme e acha que nosso tempo juntos diminuiu. Ter aceitado uma relação plural não significa deixar de ter limites.',ch:[['Ouvir e combinar tempo juntos','ouvir'],['Pausar novas inclusões','pausa'],['Terminar este relacionamento','fim'],['Ignorar a conversa','ignorar']]};},pick:(k,d)=>relResolver(P(d.pid),k)};
 yearMoney=(o=>function(){const r=o.apply(this,arguments);if(S.me.alive&&!S.scen&&partners().length>1&&polyGrupo()&&!S.pending.some(e=>e.id==='poly_conflito')){const l=partners(p=>R.chance((polyPerfil(p).ciume/100)*.18+(p.bond<55?.2:.03)));if(l.length)queue('poly_conflito',{pid:R.pick(l).id});}return r;})(yearMoney);
 V.person=(o=>function(p){const r=o(p);if(r&&partners().includes(p)&&S.me.age>=18&&p.age>=18&&!S.scen)r.items.push({ic:'🤝',l:'Rever o acordo da relação',s:p.polyPausa?'Novas inclusões pausadas':'Conversar sobre limites e convivência',on:()=>modal({t:'Rever o acordo com '+p.first,ch:[{l:'Pausar novas inclusões',fn:()=>act(()=>relPausar(p),'Acordo')},{l:'Conversar sobre incluir mais alguém',fn:()=>act(()=>polyPropor(p),'Conversa')},{l:'Cancelar'}]})});return r;})(V.person);
+
+// Iniciativas dos NPCs: um convite ou projeto por ano, sem agir pelo jogador.
+function npcAtivos(){return people('amigo','mae','pai','irmao','filho','adot','namoro','noivo','conjuge').filter(p=>p.age>=10);}
+function npcIniciativa(){
+ if(!S.me.alive||S.scen||S.me.prison||S.pending.some(e=>e.id==='npc_convite'))return;
+ const l=npcAtivos().filter(p=>p.npcAno!==S.year);if(!l.length||!R.chance(.3))return;
+ const p=R.pick(l);p.npcAno=S.year;
+ if(p.age>=18&&R.chance(.35)){p.npcProjeto=R.pick(['curso de formação','projeto de trabalho','grupo de voluntariado']);p.smarts=clamp(p.smarts+2);log(p.first+' começou um '+p.npcProjeto+' por iniciativa própria.','good');}
+ else queue('npc_convite',{pid:p.id});
+}
+function npcResponder(p,k){if(!p||!p.alive)return 'Não foi possível combinar o encontro.';
+ if(k==='sim'){p.bond=clamp(p.bond+8);p.npcUltimoEncontro=S.year;st('happy',5);return 'Aceitei o convite de '+p.first+'. Passamos um tempo juntos.';}
+ if(k==='depois'){p.bond=clamp(p.bond+1);return 'Expliquei que agora não consigo. Podemos combinar outro dia.';}
+ p.bond=clamp(p.bond-5);return p.first+' percebeu que ignorei o convite.';
+}
+EVENTS.npc_convite={when:m=>npcAtivos().length>0,show:d=>({k:'Social',t:'Um convite inesperado',x:(P(d.pid)?.first||'Uma pessoa próxima')+' tomou a iniciativa de me chamar para conversar e passar um tempo junto.',ch:[['Aceitar o convite','sim'],['Explicar e deixar para depois','depois'],['Ignorar','nao']]}),pick:(k,d)=>npcResponder(P(d.pid),k)};
+yearPeople=(o=>function(){const r=o.apply(this,arguments);npcIniciativa();return r;})(yearPeople);
+V.person=(o=>function(p){const r=o(p);if(r&&p.npcProjeto)r.items.push({l:'Projeto pessoal',s:p.npcProjeto});return r;})(V.person);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
