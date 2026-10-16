@@ -14785,6 +14785,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.27',d:'16/10/2026',t:'Relacionamentos têm memória',itens:['Separações, conflitos ignorados e traições reveladas ficam registrados na ficha da pessoa.','Anos depois, essas lembranças podem voltar em conversas que afetam a confiança.','Reconhecer o passado ajuda a resolver pendências; não apaga os fatos nem reata automaticamente.']},
  {v:'1.26',d:'16/10/2026',t:'Pessoas com iniciativa',itens:['Amigos, parceiros e familiares podem procurar você para passar tempo juntos.','NPCs adultos também começam cursos, projetos de trabalho e voluntariado; o projeto aparece na ficha.','Aceitar, adiar com cuidado ou ignorar convites afeta o vínculo.']},
  {v:'1.25',d:'16/10/2026',t:'Atualizações com integridade',itens:['Publicação inclui tamanho exato e SHA-256 do jogo para validar o download.','Novos instaladores verificam a integridade e guardam a versão anterior para recuperar arquivos corrompidos. Essa proteção nativa exige instalar o aplicativo recompilado.','A tela não afirma mais que a atualização foi instalada sem confirmação do aplicativo.']},
  {v:'1.24',d:'16/10/2026',t:'Proteções para famílias e saves',itens:['Regressão curta cobre múltiplos casamentos, divórcio individual e pausa dos acordos.','Corrigido o outro responsável virar avô e aparecer duplicado ao continuar como filho; nascimento e herança também têm regressão.','Saves anteriores aos acordos continuam reconhecendo cônjuges e recebem personalidade estável.']},
@@ -15211,6 +15212,19 @@ function npcResponder(p,k){if(!p||!p.alive)return 'Não foi possível combinar o
 EVENTS.npc_convite={when:m=>npcAtivos().length>0,show:d=>({k:'Social',t:'Um convite inesperado',x:(P(d.pid)?.first||'Uma pessoa próxima')+' tomou a iniciativa de me chamar para conversar e passar um tempo junto.',ch:[['Aceitar o convite','sim'],['Explicar e deixar para depois','depois'],['Ignorar','nao']]}),pick:(k,d)=>npcResponder(P(d.pid),k)};
 yearPeople=(o=>function(){const r=o.apply(this,arguments);npcIniciativa();return r;})(yearPeople);
 V.person=(o=>function(p){const r=o(p);if(r&&p.npcProjeto)r.items.push({l:'Projeto pessoal',s:p.npcProjeto});return r;})(V.person);
+
+// Memórias por pessoa persistem no save e reaparecem anos depois.
+function relMemoria(p,tipo){if(!p)return;const a=p.relMemorias||(p.relMemorias=[]);if(a.some(x=>x.ano===S.year&&x.tipo===tipo))return;a.push({tipo,ano:S.year,resolvida:false});if(a.length>12)a.shift();}
+const REL_MEM_NOME={separacao:'a nossa separação',conflito:'uma discussão sobre nossos limites',traicao:'a quebra de confiança'};
+divorce=(o=>function(p){const r=o.apply(this,arguments);relMemoria(p,'separacao');return r;})(divorce);
+relFim=(o=>function(p){const was=p&&partners().includes(p),r=o.apply(this,arguments);if(was&&p.rel==='ex')relMemoria(p,'separacao');return r;})(relFim);
+relResolver=(o=>function(p,k){const r=o.apply(this,arguments);if(p&&k==='ignorar')relMemoria(p,'conflito');return r;})(relResolver);
+amorContaTudo=(o=>function(dedo){const l=amores().filter(p=>p!==dedo);const r=o.apply(this,arguments);l.forEach(p=>relMemoria(p,'traicao'));return r;})(amorContaTudo);
+interact=(o=>function(p,k){const antes=p.rel,r=o.apply(this,arguments);if(['namoro','noivo','conjuge'].includes(antes)&&p.rel==='ex')relMemoria(p,'separacao');if(['discutir','insulto'].includes(k)&&p.bond<50)relMemoria(p,'conflito');return r;})(interact);
+function relLembranca(p){return (p.relMemorias||[]).find(x=>!x.resolvida&&S.year-x.ano>=2&&S.year-(x.ultima??x.ano)>=3);}
+EVENTS.rel_passado={show:d=>{const p=P(d.pid),m=p&&(p.relMemorias||[]).find(x=>x.ano===d.ano&&x.tipo===d.tipo);return {k:'Coração',t:'O passado ainda pesa',x:(p?.first||'Uma pessoa do passado')+' voltou a falar sobre '+(REL_MEM_NOME[m?.tipo]||'o que aconteceu entre nós')+'. Faz '+Math.max(0,S.year-d.ano)+' anos, mas a lembrança continua.',ch:[['Reconhecer e ouvir','ouvir'],['Pedir para não falar disso agora','adiar'],['Desprezar a lembrança','ignorar']]};},pick:(k,d)=>{const p=P(d.pid);if(!p||!p.alive)return 'A conversa não aconteceu.';const m=(p.relMemorias||[]).find(x=>x.ano===d.ano&&x.tipo===d.tipo);if(!m||m.resolvida)return 'Já conversamos sobre isso.';m.ultima=S.year;if(k==='ouvir'){p.bond=clamp(p.bond+6);m.resolvida=true;return 'Reconheci o que aconteceu. Isso ajuda a reconstruir a confiança, sem apagar a história nem retomar o relacionamento automaticamente.';}p.bond=clamp(p.bond-(k==='ignorar'?8:2));return 'O assunto continua pendente entre nós.';}};
+yearPeople=(o=>function(){const r=o.apply(this,arguments);if(S.me.alive&&!S.scen&&!S.pending.some(e=>e.id==='rel_passado')){const l=people().filter(p=>relLembranca(p));if(l.length&&R.chance(.25)){const p=R.pick(l),m=relLembranca(p);m.ultima=S.year;queue('rel_passado',{pid:p.id,ano:m.ano,tipo:m.tipo});}}return r;})(yearPeople);
+V.person=(o=>function(p){const r=o(p);if(r&&(p.relMemorias||[]).length)r.items.push({html:'<div class="card"><b>Nossa história</b>'+p.relMemorias.map(m=>'<p>'+esc(m.ano+' · '+REL_MEM_NOME[m.tipo]+(m.resolvida?' · conversamos sobre isso':''))+'</p>').join('')+'</div>'});return r;})(V.person);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
