@@ -16,7 +16,7 @@ function cadReg(id,sid,st){ const [title,text,choices,so={}]=st;
   EVENTS[cadEv(id,sid)]={title,w:0,cad:id,cd:0,
     when:m=>{ const c=cadState().on[id]; if(!c||c.s!==sid) return false; try{ return !so.when||so.when(m,c.d); }catch(e){ return false; } },
     prep:m=>{ const c=cadState().on[id]; return c?Object.assign({},c.d):null; },
-    show:d=>{ const o=CHAINS[id].o; cadPerson(d); return {k:o.k||'História',t:tp(title,d),x:tp(Array.isArray(text)?text[(d.xi||0)%text.length]:text,d),ch:choices.map((c,i)=>[tp(c.split('|')[0],d),String(i)])}; },
+    show:d=>{ const o=CHAINS[id].o; cadPerson(d); return {k:o.k||'História',t:tp(title,d),x:tp(Array.isArray(text)?text[(d.xi||0)%text.length]:text,d)+(d.ultimaDecisao?'\n\nAntes: '+tp(d.ultimaDecisao,d)+'.':''),ch:choices.map((c,i)=>[tp(c.split('|')[0],d),String(i)])}; },
     pick:(key,d)=>cadPick(id,sid,choices[+key],d)};
 }
 // separa os efeitos próprios das cadeias (>etapa, vira:, +cad:) dos efeitos normais do pack
@@ -27,7 +27,17 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
   const qi=toks.findIndex(t=>t.startsWith('?'));
   if(qi>=0){ const bm=toks[qi].match(/^\?(bond|will)([+-]\d+)?$/), pp=d.pid&&P(d.pid);   // ?bond = laço com a pessoa da história · ?will = força de vontade
     chance=bm?Math.max(.03,Math.min(.97,((bm[1]==='bond'?(pp?pp.bond:50):(m.will||50))+ +(bm[2]||0))/100)):dslChance(toks[qi]); base=toks.slice(0,qi).join(' '); fx1=toks.slice(qi+1).join(' '); }
+  // Decisões anteriores mudam as chances das etapas posteriores.
+  const hist=d.decisoes||{};
+  if(chance!=null){
+    if(id==='chefe_abusivo'&&sid==='c'&&hist.b===0) chance=Math.min(.95,chance+.25);
+    if(id==='food_truck'&&sid==='f'&&hist.d===1) chance=Math.min(.95,chance+.15);
+    if(id==='agiota'&&sid==='d'&&choice.startsWith('Pedir ajuda')){const fam=parents().concat(people('irmao'));const bond=fam.length?fam.reduce((n,p)=>n+p.bond,0)/fam.length:0;chance=Math.max(.05,Math.min(.9,chance+(bond-50)/200));}
+  }
   const ok=chance==null||R.chance(chance);
+  d.decisoes=Object.assign({},hist,{[sid]:CHAINS[id].steps[sid][2].indexOf(choice)});
+  d.ultimaDecisao=choice.split('|')[0];
+  const lembrancas=m.histDecisoes||(m.histDecisoes=[]);lembrancas.push({id,etapa:sid,escolha:d.decisoes[sid],ok,ano:S.year});if(lembrancas.length>60)lembrancas.shift();
   const b0=cadSplit(base), br=cadSplit(ok?fx1:(fx2||''));
   const out=[]; let next=null, delay=null;
   b0.own.concat(br.own).forEach(t=>{ let mm;

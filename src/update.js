@@ -3,6 +3,7 @@
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.29',d:'16/10/2026',t:'Decisões que acompanham a história',itens:['Histórias guardam suas escolhas e lembram a decisão anterior na etapa seguinte.','Juntar provas melhora a chance de responsabilizar o chefe; investir na qualidade ajuda o food truck a virar loja.','Ao pedir ajuda à família para escapar do agiota, o vínculo construído com ela passa a contar.']},
  {v:'1.28',d:'16/10/2026',t:'Encontrar pessoas ficou mais fácil',itens:['Relações ganhou busca por nome ou tipo de relação, sem precisar digitar acentos.','Filtros para parceiros, família, amigos e falecidos; ordenação por nome, idade ou vínculo.','O diretório inclui colegas e divide listas grandes em páginas de 40 pessoas.']},
  {v:'1.27',d:'16/10/2026',t:'Relacionamentos têm memória',itens:['Separações, conflitos ignorados e traições reveladas ficam registrados na ficha da pessoa.','Anos depois, essas lembranças podem voltar em conversas que afetam a confiança.','Reconhecer o passado ajuda a resolver pendências; não apaga os fatos nem reata automaticamente.']},
  {v:'1.26',d:'16/10/2026',t:'Pessoas com iniciativa',itens:['Amigos, parceiros e familiares podem procurar você para passar tempo juntos.','NPCs adultos também começam cursos, projetos de trabalho e voluntariado; o projeto aparece na ficha.','Aceitar, adiar com cuidado ou ignorar convites afeta o vínculo.']},
