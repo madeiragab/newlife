@@ -30,6 +30,7 @@ function selfTest(){
     } finally { R.chance=chance; }
   });
   T('família e saves',familySelfTest);
+  T('sistemas públicos integrados',publicSystemsSelfTest);
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
@@ -375,3 +376,13 @@ function familySelfTest(){
  return 'PASSOU: casamentos, divórcio, filiação, herança e save antigo';
  }finally{S=before;META=JSON.parse(meta);SNAPS=snaps;R.chance=chance;window.NO_SAVE=noSave;}
 }
+// Regressão curta entre política, religião, crime, poligamia e gerações.
+function publicSystemsSelfTest(){const before=S,meta=JSON.stringify(META),snaps=SNAPS,chance=R.chance,noSave=window.NO_SAVE;window.NO_SAVE=true;const ok=(v,t)=>{if(!v)throw Error(t)};try{
+ newLife({});S.me.age=45;S.me.money=1e6;S.me.office={id:'pres',yrs:0,appr:70};seitaFundar('igreja','Grupo de regressão');seita().caixa=100000;
+ const a=mkPerson({rel:'conjuge',age:35,bond:90}),b=mkPerson({rel:'conjuge',age:36,bond:90});S.people.push(a,b);a.polyCom=[b.id];b.polyCom=[a.id];for(const p of [a,b])p.personalidade={ambicao:20,lealdade:90,ciume:10,interesse:'livros'};
+ seitaAcao('sacar');let c=justica().casos[0];ok(c&&c.fonte==='culto','origem do desvio');justicaAbrir(c);ok(S.me.office&&S.me.office.appr<70,'presidente investigado');ok(partners().length===2&&polyGrupo(),'acordos durante escândalo');
+ S=JSON.parse(JSON.stringify(S));fixSave(S);c=justica().casos[0];ok(c.retido>0&&seita()&&partners().length===2,'save dos sistemas combinados');
+ R.chance=()=>false;c.etapa='julgamento';trial('p',{c:c.crime,min:2,max:2,justicaId:c.id,evid:true});ok(S.me.prison&&!S.me.office,'prisão encerra mandato');ok(c.etapa==='condenado'&&c.retido===0&&c.confiscado>0,'julgamento e ressarcimento');
+ const k=mkPerson({rel:'filho',age:20,parentId:b.id,bond:80});S.people.push(k);const saldo=S.me.money;die('de teste de regressão');continueAs(k);ok(!S.me.prison&&!S.me.office,'filho não herda prisão nem mandato');ok(S.me.money===Math.max(0,Math.round(saldo*.85)),'herança sem duplicar bloqueio');ok(P(b.id)&&['mae','pai'].includes(P(b.id).rel),'parentesco após prisão e morte');ok(S.jornal&&S.jornal.itens.length,'histórico público entre gerações');ok(Number.isFinite(S.me.money),'saldo íntegro');
+ return 'PASSOU: presidente + culto + crime, dois casamentos, save, prisão, morte e herança';
+ }finally{S=before;META=JSON.parse(meta);SNAPS=snaps;R.chance=chance;window.NO_SAVE=noSave;}}
