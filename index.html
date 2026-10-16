@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610161417'</script>
+<title>NewLife</title><script>window.NL_VER='2610161418'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -14695,6 +14695,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.32',d:'16/10/2026',t:'Cada pessoa tem seu jeito',itens:['NPCs têm ambição, lealdade, ciúme e interesses próprios, visíveis na ficha e preservados no save.','Ambição influencia a iniciativa de começar projetos; interesses orientam cursos e atividades.','Lealdade e ciúme mudam reações em conversas e conflitos. Conversar sobre o interesse da pessoa aproxima vocês.']},
  {v:'1.31',d:'16/10/2026',t:'Fortunas também exigem decisões',itens:['Cripto ganhou risco maior e retorno menor para posições enormes, reduzindo o crescimento fácil e repetitivo.','Ganhos líquidos de ações e cripto têm encargos; grandes reservas pagam gestão progressiva, com regras visíveis em Investimentos.','Cobranças usam primeiro o caixa e depois as aplicações, sem criar dívida artificial quando há reserva disponível.']},
  {v:'1.30',d:'16/10/2026',t:'A senha do cofre explicada',itens:['O minijogo agora tem instruções e exemplo: números sem repetição, posições e como interpretar as pistas.','O histórico escreve quantos números estão no lugar certo ou em outro lugar, sem depender só dos símbolos.','Confirmar um palpite incompleto explica o que falta e não gasta tentativa.']},
  {v:'1.29',d:'16/10/2026',t:'Decisões que acompanham a história',itens:['Histórias guardam suas escolhas e lembram a decisão anterior na etapa seguinte.','Juntar provas melhora a chance de responsabilizar o chefe; investir na qualidade ajuda o food truck a virar loja.','Ao pedir ajuda à família para escapar do agiota, o vínculo construído com ela passa a contar.']},
@@ -15114,8 +15115,8 @@ function npcAtivos(){return people('amigo','mae','pai','irmao','filho','adot','n
 function npcIniciativa(){
  if(!S.me.alive||S.scen||S.me.prison||S.pending.some(e=>e.id==='npc_convite'))return;
  const l=npcAtivos().filter(p=>p.npcAno!==S.year);if(!l.length||!R.chance(.3))return;
- const p=R.pick(l);p.npcAno=S.year;
- if(p.age>=18&&R.chance(.35)){p.npcProjeto=R.pick(['curso de formação','projeto de trabalho','grupo de voluntariado']);p.smarts=clamp(p.smarts+2);log(p.first+' começou um '+p.npcProjeto+' por iniciativa própria.','good');}
+ const p=R.wpick(l.map(p=>[p,1+npcPerfil(p).ambicao/100]));p.npcAno=S.year;
+ if(p.age>=18&&R.chance(.15+npcPerfil(p).ambicao/200)){p.npcProjeto=(npcPerfil(p).ambicao>65?'projeto de trabalho em ':npcPerfil(p).lealdade>65?'grupo comunitário de ':'curso de ')+npcPerfil(p).interesse;p.smarts=clamp(p.smarts+2);log(p.first+' começou um '+p.npcProjeto+' por iniciativa própria.','good');}
  else queue('npc_convite',{pid:p.id});
 }
 function npcResponder(p,k){if(!p||!p.alive)return 'Não foi possível combinar o encontro.';
@@ -15150,6 +15151,14 @@ V.relations=(o=>()=>{const r=o();r.items.unshift({ic:'🔎',l:'Buscar, filtrar e
 function econLiquidar(custo){const m=S.me;let falta=Math.max(0,Math.round(custo));const caixa=Math.min(Math.max(0,m.money),falta);m.money-=caixa;falta-=caixa;for(const k of ['poup','acoes','cripto']){const v=Math.min(Math.max(0,m.inv[k]||0),falta);m.inv[k]-=v;falta-=v;}return Math.round(custo)-falta;}
 yearMoney=(o=>function(){const m=S.me,antes=m.inv.acoes+m.inv.cripto;const r=o.apply(this,arguments);if(!m.alive||S.scen||m.age<18)return r;const ganho=Math.max(0,m.inv.acoes+m.inv.cripto-antes),imposto=Math.round(ganho*.15);const liquido=Math.max(0,m.money)+m.inv.poup+m.inv.acoes+m.inv.cripto;const gestao=Math.round(Math.max(0,liquido-5e6)*.005+Math.max(0,liquido-5e7)*.005);const pago=econLiquidar(imposto+gestao);m.econCustos={ano:S.year,imposto,gestao,pago};if(pago>100)log('Tributação dos ganhos e gestão do patrimônio: '+fmt(pago)+'.','warn');return r;})(yearMoney);
 V.invest=(o=>()=>{const r=o();r.items.unshift({html:'<div class="card"><p>Regras do jogo: ganhos anuais líquidos de ações e cripto têm encargo de 15%. Reservas financeiras acima de $5 milhões custam 0,5% ao ano sobre o excedente para administrar; acima de $50 milhões, mais 0,5% sobre essa faixa.</p><p>Cripto pode perder até 80% num ano. Grandes posições têm retorno menor por falta de liquidez.</p>'+(S.me.econCustos?'<p>Última cobrança: '+fmt(S.me.econCustos.pago)+'.</p>':'')+'</div>'});return r;})(V.invest);
+
+// Traços estáveis, inclusive para pessoas de saves antigos.
+const NPC_INTERESSES=['música','esportes','livros','tecnologia','natureza','culinária'];
+function npcPerfil(p){if(!p.personalidade){const seed=n=>Math.abs((p.id*37+n*53+(p.will||50)*7)%101);p.personalidade={ambicao:seed(1),lealdade:seed(2),ciume:polyPerfil(p).ciume,interesse:NPC_INTERESSES[Math.abs(p.id)%NPC_INTERESSES.length]};}return p.personalidade;}
+function npcAfinidade(p){if(!p||!p.alive||p.rel==='pet')return 'Não podemos conversar agora.';if(p.interesseAno===S.year)return 'Já dedicamos um tempo a esse assunto este ano.';p.interesseAno=S.year;const t=npcPerfil(p);p.bond=clamp(p.bond+6);st('happy',3);return 'Conversamos sobre '+t.interesse+'. '+p.first+' gostou de perceber meu interesse no que importa para '+(p.gender==='F'?'ela':'ele')+'.';}
+npcResponder=(o=>function(p,k){const antes=p?.bond,r=o.apply(this,arguments);if(p&&k==='nao'&&p.bond<antes&&npcPerfil(p).lealdade>70)p.bond=clamp(p.bond+2);return r;})(npcResponder);
+relResolver=(o=>function(p,k){const antes=p?.bond,r=o.apply(this,arguments);if(p&&partners().includes(p)){const t=npcPerfil(p);if(k==='ouvir'&&p.bond>antes&&t.lealdade>65)p.bond=clamp(p.bond+3);if(k==='ignorar'&&t.ciume>70)p.bond=clamp(p.bond-3);}return r;})(relResolver);
+V.person=(o=>function(p){const r=o(p);if(r&&p.alive&&p.rel!=='pet'&&p.age>=6){const t=npcPerfil(p);r.items.push({html:'<div class="card"><b>Personalidade</b>'+bar('Ambição',t.ambicao)+bar('Lealdade',t.lealdade)+bar('Ciúme',t.ciume)+'<p>Interesse: '+esc(t.interesse)+'.</p></div>'},{l:'Conversar sobre '+t.interesse,s:p.interesseAno===S.year?'Já conversamos este ano':'Mostrar interesse no que essa pessoa gosta',on:()=>act(()=>npcAfinidade(p),'Afinidade')});}return r;})(V.person);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
