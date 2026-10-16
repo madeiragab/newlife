@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2610161926'</script>
+<title>NewLife</title><script>window.NL_VER='2610161927'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -3624,7 +3624,7 @@ function specialAction(){
 function runFor(o,tier){
   const m=S.me,cost=Math.round(o.cost*[0.3,1,3][tier]);
   m.money-=cost;
-  const p=clamp((o.base+m.fame/250+m.smarts/600+(m.karma-50)/400+[-.05,.06,.16][tier]-(m.rec.conv?.25:0))*100,2,85)/100;
+  const p=clamp((o.base+m.fame/250+m.smarts/600+(m.karma-50)/400+[-.05,.06,.16][tier]-(m.rec.conv?.25:0)-(typeof npcRival==='function'&&npcRival(o.id)?npcRival(o.id).npcPoder.apoio/500:0))*100,2,85)/100;
   if(!R.chance(p)){ st('happy',-10); log(`Perdi a eleição para ${g(o.n,m.gender).toLowerCase()}.`,'bad'); return `Perdi a eleição. Gastei ${fmt(cost)} na campanha.`; }
   if(m.job) endJob(); m.office={id:o.id,yrs:0,appr:R.int(45,65)}; cnt('office_'+o.id); if(o.id==='pres') cnt('pres');
   m.fame=clamp(m.fame+{ver:3,dep:8,pref:10,gov:25,pres:60}[o.id]);
@@ -14698,6 +14698,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.40',d:'16/10/2026',t:'Aliados têm ambições próprias',itens:['NPCs acumulam influência para concorrer à presidência, liderar o culto, administrar empresas ou denunciar crimes.','Candidaturas têm nomes e disputam votos; grupos religiosos podem escolher outro líder.','Propostas de gestão podem ser aceitas, negociadas ou recusadas, com consequências no vínculo.']},
  {v:'1.39',d:'16/10/2026',t:'Proteção entre sistemas',itens:['Regressão curta combina presidência, liderança religiosa, desvio, bloqueio judicial e dois casamentos.','Verifica persistência do save, perda do mandato na prisão, ressarcimento único, morte e herança.','O filho mantém seu parentesco e o histórico público, sem herdar prisão nem cargo político.']},
  {v:'1.38',d:'16/10/2026',t:'Escândalos atingem a vida pessoal',itens:['Parceiros, familiares e amigos reagem individualmente: podem apoiar uma apuração justa, colaborar com a investigação, afastar-se ou terminar.','Lealdade, ambição, ciúme e vínculo influenciam as respostas; todos os parceiros são considerados.','Seguidores e fiéis podem se afastar. O jornal distingue fama de reputação pública e registra a repercussão.']},
  {v:'1.37',d:'16/10/2026',t:'Doações, denúncias e contas bloqueadas',itens:['Desvios do culto entram na mesma investigação usada para crimes e corrupção política.','A Justiça pode bloquear valores pessoais envolvidos e suspender saídas do caixa religioso.','Absolvição e arquivamento liberam recursos; condenações permitem ressarcimento. Doações legítimas não viram patrimônio do líder.']},
@@ -15257,6 +15258,24 @@ function escandaloReagir(c){if(!c.publico||c.reacoes)return;c.reacoes=[];const m
 justicaAbrir=(o=>function(c){const r=o.apply(this,arguments);escandaloReagir(c);return r;})(justicaAbrir);
 V.person=(o=>function(p){const r=o(p);if(r&&p.publicoReacao)r.items.push({l:'Reação ao escândalo',s:p.publicoReacao.ano+' · '+p.publicoReacao.tipo});return r;})(V.person);
 V.jornal=(o=>()=>{const r=o();r.items.unshift({html:'<div class="card">'+bar('Reputação pública',S.me.reputacao??60)+'<p>Fama mede visibilidade. Reputação mede confiança: um escândalo pode tornar alguém conhecido e menos confiável.</p></div>'});return r;})(V.jornal);
+
+// Pessoas próximas acumulam influência para perseguir objetivos próprios.
+const NPC_METAS={politica:'Disputar a presidência',culto:'Liderar o grupo religioso',empresa:'Administrar a empresa',denuncia:'Levar informações à Justiça'};
+const npcRival=cargo=>people().find(p=>p.npcPoder?.tipo==='politica'&&p.npcPoder.ativo&&cargo==='pres');
+function npcTomarCulto(p){const s=seita();if(!s)return;s.membro=1;s.cargo=0;s.xp=0;s.fe=50;s.lider=fullName(p);s.liderId=p.id;s.devo=clamp(s.devo-8);noticia(p.first+' assume a liderança de '+s.n,'A assembleia do grupo escolheu uma nova liderança. O antigo líder permanece como membro, sem controlar o caixa.','poder');}
+function npcPoderAno(){if(!S.me.alive||S.scen)return;const m=S.me;const l=people().filter(p=>p.age>=18&&p.rel!=='pet'&&(p.bond>30||p.grp?.startsWith('seita:')));
+ for(const p of l){const t=npcPerfil(p);let g=p.npcPoder;if(!g&&t.ambicao>60&&R.chance(.08)){const op=[];if(p.age>=35)op.push('politica');if(seita()&&!seita().membro&&(p.grp==='seita:'+seita().n||p.bond>60))op.push('culto');if(m.biz)op.push('empresa');if(justica().casos.some(c=>c.etapa==='oculto')&&t.lealdade<60)op.push('denuncia');if(op.length)g=p.npcPoder={tipo:R.pick(op),progresso:0};}if(!g||g.concluido||g.ano===S.year)continue;g.ano=S.year;
+ if(g.ativo&&g.tipo==='politica'){if(m.office?.id!=='pres'&&S.year>=g.eleicao){g.concluido=true;g.ativo=false;mundo().presidente=p.id;p.cargoPublico='pres';noticia(p.first+' vence a eleição presidencial','A candidatura reuniu apoio e venceu a eleição nacional.','politica');}continue;}
+ g.progresso=clamp(g.progresso+R.int(8,16)+Math.round(t.ambicao/20));if(g.progresso<100)continue;
+ if(g.tipo==='politica'){g.ativo=true;g.apoio=clamp(30+t.ambicao*.4);g.eleicao=S.year+1;noticia(p.first+' anuncia candidatura à presidência','Um antigo aliado passa a buscar o próprio espaço político. Sua candidatura pode disputar votos com a do personagem.','politica');}
+ else if(g.tipo==='denuncia'){const c=justica().casos.find(c=>c.etapa==='oculto');if(c){justicaAbrir(c);noticia(p.first+' entrega documentos à Justiça','A iniciativa abre uma apuração independente.','justica');}g.concluido=true;}
+ else{g.concluido=true;if((g.tipo==='culto'&&seita()&&!seita().membro)||(g.tipo==='empresa'&&m.biz))queue('npc_disputa',{pid:p.id,tipo:g.tipo,n:g.tipo==='culto'?seita().n:m.biz.n});}
+ }}
+EVENTS.npc_disputa={show:d=>({k:'Poder',t:'Uma ambição declarada',x:(P(d.pid)?.first||'Um aliado')+' quer '+(d.tipo==='culto'?'liderar o grupo':'administrar a empresa')+' '+d.n+'. A iniciativa partiu dessa pessoa.',ch:[['Dar espaço e aceitar','aceitar'],['Negociar limites','negociar'],['Recusar','recusar']]}),pick:(k,d)=>{const p=P(d.pid);if(!p||!p.alive)return 'A proposta perdeu o sentido.';const s=seita(),b=S.me.biz;if(d.tipo==='culto'&&(!s||s.n!==d.n||s.membro)||d.tipo==='empresa'&&(!b||b.n!==d.n))return 'A organização já mudou.';if(k==='aceitar'){if(d.tipo==='culto')npcTomarCulto(p);else{b.gestor=p.id;noticia(p.first+' assume a gestão de '+b.n,'A propriedade da empresa continua com '+S.me.first+', mas a administração foi delegada.','negocios');}return 'Aceitei dividir o espaço de poder.';}if(k==='negociar'){p.bond=clamp(p.bond+3);return 'Combinamos responsabilidades menores por enquanto.';}p.bond=clamp(p.bond-12);if(d.tipo==='culto'&&R.chance((npcPerfil(p).ambicao+(100-s.devo))/220)){npcTomarCulto(p);return 'A assembleia apoiou a outra candidatura e perdi a liderança.';}return 'Mantive a posição, mas a recusa desgastou a aliança.';}};
+yearPeople=(o=>function(){const r=o.apply(this,arguments);npcPoderAno();return r;})(yearPeople);
+runFor=(o=>function(cargo){const rival=npcRival(cargo.id),n=S.me.c['office_'+cargo.id]||0,r=o.apply(this,arguments);if(rival){const ganhou=(S.me.c['office_'+cargo.id]||0)>n;rival.npcPoder.ativo=false;rival.npcPoder.concluido=true;if(!ganhou){rival.cargoPublico=cargo.id;mundo().presidente=rival.id;noticia(rival.first+' vence a disputa eleitoral','A candidatura do personagem foi derrotada.','politica');}}return r;})(runFor);
+EVENTS.reeleicao.when=m=>!!m.office;
+V.person=(o=>function(p){const r=o(p);if(r&&p.npcPoder)r.items.push({l:'Objetivo próprio',s:NPC_METAS[p.npcPoder.tipo]+' · '+(p.npcPoder.concluido?'concluído':p.npcPoder.ativo?'candidatura ativa':Math.round(p.npcPoder.progresso)+'%')});return r;})(V.person);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
