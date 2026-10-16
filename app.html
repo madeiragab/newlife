@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610161416'</script>
+<title>NewLife</title><script>window.NL_VER='2610161417'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -1613,7 +1613,7 @@ function yearMoney(){
   const iv=m.inv;
   if(iv.poup) iv.poup=Math.round(iv.poup*1.04);
   if(iv.acoes){ const r=R.norm(.065,.18); iv.acoes=Math.max(0,Math.round(iv.acoes*(1+r))); if(Math.abs(r)>.2) log(`Minhas ações ${r>0?'subiram':'caíram'} ${Math.round(Math.abs(r)*100)}% este ano.`,r>0?'good':'bad'); }
-  if(iv.cripto){ const r=R.chance(.45)?R.f()*1.3:-R.f()*.65; /* a maioria perde um pouco, poucos ganham muito */ iv.cripto=Math.max(0,Math.round(iv.cripto*(1+r))); log(`Minhas criptomoedas ${r>0?'valorizaram':'derreteram'} ${Math.round(Math.abs(r)*100)}%.`,r>0?'good':'bad'); }
+  if(iv.cripto){ const r=R.chance(.4)?R.f()*(1.05/(1+Math.max(0,Math.log10(Math.max(1,iv.cripto)/1e6))*.2)):-R.f()*.8; /* a maioria perde um pouco, poucos ganham muito */ iv.cripto=Math.max(0,Math.round(iv.cripto*(1+r))); log(`Minhas criptomoedas ${r>0?'valorizaram':'derreteram'} ${Math.round(Math.abs(r)*100)}%.`,r>0?'good':'bad'); }
   if(m.money<-20000&&R.chance(.3)) queue('divida',{});
 }
 function yearPrison(){
@@ -3752,7 +3752,7 @@ function buy(kind,l,financed){
 }
 function sellAsset(a){ const m=S.me; if(a.stolen&&R.chance(.12)){ m.assets=m.assets.filter(x=>x!==a); arrest('receptação de produto roubado',0,2); return `O comprador era policial disfarçado. Perdi ${a.n.toLowerCase()} e fui pres${oa()}.`; } const v=Math.round(a.value*(a.stolen?.45:1)*(a.k==='casa'?(.75+a.cond/400):(.5+a.cond/220))); m.money+=v-(a.loan||0); m.assets=m.assets.filter(x=>x!==a); log(`Vendi ${a.n.toLowerCase()} por ${fmt(v)}.`); return `Vendi por ${fmt(v)}${a.loan?` (quitei ${fmt(a.loan)} de financiamento)`:''}.`; }
 function fixAsset(a){ const m=S.me; const c=Math.round(a.value*(100-a.cond)/100*(a.k==='casa'?.25:.4)); if(!canPay(c)) return `A reforma custa ${fmt(c)} e eu não tenho.`; m.money-=c; a.cond=100; a.value=Math.round(a.value*1.04); return `${a.k==='casa'?'Reformei':'Consertei'} por ${fmt(c)}.`; }
-function invest(k,v){ const m=S.me; if(v>0&&!canPay(v)) return 'Não tenho esse dinheiro.'; if(v<0&&m.inv[k]<-v) v=-m.inv[k]; m.money-=v; m.inv[k]+=v; return v>0?`Investi ${fmt(v)}.`:`Resgatei ${fmt(-v)}.`; }
+function invest(k,v){ const m=S.me; if(!['poup','acoes','cripto'].includes(k)||!Number.isFinite(v)) return 'Investimento inválido.'; if(v>0&&!canPay(v)) return 'Não tenho esse dinheiro.'; if(v<0&&m.inv[k]<-v) v=-m.inv[k]; m.money-=v; m.inv[k]+=v; return v>0?`Investi ${fmt(v)}.`:`Resgatei ${fmt(-v)}.`; }
 
 // ---------- mente e corpo ----------
 function body(k,extra){
@@ -14795,6 +14795,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.31',d:'16/10/2026',t:'Fortunas também exigem decisões',itens:['Cripto ganhou risco maior e retorno menor para posições enormes, reduzindo o crescimento fácil e repetitivo.','Ganhos líquidos de ações e cripto têm encargos; grandes reservas pagam gestão progressiva, com regras visíveis em Investimentos.','Cobranças usam primeiro o caixa e depois as aplicações, sem criar dívida artificial quando há reserva disponível.']},
  {v:'1.30',d:'16/10/2026',t:'A senha do cofre explicada',itens:['O minijogo agora tem instruções e exemplo: números sem repetição, posições e como interpretar as pistas.','O histórico escreve quantos números estão no lugar certo ou em outro lugar, sem depender só dos símbolos.','Confirmar um palpite incompleto explica o que falta e não gasta tentativa.']},
  {v:'1.29',d:'16/10/2026',t:'Decisões que acompanham a história',itens:['Histórias guardam suas escolhas e lembram a decisão anterior na etapa seguinte.','Juntar provas melhora a chance de responsabilizar o chefe; investir na qualidade ajuda o food truck a virar loja.','Ao pedir ajuda à família para escapar do agiota, o vínculo construído com ela passa a contar.']},
  {v:'1.28',d:'16/10/2026',t:'Encontrar pessoas ficou mais fácil',itens:['Relações ganhou busca por nome ou tipo de relação, sem precisar digitar acentos.','Filtros para parceiros, família, amigos e falecidos; ordenação por nome, idade ou vínculo.','O diretório inclui colegas e divide listas grandes em páginas de 40 pessoas.']},
@@ -15244,6 +15245,11 @@ const pessoaTexto=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'
 function pessoasFiltrar(q,f,ord){return S.people.filter(p=>(f==='mortos'?!p.alive:p.alive)&&(f==='amor'?['namoro','noivo','conjuge'].includes(p.rel):f==='familia'?['mae','pai','avo','irmao','filho','adot','neto'].includes(p.rel):f==='amigos'?p.rel==='amigo':true)&&pessoaTexto(fullName(p)+' '+relLabel(p)).includes(pessoaTexto(q))).sort((a,b)=>ord==='idade'?a.age-b.age:ord==='vinculo'?b.bond-a.bond:fullName(a).localeCompare(fullName(b),'pt-BR'));}
 V.buscarPessoas=()=>{const st={q:'',f:'todos',ord:'nome',page:0};return function view(){const all=pessoasFiltrar(st.q,st.f,st.ord),pages=Math.max(1,Math.ceil(all.length/40));st.page=Math.min(st.page,pages-1);const opts=(v,list)=>list.map(([id,n])=>'<option value="'+id+'" '+(id===v?'selected':'')+'>'+n+'</option>').join('');return {title:'Encontrar pessoas',items:[{html:'<div class="card"><label>Buscar nome ou relação<input class="in" id="pBusca" value="'+esc(st.q)+'" placeholder="Nome ou relação"></label><label>Mostrar<select class="in" id="pFiltro">'+opts(st.f,[['todos','Todos os vivos'],['amor','Parceiros'],['familia','Família'],['amigos','Amigos'],['mortos','Falecidos']])+'</select></label><label>Ordenar por<select class="in" id="pOrdem">'+opts(st.ord,[['nome','Nome'],['idade','Idade'],['vinculo','Vínculo']])+'</select></label><p>'+all.length+' pessoa(s) · página '+(st.page+1)+' de '+pages+'</p></div>'},...all.slice(st.page*40,st.page*40+40).map(p=>p.alive?personRow(p):{l:fullName(p),s:relLabel(p)+' · faleceu',dis:true}),...(!all.length?[{html:'<div class="card">Nenhuma pessoa encontrada.</div>'}]:[]),{btns:[{l:'Anterior',dis:st.page===0,on:()=>{st.page--;UI.draw();}},{l:'Próxima',dis:st.page>=pages-1,on:()=>{st.page++;UI.draw();}}]}],after:el=>{const inp=el.querySelector('#pBusca');inp.oninput=()=>{st.q=inp.value;st.page=0;const pos=inp.selectionStart;UI.draw();const n=$('#pBusca');n.focus();n.setSelectionRange(pos,pos);};el.querySelector('#pFiltro').onchange=e=>{st.f=e.target.value;st.page=0;UI.draw();};el.querySelector('#pOrdem').onchange=e=>{st.ord=e.target.value;st.page=0;UI.draw();};}};};};
 V.relations=(o=>()=>{const r=o();r.items.unshift({ic:'🔎',l:'Buscar, filtrar e ordenar pessoas',s:'Inclui colegas e outras pessoas conhecidas',on:()=>UI.push(V.buscarPessoas())});return r;})(V.relations);
+
+// Regras econômicas do jogo: retorno líquido e custo de administrar grandes reservas.
+function econLiquidar(custo){const m=S.me;let falta=Math.max(0,Math.round(custo));const caixa=Math.min(Math.max(0,m.money),falta);m.money-=caixa;falta-=caixa;for(const k of ['poup','acoes','cripto']){const v=Math.min(Math.max(0,m.inv[k]||0),falta);m.inv[k]-=v;falta-=v;}return Math.round(custo)-falta;}
+yearMoney=(o=>function(){const m=S.me,antes=m.inv.acoes+m.inv.cripto;const r=o.apply(this,arguments);if(!m.alive||S.scen||m.age<18)return r;const ganho=Math.max(0,m.inv.acoes+m.inv.cripto-antes),imposto=Math.round(ganho*.15);const liquido=Math.max(0,m.money)+m.inv.poup+m.inv.acoes+m.inv.cripto;const gestao=Math.round(Math.max(0,liquido-5e6)*.005+Math.max(0,liquido-5e7)*.005);const pago=econLiquidar(imposto+gestao);m.econCustos={ano:S.year,imposto,gestao,pago};if(pago>100)log('Tributação dos ganhos e gestão do patrimônio: '+fmt(pago)+'.','warn');return r;})(yearMoney);
+V.invest=(o=>()=>{const r=o();r.items.unshift({html:'<div class="card"><p>Regras do jogo: ganhos anuais líquidos de ações e cripto têm encargo de 15%. Reservas financeiras acima de $5 milhões custam 0,5% ao ano sobre o excedente para administrar; acima de $50 milhões, mais 0,5% sobre essa faixa.</p><p>Cripto pode perder até 80% num ano. Grandes posições têm retorno menor por falta de liquidez.</p>'+(S.me.econCustos?'<p>Última cobrança: '+fmt(S.me.econCustos.pago)+'.</p>':'')+'</div>'});return r;})(V.invest);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
