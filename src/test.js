@@ -29,7 +29,7 @@ function selfTest(){
       assert(nlNotas().some(x=>x.v==='1.0'&&x.body.includes('Primeira versão')),'changelog sem lançamento inicial');
     } finally { R.chance=chance; }
   });
-  T('poligamia consentida',polySelfTest);
+  T('família e saves',familySelfTest);
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
@@ -362,4 +362,16 @@ function polySelfTest(){
     V.poly().items.map(rowHtml);V.person(a).items.map(rowHtml);
     return 'PASSOU: recusa, personalidade, save, 2 e 3 casamentos, unanimidade renovada, sem punição de traição e divórcio.';
   }finally{ S=antigo;R.chance=chance;window.NO_SAVE=noSave; }
+}
+function familySelfTest(){
+ const before=S,meta=JSON.stringify(META),snaps=SNAPS,chance=R.chance,noSave=window.NO_SAVE;window.NO_SAVE=true;
+ const ok=(v,t)=>{if(!v)throw Error(t)};
+ try{polySelfTest();newLife({});S.me.age=30;R.chance=()=>false;
+ const a=mkPerson({rel:'conjuge',age:30}),b=mkPerson({rel:'conjuge',age:30});S.people.push(a,b);a.polyCom=[b.id];b.polyCom=[a.id];
+ S.births.push({with:b.id});S=JSON.parse(JSON.stringify(S));fixSave(S);yearPeople();let k=kids()[0];ok(k&&k.parentId===b.id,'filiação após salvar');
+ relPausar(P(a.id));ok(polyGrupo()&&!polyUnanime(),'pausa preserva acordo');divorce(P(a.id),false);ok(partners().length===1&&P(b.id).rel==='conjuge','divórcio individual');
+ S.me.money=100000;S.me.alive=false;k.age=20;continueAs(k);ok(S.me.money===85000,'herança');ok(P(b.id)&&['mae','pai'].includes(P(b.id).rel),'outro responsável na nova geração');
+ newLife({});const p=mkPerson({rel:'conjuge',age:30});S.people.push(p);delete p.polyCom;delete p.polyPerfil;delete S.me.polyRodada;S=JSON.parse(JSON.stringify(S));fixSave(S);ok(partners().length===1&&polyGrupo(),'save anterior aos acordos');ok(Number.isFinite(polyPerfil(P(p.id)).ciume),'perfil antigo');
+ return 'PASSOU: casamentos, divórcio, filiação, herança e save antigo';
+ }finally{S=before;META=JSON.parse(meta);SNAPS=snaps;R.chance=chance;window.NO_SAVE=noSave;}
 }

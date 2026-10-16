@@ -583,13 +583,13 @@ function showDeath(){
 function continueAs(k){
   const old=S.me; const inherit=Math.max(0,Math.round(old.money*.85)); const assets=old.assets, inv=old.inv;
   const eldestK=kids().slice().sort((a,b)=>b.age-a.age)[0]===k;
-  const other=P(k.parentId);
+  const other=P(k.parentId), grandparents=parents().slice();
   const keep=[];
   const oldP=mkPerson({rel:old.gender==='F'?'mae':'pai',gender:old.gender,first:old.first,last:old.last,age:old.age,bond:k.bond}); oldP.alive=false; keep.push(oldP);
   if(other){ other.rel=other.gender==='F'?'mae':'pai'; other.bond=R.int(50,90); keep.push(other); }
   kids().filter(x=>x!==k).forEach(x=>{ x.rel='irmao'; keep.push(x); });
   S.people.filter(p=>p.alive&&p.rel==='neto'&&p.parentId===k.id).forEach(x=>{ x.rel='filho'; keep.push(x); });
-  parents().forEach(x=>{ x.rel='avo'; keep.push(x); });
+  grandparents.forEach(x=>{ x.rel='avo'; keep.push(x); });
   people('pet').forEach(x=>keep.push(x));
   const c=countryOf(old.country);
   const m={ first:k.first,last:k.last,gender:k.gender,age:k.age,country:old.country,city:old.city,born:S.year-k.age,
