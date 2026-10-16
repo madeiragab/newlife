@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610161419'</script>
+<title>NewLife</title><script>window.NL_VER='2610161923'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -441,11 +441,14 @@ button.row:active{transform:scale(.985)}
 #start .chip{padding:7px 13px;font-size:13px}
 @media (prefers-reduced-motion:reduce){.st-faces span{animation:none}}
 
+#newsBar{display:flex;align-items:center;gap:9px;flex-shrink:0;min-height:38px;padding:8px 14px;background:#fff;color:#19243a;text-align:left;border-bottom:1px solid #e0e4ed;font-size:12px;line-height:1.4;z-index:4}#newsBar[hidden]{display:none}#newsBar svg{flex-shrink:0}.news-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.news-arrow{font-size:20px;color:#52627d}
+
 </style>
 </head>
 <body>
 <div id="splash" role="status" aria-label="Carregando"><div class="sp-in"><div id="splashArt"></div><div class="logo sp-logo">New<em>Life</em></div><div class="sp-bar"><i></i></div><p class="sp-tip">Sorteando uma nova vida…</p></div></div>
 <div id="app">
+  <button id="newsBar" aria-label="Abrir jornal de notícias"></button>
   <header id="hdr">
     <button class="icon-btn" id="menuBtn" aria-label="Menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
     <div class="avatar" id="avatar"></div>
@@ -14795,6 +14798,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.35',d:'16/10/2026',t:'As notícias chegaram',itens:['Uma barra branca no topo mostra a bandeira do país e a manchete mais recente.','Sua ascensão à fama, mandatos, prisões e acontecimentos do mundo viram notícias.','Toque na barra para abrir o jornal, ler as matérias e consultar o histórico, que continua entre gerações.']},
  {v:'1.34',d:'16/10/2026',t:'O mundo continua mudando',itens:['Cada país passa por expansão ou desaceleração econômica, políticas temporárias e mudanças na tensão social.','Salários, empresas e despesas refletem a conjuntura; reuniões de bairro permitem responder a dificuldades sociais.','Menu → O mundo ao redor mostra as notícias recentes. O contexto persiste ao continuar como filho.']},
  {v:'1.33',d:'16/10/2026',t:'A criação deixa marcas',itens:['Cada filho tem afeto, autonomia e pressão acumulados durante a criação.','Ouvir, apoiar interesses ou cobrar resultados afeta o vínculo e, aos poucos, lealdade, ambição e força de vontade.','Presença nas interações conta; os efeitos da criação permanecem na vida adulta e ao continuar como filho.']},
  {v:'1.32',d:'16/10/2026',t:'Cada pessoa tem seu jeito',itens:['NPCs têm ambição, lealdade, ciúme e interesses próprios, visíveis na ficha e preservados no save.','Ambição influencia a iniciativa de começar projetos; interesses orientam cursos e atividades.','Lealdade e ciúme mudam reações em conversas e conflitos. Conversar sobre o interesse da pessoa aproxima vocês.']},
@@ -15287,6 +15291,19 @@ continueAs=(o=>function(k){const contexto=S.mundo;const r=o.apply(this,arguments
 EVENTS.mundo_comunidade={show:()=>({k:'Vizinhança',t:'O bairro se mobilizou',x:'Com a tensão social aumentando, moradores organizaram uma reunião sobre os problemas do bairro.',ch:[['Participar e ouvir os moradores','participar'],['Ajudar com $500','doar'],['Não participar desta vez','nao']]}),pick:k=>{const w=mundo();if(k==='doar'){if(!canPay(500))return 'Não tenho dinheiro disponível para contribuir.';S.me.money-=500;w.tensao=clamp(w.tensao-2);return 'Ajudei a iniciativa do bairro, com um efeito pequeno na tensão local.';}if(k==='participar'){st('happy',3);people('amigo').forEach(p=>p.bond=clamp(p.bond+2));w.tensao=clamp(w.tensao-1);return 'Ouvi os moradores e fortaleci meus vínculos com a comunidade.';}return 'Continuei minha rotina.';}};
 V.mundo=()=>{const w=mundo();return {title:'O mundo ao redor',items:[{html:'<div class="card"><b>'+esc(countryOf(S.me.country).n)+'</b>'+kv('Economia',w.economia<0?'Desaceleração':w.economia>0?'Expansão':'Estável')+kv('Política',MUNDO_POL[w.politica].n)+bar('Tensão social',w.tensao)+'<p>A economia afeta salários e empresas. Políticas públicas alteram despesas e podem mudar após alguns anos.</p></div>'},...w.noticias.map(n=>({l:String(n.ano),s:n.text}))]};};
 V.menu=(o=>()=>{const r=o();if(!S.scen)r.items.push({ic:'🌎',l:'O mundo ao redor',s:'Economia, políticas e acontecimentos sociais',on:()=>UI.push(V.mundo)});return r;})(V.menu);
+
+// Jornal da vida: manchetes persistentes sobre o personagem e o país.
+function jornal(){return S.jornal||(S.jornal={itens:[],next:1});}
+function noticia(titulo,texto,tipo='mundo',chave){const j=jornal();if(chave&&j.itens.some(n=>n.chave===chave))return null;const n={id:j.next++,ano:S.year,pais:S.me.country,titulo,texto,tipo,chave};j.itens.unshift(n);j.itens=j.itens.slice(0,100);noticiaBarra();return n;}
+function noticiasObservar(){if(!S||!S.me||S.scen)return;const m=S.me,mar=m.newsMarcos||(m.newsMarcos={});for(const [lim,t] of [[15,'Uma nova estrela em ascensão'],[40,'Nome em destaque na imprensa nacional'],[75,'Uma celebridade reconhecida em todo o país']])if(m.fame>=lim&&!mar['f'+lim]){mar['f'+lim]=true;noticia(t+': '+m.first,fullName(m)+' ganhou visibilidade com sua trajetória. Sua fama chegou a '+Math.round(m.fame)+'%.','personagem','fama:'+S.gen+':'+lim);}if(m.office&&mar.cargo!==m.office.id){mar.cargo=m.office.id;noticia(fullName(m)+' assume cargo público','O novo mandato de '+g(OFFICES.find(o=>o.id===m.office.id).n,m.gender).toLowerCase()+' começa com '+Math.round(m.office.appr)+'% de aprovação.','politica');}if(!m.office)mar.cargo=null;}
+function noticiaBarra(){const el=document.getElementById('newsBar');if(!el||!S||!S.me)return;el.hidden=!!S.scen;const n=jornal().itens[0];el.innerHTML=flagSVG(n?.pais||S.me.country,22)+'<span class="news-label">'+esc(n?n.titulo:'Notícias de '+countryOf(S.me.country).n+' · abrir jornal')+'</span><span class="news-arrow">›</span>';el.title=n?n.titulo:'Abrir jornal';el.onclick=()=>UI.open(V.jornal);}
+render=(o=>Object.assign(function(){const r=o.apply(this,arguments);noticiasObservar();noticiaBarra();return r;},o))(render);
+mundoAno=(o=>function(){const antes=mundo().ano,r=o.apply(this,arguments);if(!S.scen&&mundo().ano!==antes){const n=mundo().noticias[0];if(n)noticia(countryOf(S.me.country).n+': '+n.text,'A conjuntura pode influenciar salários, empresas e despesas. Veja os indicadores em O mundo ao redor.','mundo','mundo:'+S.me.country+':'+S.year);}return r;})(mundoAno);
+arrest=(o=>function(crime){const preso=!!S.me.prison,r=o.apply(this,arguments);if(!preso&&S.me.prison)noticia(fullName(S.me)+' é preso','A prisão está relacionada a '+crime+'. A Justiça acompanha o caso.','justica');return r;})(arrest);
+die=(o=>function(c){const vivo=S.me.alive,r=o.apply(this,arguments);if(vivo)noticia('Morre '+fullName(S.me),'Aos '+S.me.age+' anos, termina a trajetória de '+S.me.first+'. Familiares e pessoas próximas se despedem.','personagem');return r;})(die);
+continueAs=(o=>function(k){const arquivo=S.jornal,r=o.apply(this,arguments);S.jornal=arquivo;return r;})(continueAs);
+V.jornal=()=>({title:'Jornal · personagem e mundo',items:[{html:'<div class="card"><p>Manchetes sobre sua trajetória e o país. Toque em uma notícia para ler.</p></div>'},...jornal().itens.map(n=>({l:n.titulo,s:n.ano+' · '+countryOf(n.pais).n+' · '+(n.tipo==='mundo'?'Mundo':'Sua história'),on:()=>UI.push(()=>({title:'Notícia',items:[{html:'<div class="card">'+flagSVG(n.pais,28)+'<h3>'+esc(n.titulo)+'</h3><p>'+n.ano+' · '+esc(countryOf(n.pais).n)+'</p><p>'+esc(n.texto)+'</p></div>'}]}))})),...(!jornal().itens.length?[{html:'<div class="card">As notícias aparecem conforme sua vida e o mundo avançam.</div>'}]:[])]});
+V.menu=(o=>()=>{const r=o();r.items.push({ic:'📰',l:'Jornal do personagem e do mundo',on:()=>UI.push(V.jornal)});return r;})(V.menu);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
