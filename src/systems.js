@@ -164,7 +164,7 @@ function specialAction(){
 function runFor(o,tier){
   const m=S.me,cost=Math.round(o.cost*[0.3,1,3][tier]);
   m.money-=cost;
-  const p=clamp((o.base+m.fame/250+m.smarts/600+(m.karma-50)/400+[-.05,.06,.16][tier]-(m.rec.conv?.25:0))*100,2,85)/100;
+  const p=clamp((o.base+m.fame/250+m.smarts/600+(m.karma-50)/400+[-.05,.06,.16][tier]-(m.rec.conv?.25:0)-(typeof npcRival==='function'&&npcRival(o.id)?npcRival(o.id).npcPoder.apoio/500:0))*100,2,85)/100;
   if(!R.chance(p)){ st('happy',-10); log(`Perdi a eleição para ${g(o.n,m.gender).toLowerCase()}.`,'bad'); return `Perdi a eleição. Gastei ${fmt(cost)} na campanha.`; }
   if(m.job) endJob(); m.office={id:o.id,yrs:0,appr:R.int(45,65)}; cnt('office_'+o.id); if(o.id==='pres') cnt('pres');
   m.fame=clamp(m.fame+{ver:3,dep:8,pref:10,gov:25,pres:60}[o.id]);
