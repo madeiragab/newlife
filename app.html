@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610170025'</script>
+<title>NewLife</title><script>window.NL_VER='2610170026'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -1469,7 +1469,7 @@ function yearPeople(){
   }
   for(const p of S.people.filter(p=>p.alive)){
     p.age++; p.yrs++;
-    if(p.rel==='pet'){ if(p.age>=p.life){ p.alive=false; log(`${p.first}, ${g(p.species,p.gender).toLowerCase()}, morreu de velhice.`,'bad'); st('happy',-10); } continue; }
+    if(p.rel==='pet'){ if(p.age>=p.life){ if(petRetirar(p,'morto','de velhice',true))st('happy',-10); } continue; }
     if(p.age>=40) p.health=clamp(p.health-R.int(0,p.age>70?5:2));
     const dp=deathP(p.age,p.health)*.85+(p.age<40?.0006:0);
     if(R.chance(dp)){ p.alive=false; const why=R.pick(p.age>70?['de causas naturais','dormindo','de infarto','de AVC','de pneumonia','de câncer']:['num acidente de carro','de infarto','de câncer','num acidente de trabalho','de AVC']);
@@ -1872,7 +1872,7 @@ const EVENTS={
   pick:k=>{ const m=S.me; if(k==='d') return 'Apaguei. Melhor assim.'; const g2=R.int(5000,250000); m.social.f+=g2; m.fame=clamp(m.fame+R.int(2,10)); return `Ganhei ${g2.toLocaleString('pt-BR')} seguidores.`; }},
  pet_doente:{w:2,when:m=>people('pet').length&&free(m),prep:()=>({p:R.pick(people('pet')).id,v:amt(200,4000)}),
   show:d=>({k:'Bicho',t:`${P(d.p).first} está doente`,x:`${P(d.p).first} parou de comer. O veterinário cobra ${fmt(d.v)}.`,ch:[['Levar ao veterinário','v'],['Esperar melhorar','e']]}),
-  pick:(k,d)=>{ const p=P(d.p),m=S.me; if(k==='v'){ m.money-=d.v; if(R.chance(.85)) return `${p.first} se recuperou!`; } else if(R.chance(.6)) return `${p.first} melhorou sozinho.`; p.alive=false; st('happy',-12); return `${p.first} não resistiu.`; }},
+  pick:(k,d)=>{ const p=P(d.p),m=S.me; if(k==='v'){ m.money-=d.v; if(R.chance(.85)) return `${p.first} se recuperou!`; } else if(R.chance(.6)) return `${p.first} melhorou sozinho.`; if(petRetirar(p,'morto','durante uma doença'))st('happy',-12); return `${p.first} não resistiu.`; }},
  traicao:{w:1,when:m=>partners(p=>p.bond<55).length&&free(m),prep:()=>({p:pickPartner(p=>p.bond<55).id}),
   show:d=>({k:'Amor',t:'Mensagens suspeitas',x:`Vi mensagens no celular de ${P(d.p).first}. Estou sendo traíd${oa()}.`,ch:[['Perdoar','p'],['Terminar na hora','t'],['Fazer um escândalo','e']]}),
   pick:(k,d)=>{ const p=P(d.p); st('happy',-12); if(k==='p'){ p.bond=clamp(p.bond+10); return 'Perdoei. Vamos ver no que dá.'; } if(p.rel==='conjuge'){ divorce(p,false); return `Acabou com ${p.first}.`; } p.rel='ex'; return k==='e'?'Joguei as roupas pela janela. O prédio inteiro assistiu.':`Terminei com ${p.first}.`; }},
@@ -2645,7 +2645,7 @@ function dslApply(s,d){
     else if(mm=tok.match(/^sc\.(\w+)([+-]\d+)$/)){ if(S.scen){ const k=mm[1]; S.scen[k]=Math.max(0,(S.scen[k]||0)+ +mm[2]); if(['sup','def','cure','comida','agua','abrigo','sos','o2','moral','pw','sec'].includes(k)) S.scen[k]=Math.min(100,S.scen[k]); if(k==='xp'&&typeof lvlUp==='function') lvlUp(); } }
     else if(tok==='kill'){ cnt('kills'); }
     else if(mm=tok.match(/^item:([^:]+):(\d+)$/)){ const n=mm[1]==='coisa'&&d.coisa?d.coisa.replace(/^(um|uma|uns|umas) /,''):mm[1].replace(/_/g,' '); m.assets.push({id:newId(),k:'item',n:n[0].toUpperCase()+n.slice(1),value:+mm[2],buy:0,cond:100}); }
-    else if(tok==='petdie'||tok==='petgone'){ const p=d.pid&&P(d.pid); if(p&&p.alive){ p.alive=false; st('happy',tok==='petdie'?-10:-5); } }
+    else if(tok==='petdie'||tok==='petgone'){ const p=d.pid&&P(d.pid); if(petRetirar(p,tok==='petdie'?'morto':'ausente',tok==='petdie'?'durante um evento':'saída dos meus cuidados'))st('happy',tok==='petdie'?-10:-5); }
     else if(tok==='pet'){ const p=addPet(R.pick(['Cachorro','Cachorro','Gato','Gato','Coelho','Calopsita'])); out.push(`Chama-se ${p.first}.`); }
     else if(mm=tok.match(/^dis:(\w+)$/)) addDisease(mm[1]);
     else if(mm=tok.match(/^c:(\w+)$/)) cnt(mm[1]);
@@ -3872,7 +3872,7 @@ function interact(p,k,extra){
     case 'ler': p.bond=clamp(p.bond+R.int(3,8)); return `Li uma história para ${nm} dormir.`;
     case 'passear': p.bond=clamp(p.bond+R.int(3,8)); st('health',1); return R.pick([`Passeei com ${nm}.`,`Levei ${nm} para passear no parque.`,`${nm} e eu demos uma volta no quarteirão.`,`Fomos à praça, ${nm} e eu. ${nm} fez amizade com todo mundo.`]);
     case 'vet': m.money-=150; p.life=(p.life||10)+(R.chance(.3)?1:0); return R.pick([`Levei ${nm} ao veterinário. Tudo certo.`,`Check-up de ${nm} em dia. Saúde de ferro.`,`${nm} tomou vacina e ficou emburrad${p.gender==='F'?'a':'o'} o dia todo.`]);
-    case 'doar_pet': p.alive=false; m.karma=clamp(m.karma-3); return `Doei ${nm} para outra família.`;
+    case 'doar_pet': petRetirar(p,'doado','adoção por outra família'); m.karma=clamp(m.karma-3); return `Doei ${nm} para outra família.`;
     case 'visitar': p.bond=clamp(p.bond+R.int(4,10)); st('happy',2); return `Visitei ${nm}. ${R.pick(['Comi bolo de fubá.','Ouvi histórias antigas.','Ganhei um dinheirinho escondido.','Ajudei a consertar a TV.'])}`;
     case 'demitir_chefe': return '';
     case 'puxar': p.bond=clamp(p.bond+R.int(2,8)); if(m.job) m.job.perf=clamp(m.job.perf+R.int(1,4)); return `Puxei o saco de ${nm}.`;
@@ -14798,6 +14798,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.45',d:'16/10/2026',t:'Animais com estado e histórico consistentes',itens:['Morte por velhice, doença e eventos atualiza o animal pelo ID e registra idade, ano e causa.','Animais falecidos param de envelhecer e não recebem ações ou eventos de animais vivos; notificações repetidas são evitadas.','Histórico preservado em Relações, com distinção entre falecimento, doação e ausência. Saves antigos recuperam mortes identificáveis sem ambiguidade no histórico.']},
  {v:'1.44',d:'16/10/2026',t:'Debate político só a partir dos 12',itens:['Falar sobre política exige 12 anos completos na interface e na função executada.','Conversas infantis usam assuntos adequados à idade; escolhas de participação ativa em debates políticos ficam indisponíveis antes dos 12.','Notícias e conversas políticas da família continuam podendo aparecer, com a criança acompanhando.']},
  {v:'1.43',d:'16/10/2026',t:'O jornal e a opinião pública',itens:['Investigações e condenações continuam repercutindo por anos; o jornal mostra os assuntos ainda ativos.','Reputação influencia eleições, seguidores e contratos de publicidade. Absolvições, arquivamentos e ações beneficentes também têm repercussão.','A passagem do tempo reduz os efeitos, mas mantém as notícias no arquivo. Corrigido o herdeiro aparecer como NPC duplicado quando ele próprio assume a gestão.']},
  {v:'1.42',d:'16/10/2026',t:'O poder não fica vazio',itens:['Prisão, morte ou perda do mandato abrem sucessão política, religiosa e empresarial.','Rivais podem assumir a administração; herdeiros mantêm a propriedade da empresa e negociam a gestão.','Recursos bloqueados passam por revisão do espólio, sem transferir pena criminal ao filho. As disputas e os novos líderes ficam no histórico.']},
@@ -15435,6 +15436,22 @@ function falarPolitica(p){if(S.me.age<12)return 'Só posso falar sobre política
 interact=(o=>function(p,k){if(['politica','falar_politica'].includes(k))return falarPolitica(p);return o.apply(this,arguments);})(interact);
 V.person=(o=>function(p){const r=o(p);if(r&&S.me.age>=12&&p.alive&&p.age>=12&&p.rel!=='pet')r.items.push({l:'Falar sobre política',on:()=>act(()=>interact(p,'politica'),'Conversa')});return r;})(V.person);
 for(const ev of Object.values(EVENTS)){if(ev.scen||!ev.show||!ev.pick)continue;const show=ev.show,pick=ev.pick;ev.show=function(d){const r=show(d);if(S.me.age>=12)return r;const ch=r.ch.filter(c=>!politicaAtiva(c[0],r.t+' '+r.x));if(ch.length!==r.ch.length){ch.push(['Acompanhar a conversa da família','idade_politica_observar']);return {...r,ch};}return r;};ev.pick=function(k,d){if(k==='idade_politica_observar')return S.me.age<4?'Ouvi as vozes da família enquanto conversavam.':'Acompanhei a conversa dos adultos, sem entrar no debate.';if(S.me.age<12){const r=show(d),c=r.ch.find(c=>String(c[1])===String(k));if(c&&politicaAtiva(c[0],r.t+' '+r.x))return 'Ainda não tenho 12 anos para participar desse debate.';}return pick(k,d);};}
+
+// Um único encerramento para o vínculo com um animal, identificado pelo ID.
+function petRetirar(p,estado='morto',causa='um evento',notificar=false){if(!p||p.rel!=='pet')return false;if(p.petEstado==='morto'||p.morte)return false;if(p.petEstado&&p.petEstado!=='vivo'&&!p.alive)return false;p.alive=false;p.petEstado=estado;p.petSaida={ano:S.year,idade:p.age,causa};if(estado==='morto'){p.health=0;p.morte={...p.petSaida};}p.petAvisado=true;S.pending=S.pending.filter(e=>![e.d?.pid,e.d?.p].includes(p.id));if(notificar)log(p.first+', '+g(p.species,p.gender).toLowerCase()+', morreu '+causa+'.','bad');return true;}
+function petNormalizar(s){if(!s||!s.me)return s;for(const p of s.people||[]){if(p.rel!=='pet')continue;if(!Number.isFinite(p.life)||p.life<=0){const v=petDef(p).life||[8,14];p.life=Math.max(p.age+1,Math.round((v[0]+v[1])/2));}if(p.morte||p.petEstado&&p.petEstado!=='vivo'){p.alive=false;continue;}if(p.alive&&!(s.people||[]).some(q=>q!==p&&q.rel==='pet'&&q.first===p.first)){const nome=p.first.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');const morte=new RegExp('(?:\\b'+nome+'(?:, [^.!?]*,)? (?:morreu|não resistiu)|Segurei '+nome+' no colo até o último momento)','i');let achado=null,adotado=-Infinity;for(const y of s.log||[])for(const l of y.lines||[]){const t=typeof l==='string'?l:l.t||'';if(new RegExp('Adotei '+nome+'(?:[,.! ]|$)','i').test(t))adotado=Math.max(adotado,y.year??-Infinity);if(morte.test(t))achado=y;}if(achado&&Number.isFinite(achado.year)&&achado.year>=adotado&&achado.year>=s.year-p.age&&(p.petAdotadoAno==null||achado.year>=p.petAdotadoAno)){p.age=Math.max(0,p.age-Math.max(0,s.year-achado.year));p.alive=false;p.health=0;p.petEstado='morto';p.morte={ano:achado.year,idade:p.age,causa:'registrada no histórico'};p.petSaida={...p.morte};p.petAvisado=true;}}
+ if(!p.petEstado)p.petEstado=p.alive?'vivo':'ausente';}return s;}
+fixSave=(o=>function(s){return petNormalizar(o(s));})(fixSave);
+yearPeople=(o=>function(){petNormalizar(S);return o.apply(this,arguments);})(yearPeople);
+interact=(o=>function(p,k){if(p?.rel==='pet'&&(!p.alive||p.petEstado&&p.petEstado!=='vivo'))return 'Esse animal já não está sob meus cuidados. Seu histórico foi preservado.';return o.apply(this,arguments);})(interact);
+murder=(o=>function(p){const vivo=p?.alive,r=o.apply(this,arguments);if(p?.rel==='pet'&&vivo&&!p.alive)petRetirar(p,'morto','após a ação do personagem');return r;})(murder);
+addPet=(o=>function(){const p=o.apply(this,arguments);if(p){p.petAdotadoAno=S.year;p.petEstado='vivo';}return p;})(addPet);
+adoptPet=(o=>function(){const n=S.nextId,r=o.apply(this,arguments);for(const p of S.people)if(p.id>=n&&p.rel==='pet'){p.petAdotadoAno=S.year;p.petEstado='vivo';}return r;})(adoptPet);
+for(const ev of Object.values(EVENTS)){if(!ev.pick)continue;const pick=ev.pick;ev.pick=function(k,d){const p=P(d?.pid??d?.p);if(p?.rel==='pet'&&!p.alive)return 'Esse acontecimento já foi encerrado para '+p.first+'.';return pick(k,d);};}
+const petSituacao=p=>({morto:'Falecido',doado:'Com outra família',ausente:'Fora dos meus cuidados'}[p.petEstado]||'Fora dos meus cuidados');
+V.person=(o=>function(p){if(p?.rel==='pet'&&!p.alive)return {title:p.first,items:[{html:'<div class="card">'+faceSVG(p,84)+'<h3>'+esc(p.first)+'</h3>'+kv('Situação',petSituacao(p))+kv('Idade registrada',p.age+' anos')+(p.morte?kv('Falecimento',String(p.morte.ano)):'')+'<p>O histórico deste animal continua guardado.</p></div>'}]};return o(p);})(V.person);
+V.relations=(o=>()=>{const r=o(),l=S.people.filter(p=>p.rel==='pet'&&!p.alive);if(l.length)r.items.push({sec:'Animais que fizeram parte da família'},...l.map(p=>({face:faceSVG(p,42),l:p.first,s:petSituacao(p),on:()=>UI.push(()=>V.person(p))})));return r;})(V.relations);
+continueAs=(o=>function(k){const animais=S.people.filter(p=>p.rel==='pet'&&!p.alive),r=o.apply(this,arguments);for(const p of animais)if(!P(p.id))S.people.push(p);return r;})(continueAs);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
