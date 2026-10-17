@@ -421,3 +421,4 @@ button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(
 .row:not(.dis):nth-child(-n+8) .ambient-icon{animation:iconDrift 9s ease-in-out infinite;animation-delay:-1s}
 .row:not(.dis):nth-child(even) .ambient-icon{animation-delay:-5s}
 @media(prefers-reduced-motion:reduce){.ambient-icon,.st-faces>span>svg,#nav button>svg,#sheetNav button>span,#nAge .plus,.st .se,.row:not(.dis):nth-child(-n+8) .ambient-icon{animation:none}}
+.sheet-body>*,#log>*{flex-shrink:0} /* linhas longas não podem ser esmagadas pela coluna flexível */

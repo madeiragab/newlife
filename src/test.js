@@ -42,6 +42,8 @@ function selfTest(){
   T('acontecimentos que puxam histórias',encadeamentosSelfTest);
   T('probabilidades realistas',realismoSelfTest);
   T('separações e relações plurais',separacoesSelfTest);
+  T('carreira no futebol',futebolSelfTest);
+  T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);
   T('cobertura de todas as escolhas',()=>{window.NL_COBERTURA_EVENTOS=coberturaEventosSelfTest(30000);});

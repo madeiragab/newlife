@@ -42,7 +42,12 @@ function turmaEnsure(){ const m=S.me, c=m.edu.cur; if(!c) return {profs:[],cols:
   people('prof').filter(p=>p.grp!==key).forEach(p=>p.alive=false);
   let profs=people('prof').filter(p=>p.grp===key); const np=c.type==='fund'&&c.yr<5?1:2;
   for(let i=profs.length;i<np;i++){ const p=mkPerson({rel:'prof',age:R.int(26,62),bond:R.int(35,60)}); p.grp=key; p.mat=R.pick(c.type==='uni'?['Cálculo','Teoria Geral','Metodologia','Estatística','Ética']:['Matemática','Português','História','Ciências','Geografia','Inglês','Educação Física','Artes']); S.people.push(p); profs.push(p); }
-  let cols=people('colega'); if(!cols.length&&c.type!=='fund'&&c.type!=='medio'){ for(let i=0;i<R.int(4,7);i++) S.people.push(mkPerson({rel:'colega',age:clamp(m.age+R.int(-2,6),17,60),bond:R.int(20,55)})); cols=people('colega'); }
+  /* a turma acompanha o curso inteiro: só os professores mudam a cada ano; quem vira amigo continua na turma e quem sai é substituído um a um */
+  const curso=c.type+':'+c.n; people('colega').forEach(p=>{ if(!p.turma) p.turma=curso; });
+  people('colega').filter(p=>p.turma!==curso).forEach(p=>p.alive=false); /* turma de um curso antigo não acompanha o novo */
+  let cols=people('colega').concat(people('amigo').filter(p=>p.turma===curso&&p.fromTurma));
+  if(c.type!=='fund'&&c.type!=='medio'){ S.flags.turmaN=S.flags.turmaN||{}; const alvo=S.flags.turmaN[curso]??(S.flags.turmaN[curso]=Math.max(cols.length,R.int(5,8)));
+    for(let i=cols.length;i<alvo;i++){ const p=mkPerson({rel:'colega',age:clamp(m.age+R.int(-2,6),17,60),bond:R.int(20,55)}); p.turma=curso; S.people.push(p); cols.push(p); } }
   return {profs,cols}; }
 relLabel=(o=>p=>p&&p.rel==='prof'&&p.mat?`${g('Professor|Professora',p.gender)} de ${p.mat}`:o(p))(relLabel);
 V.turma=()=>{ const m=S.me, c=m.edu.cur; if(!c) return {title:'Turma',items:[{html:'<div class="card"><p>Não estou estudando.</p></div>'}]}; const t=turmaEnsure(), it=[];
@@ -73,3 +78,12 @@ V.trabalho=()=>{ const m=S.me, j=m.job; if(!j) return {title:'Equipe',items:[{ht
   const am=people('amigo').filter(p=>p.fromJob); if(am.length){ it.push({sec:'Viraram amigos'}); am.forEach(p=>it.push(personRow(p))); }
   return {title:'Equipe do trabalho',items:it}; };
 interact=(o=>function(p,k,extra){ const was=p&&p.rel; const r=o.apply(this,arguments); if(p&&was==='colegaT'&&p.rel==='amigo') p.fromJob=1; return r; })(interact);
+
+function turmaSelfTest(){const s0=S,rf=R.f,ns=window.NO_SAVE;let x=21;R.f=()=>{x=(Math.imul(x,1664525)+1013904223)>>>0;return x/4294967296;};const ok=(v,t)=>{if(!v)throw Error('Turma · '+t);};try{window.NO_SAVE=true;newLife({country:'BR'});const m=S.me;m.age=18;m.born=S.year-18;m.edu.deg=['fund','medio'];m.edu.cur={type:'uni',id:COURSES[0].id,n:COURSES[0].n,len:4,yr:0,grade:70,cost:0};
+ const t0=turmaEnsure(),ids=t0.cols.map(p=>p.id),profs=t0.profs.map(p=>p.id);ok(ids.length>=5,'turma pequena');
+ // dois colegas viram amigos e um sai: a turma continua quase a mesma
+ const [a,b,c]=people('colega');a.rel='amigo';a.fromTurma=1;b.rel='amigo';b.fromTurma=1;c.alive=false;
+ m.edu.cur.yr=1;const t1=turmaEnsure();ok(t1.cols.length===ids.length,'tamanho da turma mudou');ok(ids.filter(id=>t1.cols.some(p=>p.id===id)).length===ids.length-1,'turma trocada em vez de completada');ok(!t1.profs.some(p=>profs.includes(p.id)),'professores não mudaram no novo ano');
+ // novo curso, turma nova
+ m.edu.cur={type:'post',id:POSTS[0].id,n:POSTS[0].n,len:2,yr:0,grade:70,cost:0};const t2=turmaEnsure();ok(!t2.cols.some(p=>ids.includes(p.id)&&p.rel==='colega'),'colegas antigos foram para o novo curso');
+ return {ok:true};}finally{S=s0;R.f=rf;window.NO_SAVE=ns;}}
