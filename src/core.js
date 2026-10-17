@@ -274,7 +274,7 @@ function yearPeople(){
   }
   for(const p of S.people.filter(p=>p.alive)){
     p.age++; p.yrs++;
-    if(p.rel==='pet'){ if(p.age>=p.life){ p.alive=false; log(`${p.first}, ${g(p.species,p.gender).toLowerCase()}, morreu de velhice.`,'bad'); st('happy',-10); } continue; }
+    if(p.rel==='pet'){ if(p.age>=p.life){ if(petRetirar(p,'morto','de velhice',true))st('happy',-10); } continue; }
     if(p.age>=40) p.health=clamp(p.health-R.int(0,p.age>70?5:2));
     const dp=deathP(p.age,p.health)*.85+(p.age<40?.0006:0);
     if(R.chance(dp)){ p.alive=false; const why=R.pick(p.age>70?['de causas naturais','dormindo','de infarto','de AVC','de pneumonia','de câncer']:['num acidente de carro','de infarto','de câncer','num acidente de trabalho','de AVC']);

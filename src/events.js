@@ -107,7 +107,7 @@ const EVENTS={
   pick:k=>{ const m=S.me; if(k==='d') return 'Apaguei. Melhor assim.'; const g2=R.int(5000,250000); m.social.f+=g2; m.fame=clamp(m.fame+R.int(2,10)); return `Ganhei ${g2.toLocaleString('pt-BR')} seguidores.`; }},
  pet_doente:{w:2,when:m=>people('pet').length&&free(m),prep:()=>({p:R.pick(people('pet')).id,v:amt(200,4000)}),
   show:d=>({k:'Bicho',t:`${P(d.p).first} está doente`,x:`${P(d.p).first} parou de comer. O veterinário cobra ${fmt(d.v)}.`,ch:[['Levar ao veterinário','v'],['Esperar melhorar','e']]}),
-  pick:(k,d)=>{ const p=P(d.p),m=S.me; if(k==='v'){ m.money-=d.v; if(R.chance(.85)) return `${p.first} se recuperou!`; } else if(R.chance(.6)) return `${p.first} melhorou sozinho.`; p.alive=false; st('happy',-12); return `${p.first} não resistiu.`; }},
+  pick:(k,d)=>{ const p=P(d.p),m=S.me; if(k==='v'){ m.money-=d.v; if(R.chance(.85)) return `${p.first} se recuperou!`; } else if(R.chance(.6)) return `${p.first} melhorou sozinho.`; if(petRetirar(p,'morto','durante uma doença'))st('happy',-12); return `${p.first} não resistiu.`; }},
  traicao:{w:1,when:m=>partners(p=>p.bond<55).length&&free(m),prep:()=>({p:pickPartner(p=>p.bond<55).id}),
   show:d=>({k:'Amor',t:'Mensagens suspeitas',x:`Vi mensagens no celular de ${P(d.p).first}. Estou sendo traíd${oa()}.`,ch:[['Perdoar','p'],['Terminar na hora','t'],['Fazer um escândalo','e']]}),
   pick:(k,d)=>{ const p=P(d.p); st('happy',-12); if(k==='p'){ p.bond=clamp(p.bond+10); return 'Perdoei. Vamos ver no que dá.'; } if(p.rel==='conjuge'){ divorce(p,false); return `Acabou com ${p.first}.`; } p.rel='ex'; return k==='e'?'Joguei as roupas pela janela. O prédio inteiro assistiu.':`Terminei com ${p.first}.`; }},

@@ -312,7 +312,7 @@ function interact(p,k,extra){
     case 'ler': p.bond=clamp(p.bond+R.int(3,8)); return `Li uma história para ${nm} dormir.`;
     case 'passear': p.bond=clamp(p.bond+R.int(3,8)); st('health',1); return R.pick([`Passeei com ${nm}.`,`Levei ${nm} para passear no parque.`,`${nm} e eu demos uma volta no quarteirão.`,`Fomos à praça, ${nm} e eu. ${nm} fez amizade com todo mundo.`]);
     case 'vet': m.money-=150; p.life=(p.life||10)+(R.chance(.3)?1:0); return R.pick([`Levei ${nm} ao veterinário. Tudo certo.`,`Check-up de ${nm} em dia. Saúde de ferro.`,`${nm} tomou vacina e ficou emburrad${p.gender==='F'?'a':'o'} o dia todo.`]);
-    case 'doar_pet': p.alive=false; m.karma=clamp(m.karma-3); return `Doei ${nm} para outra família.`;
+    case 'doar_pet': petRetirar(p,'doado','adoção por outra família'); m.karma=clamp(m.karma-3); return `Doei ${nm} para outra família.`;
     case 'visitar': p.bond=clamp(p.bond+R.int(4,10)); st('happy',2); return `Visitei ${nm}. ${R.pick(['Comi bolo de fubá.','Ouvi histórias antigas.','Ganhei um dinheirinho escondido.','Ajudei a consertar a TV.'])}`;
     case 'demitir_chefe': return '';
     case 'puxar': p.bond=clamp(p.bond+R.int(2,8)); if(m.job) m.job.perf=clamp(m.job.perf+R.int(1,4)); return `Puxei o saco de ${nm}.`;
