@@ -400,3 +400,16 @@ button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(
 @media(max-width:360px){.sheet-head{padding:12px 10px}.sheet-body{padding-left:10px;padding-right:10px}#sheetTools{padding-left:10px;padding-right:10px}.row .ic{width:34px;height:34px;font-size:19px}.home-action{padding:14px 12px}.home-icon{width:40px;height:40px}.start-fields{padding:14px}.sheet-head h2{font-size:18px}}
 
 .grid2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2>*{min-width:0}input.in,select.in{min-width:0}
+
+/* Movimento discreto no início, sem interferir na faixa de notícias. */
+@keyframes homeEnter{from{opacity:0;translate:0 10px}to{opacity:var(--home-opacity,1);translate:0 0}}
+@keyframes homeGlow{from{transform:translate(-8px,0) scale(1)}to{transform:translate(12px,8px) scale(1.08)}}
+.st-hero::before{content:"";position:absolute;pointer-events:none;width:210px;height:210px;right:-70px;top:-90px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.13),rgba(255,255,255,0) 70%);animation:homeGlow 8s ease-in-out infinite alternate}
+.home-intro,.start-form-head,.start-fields{animation:homeEnter .32s ease-out both}
+.home-action{animation:homeEnter .36s ease-out both;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.home-action:nth-child(2){animation-delay:.07s}.home-action:nth-child(3){animation-delay:.14s}
+.home-action:disabled{--home-opacity:.55}
+.home-icon{transition:transform .18s ease}
+@media(hover:hover){.home-action:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,28,60,.12)}.home-action:not(:disabled):hover .home-icon{transform:rotate(-4deg)}}
+.home-action:not(:disabled):active{transform:scale(.985)}
+@media(prefers-reduced-motion:reduce){.st-hero::before,.home-intro,.start-form-head,.start-fields,.home-action{animation:none}.home-action,.home-icon{transition:none}.home-action:not(:disabled):hover,.home-action:not(:disabled):active,.home-action:not(:disabled):hover .home-icon{transform:none}}
