@@ -409,6 +409,7 @@ function yearMoney(){
     cost+=m.assets.filter(a=>a.k==='carro').length*900+people('pet').reduce((s,p)=>s+(typeof petDef==='function'&&petDef(p)&&petDef(p).ex?1500:500),0);
     if(m.edu.cur&&m.edu.cur.type!=='medio'&&m.age<26) cost=Math.min(cost,Math.round(3000*custoLocal));
     kids().filter(k=>k.age<18).forEach(()=>cost+=Math.round(4000*custoLocal));
+    if(m.familiaEconomia?.ate>=S.year)cost=Math.round(cost*.9);
     // morando com os pais e sem dinheiro: eles bancam o básico (sem dívida), mas o relacionamento sofre um pouco
     const ps=parents().filter(p=>p.money>0).sort((a,b)=>b.money-a.money);
     if(atHome&&m.money<cost&&ps.length){ ps[0].money-=cost; ps.forEach(p=>p.bond=clamp(p.bond-1)); if(R.chance(.3)) log(R.pick(['Meus pais bancaram minhas despesas mais um ano.','Meus pais pagaram minhas contas e jogaram na cara no almoço de domingo.'])); cost=0; }

@@ -12,3 +12,21 @@ V.jobs=(o=>()=>{const r=o();if(r)r.items.unshift({html:'<div class="card">'+kv('
 // Índices de segurança também alteram a frequência dos eventos de vitimização existentes.
 const RISCOS_MUNDO=['assalto','casa_assaltada','furto_celular'].map(id=>({id,base:EVENTS[id]?.w||1}));
 yearEvents=(o=>function(){const w=mundo(),f=macroLim(.5+w.crime/100-w.policia/200,.15,1.5);for(const x of RISCOS_MUNDO)if(EVENTS[x.id])EVENTS[x.id].w=x.base*f;return o.apply(this,arguments);})(yearEvents);
+
+// Orçamento individual de NPC: nunca debita automaticamente o caixa do jogador.
+function npcChanceEmprego(p){const w=mundo(p.country),t=npcPerfil(p);return macroLim(.32+t.ambicao/600-w.desemprego*.8+w.crescimento, .08,.65);}
+function npcDestino(p){return R.wpick(COUNTRIES.filter(c=>c.id!==p.country).map(c=>{const w=mundo(c.id);return [c,Math.max(.05,.3+w.crescimento*4-w.desemprego+w.poderCompra*.1)];}));}
+function npcFinancasAno(p){const v=npcVida(p);if(v.financas?.ano===S.year)return v.financas;const w=mundo(p.country),indice=macroLim(mercadoIndice(p.country,'salarios'),.3,8),precos=macroLim((mercadoIndice(p.country,'alimentos')+mercadoIndice(p.country,'servicos'))/2,.3,8);let corte=false;
+ const risco=macroLim(.008+Math.max(0,w.desemprego-.07)*.4+Math.max(0,-w.crescimento)*.7, .005,.18);
+ if(p.job&&!p.monarch&&!v.aposentado&&R.chance(risco)){v.ultimoEmprego=p.job;p.job=null;v.emprego=null;corte=true;npcMarco(p,'demissao',p.first+' perdeu o emprego em '+countryOf(p.country).n+' durante o corte de vagas.',{pais:p.country});}
+ const d=JOBS.find(j=>j.id===v.emprego?.id)||JOBS.find(j=>j.l.some(t=>g(t,p.gender)===p.job));
+ const renda=Math.round((v.aposentado?6000:p.job?(d?.sal||18000):0)*indice),despesa=Math.round((v.aposentado?5000:7000)*precos),anterior=Number.isFinite(p.money)?p.money:0;
+ p.money=Math.round(anterior+renda-tax(renda)-despesa);if(p.money<0)p.money-=Math.round(-p.money*.04);v.financas={ano:S.year,renda,despesa,saldo:p.money-anterior,pais:p.country,corte};return v.financas;
+}
+function familiaEconomiaAno(){if(S.scen||!S.me.alive)return;const m=S.me,proximos=partners().concat(parents()),corte=proximos.find(p=>p.vida?.financas?.ano===S.year&&p.vida.financas.corte),divida=proximos.some(p=>p.money<0)||m.money<0;const f=m.familiaEconomia||(m.familiaEconomia={});
+ if((corte||divida)&&S.year-(f.aviso??-999)>=3&&!S.pending.some(e=>e.id==='familia_orcamento')){f.aviso=S.year;queue('familia_orcamento',{pid:corte?.id||null,ano:S.year});}
+ for(const p of kids().filter(p=>p.age<18)){const c=familiaCriacao(p);c.contexto={ano:S.year,pais:m.country,seguranca:m.money>=0&&!divida?'estavel':'apertado'};}
+}
+EVENTS.familia_orcamento={show:d=>({k:'Família e economia',t:'Hora de rever o orçamento',x:d.pid&&P(d.pid)?.alive?P(d.pid).first+' perdeu o emprego. Precisamos conversar sobre como atravessar essa fase.':'As contas da família ficaram apertadas. Podemos ajustar os planos sem transferir dinheiro automaticamente.',ch:[['Combinar gastos menores por dois anos','reduzir'],['Conversar e manter os planos','conversar'],['Ajudar a pessoa desempregada com $1.000','ajudar']]}),pick:(k,d)=>{const f=S.me.familiaEconomia||(S.me.familiaEconomia={});if(f.resposta===d.ano)return 'Já conversamos sobre esse orçamento.';if(k==='ajudar'){const p=P(d.pid);if(!p?.alive||p.money>=0)return 'Essa ajuda não é necessária neste momento.';if(S.me.age<18||!canPay(1000))return 'Não tenho $1.000 disponíveis para ajudar.';S.me.money-=1000;p.money+=1000;relMemoria(p,'apoio');npcVida(p).apoio={ano:S.year,tipo:'financeiro',valor:1000};f.resposta=d.ano;return 'Transferi $1.000 para '+p.first+'. O dinheiro saiu da minha conta e entrou na conta dessa pessoa.';}f.resposta=d.ano;if(k==='reduzir'){f.ate=S.year+2;return 'Combinamos um padrão de gastos 10% menor nos próximos dois anos. Não houve cobrança extra.';}return 'Ouvimos as preocupações da família e mantivemos os planos por enquanto.';}};
+yearPeople=(o=>function(){const r=o.apply(this,arguments);familiaEconomiaAno();return r;})(yearPeople);
+V.person=(o=>function(p){const r=o(p),f=p.vida?.financas;if(r&&f)r.items.push({l:'Último orçamento pessoal',s:f.ano+' · renda '+fmt(f.renda)+' · despesas '+fmt(f.despesa)+' · resultado '+fmt(f.saldo)});return r;})(V.person);
