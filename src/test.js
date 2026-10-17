@@ -30,6 +30,7 @@ function selfTest(){
       assert(nlNotas().some(x=>x.v==='1.0'&&x.body.includes('Primeira versão')),'changelog sem lançamento inicial');
     } finally { R.chance=chance; }
   });
+  T('correções e evolução da vida comum',evolucaoSelfTest);
   T('trajetórias persistentes',continuidadeSelfTest);
   T('NPCs ao longo de décadas',()=>{window.NL_NPC_DECADAS=npcDecadasSelfTest();});
   if(window.NL_CONT_FIXTURES)T('saves reais da 1.59 e 1.60',()=>{window.NL_CONT_COMPAT=continuidadeCompatSelfTest(window.NL_CONT_FIXTURES);});
