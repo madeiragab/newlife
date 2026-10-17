@@ -73,13 +73,13 @@ yearPeople=(o=>function(){const r=o.apply(this,arguments);if(!S.scen&&S.me.alive
 // Decisões cotidianas usam bens e pessoas reais, com uma oportunidade a cada três anos.
 function cotidiano(){return S.me.cotidiano||(S.me.cotidiano={notas:[]});}
 function cotidianoRegistrar(tipo,texto,extra={}){const c=cotidiano();c.notas.push({ano:S.year,tipo,texto,...extra});c.notas=c.notas.slice(-16);log(texto);}
-function cotidianoAno(){const m=S.me;if(!m.alive||S.scen||m.age<18||m.prison)return;const c=cotidiano();if(S.year-(c.ultimo??-999)<3||S.pending.some(e=>e.id==='vida_cotidiana')||!R.chance(.4))return;const op=[];
- const casa=m.assets.find(a=>a.k==='casa'&&a.cond<75);if(casa)op.push({tipo:'reparo',aid:casa.id,custo:Math.max(500,Math.round(casa.value*.006))});
- const filho=kids().find(p=>p.age>=6&&p.age<18&&(p.smarts<50||familiaCriacao(p).pressao>60));if(filho)op.push({tipo:'escola',pid:filho.id});
- const amigo=people('amigo').find(p=>p.age>=18&&S.year-(npcVida(p).inicio??S.year)>=5);if(amigo)op.push({tipo:'amizade',pid:amigo.id});
- if(m.age>=45&&!m.ret)op.push({tipo:'reserva',custo:2000});if(m.job&&m.job.yrs>=5&&m.job.perf>=65)op.push({tipo:'trabalho',emprego:m.job.id,empresa:m.job.co});
- if(op.length){c.ultimo=S.year;queue('vida_cotidiana',{...R.pick(op),ano:S.year});}
+function cotidianoCandidatos(){const m=S.me,c=cotidiano(),op=[],add=(d,peso)=>{const chave=d.tipo+':'+(d.pid??d.aid??'pessoal'),ultimo=c.selecoes?.[chave];op.push({...d,chave,peso:peso*(ultimo==null?1.3:Math.min(1.5,.35+(S.year-ultimo)/12))});};
+ for(const a of m.assets.filter(a=>a.k==='casa'&&a.cond<75))add({tipo:'reparo',aid:a.id,custo:Math.max(500,Math.round(a.value*.006))},2+(75-a.cond)/10);
+ for(const p of kids().filter(p=>p.age>=6&&p.age<18&&(p.smarts<50||familiaCriacao(p).pressao>60)))add({tipo:'escola',pid:p.id},2+Math.max(0,50-p.smarts)/15+familiaCriacao(p).pressao/40);
+ for(const p of people('amigo').filter(p=>p.age>=18&&S.year-npcVida(p).inicio>=5))add({tipo:'amizade',pid:p.id},1+Math.min(3,(S.year-(npcVida(p).contato??npcVida(p).inicio))/5));
+ if(m.age>=45&&!m.ret)add({tipo:'reserva',custo:2000},1+(m.inv.poup<10000?1:0));if(m.job&&m.job.yrs>=5&&m.job.perf>=65)add({tipo:'trabalho',emprego:m.job.id,empresa:m.job.co},2);return op;
 }
+function cotidianoAno(){const m=S.me;if(!m.alive||S.scen||m.age<18||m.prison)return;const c=cotidiano();if(S.year-(c.ultimo??-999)<3||S.pending.some(e=>e.id==='vida_cotidiana')||!R.chance(.4))return;const op=cotidianoCandidatos();if(op.length){const d=R.wpick(op.map(d=>[d,d.peso]));c.ultimo=S.year;c.selecoes||={};c.selecoes[d.chave]=S.year;for(const k of Object.keys(c.selecoes))if(S.year-c.selecoes[k]>30)delete c.selecoes[k];queue('vida_cotidiana',{...d,ano:S.year});}}
 function cotidianoResolver(k,d){const m=S.me,c=cotidiano();if(c.resposta===d.ano)return 'Já cuidei desse assunto.';const p=d.pid&&P(d.pid),a=d.aid&&m.assets.find(a=>a.id===d.aid);
  if(d.pid&&!p?.alive||d.aid&&!a)return 'A situação mudou; essa decisão não se aplica mais.';
  if(d.tipo==='reparo'){if(k==='agir'){if(!canPay(d.custo))return 'Não tenho dinheiro para esse reparo.';m.money-=d.custo;a.cond=clamp(a.cond+18);cotidianoRegistrar('reparo','Fiz a manutenção de '+a.n+' por '+fmt(d.custo)+'.',{aid:a.id,cond:a.cond});}else{a.cond=clamp(a.cond-2);cotidianoRegistrar('reparo_adiado','Adiei a manutenção de '+a.n+'. O desgaste continua.',{aid:a.id});}}

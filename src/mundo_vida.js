@@ -14,14 +14,21 @@ const RISCOS_MUNDO=['assalto','casa_assaltada','furto_celular'].map(id=>({id,bas
 yearEvents=(o=>function(){const w=mundo(),f=macroLim(.5+w.crime/100-w.policia/200,.15,1.5);for(const x of RISCOS_MUNDO)if(EVENTS[x.id])EVENTS[x.id].w=x.base*f;return o.apply(this,arguments);})(yearEvents);
 
 // Orçamento individual de NPC: nunca debita automaticamente o caixa do jogador.
-function npcChanceEmprego(p){const w=mundo(p.country),t=npcPerfil(p);return macroLim(.32+t.ambicao/600-w.desemprego*.8+w.crescimento, .08,.65);}
+function npcChanceEmprego(p){const w=mundo(p.country),t=npcPerfil(p);return macroLim(.32+t.ambicao/600-w.desemprego*.8+w.crescimento+Math.min(.15,(p.vida?.semEmprego||0)*.025), .08,.65);}
 function npcDestino(p){return R.wpick(COUNTRIES.filter(c=>c.id!==p.country).map(c=>{const w=mundo(c.id);return [c,Math.max(.05,.3+w.crescimento*4-w.desemprego+w.poderCompra*.1)];}));}
 function npcFinancasAno(p){const v=npcVida(p);if(v.financas?.ano===S.year)return v.financas;const w=mundo(p.country),indice=macroLim(mercadoIndice(p.country,'salarios'),.3,8),precos=macroLim((mercadoIndice(p.country,'alimentos')+mercadoIndice(p.country,'servicos'))/2,.3,8);let corte=false;
  const risco=macroLim(.008+Math.max(0,w.desemprego-.07)*.4+Math.max(0,-w.crescimento)*.7, .005,.18);
  if(p.job&&!p.monarch&&!v.aposentado&&R.chance(risco)){v.ultimoEmprego=p.job;p.job=null;v.emprego=null;corte=true;npcMarco(p,'demissao',p.first+' perdeu o emprego em '+countryOf(p.country).n+' durante o corte de vagas.',{pais:p.country});}
  const d=JOBS.find(j=>j.id===v.emprego?.id)||JOBS.find(j=>j.l.some(t=>g(t,p.gender)===p.job));
- const renda=Math.round((v.aposentado?6000:p.job?(d?.sal||18000):0)*indice),despesa=Math.round((v.aposentado?5000:7000)*precos),anterior=Number.isFinite(p.money)?p.money:0;
- p.money=Math.round(anterior+renda-tax(renda)-despesa);if(p.money<0)p.money-=Math.round(-p.money*.04);v.financas={ano:S.year,renda,despesa,saldo:p.money-anterior,pais:p.country,corte};return v.financas;
+ const base=Math.round((v.aposentado?6000:p.job?(d?.sal||18000):0)*indice),bicos=!p.job&&!v.aposentado&&R.chance(.5+p.smarts/300)?Math.round(3500*indice):0,renda=base+bicos,anterior=Number.isFinite(p.money)?p.money:0;
+ v.semEmprego=p.job||v.aposentado?0:(v.semEmprego||0)+1;const t=npcPerfil(p);v.padrao||=(t.ambicao>70?'confortavel':t.lealdade>70?'economico':'equilibrado');
+ const fator={economico:.85,equilibrado:1,confortavel:1.3}[v.padrao]||1;let prevista=Math.round((v.aposentado?5000:7000)*precos*fator);if(anterior<0||renda<prevista)prevista=Math.round(3500*precos);
+ let abatimento=0;if(anterior<-12000&&S.year-(v.acordo?.ano??-999)>=5){abatimento=Math.round(Math.min(-anterior*.12,3000*precos));v.acordo={ano:S.year,ate:S.year+4,abatimento};npcMarco(p,'acordo',p.first+' renegociou a dívida, com abatimento de '+fmt(abatimento)+' e juros menores por cinco anos.');}
+ const liquido=renda-tax(renda),semCredito=v.insolvencia?.ate>=S.year,disponivel=Math.max(0,anterior+liquido+abatimento),despesa=semCredito?Math.min(prevista,disponivel):prevista;
+ p.money=Math.round(anterior+liquido+abatimento-despesa);const juros=p.money<0?Math.round(-p.money*(v.acordo?.ate>=S.year?.01:.04)):0;p.money-=juros;v.anosDivida=p.money<0?(v.anosDivida||0)+1:0;
+ let liquidacao=0,encerrado=0;if(v.anosDivida>=8&&-p.money>Math.max(30000,renda*6)&&S.year-(v.insolvencia?.ano??-999)>=10){if(v.negocio){liquidacao=Math.round((v.negocio.capital+Math.max(0,v.negocio.caixa))*.6);p.money+=liquidacao;v.negocio=null;npcMarco(p,'liquidacao',p.first+' encerrou o negócio para pagar parte das dívidas.');}if(p.money<0){encerrado=-p.money;v.insolvencia={ano:S.year,ate:S.year+7,encerrado};p.money=0;v.anosDivida=0;npcMarco(p,'insolvencia',p.first+' concluiu uma reestruturação por insolvência. Créditos incobráveis de '+fmt(encerrado)+' foram encerrados; não terá novo crédito por sete anos.');}}
+ if(semCredito&&despesa<prevista)p.health=clamp(p.health-1);
+ v.financas={ano:S.year,renda,bicos,despesa,prevista,juros,abatimento,liquidacao,encerrado,saldo:p.money-anterior,pais:p.country,corte,padrao:v.padrao};return v.financas;
 }
 function familiaEconomiaAno(){if(S.scen||!S.me.alive)return;const m=S.me,proximos=partners().concat(parents()),corte=proximos.find(p=>p.vida?.financas?.ano===S.year&&p.vida.financas.corte),divida=proximos.some(p=>p.money<0)||m.money<0;const f=m.familiaEconomia||(m.familiaEconomia={});
  if((corte||divida)&&S.year-(f.aviso??-999)>=3&&!S.pending.some(e=>e.id==='familia_orcamento')){f.aviso=S.year;queue('familia_orcamento',{pid:(corte||proximos.find(p=>!p.job&&p.money<0))?.id||null,ano:S.year});}
