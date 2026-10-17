@@ -52,11 +52,11 @@ chain('heranca_tio',{k:'Família',min:22,max:75,v:[50000,300000],gap:[1,1]},{
  e:['A revelação','O diário fala de uma coleção de moedas raras escondida na casa.',['Procurar|$+v ?50 $+v2 h+15|Encontrei atrás da parede da lareira! Depois vendi a casa.|h-2|Nada. Vendi a casa com o segredo dentro.','Deixar a lenda em paz|$+v h+4|Vendi a casa para uma família que prometeu cuidar dela. Algumas coisas devem continuar mistério.']],
 });
 chain('imovel',{k:'Dinheiro',min:25,max:70,v:[40000,120000],gap:[1,2]},{
- a:['A casa em leilão','Um amigo corretor disse que uma casa vai a leilão pela metade do preço.',['Dar um lance|?45 $-v >b|Arrematei!|h-3|Alguém deu um lance maior.','Não arriscar|h+0|Leilão me dá medo.']],
+ a:['A casa em leilão','Um amigo corretor disse que uma casa vai a leilão pela metade do preço.',['Dar um lance|?45 imovel:Casa_do_leilão >b|Arrematei!|h-3|Alguém deu um lance maior.','Não arriscar|h+0|Leilão me dá medo.']],
  b:['O problema','A casa tinha moradores que não querem sair.',['Negociar com calma|$-5000 k+4 >c|Ajudei a família a encontrar outro lugar.','Entrar na justiça|$-3000 >c|Um ano de processo.']],
  c:['A reforma','A casa precisa de uma reforma inteira.',['Reformar com profissionais|$-30000 >d|Ficou linda.','Fazer eu mesm{o}|$-10000 hl-5 sm+3 >d|Aprendi a assentar azulejo.']],
- d:['Vender ou alugar?','A casa está pronta.',['Vender|$+v2 h+12|Lucro de verdade!','Alugar|$+2000 >e@2|Renda todo mês.','Morar nela|h+10|Minha casa, do meu jeito.']],
- e:['O inquilino','O inquilino parou de pagar o aluguel.',['Negociar|?50 $+3000|Ele voltou a pagar.|$-2000 h-4|Tive que despejar.','Vender a casa de vez|$+v h+6|Chega de dor de cabeça.']],
+ d:['Vender ou alugar?','A casa está pronta.',['Vender|vender:Casa_do_leilão $+v h+12|Lucro de verdade!','Alugar|$+2000 >e@2|Renda todo mês.','Morar nela|h+10|Minha casa, do meu jeito.']],
+ e:['O inquilino','O inquilino parou de pagar o aluguel.',['Negociar|?50 $+3000|Ele voltou a pagar.|$-2000 h-4|Tive que despejar.','Vender a casa de vez|vender:Casa_do_leilão h+6|Chega de dor de cabeça.']],
 });
 chain('bico_entrega',{k:'Trabalho',min:18,max:60,when:m=>!m.job,gap:[1,1]},{
  a:['Entregas por aplicativo','Sem emprego, comecei a fazer entregas de bicicleta por aplicativo.',['Trabalhar de manhã à noite|$+3000 hl+2 >b|As pernas doem, mas a conta fecha.','Só nos horários de pico|$+1500 >b|O suficiente para o básico.']],

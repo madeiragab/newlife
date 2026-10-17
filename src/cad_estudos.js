@@ -38,11 +38,11 @@ chain('intercambio_escola',{k:'Estudos',min:15,max:24,npc:1,gap:[1,1],when:m=>!!
  e:['A visita','Anos depois, {p} veio me visitar.',['Mostrar minha cidade|h+10 bond+10|Agora é a minha vez de receber.','Fazer uma viagem juntos|$-3000 h+12 bond+10|Amizade que atravessa oceanos.']],
 });
 chain('bolsa_faculdade',{k:'Faculdade',min:17,max:30,when:NA_FACUL,gap:[1,1]},{
- a:['A mensalidade','A mensalidade da faculdade subiu e minha família não consegue pagar.',['Procurar uma bolsa|>b|Preenchi doze formulários.','Trancar a matrícula|h-8 >e|Vou trabalhar e voltar depois.','Arrumar um emprego à noite|$+1500 hl-3 >c|Trabalho de dia, estudo de noite.']],
+ a:['A mensalidade','A mensalidade da faculdade subiu e minha família não consegue pagar.',['Procurar uma bolsa|>b|Preenchi doze formulários.','Trancar a matrícula|trancar h-8 >e|Vou trabalhar e voltar depois.','Arrumar um emprego à noite|$+1500 hl-3 >c|Trabalho de dia, estudo de noite.']],
  b:['A entrevista da bolsa','A entrevista para a bolsa é amanhã.',['Contar minha história com sinceridade|?k+10 $+5000 h+12 >d|Ganhei bolsa integral!|>c|Não consegui. Vou trabalhar à noite.','Exagerar um pouco a situação|?40 $+5000 k-4 >d|Funcionou.|k-4 >c|Perceberam.']],
  c:['Jornada dupla','Trabalhar e estudar está me esgotando.',['Aguentar até o fim|hl-4 grade-3 >d|Durmo no ônibus.','Diminuir as matérias|grade+3 >d|Vou demorar mais para formar, mas com saúde.']],
  d:['Reta final','Cheguei ao último ano da faculdade, com muito esforço.',['Agradecer a quem ajudou|k+5 h+15|Liguei para cada pessoa que me apoiou.','Comemorar sem parar|h+15|Ninguém sabe o quanto custou chegar até aqui.']],
- e:['A volta','Depois de um ano trabalhando, posso voltar à faculdade.',['Voltar|grade+3 h+8 >d|Voltei mais madur{o}.','Não voltar|h-3|O trabalho me engoliu.']],
+ e:['A volta','Depois de um ano trabalhando, posso voltar à faculdade.',['Voltar|retomar grade+3 h+8 >d|Voltei mais madur{o}.','Não voltar|h-3|O trabalho me engoliu.']],
 });
 chain('professor_carreira',{k:'Carreira',min:22,max:60,when:m=>!!m.job&&['prof','univ','psub','pedg'].includes(m.job.id),npc:1,age:[-20,-10],gap:[1,1]},{
  a:['O aluno difícil','Na minha turma, {p} não para quiet{o2} e responde a todos os professores.',['Ter paciência|k+4 >b|Puxei uma cadeira para conversar depois da aula.','Mandar para a diretoria|perf+2 >c|Mais um na lista.']],

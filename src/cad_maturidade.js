@@ -45,9 +45,9 @@ chain('faculdade_tardia',{k:'Estudos',min:45,max:80,gap:[1,1]},{
  d:['A formatura','Chegou o dia da minha formatura.',['Subir no palco|diploma sm+5 h+20 f+1|Meus netos gritaram meu nome na plateia.','Fazer o discurso da turma|diploma ?sm h+20 f+3|Falei sobre começar de novo. Ninguém segurou o choro.|h+15|Gaguejei, mas me aplaudiram de pé.']],
 });
 chain('casa_praia',{k:'Sonhos',min:40,max:80,v:[80000,250000],gap:[1,2]},{
- a:['A casa na praia','Sempre sonhei com uma casa na praia. Vi uma à venda.',['Comprar|$-v h+15 >b|Cheiro de maresia todos os dias.','Alugar por temporada|$-3000 h+8|Só um gostinho.']],
+ a:['A casa na praia','Sempre sonhei com uma casa na praia. Vi uma à venda.',['Comprar|imovel:Casa_na_praia h+15 >b|Cheiro de maresia todos os dias.','Alugar por temporada|$-3000 h+8|Só um gostinho.']],
  b:['Os fins de semana','A casa virou ponto de encontro da família.',['Receber todo mundo|h+10 k+3 >c|Casa cheia, rede na varanda e peixe frito.','Usar só para descansar|h+8 hl+3 >c|Silêncio e mar.']],
- c:['A manutenção','A maresia está destruindo a casa.',['Reformar|$-15000 >d|Telhado novo, pintura nova.','Vender|$+v h-4|Sonho caro demais.']],
+ c:['A manutenção','A maresia está destruindo a casa.',['Reformar|$-15000 >d|Telhado novo, pintura nova.','Vender|vender:Casa_na_praia h-4|Sonho caro demais.']],
  d:['Para sempre','Decidi passar a velhice ali.',['Mudar de vez|h+15 hl+5|Acordo com o barulho das ondas.','Deixar para os filhos|k+4|Um lugar para a família se reunir quando eu não estiver.']],
 });
 chain('amigo_doente',{k:'Amizade',min:50,max:90,who:'friend',gap:[1,1]},{

@@ -27,7 +27,7 @@ function cadReg(id,sid,st){ const [title,text,choices,so={}]=st;
     pick:(key,d)=>cadPick(id,sid,choices[+key],d)};
 }
 // separa os efeitos próprios das cadeias (>etapa, vira:, +cad:) dos efeitos normais do pack
-function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$|separar$|pbond[+-]\d+$|caso[+-]$|curar$|morder$|fome[+-]\d+$|virar:\w+$|mem:\w+(?::\w+)?$|morre$|mudarcidade$|aposentar$|diploma$|paisseparam$|casa:(fin|vista)$|empregonovo$|adotar$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
+function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$|separar$|pbond[+-]\d+$|caso[+-]$|curar$|morder$|fome[+-]\d+$|virar:\w+$|mem:\w+(?::\w+)?$|morre$|mudarcidade$|aposentar$|diploma$|paisseparam$|casa:(fin|vista)$|empregonovo$|adotar$|imovel:[\wÀ-ú]+$|vender:[\wÀ-ú]+$|carro:[\wÀ-ú]+:\d+$|trancar$|retomar$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
 function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me; const d=c?c.d:dPend;
   if(c&&!cadContextoValido(id,c)){delete st.on[id];st.done[id]=(st.done[id]||0)+1;return 'A situação mudou e essa história não pode continuar como antes.';}
   const parts=choice.split('|'); let fx1=parts[1]||'', t1=parts[2]||'', fx2=parts[3], t2=parts[4];
@@ -67,6 +67,11 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
     else if(mm=t.match(/^casa:(fin|vista)$/)){ const l=houseListings()[0], r=l?buy('casa',l,mm[1]==='fin'):'Não achei nenhuma casa à venda.'; if(/^Comprei/.test(r||'')) out.push(r); else { out.push((r||'Não deu para comprar.')+' O sonho da casa própria vai ter que esperar.'); para=true; } }
     else if(t==='empregonovo'){ const op=openings().filter(o=>o.id!==m.job?.id&&!jobReqs(JOBS.find(j=>j.id===o.id)).length); if(op.length&&m.age>=16){ takeJob(R.pick(op)); out.push(`Agora sou ${jobTitle(m.job).toLowerCase()}.`); } else { out.push('A vaga não saiu. Continuo onde estou.'); para=true; } }
     else if(t==='adotar'){ const gd=R.chance(.5)?'M':'F', k=mkPerson({rel:'adot',gender:gd,age:R.int(0,4),last:m.last,bond:R.int(80,100)}); uniqFirst(k); S.people.push(k); cnt('kids'); out.push(`${gd==='F'?'Minha filha':'Meu filho'} ${k.first} chegou em casa.`); }
+    else if(mm=t.match(/^imovel:([\wÀ-ú]+)$/)){ const n=mm[1].replace(/_/g,' '), v=d.v||50000; if(!canPay(v)){ out.push(`Precisava de ${fmt(v)} e não tinha.`); para=true; } else { m.money-=v; m.assets.push({id:newId(),k:'casa',n,value:v,cond:R.int(60,95),buy:v,country:m.country,city:m.city}); out.push(`${n} agora é minha.`); } }
+    else if(mm=t.match(/^vender:([\wÀ-ú]+)$/)){ const n=mm[1].replace(/_/g,' '), a=m.assets.find(x=>x.n===n); if(a) out.push(sellAsset(a)); }
+    else if(mm=t.match(/^carro:([\wÀ-ú]+):(\d+)$/)){ const n=mm[1].replace(/_/g,' '); m.assets.push({id:newId(),k:'carro',n,value:+mm[2],cond:100,buy:0,country:m.country,city:m.city}); }
+    else if(t==='trancar'){ if(m.edu.cur&&!['fund','medio'].includes(m.edu.cur.type)){ m.edu.trancado=m.edu.cur; m.edu.cur=null; out.push('Tranquei a matrícula.'); } }
+    else if(t==='retomar'){ if(m.edu.trancado&&!m.edu.cur){ m.edu.cur=m.edu.trancado; delete m.edu.trancado; out.push('Destranquei a matrícula e voltei às aulas.'); } }
     else if(t==='paisseparam'){ if(parents().length>=2) S.flags.divorced=1; }
     else if(t==='morre'){ const pp=d.pid&&P(d.pid); if(pp&&pp.alive&&pp!==m){ pp.alive=false; pp.cause=pp.cause||'de causas naturais'; d.morto=1; } }
     else if(mm=t.match(/^mem:(\w+)(?::(\w+))?$/)){ const pp=d.pid&&P(d.pid); if(pp&&typeof relMemoria==='function') relMemoria(pp,mm[1],mm[2]); }
@@ -78,7 +83,7 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
     else if(t==='bebe'){ const par=storyPartner(d); if(m.age>=18&&m.age<=50){ const gd=R.chance(.5)?'M':'F'; const k=mkPerson({rel:'filho',gender:gd,age:0,last:m.last,bond:R.int(85,100),parentId:par?par.id:null,from:par?[m,par]:undefined}); uniqFirst(k); S.people.push(k); cnt('kids'); out.push(`Nasceu ${gd==='F'?'minha filha':'meu filho'} ${k.first}!`); } } });
   if(para) next=null;
   if(c){ if(next&&next!=='fim'&&CHAINS[id].steps[next]){ const g=CHAINS[id].o.gap||[1,3]; c.s=next; c.due=m.age+(delay!=null?delay:R.int(g[0],g[1])); c.n=(c.n||0)+1; }
-    else { delete st.on[id]; st.done[id]=(st.done[id]||0)+1; cnt('historias'); } }
+    else { delete st.on[id]; st.done[id]=(st.done[id]||0)+1; cnt('historias'); if(typeof cadLigar==='function') cadLigar(id); } }
   const r0=dslApply(b0.rest,d), r1=dslApply(br.rest,d);
   storyPartner(d);
   cadPerson(d);
@@ -112,7 +117,7 @@ function cadYear(){ const m=S.me; if(!m||!m.alive||S.scen||m.age<5) return; cons
     queue(eid,ev.prep(m)); n++; }
   const ativos=Object.keys(st.on).length;
   if(n<2&&ativos<4&&R.chance(ativos?.45:.7)){ const el=Object.keys(CHAINS).filter(id=>cadCan(id,m));
-    if(el.length){ const id=R.wpick(el.map(id=>[id,CHAINS[id].o.w||1])); if(cadStart(id)){ const c=st.on[id], eid=cadEv(id,'a'); if(EVENTS[eid].when(m)) queue(eid,EVENTS[eid].prep(m)); } } } }
+    if(el.length){ const prox=st.prox||{}; const id=R.wpick(el.map(id=>[id,(CHAINS[id].o.w||1)*(prox[id]?8:1)])); if(prox[id]) delete prox[id]; if(cadStart(id)){ const c=st.on[id], eid=cadEv(id,'a'); if(EVENTS[eid].when(m)) queue(eid,EVENTS[eid].prep(m)); } } } }
 yearEvents=(o=>function(){ const r=o.apply(this,arguments); try{ cadYear(); }catch(e){ cadFalha(e,'Avanço anual das histórias'); } return r; })(yearEvents);
 // conferência para o teste: toda etapa citada existe e toda etapa é alcançável
 function cadAudit(){ const errs=[]; let steps=0;
