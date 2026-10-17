@@ -342,7 +342,7 @@ function stolenLoot(c,v,flavor){ const m=S.me, add=(k,n,val,cond)=>{ m.assets.pu
   return null; }
 function crime(c){
   const m=S.me; cnt('crimes'); cnt('actions'); m.rec.crimes++; m.karma=clamp(m.karma-c.k);
-  const p=c.p+(m.smarts-50)/400+(m.fight/500)+(m.job&&m.job.spc==='crime'?.1:0);
+  const p=chanceCrime(c);
   const flavor={loja:R.pick(['um batom','um fone de ouvido','um chocolate','uma garrafa de vinho','um tênis','uma camiseta']),carteira:R.pick(['de um turista','de um executivo','de uma senhora no ônibus','de um homem distraído no celular']),casa:R.pick(['de um médico','de um casal em viagem','de um vizinho rico','de uma mansão na serra']),carro:R.pick(CARS.slice(3)).t.toLowerCase(),golpe:R.pick(['um falso site de vendas','um perfil falso de namoro','um boleto falso','uma falsa central do banco'])}[c.id]||'';
   if(R.chance(p)){ const v=R.int(...c.cash); st('happy',R.int(1,5));
     const loot=stolenLoot(c,v,flavor); if(loot) return loot; m.money+=v;
@@ -398,7 +398,7 @@ function adoptPet(kind,sp){
   return `Adotei ${p.first}, ${g(s.s,gd).toLowerCase()}${kind==='abrigo'?' do abrigo':''}!`;
 }
 function adoptChild(){ const m=S.me; if(!canPay(20000)) return 'Preciso de pelo menos $20.000 para o processo.'; if(m.rec.conv) return 'Minha ficha criminal impediu a adoção.'; m.money-=20000; if(!R.chance(.6)) return 'O processo foi negado desta vez.'; const k=mkPerson({rel:'adot',age:R.int(0,10),last:m.last,bond:R.int(55,80),country:R.pick(COUNTRIES).id}); S.people.push(k); cnt('kids'); st('happy',15); log(`Adotei ${k.first}, de ${k.age} anos.`,'good'); return `Adotei ${k.first}, de ${k.age} anos!`; }
-function emigrate(c){ const m=S.me; const cost=5000; if(!canPay(cost)) return 'Não tenho dinheiro para emigrar.'; if(!R.chance(.4+m.smarts/250+(m.money>500000?.3:0)-(m.rec.conv?.3:0))){ m.money-=500; return `Meu pedido de visto para ${c.n} foi negado.`; } m.money-=cost; m.country=c.id; m.city=R.pick(c.cities); cnt('emig'); m.c.countries=(m.c.countries||1)+1; if(m.job) endJob(); S.people.filter(p=>['amigo','colega','colegaT','chefe'].includes(p.rel)).forEach(p=>p.bond=clamp(p.bond-25)); log(`Emigrei para ${m.city}, ${c.n}.`,'good'); st('happy',R.int(-5,15)); return `Me mudei para ${m.city}, ${c.n}!`; }
+function emigrate(c){ const m=S.me; const cost=5000; if(!canPay(cost)) return 'Não tenho dinheiro para emigrar.'; if(!R.chance(chanceVisto(c))){ m.money-=500; return `Meu pedido de visto para ${c.n} foi negado.`; } m.money-=cost; m.country=c.id; m.city=R.pick(c.cities); cnt('emig'); m.c.countries=(m.c.countries||1)+1; if(m.job) endJob(); S.people.filter(p=>['amigo','colega','colegaT','chefe'].includes(p.rel)).forEach(p=>p.bond=clamp(p.bond-25)); log(`Emigrei para ${m.city}, ${c.n}.`,'good'); st('happy',R.int(-5,15)); return `Me mudei para ${m.city}, ${c.n}!`; }
 function driving(){ const m=S.me; m.money-=1500; if(use('lic')>2) return 'A autoescola só deixa três provas por ano.'; if(R.chance(.35+m.smarts/200)){ m.lic=true; st('happy',8); log('Tirei minha carteira de motorista.','good'); return 'Passei na prova de direção!'; } return R.pick(['Reprovei na baliza.','Bati no cone.','Esqueci de dar seta e reprovei.','Deixei o carro morrer três vezes na subida.']); }
 function socialPost(kind){
   const m=S.me,s=m.social; if(use('post')>4) return 'Já postei demais este ano. Ninguém aguenta.';

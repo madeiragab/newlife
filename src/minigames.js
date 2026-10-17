@@ -97,7 +97,7 @@ function mgVault(c){
   const press=(k)=>{ if(s.over) return;
     if(k==='⌫'){ s.cur.pop(); return draw(); }
     if(k==='✓'){ if(s.cur.length<len){s.msg='Digite os quatro números antes de confirmar. Nenhuma tentativa foi gasta.';return draw();} const g=s.cur.slice(); const a=g.filter((d,i)=>code[i]===d).length; const b=g.filter((d,i)=>code[i]!==d&&code.includes(d)).length; s.hist.push({g,a,b}); s.cur=[];
-      if(a===len){ s.over=true; const v=R.int(...c.cash); s.msg='O cofre abriu!'; s.result=()=>{ m.money+=v; cnt('crimes'); m.rec.crimes++; m.karma=clamp(m.karma-c.k); st('happy',10); if(R.chance(.25)){ arrest(c.n.toLowerCase(),c.jail[0],c.jail[1]); return `Abri o cofre e levei ${fmt(v)}, mas fui identificad${oa()} pelas câmeras dias depois.`; } return `Abri o cofre e fugi com ${fmt(v)}!`; }; }
+      if(a===len){ s.over=true; const v=R.int(...c.cash); s.msg='O cofre abriu!'; s.result=()=>{ m.money+=v; cnt('crimes'); m.rec.crimes++; m.karma=clamp(m.karma-c.k); st('happy',10); if(R.chance(chanceIdentificacao(.25))){ arrest(c.n.toLowerCase(),c.jail[0],c.jail[1]); return `Abri o cofre e levei ${fmt(v)}, mas fui identificad${oa()} pelas câmeras dias depois.`; } return `Abri o cofre e fugi com ${fmt(v)}!`; }; }
       else if(s.hist.length>=tries){ s.over=true; s.msg=`O alarme disparou. A senha era ${code.join('')}.`; s.result=()=>{ cnt('crimes'); m.rec.crimes++; m.karma=clamp(m.karma-c.k); arrest(c.n.toLowerCase(),c.jail[0],c.jail[1]); return 'O alarme tocou e a polícia cercou o lugar.'; }; }
       else s.msg=a+b?'Estou chegando perto...':'Nenhum desses números está na senha.';
       return draw(); }

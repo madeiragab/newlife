@@ -318,7 +318,7 @@ function yearHealth(){
     if(def.min&&m.age<def.min||def.max&&m.age>def.max||def.g&&def.g!==m.gender) continue;
     if(def.country&&!def.country.split(',').includes(m.country)) continue;
     if(def.criatura&&(S.scen||def.criatura!==m.criatura)) continue;
-    let p=def.p*mult; if(def.smoke&&m.add.cigarro>40) p*=8;
+    let p=def.p*mult*(typeof macroSaude==='function'&&!def.criatura?macroSaude():1); if(def.smoke&&m.add.cigarro>40) p*=8;
     if(R.chance(p)){ addDisease(id); break; }
   }
   if(m.age>=3&&R.chance(.012)){ const what=R.pick(['Quebrei o braço','Torci o tornozelo','Quebrei a perna','Desloquei o ombro','Quebrei o nariz']); log(`${what} num acidente.`,'bad'); st('health',-R.int(5,14)); st('happy',-5); }
