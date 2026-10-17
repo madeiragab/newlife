@@ -41,8 +41,10 @@ function selfTest(){
   T('peso das memórias',memoriaPesoSelfTest);
   T('acontecimentos que puxam histórias',encadeamentosSelfTest);
   T('probabilidades realistas',realismoSelfTest);
+  T('separações e relações plurais',separacoesSelfTest);
+  T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);
-  T('cobertura de todas as escolhas',()=>{window.NL_COBERTURA_EVENTOS=coberturaEventosSelfTest(20000);});
+  T('cobertura de todas as escolhas',()=>{window.NL_COBERTURA_EVENTOS=coberturaEventosSelfTest(45000);});
   T('três gerações naturais',()=>{window.NL_GERACOES_NATURAIS=geracoesNaturaisSelfTest();});
   if(window.NL_MIG_FIXTURES)T('saves de versões publicadas',()=>{window.NL_MIGRACAO=migracaoVersoesSelfTest(window.NL_MIG_FIXTURES);});
   T('três gerações por estilo',()=>{window.NL_TRES_GERACOES=evolucaoGeracoesSelfTest();});
