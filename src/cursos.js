@@ -37,8 +37,9 @@ JOBS.push(
 );
 // quem tem diploma vê mais vagas da própria área (como no mercado de verdade)
 openings=(o=>function(){ const m=S.me, first=!m.yr.openings; const r=o.apply(this,arguments);
-  if(first&&m.age>=18&&m.edu.deg.some(d=>d.startsWith('uni:')||d.startsWith('post:'))){ const fit=JOBS.filter(j=>!j.pt&&j.edu&&j.edu!=='medio'&&eduOk(j.edu)&&!m.yr.openings.some(x=>x.id===j.id));
-    R.shuffle(fit).slice(0,4).forEach(j=>{ const size=pickSize(); m.yr.openings.push({id:j.id,co:companyName(),size,mul:(1+R.int(-8,18)/100)*SIZES[size].mul}); }); }
+  // vagas extras para quem tem técnico, faculdade ou pós: só as que a formação permite
+  if(first&&m.age>=18&&m.edu.deg.some(d=>/^(uni|tec|post):/.test(d))){ const fit=JOBS.filter(j=>!j.pt&&j.edu&&j.edu!=='medio'&&eduOk(j.edu)&&!m.yr.openings.some(x=>x.id===j.id));
+    R.shuffle(fit).slice(0,5).forEach(j=>{ const size=pickSize(); m.yr.openings.push({id:j.id,co:companyName(),size,mul:(1+R.int(-8,18)/100)*SIZES[size].mul}); }); }
   return r||m.yr.openings; })(openings);
 
 // ===== Carteira nova: os pais podem dar um carro, conforme o dinheiro da família =====

@@ -21,7 +21,7 @@ function voltaConseq(id,d,win,junto){ junto=junto||[]; const m=S.me, L=[], adult
   for(const p of partners()){
   if(p&&junto.includes(p.id)) L.push(`❤️ ${p.first} viveu tudo isso comigo. Agora a gente tem uma história que ninguém mais acredita.`);
   else if(p){ const tempo=voltaTempo(d), casado=p.rel==='conjuge';
-    p.bond=clamp(p.bond-Math.min(60,Math.round(d*.8)));
+    p.bond=clamp(p.bond-Math.min(60,Math.round(d*.8))); if(d>=7) relMemoria(p,d>=180?'abandono':'ausencia');
     let ch=p.rel==='namoro'?(d-4)/40:p.rel==='noivo'?(d-6)/55:(d-10)/90; if(p.bond<30) ch+=.2; if(d>=365) ch=.95; ch=Math.max(0,Math.min(.97,ch));
     if(d>=4&&R.chance(ch)){ cnt('terminoMundo');
       const txt=d<30?R.pick([`${p.first} terminou comigo por mensagem no terceiro dia sem resposta. Só li agora.`,`${p.first} achou que eu tinha ${R.pick(['fugido com alguém','me cansado','ido embora de vez'])}. Quando voltei, já era ex.`,`Encontrei minhas coisas em caixas na porta. Um bilhete de ${p.first}: "Nem um recado em ${tempo}?"`])
@@ -29,13 +29,13 @@ function voltaConseq(id,d,win,junto){ junto=junto||[]; const m=S.me, L=[], adult
         :R.pick([`Fiquei ${tempo} sumid${oa()}. ${p.first} achou que eu tinha morrido e ${casado?'casou de novo':'casou com outra pessoa'}. Tem até um bebê.`,`${p.first} guardou luto por mim. Depois refez a vida. Quando bati na porta, quem atendeu foi o novo amor de ${p.first}.`,`Para ${p.first}, eu estava mort${oa()}. Teve velório, teve choro, e depois teve outra pessoa.`]);
       if(casado){ divorce(p,true); L.push('💔 '+txt+' O divórcio saiu por abandono do lar.'); }
       else { p.rel='ex'; st('happy',-15); log(`${p.first} terminou comigo enquanto eu estava ${onde}.`,'bad'); L.push('💔 '+txt); } }
-    else if(d>=60){ p.bond=clamp(p.bond+15); L.push('❤️ '+R.pick([`${p.first} esperou ${tempo} sem desistir. Quando me viu, não disse nada: só me abraçou.`,`Todo mundo mandou ${p.first} seguir em frente. ${p.first} não seguiu. Esperou.`])); }
+    else if(d>=60){ p.bond=clamp(p.bond+15); relMemoria(p,'apoio'); L.push('❤️ '+R.pick([`${p.first} esperou ${tempo} sem desistir. Quando me viu, não disse nada: só me abraçou.`,`Todo mundo mandou ${p.first} seguir em frente. ${p.first} não seguiu. Esperou.`])); }
     else if(d>=5) L.push('❤️ '+R.pick([`${p.first} chorou, gritou e depois me abraçou por um tempão.`,`${p.first} me deu um gelo de uma semana. Justo.`,`${p.first} quer saber onde eu estava. Não sei como contar.`])); }
   }
   // família
   const ps=parents();
   if(ps.length&&ps.every(x=>junto.includes(x.id))) L.push('👪 Minha família inteira voltou comigo. Os vizinhos olham para a gente como se fôssemos fantasmas.');
-  else if(ps.length&&d>=3){ ps.forEach(x=>x.bond=clamp(x.bond+(R.chance(.5)?5:-5)));
+  else if(ps.length&&d>=3){ ps.forEach(x=>{ x.bond=clamp(x.bond+(R.chance(.5)?5:-5)); if(d>=30) relMemoria(x,'ausencia'); });
     L.push('👪 '+(m.age<18?R.pick(['Meus pais tinham colado cartazes com a minha foto pela cidade. Fiquei de castigo até não sei quando.','Minha mãe desmaiou quando me viu entrar pela porta. Depois veio o castigo.']):R.pick(['Meus pais tinham feito um boletim de ocorrência de desaparecimento.','Minha mãe acendeu velas na igreja todos os dias em que eu estive fora.','Meu pai envelheceu dez anos nesses dias. Me abraçou sem dizer nada.'])));
     if(d>=15){ m.fame=clamp(m.fame+3); L.push('📺 Meu sumiço tinha aparecido no jornal local.'); }
     if(d>=180) L.push(`⚰️ Fui declarad${oa()} mort${oa()}. Teve até velório com caixão vazio. Desfazer isso no cartório vai dar trabalho.`); }

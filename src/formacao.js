@@ -53,10 +53,6 @@ eduName=(o=>function(req){ if(req&&req.includes('+')) return req.split('+').map(
   if(req&&req.startsWith('tec:')&&req.includes(',')) return req.slice(4).split(',').map(x=>(TECHS.find(t=>t.id===x)||{}).n).join(' ou ');
   if(req==='post:esp') return 'Especialização (ou MBA, mestrado)'; return o(req); })(eduName);
 // quem tem pós vê as vagas que pedem pós; quem tem técnico vê as vagas do técnico
-openings=(o=>function(){ const m=S.me, first=!m.yr.openings; const r=o.apply(this,arguments);
-  if(first&&m.age>=18&&m.edu.deg.some(d=>d.startsWith('tec:')||d.startsWith('post:'))){ const fit=JOBS.filter(j=>!j.pt&&j.edu&&(j.edu.startsWith('tec:')||j.edu.includes('post:'))&&eduOk(j.edu)&&!m.yr.openings.some(x=>x.id===j.id));
-    R.shuffle(fit).slice(0,3).forEach(j=>{ const size=pickSize(); m.yr.openings.push({id:j.id,co:companyName(),size,mul:(1+R.int(-6,18)/100)*SIZES[size].mul}); }); }
-  return r||m.yr.openings; })(openings);
 // formação a mais rende mais no salário, como no mercado de verdade (mestrado +10%, doutorado +15%, MBA +8%, especialização +5%)
 function eduBonus(j){ if(!j||j.spc||!S||!S.me) return 0; const d=S.me.edu.deg, def=JOBS.find(x=>x.id===j.id); if(!def) return 0; let b=0;
   if(d.includes('post:dout')) b+=.15; else if(d.includes('post:mest')) b+=.10; if(d.includes('post:mba')) b+=.08; if(d.includes('post:esp')) b+=.05;
