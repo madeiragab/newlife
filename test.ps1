@@ -13,8 +13,8 @@ $url = "file:///" + ($page -replace '\\','/') + "#teste"
 $out = Join-Path $env:TEMP 'ov-dom.txt'
 if (Test-Path $out) { Remove-Item $out -Force }
 $p = Start-Process -FilePath $edge -ArgumentList @('--headless=new','--disable-gpu',"--user-data-dir=$prof",'--virtual-time-budget=120000','--dump-dom',$url) -RedirectStandardOutput $out -RedirectStandardError (Join-Path $env:TEMP 'ov-err.txt') -PassThru
-# o Edge às vezes fica preso esperando a fonte da internet: depois de 3 minutos, desiste
-if (-not $p.WaitForExit(180000)) { try { $p.Kill() } catch {} ; 'FALHOU: o teste não terminou em 3 minutos'; exit 1 }
+# o Edge às vezes fica preso com a simulação ampliada: o limite de execução é de 6 minutos
+if (-not $p.WaitForExit(360000)) { try { $p.Kill() } catch {} ; 'FALHOU: o teste não terminou em 6 minutos'; exit 1 }
 $dom = if (Test-Path $out) { Get-Content $out -Raw -Encoding UTF8 } else { '' }
 if ($dom -notmatch '(?s)<pre id="out"[^>]*>(.*?)</pre>') { 'FALHOU: SEM SAIDA DE TESTE (o jogo não chegou a rodar o teste)'; exit 1 }
 $t = $matches[1] -replace '&gt;','>' -replace '&lt;','<' -replace '&quot;','"' -replace '&amp;','&'

@@ -32,6 +32,7 @@ function selfTest(){
   T('família e saves',familySelfTest);
   T('sistemas públicos integrados',publicSystemsSelfTest);
   T('economia mundial',()=>mundoDiagnostico(100));
+  T('idades e animais',idadeAnimaisSelfTest);
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
@@ -387,3 +388,6 @@ function publicSystemsSelfTest(){const before=S,meta=JSON.stringify(META),snaps=
  const k=mkPerson({rel:'filho',age:20,parentId:b.id,bond:80});S.people.push(k);const saldo=S.me.money;die('de teste de regressão');continueAs(k);ok(!S.me.prison&&!S.me.office,'filho não herda prisão nem mandato');ok(S.me.money===Math.max(0,Math.round(saldo*.85)),'herança sem duplicar bloqueio');ok(P(b.id)&&['mae','pai'].includes(P(b.id).rel),'parentesco após prisão e morte');ok(S.jornal&&S.jornal.itens.length,'histórico público entre gerações');ok(Number.isFinite(S.me.money),'saldo íntegro');
  return 'PASSOU: presidente + culto + crime, dois casamentos, save, prisão, morte e herança';
  }finally{S=before;META=JSON.parse(meta);SNAPS=snaps;R.chance=chance;window.NO_SAVE=noSave;}}
+function idadeAnimaisSelfTest(){const before=S,meta=JSON.stringify(META),snaps=SNAPS,noSave=window.NO_SAVE,chance=R.chance;window.NO_SAVE=true;const ok=(v,t)=>{if(!v)throw Error(t)};try{newLife({});const p=parents()[0];for(const a of [0,11]){S.me.age=a;ok(!V.person(p).items.some(x=>x.l==='Falar sobre política'),'política na interface');const antes=JSON.stringify(S);interact(p,'politica');ok(JSON.stringify(S)===antes,'política alterou estado infantil');}S.me.age=12;ok(V.person(p).items.some(x=>x.l==='Falar sobre política'),'política ausente aos 12');interact(p,'politica');for(const a of [0,3,4,11,12,17]){S.me.age=a;S.me.yr={};const texto=tempoTodos();ok(!/Fiz um churrasco|Organizei|Alugamos/.test(texto),'organização incompatível com a idade');}
+ const a=addPet('Cachorro','Rex'),b=addPet('Cachorro','Toby');dslApply('petdie',{pid:a.id});ok(!a.alive&&a.morte&&b.alive,'alvo do falecimento');const idade=a.age,h=S.me.happy;dslApply('petdie',{pid:a.id});ok(S.me.happy===h,'falecimento repetido');R.chance=()=>false;yearPeople();ok(a.age===idade,'animal morto envelheceu');const antes=JSON.stringify(a);interact(a,'vet');ok(JSON.stringify(a)===antes,'ação em animal morto');S=JSON.parse(JSON.stringify(S));fixSave(S);ok(!P(a.id).alive&&V.person(P(a.id)),'histórico e save');return 'PASSOU: política 0/11/12, encontros por idade e estado persistente dos animais';
+ }finally{S=before;META=JSON.parse(meta);SNAPS=snaps;window.NO_SAVE=noSave;R.chance=chance;}}

@@ -9,3 +9,6 @@ function chanceVisto(c){const m=S.me,w=mundo(c.id);return macroLim(.4+m.smarts/2
 function macroSaude(){const w=mundo();return 1+(60-w.saude)/150+(w.choque?.tipo==='epidemia'?.5:0);}
 justicaRegistrar=(o=>function(crime,v,fonte){const c=o.apply(this,arguments);if(fonte==='crime'&&R.chance(chanceIdentificacao()))justicaAbrir(c);return c;})(justicaRegistrar);
 V.jobs=(o=>()=>{const r=o();if(r)r.items.unshift({html:'<div class="card">'+kv('Desemprego no país',(mundo().desemprego*100).toFixed(1)+'%')+'<p>Vagas, salários e risco de corte acompanham o país e o setor. As ofertas ficam estáveis neste ano.</p></div>'});return r;})(V.jobs);
+// Índices de segurança também alteram a frequência dos eventos de vitimização existentes.
+const RISCOS_MUNDO=['assalto','casa_assaltada','furto_celular'].map(id=>({id,base:EVENTS[id]?.w||1}));
+yearEvents=(o=>function(){const w=mundo(),f=macroLim(.5+w.crime/100-w.policia/200,.15,1.5);for(const x of RISCOS_MUNDO)if(EVENTS[x.id])EVENTS[x.id].w=x.base*f;return o.apply(this,arguments);})(yearEvents);
