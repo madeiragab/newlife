@@ -292,7 +292,7 @@ function yearPeople(){
     if(!npcAcompanhado(p)&&(p.rel==='filho'||p.rel==='adot')&&p.age>=21&&p.age<=42&&R.chance(.07)){ const n=mkPerson({rel:'neto',age:0,last:p.gender==='M'?p.last:R.pick(countryOf(m.country).L),parentId:p.id,bond:R.int(60,95),from:[p,mkPerson({rel:'tmp',gender:p.gender==='F'?'M':'F',age:p.age})]}); S.people.push(n); log(`${p.first} teve ${n.gender==='F'?'uma filha':'um filho'}, ${n.first}. Agora sou ${m.gender==='F'?'avó':'avô'}!`,'good'); cnt('kids'); }
     if(!npcAcompanhado(p)&&['filho','adot'].includes(p.rel)&&p.age===R.int(18,26)&&!p.job){ const d=R.pick(JOBS.filter(j=>!j.pt)); p.job=g(d.l[0],p.gender); }
   }
-  if(m.age<=13){ const mom=people('mae')[0]; if(mom&&mom.age<=43&&R.chance(.07)){ const s=uniqFirst(mkPerson({rel:'irmao',age:0,last:m.last,bond:R.int(50,80),from:[mom,people('pai')[0]||mkPerson({rel:'tmp',gender:'M',age:mom.age})]})); S.people.push(s); log(`${s.gender==='F'?'Nasceu minha irmã':'Nasceu meu irmão'} ${s.first}.`,'good'); } }
+  if(m.age<=13){ const mom=people('mae')[0]; if(mom&&!npcAcompanhado(mom)&&mom.age<=43&&R.chance(.07)){ const s=uniqFirst(mkPerson({rel:'irmao',age:0,last:m.last,bond:R.int(50,80),from:[mom,people('pai')[0]||mkPerson({rel:'tmp',gender:'M',age:mom.age})]})); S.people.push(s); log(`${s.gender==='F'?'Nasceu minha irmã':'Nasceu meu irmão'} ${s.first}.`,'good'); } }
   const mom=people('mae')[0],dad=people('pai')[0];
   if(mom&&dad&&!S.flags.divorced&&R.chance(.015)){ S.flags.divorced=true; log('Meus pais se divorciaram.','bad'); st('happy',m.age<18?-15:-5); }
 }
