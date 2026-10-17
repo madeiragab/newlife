@@ -13,3 +13,5 @@ conversão da empresa e financiamento novo com taxa contratada.
 
 
 As fixtures 1.59 e 1.60 foram geradas executando os HTMLs publicados originais, com emprego, empresa, casa financiada, cônjuge e filho. Os arquivos origem-*.json registram o carimbo e o SHA-256 de cada HTML. Os testes verificam migração idempotente, patrimônio, contratos e pessoas.
+
+As fixtures 1.18, 1.35, 1.50 e 1.57 foram geradas executando o `app.html` publicado de cada versão: emprego, casa financiada, carro, empresa, mudança para Portugal com uma casa lá, cônjuge e namoro ao mesmo tempo, filhos adultos e duas sucessões até a terceira geração. Todas as fixtures `save-*.json` passam pelo teste de migração entre versões: migração idempotente, dinheiro, bens, pessoas e relacionamentos preservados, e três anos de vida com `ageUp()` real depois de carregar.

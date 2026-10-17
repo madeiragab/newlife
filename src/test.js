@@ -36,6 +36,11 @@ function selfTest(){
   T('localização e residência',localizacaoSelfTest);
   T('decisões e memórias familiares',familiaDecisoesSelfTest);
   T('envelhecimento e rotina',cotidianoIdadeSelfTest);
+  T('aposentadoria e herança',aposentadoriaSelfTest);
+  T('conquistas da família',conquistasFamiliaSelfTest);
+  T('peso das memórias',memoriaPesoSelfTest);
+  T('três gerações naturais',()=>{window.NL_GERACOES_NATURAIS=geracoesNaturaisSelfTest();});
+  if(window.NL_MIG_FIXTURES)T('saves de versões publicadas',()=>{window.NL_MIGRACAO=migracaoVersoesSelfTest(window.NL_MIG_FIXTURES);});
   T('três gerações por estilo',()=>{window.NL_TRES_GERACOES=evolucaoGeracoesSelfTest();});
   T('trajetórias persistentes',continuidadeSelfTest);
   T('NPCs ao longo de décadas',()=>{window.NL_NPC_DECADAS=npcDecadasSelfTest();});

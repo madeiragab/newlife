@@ -268,7 +268,7 @@ V.jobMenu=()=>{ const m=S.me,j=m.job; if(!j) return {title:'Emprego',items:[{htm
     it.push({l:'Pedir aumento',on:()=>act(askRaise,'Trabalho')});
     if(!(d&&d.pt)) it.push({l:'Pedir promoção',on:()=>act(askPromo,'Trabalho')});
     if(!j.spc) it.push({l:'Colegas e chefe',on:()=>UI.push(()=>({title:'Trabalho',items:people('chefe','colegaT').map(p=>personRow(p))}))});
-    if(m.age>=55&&!j.spc) it.push({l:'Me aposentar',on:()=>confirmBox('Aposentar?','Vou parar de trabalhar e receber aposentadoria.','Aposentar',()=>act(()=>{ retire(); log('Me aposentei.','good'); return `Me aposentei com ${fmt(S.me.ret.pension)}/ano.`; },'Aposentadoria'))});
+    if(m.age>=APOS_IDADE_MIN&&!j.spc) it.push({l:'Me aposentar',s:m.age<APOS_IDADE_PLENA?'Antecipada · benefício menor':'',on:()=>confirmBox('Aposentar?',aposTexto(),'Aposentar',()=>act(()=>{ retire(); log('Me aposentei.','good'); return `Me aposentei com ${fmt(S.me.ret.pension)}/ano.`; },'Aposentadoria'))});
     it.push({l:'Pedir demissão',tone:'bad',on:()=>confirmBox('Pedir demissão?','Vou sair do emprego.','Sair',()=>act(quitJob,'Trabalho'))});
   return {title:'Meu emprego',items:it}; };
 V.clubs=()=>({title:'Clubes e times',items:CLUBS.map(c=>({l:c.n,on:()=>act(()=>joinClub(c),'Escola')}))});

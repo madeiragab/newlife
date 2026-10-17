@@ -46,7 +46,8 @@ async function run(){
   await send('Runtime.addBinding',{name:'nlTestNotify'});
   const continuidade=['1.59','1.60'].map(versao=>({versao,save:JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/save-'+versao+'.json'),'utf8'))}));
   const fixture=fs.readFileSync(path.join(__dirname,'fixtures/save-1.46.json'),'utf8');
-  await send('Page.addScriptToEvaluateOnNewDocument',{source:'window.NL_SAVE_FIXTURE='+fixture+';window.NL_CONT_FIXTURES='+JSON.stringify(continuidade)+';'});
+  const migracao=fs.readdirSync(path.join(__dirname,'fixtures')).map(n=>n.match(/^save-([\d.]+)\.json$/)).filter(Boolean).map(x=>({versao:x[1],save:JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures',x[0]),'utf8'))})).sort((a,b)=>parseFloat(a.versao)-parseFloat(b.versao));
+  await send('Page.addScriptToEvaluateOnNewDocument',{source:'window.NL_SAVE_FIXTURE='+fixture+';window.NL_CONT_FIXTURES='+JSON.stringify(continuidade)+';window.NL_MIG_FIXTURES='+JSON.stringify(migracao)+';'});
   timer=setTimeout(()=>rejectDone(Error('Limite de 6 minutos; último progresso: '+last)),360000);
   send('Page.navigate',{url:pathToFileURL(page).href+'#teste'}).catch(rejectDone);
   const result=await done;
