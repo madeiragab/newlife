@@ -148,7 +148,7 @@ function selfTest(){
     T('death',showDeath);
   }
   let swept=0;
-  for(let L=0;L<14;L++){ T('newLife',()=>newLife({})); for(const age of [3,8,15,22,35,55,80]){ while(S.me.alive&&S.me.age<age){ T('ageUp',ageUp); S.pending=[]; } if(!S.me.alive) break; T('sweepActs',acts); sweep(); } }
+  for(let L=0;L<14;L++){ T('newLife',()=>newLife({})); for(const age of [3,8,15,22,35,55,80]){ S.scen=null; let passos=0; while(S.me.alive&&S.me.age<age&&passos++<130){ T('ageUp',ageUp); S.pending=[]; } if(S.me.alive&&S.me.age<age){ errs['varredura normal não avançou até '+age]=1; break; } if(!S.me.alive) break; T('sweepActs',acts); sweep(); } }
   // atestados: pedir sem parar tem que terminar em demissão
   let fired=0; for(let k=0;k<40;k++){ T('atestLife',()=>{ newLife({}); while(S.me.alive&&S.me.age<25){ S.pending=[]; ageUp(); } if(!S.me.alive) return; S.pending=[]; const ok=openings().filter(o=>!jobReqs(JOBS.find(x=>x.id===o.id)).length); if(ok.length) takeJob(R.pick(ok)); if(!S.me.job) return; S.me.money+=5000; for(let i=0;i<8&&S.me.job;i++) sickNote(i%2?'fake':'real'); if(!S.me.job) fired++; }); }
   // aventuras (modos fictícios): cada modo jogado até o fim várias vezes, e cada evento de aventura varrido
