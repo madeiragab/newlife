@@ -8,8 +8,7 @@ function prisonDo(k){
   const m=S.me,pr=m.prison; if(!pr) return 'Não estou pres'+oa()+'.';
   if(k==='comportar'){ if(use('pr_comp')>3) return 'Já sou o detento mais exemplar da ala este ano.'; pr.behav=clamp(pr.behav+R.int(7,12)); st('happy',-1);
     return R.pick(['Cumpri todas as regras, ajudei na limpeza e não arrumei confusão.','Fiquei na minha. Os guardas notaram.','Ajudei um guarda a separar uma briga. Ponto para mim.']); }
-  if(k==='livro'){ if(use('pr_livro')>3) return 'Já li todos os livros bons da biblioteca este ano.'; st('smarts',R.int(1,4)); pr.behav=clamp(pr.behav+3); cnt('books');
-    return `Li ${R.pick(['"Dom Casmurro"','"O Conde de Monte Cristo"','"Crime e Castigo"','"Memórias do Cárcere"','"O Pequeno Príncipe"','"Cem Anos de Solidão"','um livro de direito penal','uma biografia de Mandela','"O Alquimista"'])}.`; }
+  if(k==='livro') return lerLivro();
   if(k==='criarGrupo'){ if(pr.gang) return 'Já faço parte de um grupo.'; if(m.fight<35&&!(m.c.kills>0)) return 'Ninguém me levou a sério. Preciso de mais respeito no pátio (luta 35%+).';
     const n=R.pick(GANG_NAMES); pr.gang={n,rank:2,rep:30,own:1}; pr.behav=clamp(pr.behav-10); cnt('gangs'); log(`Fundei um grupo na prisão: ${n}.`,'warn'); return `Fundei o grupo "${n}". Agora sou o líder.`; }
   if(k==='entrarGrupo'){ if(pr.gang) return 'Já faço parte de um grupo.'; if(use('pr_grupo')>1) return 'Já tentei este ano.'; const n=R.pick(GANG_NAMES);

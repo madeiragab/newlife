@@ -199,11 +199,11 @@ function invest(k,v){ const m=S.me; if(!['poup','acoes','cripto'].includes(k)||!
 
 // ---------- mente e corpo ----------
 function body(k,extra){
+  if(k==='lib') return lerLivro(extra);
   const m=S.me; const n=use('b_'+k); const tired=n>3;
   const r=x=>tired?Math.round(x/3):x;
   switch(k){
     case 'gym': st('health',r(R.int(1,5))); st('looks',r(R.int(0,3))); st('happy',r(R.int(0,3))); m.talent.athletic=clamp(m.talent.athletic+r(1)); if(R.chance(.03)){ st('health',-8); return 'Exagerei no supino e me machuquei.'; } return R.pick(['Malhei pesado.','Fiz uma aula de spinning.','Treinei perna e mal consegui andar depois.','Corri 5 km na esteira.']);
-    case 'lib': st('smarts',r(R.int(1,4))); st('happy',r(R.int(0,2))); return `Li ${R.pick(['um romance policial','uma biografia','um livro de filosofia','uma enciclopédia antiga','um livro de autoajuda duvidoso','um clássico da literatura','um mangá inteiro','um livro de história do Brasil'])}.`;
     case 'med': st('happy',r(R.int(1,5))); st('health',r(R.int(0,2))); m.will=clamp(m.will+r(1)); return R.pick(['Meditei por uma hora.','Fiz um retiro de silêncio de um dia.','Meditei e quase dormi.']);
     case 'walk': st('health',r(R.int(1,3))); st('happy',r(R.int(0,2))); return R.pick(['Caminhei no parque ao entardecer.','Fiz uma trilha na mata.','Corri na orla.']);
     case 'yoga': st('health',r(R.int(1,3))); st('happy',r(R.int(1,3))); st('looks',r(R.int(0,1))); return 'Fiz uma aula de ioga.';
@@ -357,9 +357,9 @@ function crime(c){
 
 // ---------- prisão ----------
 function prisonAct(k){
+  if(k==='ler') return lerLivro();
   const m=S.me,pr=m.prison; if(use('pr_'+k)>3) return 'Já fiz isso demais este ano.';
   if(k==='malhar'){ st('health',R.int(2,5)); m.fight=clamp(m.fight+2); return 'Malhei no pátio com halteres de garrafa pet.'; }
-  if(k==='ler'){ st('smarts',R.int(1,4)); pr.behav=clamp(pr.behav+3); return 'Li livros da biblioteca da prisão.'; }
   if(k==='trabalho'){ pr.behav=clamp(pr.behav+6); if(R.chance(.3)&&pr.left>1){ pr.left--; return 'Trabalhei na cozinha e ganhei remição de pena: um ano a menos!'; } return 'Trabalhei na lavanderia.'; }
   if(k==='brigar'){ cnt('fights'); pr.behav=clamp(pr.behav-15); if(R.chance(.4+m.fight/200)){ return 'Ganhei a briga. Agora me respeitam.'; } st('health',-R.int(8,20)); return 'Apanhei feio.'; }
   if(k==='apelar'){ m.money-=5000; if(R.chance(.12)){ m.prison=null; st('happy',25); log('Ganhei o recurso e fui solt'+oa()+'!','good'); return 'O recurso foi aceito! Estou livre!'; } return 'O recurso foi negado.'; }
