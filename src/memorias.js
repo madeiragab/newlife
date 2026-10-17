@@ -1,6 +1,6 @@
 // Memórias por pessoa persistem no save e reaparecem anos depois.
 function relMemoria(p,tipo){if(!p)return;const a=p.relMemorias||(p.relMemorias=[]);if(a.some(x=>x.ano===S.year&&x.tipo===tipo))return;a.push({tipo,ano:S.year,resolvida:false});if(a.length>12)a.shift();}
-const REL_MEM_NOME={separacao:'a nossa separação',conflito:'uma discussão sobre nossos limites',traicao:'a quebra de confiança'};
+const REL_MEM_NOME={apoio:'o apoio numa fase difícil',ausencia:'os anos de afastamento',reconciliacao:'a nossa reaproximação',separacao:'a nossa separação',conflito:'uma discussão sobre nossos limites',traicao:'a quebra de confiança'};
 divorce=(o=>function(p){const r=o.apply(this,arguments);relMemoria(p,'separacao');return r;})(divorce);
 relFim=(o=>function(p){const was=p&&partners().includes(p),r=o.apply(this,arguments);if(was&&p.rel==='ex')relMemoria(p,'separacao');return r;})(relFim);
 relResolver=(o=>function(p,k){const r=o.apply(this,arguments);if(p&&k==='ignorar')relMemoria(p,'conflito');return r;})(relResolver);

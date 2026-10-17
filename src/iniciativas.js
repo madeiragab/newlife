@@ -1,11 +1,13 @@
 // Iniciativas dos NPCs: um convite ou projeto por ano, sem agir pelo jogador.
-function npcAtivos(){return people('amigo','mae','pai','irmao','filho','adot','namoro','noivo','conjuge').filter(p=>p.age>=10);}
+function npcAtivos(){return people('amigo','ex_amigo','mae','pai','irmao','filho','adot','namoro','noivo','conjuge').filter(p=>p.age>=10);}
 function npcIniciativa(){
- if(!S.me.alive||S.scen||S.me.prison||S.pending.some(e=>e.id==='npc_convite'))return;
- const l=npcAtivos().filter(p=>p.npcAno!==S.year);if(!l.length||!R.chance(.3))return;
- const p=R.wpick(l.map(p=>[p,1+npcPerfil(p).ambicao/100]));p.npcAno=S.year;
- if(p.age>=18&&R.chance(.15+npcPerfil(p).ambicao/200)){p.npcProjeto=(npcPerfil(p).ambicao>65?'projeto de trabalho em ':npcPerfil(p).lealdade>65?'grupo comunitário de ':'curso de ')+npcPerfil(p).interesse;p.smarts=clamp(p.smarts+2);log(p.first+' começou um '+p.npcProjeto+' por iniciativa própria.','good');}
- else queue('npc_convite',{pid:p.id});
+ if(!S.me.alive||S.scen||S.me.prison||S.pending.some(e=>['npc_convite','npc_conversa'].includes(e.id)))return;
+ const l=npcAtivos().filter(p=>p.npcAno!==S.year&&S.year-(p.vida?.ultimoPedido??-999)>1);if(!l.length)return;
+ const peso=p=>{const t=npcPerfil(p),v=npcVida(p),ausencia=S.year-(v.contato??v.inicio);return 1+p.bond/70+t.lealdade/150+(ausencia>3?1:0)+(!p.job&&p.age>=18?1:0);};
+ if(!R.chance(.25+Math.min(.2,l.length*.012)))return;
+ const p=R.wpick(l.map(p=>[p,peso(p)])),v=npcVida(p);p.npcAno=S.year;v.ultimoPedido=S.year;
+ let tipo='convite';if(p.rel==='ex_amigo'&&p.bond>=15)tipo='reconciliar';else if(p.age>=18&&!p.job&&!v.aposentado)tipo='apoio';else if(S.year-(v.contato??v.inicio)>3&&p.bond<65)tipo='distancia';else if(p.age>=18&&p.job&&npcPerfil(p).ambicao>60&&S.me.age>=18&&!S.me.job)tipo='oportunidade';
+ queue('npc_conversa',{pid:p.id,tipo,ano:S.year});
 }
 function npcResponder(p,k){if(!p||!p.alive)return 'Não foi possível combinar o encontro.';
  if(k==='sim'){p.bond=clamp(p.bond+8);p.npcUltimoEncontro=S.year;st('happy',5);return 'Aceitei o convite de '+p.first+'. Passamos um tempo juntos.';}
@@ -38,3 +40,19 @@ function npcTrajetoria(p){if(!p.alive||!npcAcompanhado(p))return;const v=npcVida
 function npcTrajetoriasAno(){if(S.scen||!S.me.alive)return;S._npcResumo=[];for(const p of S.people.slice())npcTrajetoria(p);for(const h of S._npcResumo.slice(0,3))log(h.texto,h.tipo==='separacao'||h.tipo==='viuvez'?'warn':'');delete S._npcResumo;}
 yearPeople=(o=>function(){const r=o.apply(this,arguments);npcTrajetoriasAno();return r;})(yearPeople);
 V.person=(o=>function(p){const r=o(p);if(r&&npcAcompanhado(p)){const v=npcVida(p),q=v.par&&P(v.par);r.items.push({sec:'Trajetória pessoal'},{l:'Vida em '+countryOf(p.country).n,s:(v.aposentado?'Aposentadoria':p.job||'Sem emprego')+(q?.alive?' · casado com '+fullName(q):'')},...v.historico.slice(-6).reverse().map(h=>({l:String(h.ano),s:h.texto})));}return r;})(V.person);
+
+function npcContato(p){if(p&&p.alive)npcVida(p).contato=S.year;}
+function npcDesgaste(p){const v=npcVida(p),t=npcPerfil(p),anos=S.year-(v.contato??v.inicio);if(anos<=2)return 0;return R.chance(t.lealdade>65?.25:.55)?1:0;}
+const NPC_ASSUNTOS={convite:['Vamos nos encontrar?', 'quer passar um tempo comigo.'],apoio:['Uma fase difícil', 'está sem trabalho e me procurou para conversar sobre os próximos passos.'],distancia:['Sinto sua falta', 'percebeu que nos afastamos e quer conversar sobre nossa relação.'],reconciliar:['Podemos nos reaproximar?', 'lembrou da nossa amizade e propôs tentar uma reaproximação.'],oportunidade:['Uma indicação profissional', 'soube de uma vaga e se ofereceu para me indicar. A contratação depende dos requisitos.']};
+function npcConversaResolver(k,d){const p=P(d.pid);if(!p?.alive)return 'Essa conversa já não é possível.';const v=npcVida(p);if(v.respostaAno===d.ano)return 'Já respondi a essa conversa.';v.respostaAno=d.ano;
+ if(k==='adiar'){p.bond=clamp(p.bond-1);return 'Expliquei que preciso de tempo. Não fiz uma promessa.';}
+ if(k==='ignorar'){p.bond=clamp(p.bond-4);relMemoria(p,'ausencia');return p.first+' ficou sentindo a distância. Ainda podemos conversar depois.';}
+ npcContato(p);p.bond=clamp(p.bond+6);st('happy',3);
+ if(d.tipo==='reconciliar'&&p.rel==='ex_amigo'){p.rel='amigo';relMemoria(p,'reconciliacao');return 'Aceitei reconstruir a amizade aos poucos. As lembranças anteriores continuam.';}
+ if(d.tipo==='apoio'){relMemoria(p,'apoio');v.apoio={ano:S.year,tipo:'escuta'};return 'Ouvi '+p.first+' e ajudei a pensar em alternativas. O apoio não garante um emprego.';}
+ if(d.tipo==='oportunidade'){if(S.me.age<18||S.me.job)return 'Minha situação de trabalho já mudou.';const j=JOBS.find(j=>j.id===v.emprego?.id);if(!j||jobReqs(j).length)return 'A indicação não dispensa formação e experiência. Ainda não atendo aos requisitos.';takeJob({id:j.id,co:companyName(),size:'pequena',mul:1});return 'Aceitei a indicação de '+p.first+' e fui contratado para uma vaga compatível.';}
+ return 'Reservei um tempo para '+p.first+'. A iniciativa dessa conversa veio de '+(p.gender==='F'?'ela':'ele')+'.';
+}
+EVENTS.npc_conversa={show:d=>{const p=P(d.pid),a=NPC_ASSUNTOS[d.tipo]||NPC_ASSUNTOS.convite;return {k:'Pessoas próximas',t:a[0],x:(p?.first||'Uma pessoa próxima')+' '+a[1],ch:[['Ouvir e aceitar a conversa','ouvir'],['Explicar e adiar','adiar'],['Ignorar','ignorar']]};},pick:npcConversaResolver};
+interact=(o=>function(p,k){const b=p?.bond,r=o.apply(this,arguments);if(p?.alive&&p.bond>b)npcContato(p);return r;})(interact);
+polyNamorar=(o=>function(p){const r=o.apply(this,arguments);if(p&&partners().includes(p)){const v=npcVida(p),q=v.par&&P(v.par);if(q){npcVida(q).par=null;v.par=null;npcMarco(p,'separacao',p.first+' encerrou a união anterior com '+q.first+'.');}npcContato(p);}return r;})(polyNamorar);

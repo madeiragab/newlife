@@ -284,7 +284,7 @@ function yearPeople(){
       continue; }
     if(p.age>=18&&!['pet'].includes(p.rel)&&!npcAcompanhado(p)){ const mult={pobre:.35,media:1,rica:4,milionaria:20,realeza:60}[S.flags.cls]||1; const inc=p.job&&p.age<70?R.int(2000,14000)*(['mae','pai'].includes(p.rel)?mult:1):-R.int(0,2500); p.money=Math.round((p.money||0)*(p.money>0?1.02:1)+inc); }
     const fam=['mae','pai','filho','irmao','avo','neto','adot'].includes(p.rel);
-    if(!fam&&p.rel!=='inimigo') p.bond=clamp(p.bond-R.int(0,5)); else p.bond=clamp(p.bond-R.int(-1,3));
+    if(npcAcompanhado(p))p.bond=clamp(p.bond-npcDesgaste(p));else if(!fam&&p.rel!=='inimigo') p.bond=clamp(p.bond-R.int(0,5)); else p.bond=clamp(p.bond-R.int(-1,3));
     if(['namoro','noivo'].includes(p.rel)&&p.bond<18&&R.chance(.5)){ p.rel='ex'; log(`${p.first} terminou comigo.`,'bad'); st('happy',-15); }
     if(p.rel==='conjuge'&&p.bond<12&&R.chance(.35)){ divorce(p,true); }
     if(p.rel==='amigo'&&p.bond<10&&R.chance(.4)){ p.rel='ex_amigo'; p.alive=true; log(`Perdi contato com ${p.first}.`); }
