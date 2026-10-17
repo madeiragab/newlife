@@ -638,33 +638,36 @@ function showDeath(){
   if(SNAPS.length&&godUnlocked()) $('#dTime').onclick=()=>UI.open(V.time);
 }
 function continueAs(k){
-  const old=S.me; const inherit=Math.max(0,Math.round(old.money*.85)); const assets=old.assets, inv=old.inv;
+  if(!k?.alive||!kids().includes(k)||S.me.alive)return false;
+  geracaoNormalizar(S);const passado=geracaoFoto(k);
+  const old=S.me; const inherit=Math.max(0,Math.round(old.money*.85))+(Number.isFinite(k.money)?Math.max(0,k.money):0); const assets=old.assets, inv=old.inv;
   const eldestK=kids().slice().sort((a,b)=>b.age-a.age)[0]===k;
-  const other=P(k.parentId), grandparents=parents().slice();
+  const other=P((k.parentIds||[]).find(id=>id!==old.id)||k.parentId), grandparents=parents().slice();
   const keep=[];
-  const oldP=mkPerson({rel:old.gender==='F'?'mae':'pai',gender:old.gender,first:old.first,last:old.last,age:old.age,bond:k.bond}); oldP.alive=false; keep.push(oldP);
+  const oldP=mkPerson({rel:old.gender==='F'?'mae':'pai',gender:old.gender,first:old.first,last:old.last,age:old.age,bond:k.bond}); oldP.id=old.id;oldP.first=old.first;oldP.last=old.last;oldP.alive=false;oldP.parentIds=old.parentIds||[];keep.push(oldP);
   if(other){ other.rel=other.gender==='F'?'mae':'pai'; other.bond=R.int(50,90); keep.push(other); }
   kids().filter(x=>x!==k).forEach(x=>{ x.rel='irmao'; keep.push(x); });
   S.people.filter(p=>p.alive&&p.rel==='neto'&&p.parentId===k.id).forEach(x=>{ x.rel='filho'; keep.push(x); });
   grandparents.forEach(x=>{ x.rel='avo'; keep.push(x); });
   people('pet').forEach(x=>keep.push(x));
+  geracaoPessoas(k,old,keep,passado);
   const c=countryOf(old.country);
-  const m={ first:k.first,last:k.last,gender:k.gender,age:k.age,country:old.country,city:old.city,born:S.year-k.age,
+  const m={ id:k.id,parentIds:k.parentIds||[],historiaPessoal:JSON.parse(JSON.stringify(k.vida?.historico||[])),first:k.first,last:k.last,gender:k.gender,age:k.age,country:k.country||old.country,city:k.country&&k.country!==old.country?R.pick(countryOf(k.country).cities):old.city,born:S.year-k.age,
     happy:R.int(40,70),health:clamp(Math.max(k.health,60)),smarts:k.smarts,looks:k.looks,karma:R.int(40,70),fame:Math.round(old.fame/3),money:inherit,
     talent:k.talent||randTalent(),will:k.will??R.int(5,100),fert:k.fert??R.int(15,100),fight:R.int(0,40),genes:k.genes||randGenes(k.gender),
     pref:R.chance(.88)?(k.gender==='M'?'F':'M'):R.pick([k.gender,'A']),add:{alcool:0,cigarro:0,jogo:0},dis:[],edu:{deg:[],cur:null,club:null},
-    job:null,hist:[],rec:{arrests:0,conv:0,crimes:0},prison:null,lic:k.age>=18&&R.chance(.7),assets,loans:[],inv,social:null,office:null,ret:null,c:{},yr:{},alive:true,cause:null };
+    job:null,hist:[],rec:{arrests:0,conv:0,crimes:0},prison:null,lic:k.age>=18&&R.chance(.7),assets,loans:geracaoDividas(old,k),inv,social:null,office:null,ret:null,c:{},yr:{},alive:true,cause:null };
   if(k.age>=15) m.edu.deg.push('fund'); if(k.age>=18&&R.chance(.8)) m.edu.deg.push('medio'); if(k.age>=23&&R.chance(.45)) m.edu.deg.push('uni:'+R.pick(COURSES).id);
   const gen=S.gen+1, year=S.year, dif=S.flags.diff;
   m.biz=old.biz||null; m.c.countries=1;
   if(old.royal&&!old.royal.abd){ const eldest=eldestK; m.royal={house:old.royal.house,pop:old.royal.pop,reign:old.royal.reign&&eldest,abd:false}; m.c.royal=1; if(m.royal.reign) m.c.reigned=1; else if(old.royal.reign){ const h=keep.find(x=>x.rel==='irmao'&&x.age>k.age); if(h){ h.monarch=true; h.job=g('Rei|Rainha',h.gender); } } m.fame=Math.max(m.fame,35); }
-  S={v:1,nextId:S.nextId,year,people:keep,log:[{age:k.age,year,lines:[]}],pending:[],births:[],me:m,gen,flags:{cls:old.royal?'realeza':inherit>1e6?'rica':'media',movedOut:k.age>=18?1:0,diff:dif}};
+  S={...S,scen:null,memoriaGeracoes:passado.arquivo,v:1,nextId:S.nextId,year,people:keep,log:[{age:k.age,year,lines:[]}],pending:[],births:[],me:m,gen,flags:{cls:old.royal?'realeza':inherit>1e6?'rica':'media',movedOut:k.age>=18?1:0,diff:dif}};
   SNAPS=[]; storeSnaps();
   log(`Continuei a história como ${m.first} ${m.last}, ${k.gender==='F'?'filha':'filho'} de ${old.first}.`,'big');
   if(inherit) log(`Herdei ${fmt(inherit)}${assets.length?` e ${assets.length} ${assets.length>1?'bens':'bem'}`:''}.`,'good');
   if(k.age>=6&&k.age<15) startSchool('fund'); else if(k.age>=15&&k.age<18) startSchool('medio');
   if(k.age>=18&&k.job){ const d=JOBS.find(j=>j.l.some(t=>g(t,k.gender)===k.job)); if(d&&!d.pt){ m.job={id:d.id,lvl:Math.max(0,d.l.findIndex(t=>g(t,k.gender)===k.job)),perf:55,yrs:R.int(0,8),co:companyName()}; } }
-  save();
+  geracaoNormalizar(S);save();
 }
 
 function showErr(e){ console.error(e); const el=$('#err'); el.hidden=false; el.textContent='Erro: '+(e&&e.message||e)+'\n'+(e&&e.stack||'').split('\n').slice(0,3).join('\n'); setTimeout(()=>el.hidden=true,9000); }

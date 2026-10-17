@@ -16,3 +16,27 @@ bizAct=(o=>function(){if(S.me.biz?.disputa)return 'A gestão está em disputa. R
 yearBiz=(o=>function(){const b=S.me.biz,p=b&&P(b.gestor);if(p&&p.alive){b.bonus=(b.bonus||0)+(p.smarts-50)/2000;S.me.money-=Math.round(b.value*.005);}return o.apply(this,arguments);})(yearBiz);
 V.sucessao=()=>({title:'Sucessão e poder',items:[...(S.me.biz?.disputa?[{l:'Aceitar a nova gestão',s:'A empresa continua sendo minha',on:()=>act(()=>sucessaoResolver('aceitar'),'Sucessão')},{l:'Negociar a retomada da gestão',s:fmt(Math.max(2000,Math.round(S.me.biz.value*.02))),on:()=>act(()=>sucessaoResolver('negociar'),'Sucessão')}]:[]),...(S.sucessoes||[]).map(x=>({l:x.nome+' · '+x.n,s:x.ano+' · '+x.motivo})),...(S.espolios||[]).map(e=>({l:'Espólio de '+e.nome,s:e.feito?'Revisão concluída':'Recursos em revisão: '+fmt(e.valor)})),{html:'<div class="card">Gestores recebem 0,5% do valor da empresa por ano. Herdar uma empresa não garante o controle imediato da administração. Filhos não herdam pena criminal nem mandato.</div>'}]});
 V.menu=(o=>()=>{const r=o();r.items.push({ic:'🏛️',l:'Sucessão e poder',on:()=>UI.push(V.sucessao)});return r;})(V.menu);
+
+// Identidade estável: o NPC que assume a vida mantém o mesmo ID.
+function geracaoNormalizar(s){if(!s?.me)return s;let max=Math.max(0,...s.people.map(p=>Number(p.id)||0),Number(s.me.id)||0);s.nextId=Math.max(s.nextId||1,max+1);if(!s.me.id)s.me.id=s.nextId++;
+ for(const p of s.people){if(!p.parentIds)p.parentIds=p.parentId?[p.parentId]:[];if(['filho','adot'].includes(p.rel)&&!p.parentIds.includes(s.me.id))p.parentIds.push(s.me.id);}
+ return s;
+}
+function geracaoFoto(k){const antigo=S.me,arquivo=(S.memoriaGeracoes||[]).slice();arquivo.push({id:antigo.id,nome:fullName(antigo),ano:S.year,geracao:S.gen,causa:antigo.cause,pais:antigo.country,cotidiano:JSON.parse(JSON.stringify(antigo.cotidiano?.notas||[]))});return {pessoas:S.people.slice(),rels:Object.fromEntries(S.people.map(p=>[p.id,{rel:p.rel,bond:p.bond,memorias:p.relMemorias||[]} ])),arquivo:arquivo.slice(-30)};}
+function geracaoPessoas(k,old,keep,passado){const ids=new Set(keep.map(p=>p.id)),par=k.vida?.par;
+ for(const p of passado.pessoas){if(p.id===k.id)continue;const prev=passado.rels[p.id];const vinc=p.vinculos||(p.vinculos={});vinc[old.id]={rel:prev.rel,bond:prev.bond,memorias:prev.memorias};p.relMemorias=[];
+ if(p.id===par&&p.alive){p.rel='conjuge';p.bond=clamp(p.bond);p.polyCom=[];}
+ else if(p.parentIds?.includes(k.id))p.rel='filho';
+ else if(prev.rel==='neto'&&!ids.has(p.id))p.rel='sobrinho';
+ else if(!ids.has(p.id)&&prev.rel!=='pet'){p.rel=['conjuge','noivo','namoro'].includes(prev.rel)?'padrasto':'conhecido';p.bond=Math.min(45,p.bond);}
+ if(!ids.has(p.id)){keep.push(p);ids.add(p.id);}
+ }
+ for(const p of keep.filter(p=>p.rel==='conjuge')){npcVida(p).par=k.id;p.polyCom=keep.filter(q=>q.rel==='conjuge'&&q.id!==p.id).map(q=>q.id);}
+}
+function geracaoDividas(old,k){const l=JSON.parse(JSON.stringify(old.loans||[]));for(const [valor,n] of [[old.money,'Dívida do espólio'],[k.money,'Dívida pessoal anterior']])if(valor<0)l.push({n,bal:Math.round(-valor*(n==='Dívida do espólio'?.85:1)),pay:Math.max(100,Math.round(-valor*.05))});return l;}
+Object.assign(REL_LABEL,{conhecido:'Conhecido|Conhecida',sobrinho:'Sobrinho|Sobrinha',padrasto:'Padrasto|Madrasta'});
+fixSave=(o=>function(s){return geracaoNormalizar(o(s));})(fixSave);
+newLife=(o=>function(){const r=o.apply(this,arguments);geracaoNormalizar(S);return r;})(newLife);
+yearPeople=(o=>function(){const r=o.apply(this,arguments);geracaoNormalizar(S);return r;})(yearPeople);
+V.me=(o=>function(){const r=o();if(r&&S.me.historiaPessoal?.length)r.items.push({sec:'Minha trajetória anterior'},...S.me.historiaPessoal.slice(-6).map(h=>({l:String(h.ano),s:h.texto})));if(r&&(S.memoriaGeracoes||[]).length)r.items.push({sec:'Gerações anteriores'},...S.memoriaGeracoes.slice(-8).reverse().map(h=>({l:h.nome,s:h.ano+' · geração '+h.geracao+' · '+(h.causa||'história encerrada')})));return r;})(V.me);
+V.person=(o=>function(p){const r=o(p);if(r&&p.vinculos)for(const [id,v] of Object.entries(p.vinculos)){const nome=S.memoriaGeracoes?.find(h=>String(h.id)===id)?.nome;if(nome)r.items.push({l:'Vínculo com '+nome,s:g(REL_LABEL[v.rel]||v.rel,p.gender)+((v.memorias||[]).length?' · '+(v.memorias||[]).length+' lembranças preservadas':'')});}return r;})(V.person);

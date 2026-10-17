@@ -31,7 +31,7 @@ function npcTrajetoria(p){if(!p.alive||!npcAcompanhado(p))return;const v=npcVida
  if(p.age>=70&&!v.aposentado){v.aposentado=true;v.ultimoEmprego=p.job;p.job=null;npcMarco(p,'aposentadoria',p.first+' se aposentou.');}
  if(!v.aposentado&&!v.negocio){if(!p.job&&R.chance(npcChanceEmprego(p)))npcEmprego(p);else if(p.job&&R.chance(.025+t.ambicao/3000)){npcEmprego(p);npcMarco(p,'carreira',p.first+' decidiu mudar de carreira.');}}
  npcFinancasAno(p);
- const par=v.par&&P(v.par);if(v.par&&(!par||!par.alive)){v.par=null;if(par?.vida)par.vida.par=null;npcMarco(p,'viuvez',p.first+' perdeu '+(par?.first||'seu par')+'.');}
+ const par=v.par&&(v.par===S.me.id?S.me:P(v.par));if(v.par&&(!par||!par.alive)){v.par=null;if(par?.vida)par.vida.par=null;npcMarco(p,'viuvez',p.first+' perdeu '+(par?.first||'seu par')+'.');}
  if(par?.alive&&npcPodeFormarFamilia(p)&&npcPodeFormarFamilia(par)&&R.chance(.012+(100-t.lealdade)/6000)){v.par=null;npcVida(par).par=null;npcMarco(p,'separacao',p.first+' e '+par.first+' se separaram.');}
  if(npcPodeFormarFamilia(p)&&!v.par&&p.age<75&&S.people.length<120&&R.chance(.055)){const q=mkPerson({rel:'conhecido',age:Math.max(18,p.age+R.int(-5,5)),country:p.country});S.people.push(q);npcUnir(p,q);}
  const q=v.par&&P(v.par);if(q?.alive&&p.id<q.id&&R.chance(.065))npcFilho(p,q);
