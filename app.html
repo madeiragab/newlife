@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610170029'</script>
+<title>NewLife</title><script>window.NL_VER='2610170030'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -1599,10 +1599,11 @@ function yearMoney(){
     const ownHome=m.assets.some(a=>a.k==='casa');
     if(!S.flags.movedOut&&(m.age>=26||ownHome||people('conjuge').length||!parents().length)){ S.flags.movedOut=1; if(!ownHome&&parents().length) log('Saí da casa dos meus pais e aluguei um lugar só meu.'); }
     const atHome=!S.flags.movedOut;
-    let cost=atHome?1800:(ownHome?4500:9500)+Math.round(gross*.32); /* o padrão de vida sobe junto com o salário */
+    const custoLocal=typeof mercadoCusto==='function'?mercadoCusto():1;
+    let cost=atHome?Math.round(1800*custoLocal):Math.round((ownHome?4500:9500)*custoLocal)+Math.round(gross*.32); /* o padrão de vida sobe junto com o salário */
     cost+=m.assets.filter(a=>a.k==='carro').length*900+people('pet').reduce((s,p)=>s+(typeof petDef==='function'&&petDef(p)&&petDef(p).ex?1500:500),0);
-    if(m.edu.cur&&m.edu.cur.type!=='medio'&&m.age<26) cost=Math.min(cost,3000);
-    kids().filter(k=>k.age<18).forEach(()=>cost+=4000);
+    if(m.edu.cur&&m.edu.cur.type!=='medio'&&m.age<26) cost=Math.min(cost,Math.round(3000*custoLocal));
+    kids().filter(k=>k.age<18).forEach(()=>cost+=Math.round(4000*custoLocal));
     // morando com os pais e sem dinheiro: eles bancam o básico (sem dívida), mas o relacionamento sofre um pouco
     const ps=parents().filter(p=>p.money>0).sort((a,b)=>b.money-a.money);
     if(atHome&&m.money<cost&&ps.length){ ps[0].money-=cost; ps.forEach(p=>p.bond=clamp(p.bond-1)); if(R.chance(.3)) log(R.pick(['Meus pais bancaram minhas despesas mais um ano.','Meus pais pagaram minhas contas e jogaram na cara no almoço de domingo.'])); cost=0; }
@@ -1637,7 +1638,7 @@ function yearFame(){
 function yearAssets(){
   const m=S.me;
   for(const a of m.assets){
-    if(a.k==='casa'){ a.value=Math.round(a.value*(1+R.norm(.04,.05))); a.cond=clamp(a.cond-R.int(1,4)); m.money-=Math.round(a.value*.012); }
+    if(a.k==='casa'){ a.value=Math.round(a.value*(typeof mercadoValor==='function'?mercadoValor(a):1+R.norm(.04,.05))); a.cond=clamp(a.cond-R.int(1,4)); m.money-=Math.round(a.value*.012); }
     else if(a.k==='carro'&&a.classic){ a.value=Math.round(a.value*(1+R.norm(.05,.04))); a.cond=clamp(a.cond-R.int(0,2)); }
     else if(a.k==='carro'){ a.value=Math.round(a.value*R.f()*.08+a.value*.84); a.cond=clamp(a.cond-R.int(3,9)); m.money-=Math.round(a.value*.03); }
     else { a.value=Math.round(a.value*(1+R.norm(.01,.06))); }
@@ -14798,6 +14799,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.48',d:'16/10/2026',t:'Preços acompanham cada mercado',itens:['Imóveis e veículos usam oferta, demanda e índices nacionais, com ofertas estáveis durante o ano.','Imóveis já comprados acompanham o mercado do país de origem; mudar de país não muda a localização dos bens.','Despesas usam alimentos e serviços locais. Novos financiamentos têm juros do país e amortização; contratos antigos mantêm suas condições.']},
  {v:'1.47',d:'16/10/2026',t:'Quinze economias em movimento',itens:['Todos os países simulam PIB, crescimento, inflação, juros, desemprego, oferta, demanda e poder de compra a cada ano.','Choques temporários e relações com parceiros afetam a trajetória; índices separados de salários, imóveis, veículos, alimentos e serviços ficam salvos.','O painel da economia mundial permite comparar países e consultar seu histórico, mesmo sem visitá-los.']},
  {v:'1.46',d:'16/10/2026',t:'Infância com atividades adequadas',itens:['Até os 3 anos, encontros e churrascos são organizados pela família; dos 4 aos 11, a criança participa com responsáveis.','Dos 12 aos 17, o personagem pode ajudar nos preparativos. Organização por conta própria fica para adultos.','Revisadas escolhas de festas, homenagens e reuniões; bebês não conduzem debates de bairro nem recebem narração de adultos. Festa em casa tem validação de idade na função.']},
  {v:'1.45',d:'16/10/2026',t:'Animais com estado e histórico consistentes',itens:['Morte por velhice, doença e eventos atualiza o animal pelo ID e registra idade, ano e causa.','Animais falecidos param de envelhecer e não recebem ações ou eventos de animais vivos; notificações repetidas são evitadas.','Histórico preservado em Relações, com distinção entre falecimento, doação e ausência. Saves antigos recuperam mortes identificáveis sem ambiguidade no histórico.']},
@@ -15307,7 +15309,7 @@ function mundoAno(){if(S.scen||!S.me.alive)return;const all=macroInicializar();w
 
 yearStats=(o=>function(){mundoAno();return o.apply(this,arguments);})(yearStats);
 jobSalary=(o=>function(j){const base=o.apply(this,arguments);if(!S||S.scen)return base;const w=mundo();return Math.round(base*(1+w.economia*.025+MUNDO_POL[w.politica].sal));})(jobSalary);
-yearMoney=(o=>function(){const r=o.apply(this,arguments),m=S.me;if(!S.scen&&m.alive&&m.age>=18&&!m.prison){const w=mundo(),extra=Math.round((m.c.lastCost||0)*(Math.max(0,-w.economia)*.03+MUNDO_POL[w.politica].custo));m.money-=extra;m.c.lastCost=(m.c.lastCost||0)+extra;w.ultimoCusto=extra;if(extra)log('A conjuntura '+(extra>0?'aumentou':'reduziu')+' minhas despesas em '+fmt(Math.abs(extra))+'.',extra>0?'warn':'good');}return r;})(yearMoney);
+yearMoney=(o=>function(){const r=o.apply(this,arguments),m=S.me;if(!S.scen&&m.alive&&m.age>=18&&!m.prison){const w=mundo(),extra=Math.round((m.c.lastCost||0)*(MUNDO_POL[w.politica].custo));m.money-=extra;m.c.lastCost=(m.c.lastCost||0)+extra;w.ultimoCusto=extra;if(extra)log('A conjuntura '+(extra>0?'aumentou':'reduziu')+' minhas despesas em '+fmt(Math.abs(extra))+'.',extra>0?'warn':'good');}return r;})(yearMoney);
 yearBiz=(o=>function(){if(S.me.biz&&!S.scen)S.me.biz.bonus=(S.me.biz.bonus||0)+mundo().economia*.015;return o.apply(this,arguments);})(yearBiz);
 continueAs=(o=>function(k){const contexto=S.mundo;const r=o.apply(this,arguments);S.mundo=contexto;return r;})(continueAs);
 EVENTS.mundo_comunidade={show:()=>({k:'Vizinhança',t:'O bairro se mobilizou',x:'Com a tensão social aumentando, moradores organizaram uma reunião sobre os problemas do bairro.',ch:[['Participar e ouvir os moradores','participar'],['Ajudar com $500','doar'],['Não participar desta vez','nao']]}),pick:k=>{const w=mundo();if(k==='doar'){if(!canPay(500))return 'Não tenho dinheiro disponível para contribuir.';S.me.money-=500;w.tensao=clamp(w.tensao-2);return 'Ajudei a iniciativa do bairro, com um efeito pequeno na tensão local.';}if(k==='participar'){st('happy',3);people('amigo').forEach(p=>p.bond=clamp(p.bond+2));w.tensao=clamp(w.tensao-1);return 'Ouvi os moradores e fortaleci meus vínculos com a comunidade.';}return 'Continuei minha rotina.';}};
@@ -15478,6 +15480,16 @@ interact=(o=>function(p,k){if(S.me.age<4&&p?.alive&&p.rel!=='pet'&&['tempo','con
 npcResponder=(o=>function(p,k){const r=o.apply(this,arguments);return S.me.age<4&&k==='sim'?'Meus responsáveis combinaram um encontro com '+(p?.first||'a família')+'. Participei acompanhado por eles.':r;})(npcResponder);
 npcAfinidade=(o=>function(){if(S.me.age<4)return 'Meus responsáveis ainda me ajudam a participar das conversas.';return o.apply(this,arguments);})(npcAfinidade);
 V.person=(o=>function(p){const r=o(p);if(r&&S.me.age<4)r.items=r.items.filter(x=>!/^Conversar sobre /.test(x.l||''));return r;})(V.person);
+
+// Mercados nacionais em moeda comum: cotação local / câmbio simulado.
+function mercadoIndice(pais,tipo){const w=mundo(pais);return w.indices[tipo]/w.cambio;}
+function mercadoCusto(){return .45*mercadoIndice(S.me.country,'alimentos')+.55*mercadoIndice(S.me.country,'servicos');}
+houseListings=(o=>function(){const m=S.me;if(m.yr.casasPais!==m.country||m.yr.casasAno!==S.year||!Array.isArray(m.yr.houses)){const idx=mercadoIndice(m.country,'imoveis');m.yr.houses=o.apply(this,arguments).map(l=>({...l,v:Math.max(1000,Math.round(l.v*idx/100)*100),country:m.country,mercadoAno:S.year,mercadoIndice:idx}));m.yr.casasPais=m.country;m.yr.casasAno=S.year;}return m.yr.houses;})(houseListings);
+carListings=(o=>function(){const m=S.me;if(m.yr.carrosPais!==m.country||m.yr.carrosAno!==S.year||!Array.isArray(m.yr.cars)){m.yr.cars=null;const idx=mercadoIndice(m.country,'veiculos');m.yr.cars=o.apply(this,arguments).map(l=>({...l,v:Math.max(100,Math.round(l.v*idx/100)*100),country:m.country,mercadoAno:S.year,mercadoIndice:idx}));m.yr.carrosPais=m.country;m.yr.carrosAno=S.year;}return m.yr.cars;})(carListings);
+function mercadoValor(a){if(!['casa','carro'].includes(a.k))return 1;const pais=a.country||(a.country=S.me.country),idx=mercadoIndice(pais,a.k==='casa'?'imoveis':'veiculos');if(!a.mercadoIndice){a.mercadoIndice=idx;a.mercadoAno=S.year;return 1;}if(a.mercadoAno===S.year)return 1;const f=idx/a.mercadoIndice;a.mercadoIndice=idx;a.mercadoAno=S.year;return macroLim(f,.5,1.5);}
+buy=(o=>function(kind,l,fin){if(l.country&&(l.country!==S.me.country||l.mercadoAno!==S.year))return 'Essa oferta pertence a outro país ou ano. Consulte o mercado atual.';const n=S.me.assets.length,r=o.apply(this,arguments);for(const a of S.me.assets.slice(n)){if(!['casa','carro'].includes(kind))continue;a.country=l.country||S.me.country;a.mercadoIndice=mercadoIndice(a.country,kind==='casa'?'imoveis':'veiculos');a.mercadoAno=S.year;if(a.loan){a.loanRate=mundo(a.country).juros;const j=a.loanRate;a.pay=Math.round(a.loan*j/(1-Math.pow(1+j,-25)));}}return r;})(buy);
+yearAssets=(o=>function(){for(const a of S.me.assets){if(a.loan&&a.loanRate)a.loan=Math.round(a.loan*(1+a.loanRate));if(a.k==='carro')a.value=Math.max(1,Math.round(a.value*mercadoValor(a)));}return o.apply(this,arguments);})(yearAssets);
+V.asset=(o=>function(a){const r=o(a);if(r&&a.country)r.items.unshift({html:'<div class="card">'+kv('Mercado de origem',countryOf(a.country).n)+(a.loanRate?kv('Juros anuais do contrato',(a.loanRate*100).toFixed(1)+'%'):'')+'<p>O valor acompanha o mercado deste país, mesmo depois de emigrar.</p></div>'});return r;})(V.asset);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
