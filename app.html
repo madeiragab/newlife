@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610170036'</script>
+<title>NewLife</title><script>window.NL_VER='2610170037'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -14786,6 +14786,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.53',d:'16/10/2026',t:'Diagnóstico da economia mundial',itens:['Diagnóstico reproduzível acompanha até 200 anos nos 15 países, verificando preços, inflação, recuperação de crises e integridade do save.','Projeções dos 30 aos 90 anos com salário, ações, cripto e empresa ajudam a identificar fortunas inválidas e diferenças entre estratégias.','As projeções isolam as finanças e não simulam mortalidade; os resultados servem para orientar novos ajustes de equilíbrio.']},
  {v:'1.52',d:'16/10/2026',t:'O jornal mostra um mundo vivo',itens:['Manchetes internacionais nascem de mudanças relevantes nos indicadores, com bandeira e país corretos.','Jornal dividido entre meu país, internacionais e minha história; matérias abrem indicadores e planejamento de emigração.','Presidentes definem prioridades de emprego, segurança, saúde e transparência com efeitos por vários anos. Grandes operações privadas também influenciam a economia, em escala limitada.','O motor e a migração de animais foram otimizados para não repetir trabalho a cada consulta.']},
  {v:'1.51',d:'16/10/2026',t:'O mundo influencia o mundo',itens:['Comércio, energia, logística, câmbio e fluxos migratórios conectam as economias; epidemias podem atravessar a rede de parceiros.','Empresas podem exportar, com demanda externa e custos de importação e logística. Crises energéticas afetam parceiros e concorrentes.','A emigração considera o destino e cobra transferência; preços usam moeda comum e a cotação nunca multiplica o saldo do jogador.']},
  {v:'1.50',d:'16/10/2026',t:'Empresas com contas de verdade',itens:['Lucro operacional é receita menos salários, insumos, despesas e tributos do país e do setor.','Capital produtivo e caixa são separados; prejuízos consomem reservas e podem levar à falência. Dividendos usam dinheiro disponível.','Abra filiais em outros países e setores, consulte relatórios por unidade ou transfira a sede.']},
@@ -15526,6 +15527,13 @@ const GOVERNO_MEDIDAS={emprego:{n:'Programa de empregos',crescimento:.008,polici
 officeAct=(o=>function(k){const plano=GOVERNO_MEDIDAS[k],m=S.me;if(plano){if(m.office?.id!=='pres')return 'Essa decisão exige exercer a presidência.';if(use('planoPresidencial')>1)return 'Já defini a prioridade de governo deste ano.';mundo().medidas={...plano,anos:3};m.office.appr=clamp(m.office.appr+2);noticia(m.first+' anuncia '+plano.n.toLowerCase(),'A medida foi aprovada para os próximos três anos. Os efeitos serão calculados na atualização dos indicadores e têm custos inflacionários.','politica');return 'Defini '+plano.n.toLowerCase()+'. Os efeitos começam no próximo ano.';}const n=m.yr.office||0,r=o.apply(this,arguments);if(n<3&&m.office?.id==='pres'&&k==='imposto')mundo().medidas={n:'Aumento de impostos',crescimento:-.004,policia:0,saude:3,corrupcao:0,inf:-.002,anos:2};return r;})(officeAct);
 V.career=(o=>()=>{const r=o();if(S.me.office?.id==='pres')r.items.push({sec:'Prioridades do país'},...Object.entries(GOVERNO_MEDIDAS).map(([k,p])=>({l:p.n,s:'Efeitos nos indicadores · uma decisão por ano',on:()=>act(()=>officeAct(k),'Governo')})));return r;})(V.career);
 
+// Diagnóstico econômico curto: estabilidade secular e projeções financeiras sem mortalidade.
+function mundoDiagnostico(anos=200){const before=S,meta=JSON.stringify(META),snaps=SNAPS,rand=R.f,noSave=window.NO_SAVE,noNews=window.NO_NEWS;window.NO_SAVE=true;window.NO_NEWS=true;let seed=713427;R.f=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};const ok=(v,t)=>{if(!v)throw Error(t)};try{newLife({});let recuperou=false;const id=COUNTRIES[0].id;mundo(id).crescimento=-.07;mundo(id).choque={tipo:'credito',ate:S.year+3};let maxInf=0,maxIndice=0;for(let i=0;i<anos;i++){S.year++;macroPasso(S.year);for(const c of COUNTRIES){const w=mundo(c.id);for(const k of ['pib','crescimento','inflacao','juros','desemprego','cambio','crime','policia','saude'])ok(Number.isFinite(w[k]),c.id+' '+k);ok(w.pib>0&&w.juros>0&&w.desemprego>=0&&w.desemprego<=.3,'limites '+c.id);for(const v of Object.values(w.indices)){ok(v>0&&Number.isFinite(v),'preço inválido');maxIndice=Math.max(maxIndice,v);}maxInf=Math.max(maxInf,w.inflacao);}if(i>3&&mundo(id).crescimento>0)recuperou=true;}
+ ok(recuperou,'a economia em crise nunca se recuperou');ok(maxInf<.15,'inflação persistente fora do intervalo');S=JSON.parse(JSON.stringify(S));fixSave(S);ok(mundo(id).ano===S.year,'save do mundo');
+ const trajetorias=[];for(const estrategia of ['salario','acoes','cripto','empresa']){newLife({});S.me.age=30;S.me.money=100000;const j=JOBS.find(j=>j.sal>=50000&&j.sal<=80000&&!j.pt)||JOBS.find(j=>!j.pt);takeJob({id:j.id,co:'Diagnóstico',size:'média',mul:1});if(estrategia==='empresa')openBiz(BIZ_SECTORS[0],'Diagnóstico');const pontos={a30:origemTotal()};for(let a=31;a<=90;a++){S.me.age=a;S.year++;S.me.yr={};S.people.forEach(p=>p.yr={});S.log.push({age:a,year:S.year,lines:[]});mundoAno();if(S.me.job&&a%10===0)S.me.job.lvl=Math.min(S.me.job.lvl+1,j.l.length-1);yearMoney();yearAssets();yearBiz();for(const e of S.pending.splice(0)){if(e.id==='biz_evento'&&S.me.biz)EVENTS.biz_evento.pick(EVENTS.biz_evento.show(e.d).ch[0][1],e.d);}if(['acoes','cripto'].includes(estrategia)&&S.me.money>15000)invest(estrategia,Math.round((S.me.money-15000)*.25));ok(Number.isFinite(origemTotal()),'fortuna infinita '+estrategia);if(S.me.biz)ok(S.me.biz.value>=0,'empresa negativa');if([45,65,90].includes(a))pontos['a'+a]=Math.round(netWorth()+(S.me.biz?.value||0));}trajetorias.push({estrategia,...pontos});}
+ return {anos,paises:COUNTRIES.length,recuperou,maxInflacao:maxInf,maxIndice,trajetorias,nota:'Projeções financeiras com trabalho e mercados, sem mortalidade; não substituem testes de jogadores.'};
+ }finally{S=before;META=JSON.parse(meta);SNAPS=snaps;R.f=rand;window.NO_SAVE=noSave;window.NO_NEWS=noNews;}}
+
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
   {
@@ -15767,6 +15775,7 @@ function selfTest(){
   });
   T('família e saves',familySelfTest);
   T('sistemas públicos integrados',publicSystemsSelfTest);
+  T('economia mundial',()=>mundoDiagnostico(100));
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
