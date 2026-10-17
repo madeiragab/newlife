@@ -30,6 +30,7 @@ function selfTest(){
       assert(nlNotas().some(x=>x.v==='1.0'&&x.body.includes('Primeira versão')),'changelog sem lançamento inicial');
     } finally { R.chance=chance; }
   });
+  T('trajetórias persistentes',continuidadeSelfTest);
   T('família e saves',familySelfTest);
   T('sistemas públicos integrados',publicSystemsSelfTest);
   T('economia mundial',()=>mundoDiagnostico(100));

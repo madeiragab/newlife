@@ -87,7 +87,7 @@ function mkPerson(o){
     bond:o.bond??R.int(45,90), alive:true, looks:o.looks??clamp(R.norm(55,20)), smarts:o.smarts??clamp(R.norm(55,20)),
     craze:o.craze??R.int(0,100), money:o.money??0, job:o.job||null, health:o.health??R.int(55,100),
     talent:randTalent(), will:R.int(5,100), fert:R.int(15,100), genes:o.species?null:randGenes(gender,c.id),
-    species:o.species||null, life:o.life||null, parentId:o.parentId||null, yrs:0, yr:{} };
+    country:c.id, species:o.species||null, life:o.life||null, parentId:o.parentId||null, yrs:0, yr:{} };
   if(o.from) Object.assign(p,childOf(o.from[0],o.from[1],gender));
   return p;
 }
@@ -282,15 +282,15 @@ function yearPeople(){
       if(['mae','pai','avo'].includes(p.rel)&&p.money>1000&&R.chance(p.rel==='avo'?.35:.6)){ const share=Math.round(p.money*(p.rel==='avo'?R.f()*.3:R.f()*.5+.2)); m.money+=share; log(`Recebi uma herança de ${fmt(share)}.`,'good'); }
       if(p.rel==='conjuge') cnt('widow');
       continue; }
-    if(p.age>=18&&!['pet'].includes(p.rel)){ const mult={pobre:.35,media:1,rica:4,milionaria:20,realeza:60}[S.flags.cls]||1; const inc=p.job&&p.age<70?R.int(2000,14000)*(['mae','pai'].includes(p.rel)?mult:1):-R.int(0,2500); p.money=Math.round((p.money||0)*(p.money>0?1.02:1)+inc); }
+    if(p.age>=18&&!['pet'].includes(p.rel)&&!npcAcompanhado(p)){ const mult={pobre:.35,media:1,rica:4,milionaria:20,realeza:60}[S.flags.cls]||1; const inc=p.job&&p.age<70?R.int(2000,14000)*(['mae','pai'].includes(p.rel)?mult:1):-R.int(0,2500); p.money=Math.round((p.money||0)*(p.money>0?1.02:1)+inc); }
     const fam=['mae','pai','filho','irmao','avo','neto','adot'].includes(p.rel);
     if(!fam&&p.rel!=='inimigo') p.bond=clamp(p.bond-R.int(0,5)); else p.bond=clamp(p.bond-R.int(-1,3));
     if(['namoro','noivo'].includes(p.rel)&&p.bond<18&&R.chance(.5)){ p.rel='ex'; log(`${p.first} terminou comigo.`,'bad'); st('happy',-15); }
     if(p.rel==='conjuge'&&p.bond<12&&R.chance(.35)){ divorce(p,true); }
     if(p.rel==='amigo'&&p.bond<10&&R.chance(.4)){ p.rel='ex_amigo'; p.alive=true; log(`Perdi contato com ${p.first}.`); }
     if((p.rel==='filho'||p.rel==='adot')&&p.age===18) log(`${p.first} fez 18 anos${R.chance(.5)?' e saiu de casa':''}.`);
-    if((p.rel==='filho'||p.rel==='adot')&&p.age>=21&&p.age<=42&&R.chance(.07)){ const n=mkPerson({rel:'neto',age:0,last:p.gender==='M'?p.last:R.pick(countryOf(m.country).L),parentId:p.id,bond:R.int(60,95),from:[p,mkPerson({rel:'tmp',gender:p.gender==='F'?'M':'F',age:p.age})]}); S.people.push(n); log(`${p.first} teve ${n.gender==='F'?'uma filha':'um filho'}, ${n.first}. Agora sou ${m.gender==='F'?'avó':'avô'}!`,'good'); cnt('kids'); }
-    if(['filho','adot'].includes(p.rel)&&p.age===R.int(18,26)&&!p.job){ const d=R.pick(JOBS.filter(j=>!j.pt)); p.job=g(d.l[0],p.gender); }
+    if(!npcAcompanhado(p)&&(p.rel==='filho'||p.rel==='adot')&&p.age>=21&&p.age<=42&&R.chance(.07)){ const n=mkPerson({rel:'neto',age:0,last:p.gender==='M'?p.last:R.pick(countryOf(m.country).L),parentId:p.id,bond:R.int(60,95),from:[p,mkPerson({rel:'tmp',gender:p.gender==='F'?'M':'F',age:p.age})]}); S.people.push(n); log(`${p.first} teve ${n.gender==='F'?'uma filha':'um filho'}, ${n.first}. Agora sou ${m.gender==='F'?'avó':'avô'}!`,'good'); cnt('kids'); }
+    if(!npcAcompanhado(p)&&['filho','adot'].includes(p.rel)&&p.age===R.int(18,26)&&!p.job){ const d=R.pick(JOBS.filter(j=>!j.pt)); p.job=g(d.l[0],p.gender); }
   }
   if(m.age<=13){ const mom=people('mae')[0]; if(mom&&mom.age<=43&&R.chance(.07)){ const s=uniqFirst(mkPerson({rel:'irmao',age:0,last:m.last,bond:R.int(50,80),from:[mom,people('pai')[0]||mkPerson({rel:'tmp',gender:'M',age:mom.age})]})); S.people.push(s); log(`${s.gender==='F'?'Nasceu minha irmã':'Nasceu meu irmão'} ${s.first}.`,'good'); } }
   const mom=people('mae')[0],dad=people('pai')[0];
