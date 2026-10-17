@@ -18,8 +18,8 @@ V.sucessao=()=>({title:'Sucessão e poder',items:[...(S.me.biz?.disputa?[{l:'Ace
 V.menu=(o=>()=>{const r=o();r.items.push({ic:'🏛️',l:'Sucessão e poder',on:()=>UI.push(V.sucessao)});return r;})(V.menu);
 
 // Identidade estável: o NPC que assume a vida mantém o mesmo ID.
-function geracaoNormalizar(s){if(!s?.me)return s;let max=Math.max(0,...s.people.map(p=>Number(p.id)||0),Number(s.me.id)||0);s.nextId=Math.max(s.nextId||1,max+1);if(!s.me.id)s.me.id=s.nextId++;
- for(const p of s.people){if(!p.parentIds)p.parentIds=p.parentId?[p.parentId]:[];if(['filho','adot'].includes(p.rel)&&!p.parentIds.includes(s.me.id))p.parentIds.push(s.me.id);}
+function geracaoNormalizar(s){if(!s?.me)return s;let max=Math.max(0,...s.people.map(p=>Number(p.id)||0),Number(s.me.id)||0);s.nextId=Math.max(s.nextId||1,max+1);if(!s.me.id)s.me.id=s.nextId++;if(!s.me.parentIds)s.me.parentIds=s.people.filter(p=>['mae','pai'].includes(p.rel)).map(p=>p.id);
+ for(const p of s.people){if(!p.parentIds)p.parentIds=p.parentId?[p.parentId]:[];if(p.rel==='irmao'&&!p.parentIds.length)p.parentIds=s.me.parentIds.slice();if(['filho','adot'].includes(p.rel)&&!p.parentIds.includes(s.me.id))p.parentIds.push(s.me.id);}
  return s;
 }
 function geracaoFoto(k){const antigo=S.me,arquivo=(S.memoriaGeracoes||[]).slice();arquivo.push({id:antigo.id,nome:fullName(antigo),ano:S.year,geracao:S.gen,causa:antigo.cause,pais:antigo.country,cotidiano:JSON.parse(JSON.stringify(antigo.cotidiano?.notas||[]))});return {pessoas:S.people.slice(),rels:Object.fromEntries(S.people.map(p=>[p.id,{rel:p.rel,bond:p.bond,memorias:p.relMemorias||[]} ])),arquivo:arquivo.slice(-30)};}
@@ -40,3 +40,8 @@ newLife=(o=>function(){const r=o.apply(this,arguments);geracaoNormalizar(S);retu
 yearPeople=(o=>function(){const r=o.apply(this,arguments);geracaoNormalizar(S);return r;})(yearPeople);
 V.me=(o=>function(){const r=o();if(r&&S.me.historiaPessoal?.length)r.items.push({sec:'Minha trajetória anterior'},...S.me.historiaPessoal.slice(-6).map(h=>({l:String(h.ano),s:h.texto})));if(r&&(S.memoriaGeracoes||[]).length)r.items.push({sec:'Gerações anteriores'},...S.memoriaGeracoes.slice(-8).reverse().map(h=>({l:h.nome,s:h.ano+' · geração '+h.geracao+' · '+(h.causa||'história encerrada')})));return r;})(V.me);
 V.person=(o=>function(p){const r=o(p);if(r&&p.vinculos)for(const [id,v] of Object.entries(p.vinculos)){const nome=S.memoriaGeracoes?.find(h=>String(h.id)===id)?.nome;if(nome)r.items.push({l:'Vínculo com '+nome,s:g(REL_LABEL[v.rel]||v.rel,p.gender)+((v.memorias||[]).length?' · '+(v.memorias||[]).length+' lembranças preservadas':'')});}return r;})(V.person);
+
+continueAs=(o=>function(k){if(!k?.alive||S.me.alive||!kids().includes(k))return false;return o.apply(this,arguments);})(continueAs);
+
+function geracaoRecalcular(s){const mapa=new Map(s.people.concat(s.me).map(p=>[p.id,p]));const ascendentes=id=>{let fila=[id],res=new Map();for(let nivel=1;nivel<=5&&fila.length;nivel++){const prox=[];for(const n of fila)for(const pid of mapa.get(n)?.parentIds||[])if(!res.has(pid)){res.set(pid,nivel);prox.push(pid);}fila=prox;}return res;};const ancestrais=ascendentes(s.me.id),pais=s.me.parentIds||[];for(const p of s.people){if(p.rel==='pet')continue;const grau=ancestrais.get(p.id);if(grau){p.rel=grau===1?(p.gender==='F'?'mae':'pai'):grau===2?'avo':grau===3?'bisavo':'ancestral';continue;}const desc=ascendentes(p.id).get(s.me.id);if(desc){p.rel=desc===1?'filho':desc===2?'neto':'descendente';continue;}const pp=p.parentIds||[];if(pp.some(id=>pais.includes(id))){p.rel='irmao';continue;}if(pp.some(id=>(mapa.get(id)?.parentIds||[]).some(x=>pais.includes(x))))p.rel='sobrinho';else if(pais.some(id=>(mapa.get(id)?.parentIds||[]).some(x=>pp.includes(x))))p.rel='tio';}}
+Object.assign(REL_LABEL,{bisavo:'Bisavô|Bisavó',ancestral:'Antepassado|Antepassada',descendente:'Descendente',tio:'Tio|Tia'});

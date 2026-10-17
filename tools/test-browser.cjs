@@ -44,13 +44,15 @@ async function run(){
   closeBrowser=()=>send('Browser.close');
   await send('Runtime.enable');await send('Page.enable');
   await send('Runtime.addBinding',{name:'nlTestNotify'});
+  const continuidade=['1.59','1.60'].map(versao=>({versao,save:JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/save-'+versao+'.json'),'utf8'))}));
   const fixture=fs.readFileSync(path.join(__dirname,'fixtures/save-1.46.json'),'utf8');
-  await send('Page.addScriptToEvaluateOnNewDocument',{source:'window.NL_SAVE_FIXTURE='+fixture+';'});
+  await send('Page.addScriptToEvaluateOnNewDocument',{source:'window.NL_SAVE_FIXTURE='+fixture+';window.NL_CONT_FIXTURES='+JSON.stringify(continuidade)+';'});
   timer=setTimeout(()=>rejectDone(Error('Limite de 6 minutos; último progresso: '+last)),360000);
   send('Page.navigate',{url:pathToFileURL(page).href+'#teste'}).catch(rejectDone);
   const result=await done;
   fs.writeFileSync(report,result.text,'utf8');
   if(result.economia)fs.writeFileSync(report+'.economia.json',JSON.stringify(result.economia,null,2));
+  if(result.continuidade)fs.writeFileSync(report+'.continuidade.json',JSON.stringify(result.continuidade,null,2));
   if(result.playtests)fs.writeFileSync(report+'.trajetorias.json',JSON.stringify(result.playtests,null,2));
   console.log('Duração: '+((Date.now()-inicio)/1000).toFixed(1)+' s');
   const limit=Number(process.env.NL_REPORT_LIMIT)||3000;

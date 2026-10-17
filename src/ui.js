@@ -667,7 +667,9 @@ function continueAs(k){
   if(inherit) log(`Herdei ${fmt(inherit)}${assets.length?` e ${assets.length} ${assets.length>1?'bens':'bem'}`:''}.`,'good');
   if(k.age>=6&&k.age<15) startSchool('fund'); else if(k.age>=15&&k.age<18) startSchool('medio');
   if(k.age>=18&&k.job){ const d=JOBS.find(j=>j.l.some(t=>g(t,k.gender)===k.job)); if(d&&!d.pt){ m.job={id:d.id,lvl:Math.max(0,d.l.findIndex(t=>g(t,k.gender)===k.job)),perf:55,yrs:R.int(0,8),co:companyName()}; } }
-  geracaoNormalizar(S);save();
+  for(const curso of k.vida?.formacao||[])if(!m.edu.deg.includes(curso))m.edu.deg.push(curso);if(k.vida?.lic)m.lic=true;
+  if(m.job&&k.vida?.emprego?.id===m.job.id)m.job.yrs=Math.max(0,S.year-k.vida.emprego.desde);if(k.vida?.aposentado){m.ret={pension:k.vida.financas?.renda||6000};m.job=null;}
+  geracaoNormalizar(S);geracaoRecalcular(S);save();
 }
 
 function showErr(e){ console.error(e); const el=$('#err'); el.hidden=false; el.textContent='Erro: '+(e&&e.message||e)+'\n'+(e&&e.stack||'').split('\n').slice(0,3).join('\n'); setTimeout(()=>el.hidden=true,9000); }

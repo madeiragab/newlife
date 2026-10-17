@@ -10,3 +10,6 @@ O estado foi serializado antes de carregar qualquer código econômico novo.
 O runner injeta esse JSON no navegador de teste. A regressão verifica valores,
 contrato legado, migração idempotente, troca de país, país de origem dos bens,
 conversão da empresa e financiamento novo com taxa contratada.
+
+
+As fixtures 1.59 e 1.60 foram geradas executando os HTMLs publicados originais, com emprego, empresa, casa financiada, cônjuge e filho. Os arquivos origem-*.json registram o carimbo e o SHA-256 de cada HTML. Os testes verificam migração idempotente, patrimônio, contratos e pessoas.

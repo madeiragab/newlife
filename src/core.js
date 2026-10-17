@@ -390,7 +390,7 @@ function yearWork(){
   }
   if(m.office&&!m.prison){ const o=m.office; o.yrs++; o.appr=clamp(o.appr+R.int(-8,5)); if(o.yrs>=4) queue('reeleicao',{}); }
 }
-function endJob(){ const m=S.me; if(m.job){ m.hist.push({t:jobTitle(m.job),co:m.job.co,yrs:m.job.yrs}); } m.job=null; S.people.filter(p=>p.rel==='colegaT'||p.rel==='chefe').forEach(p=>p.alive=false); }
+function endJob(){ const m=S.me; if(m.job){ m.hist.push({t:jobTitle(m.job),co:m.job.co,yrs:m.job.yrs}); } m.job=null; S.people.filter(p=>p.alive&&(p.rel==='colegaT'||p.rel==='chefe')).forEach(p=>{p.rel='conhecido';p.exTrabalho=S.year;}); }
 function yearMoney(){
   const m=S.me; let gross=0,net=0;
   if(m.prison) { m.loans.forEach(l=>{ l.bal=Math.round(l.bal*1.04); }); return; }

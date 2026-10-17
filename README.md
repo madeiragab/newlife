@@ -42,7 +42,7 @@
 Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que fazer nos eventos. Tudo é aleatório o bastante para duas vidas nunca serem iguais.
 
 ### 👶 Nascimento e genética
-- Primeira vida **totalmente aleatória**; depois você escolhe entre vida aleatória ou personalizada.
+- **Tela inicial** com Nova vida, Continuar e Novidades; escolha uma vida personalizada ou aleatória.
 - Pais com aparência coerente com o país (tom de pele, cabelo e olhos); **filhos herdam** traços, altura, inteligência e talentos dos pais.
 - **15 países**, cada um com banco próprio de nomes e sobrenomes (mais de 2.400 só no Brasil), sem repetir nomes entre vidas.
 
@@ -357,3 +357,14 @@ docs/img/       imagens deste README
 - Nomes e sobrenomes do Brasil: API de Nomes do **IBGE** (Censo 2022).
 - Nomes dos outros países: [popular-names-by-country-dataset](https://github.com/sigpwned/popular-names-by-country-dataset) (CC0), complementados à mão.
 - Fontes **Fredoka** e **Nunito** (SIL Open Font License), embutidas para funcionar offline.
+
+
+## Vidas que continuam · 1.61–1.68
+
+Pessoas próximas podem trabalhar, formar famílias, emigrar e tomar iniciativas. Abra a ficha de uma pessoa em Relações para consultar sua trajetória, orçamento e memórias. O desemprego depende do país onde ela vive; ajudar alguém é uma escolha, sem pagamento automático pelo protagonista.
+
+Decisões cotidianas sobre escola, casa, amizades, trabalho e aposentadoria aparecem conforme a situação da partida. O jornal registra consequências já calculadas e permite consultar os indicadores do país. Não há uma história obrigatória nem retorno garantido por ajudar alguém.
+
+Ao continuar como um filho, IDs e pessoas permanecem no mundo. Vínculos do protagonista anterior ficam no arquivo familiar; o herdeiro conserva seu próprio saldo, país e família, além do patrimônio e contratos herdados. Mandatos e penas criminais não são transferidos.
+
+O pipeline verifica saves produzidos nos HTMLs publicados da 1.59 e 1.60, trajetórias de NPCs, três gerações e os percursos comuns, empresariais, familiares e criminosos. As projeções financeiras de 30 a 90 anos são diagnósticos automatizados, sem mortalidade; não equivalem a playtests humanos nem provam o equilíbrio de todas as estratégias.

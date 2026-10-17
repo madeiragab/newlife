@@ -1,0 +1,1817 @@
+{
+  "v": 1,
+  "nextId": 13,
+  "year": 2010,
+  "people": [
+    {
+      "id": 1,
+      "first": "Graziele",
+      "last": "Cardoso",
+      "gender": "F",
+      "age": 21,
+      "rel": "mae",
+      "bond": 67,
+      "alive": true,
+      "looks": 27,
+      "smarts": 67,
+      "craze": 46,
+      "money": 5787,
+      "job": null,
+      "health": 68,
+      "talent": {
+        "acting": 75,
+        "musical": 71,
+        "athletic": 46,
+        "art": 32,
+        "dance": 17,
+        "writing": 26,
+        "comedy": 44
+      },
+      "will": 35,
+      "fert": 62,
+      "genes": {
+        "hair": "preto",
+        "eyes": "castanho-escuros",
+        "h": 158,
+        "skin": 2,
+        "style": 3,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 1,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 2,
+      "first": "Fernando Tadeu",
+      "last": "Santos Sobrinho",
+      "gender": "M",
+      "age": 19,
+      "rel": "pai",
+      "bond": 76,
+      "alive": true,
+      "looks": 50,
+      "smarts": 52,
+      "craze": 8,
+      "money": 5644,
+      "job": "Ajudante de cozinha",
+      "health": 61,
+      "talent": {
+        "acting": 39,
+        "musical": 79,
+        "athletic": 30,
+        "art": 15,
+        "dance": 60,
+        "writing": 50,
+        "comedy": 60
+      },
+      "will": 86,
+      "fert": 46,
+      "genes": {
+        "hair": "preto",
+        "eyes": "castanhos",
+        "h": 160,
+        "skin": 0,
+        "style": 2,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 2,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 3,
+      "first": "Eliseu",
+      "last": "Lima",
+      "gender": "M",
+      "age": 50,
+      "rel": "avo",
+      "bond": 54,
+      "alive": true,
+      "looks": 44,
+      "smarts": 86,
+      "craze": 3,
+      "money": 3911,
+      "job": null,
+      "health": 85,
+      "talent": {
+        "acting": 17,
+        "musical": 79,
+        "athletic": 57,
+        "art": 24,
+        "dance": 48,
+        "writing": 72,
+        "comedy": 0
+      },
+      "will": 44,
+      "fert": 34,
+      "genes": {
+        "hair": "castanho",
+        "eyes": "castanho-escuros",
+        "h": 182,
+        "skin": 5,
+        "style": 3,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 3,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 4,
+      "first": "Rosana",
+      "last": "Pinto",
+      "gender": "F",
+      "age": 44,
+      "rel": "avo",
+      "bond": 67,
+      "alive": true,
+      "looks": 67,
+      "smarts": 39,
+      "craze": 24,
+      "money": 605,
+      "job": null,
+      "health": 56,
+      "talent": {
+        "acting": 27,
+        "musical": 32,
+        "athletic": 19,
+        "art": 38,
+        "dance": 2,
+        "writing": 17,
+        "comedy": 86
+      },
+      "will": 15,
+      "fert": 55,
+      "genes": {
+        "hair": "preto",
+        "eyes": "castanhos",
+        "h": 173,
+        "skin": 0,
+        "style": 3,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 2,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 5,
+      "first": "Gean",
+      "last": "Freitas",
+      "gender": "M",
+      "age": 41,
+      "rel": "avo",
+      "bond": 88,
+      "alive": true,
+      "looks": 74,
+      "smarts": 59,
+      "craze": 40,
+      "money": 1006,
+      "job": null,
+      "health": 37,
+      "talent": {
+        "acting": 40,
+        "musical": 88,
+        "athletic": 54,
+        "art": 28,
+        "dance": 7,
+        "writing": 51,
+        "comedy": 70
+      },
+      "will": 16,
+      "fert": 40,
+      "genes": {
+        "hair": "castanho-escuro",
+        "eyes": "castanhos",
+        "h": 179,
+        "skin": 1,
+        "style": 0,
+        "glasses": true,
+        "freckles": true,
+        "eyeShape": 0,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 6,
+      "first": "Tiago",
+      "last": "Ramos",
+      "gender": "M",
+      "age": 35,
+      "rel": "colegaT",
+      "bond": 51,
+      "alive": true,
+      "looks": 62,
+      "smarts": 94,
+      "craze": 47,
+      "money": 0,
+      "job": null,
+      "health": 76,
+      "talent": {
+        "acting": 0,
+        "musical": 58,
+        "athletic": 38,
+        "art": 39,
+        "dance": 57,
+        "writing": 10,
+        "comedy": 34
+      },
+      "will": 88,
+      "fert": 85,
+      "genes": {
+        "hair": "castanho-escuro",
+        "eyes": "castanho-escuros",
+        "h": 180,
+        "skin": 6,
+        "style": 5,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 1,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 7,
+      "first": "Helena",
+      "last": "Clara Moraes",
+      "gender": "F",
+      "age": 41,
+      "rel": "colegaT",
+      "bond": 37,
+      "alive": true,
+      "looks": 36,
+      "smarts": 72,
+      "craze": 31,
+      "money": 0,
+      "job": null,
+      "health": 64,
+      "talent": {
+        "acting": 0,
+        "musical": 8,
+        "athletic": 93,
+        "art": 39,
+        "dance": 21,
+        "writing": 29,
+        "comedy": 68
+      },
+      "will": 33,
+      "fert": 85,
+      "genes": {
+        "hair": "preto",
+        "eyes": "pretos",
+        "h": 160,
+        "skin": 4,
+        "style": 4,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 3,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 8,
+      "first": "Luís",
+      "last": "Brasil",
+      "gender": "M",
+      "age": 37,
+      "rel": "colegaT",
+      "bond": 25,
+      "alive": true,
+      "looks": 48,
+      "smarts": 79,
+      "craze": 42,
+      "money": 0,
+      "job": null,
+      "health": 67,
+      "talent": {
+        "acting": 49,
+        "musical": 21,
+        "athletic": 91,
+        "art": 32,
+        "dance": 55,
+        "writing": 100,
+        "comedy": 25
+      },
+      "will": 58,
+      "fert": 69,
+      "genes": {
+        "hair": "castanho-escuro",
+        "eyes": "castanho-escuros",
+        "h": 175,
+        "skin": 2,
+        "style": 3,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 2,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 9,
+      "first": "Letícia Eloah",
+      "last": "Machado",
+      "gender": "F",
+      "age": 59,
+      "rel": "chefe",
+      "bond": 46,
+      "alive": true,
+      "looks": 50,
+      "smarts": 53,
+      "craze": 71,
+      "money": 0,
+      "job": null,
+      "health": 71,
+      "talent": {
+        "acting": 39,
+        "musical": 29,
+        "athletic": 15,
+        "art": 69,
+        "dance": 28,
+        "writing": 54,
+        "comedy": 70
+      },
+      "will": 38,
+      "fert": 71,
+      "genes": {
+        "hair": "castanho",
+        "eyes": "verdes",
+        "h": 170,
+        "skin": 6,
+        "style": 1,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 1,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 11,
+      "first": "Tânia",
+      "last": "Nonato",
+      "gender": "F",
+      "age": 34,
+      "rel": "conjuge",
+      "bond": 90,
+      "alive": true,
+      "looks": 63,
+      "smarts": 98,
+      "craze": 53,
+      "money": 0,
+      "job": null,
+      "health": 56,
+      "talent": {
+        "acting": 64,
+        "musical": 18,
+        "athletic": 59,
+        "art": 62,
+        "dance": 21,
+        "writing": 17,
+        "comedy": 1
+      },
+      "will": 82,
+      "fert": 100,
+      "genes": {
+        "hair": "preto",
+        "eyes": "verdes",
+        "h": 162,
+        "skin": 6,
+        "style": 3,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 0,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 12,
+      "first": "Jadson",
+      "last": "Viana",
+      "gender": "M",
+      "age": 10,
+      "rel": "filho",
+      "bond": 76,
+      "alive": true,
+      "looks": 23,
+      "smarts": 56,
+      "craze": 43,
+      "money": 0,
+      "job": null,
+      "health": 65,
+      "talent": {
+        "acting": 8,
+        "musical": 20,
+        "athletic": 46,
+        "art": 54,
+        "dance": 60,
+        "writing": 64,
+        "comedy": 68
+      },
+      "will": 78,
+      "fert": 28,
+      "genes": {
+        "hair": "castanho-escuro",
+        "eyes": "castanhos",
+        "h": 179,
+        "skin": 2,
+        "style": 4,
+        "glasses": true,
+        "freckles": false,
+        "eyeShape": 3,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": 11,
+      "yrs": 0,
+      "yr": {}
+    }
+  ],
+  "log": [
+    {
+      "age": 0,
+      "year": 2010,
+      "lines": [
+        {
+          "t": "Nasci menino em Goiânia, Brasil, no ano de 2010.",
+          "c": "big"
+        },
+        "Meu nome é Vitor Murilo Santos Sobrinho.",
+        "Minha mãe é Graziele Cardoso, sem emprego, 21 anos.",
+        "Meu pai é Fernando Tadeu Santos Sobrinho, ajudante de cozinha, 19 anos.",
+        "Minha família é pobre.",
+        "Tenho olhos castanhos do meu pai e cabelo preto da minha mãe.",
+        {
+          "t": "Fui contratado como atendente de lanchonete na Fixture.",
+          "c": "good"
+        },
+        {
+          "t": "Comprei: quitinete numa rua arborizada por $48.400.",
+          "c": "good"
+        },
+        {
+          "t": "Abri minha empresa: Empresa do save antigo (lanchonete).",
+          "c": "good"
+        }
+      ]
+    }
+  ],
+  "pending": [],
+  "births": [],
+  "me": {
+    "first": "Vitor Murilo",
+    "last": "Santos Sobrinho",
+    "gender": "M",
+    "age": 35,
+    "country": "BR",
+    "city": "Goiânia",
+    "born": 1975,
+    "happy": 100,
+    "health": 59,
+    "smarts": 63,
+    "looks": 42,
+    "karma": 72,
+    "fame": 0,
+    "money": 1450320,
+    "talent": {
+      "acting": 56,
+      "musical": 68,
+      "athletic": 75,
+      "art": 24,
+      "dance": 28,
+      "writing": 38,
+      "comedy": 48
+    },
+    "will": 44,
+    "fert": 51,
+    "fight": 18,
+    "pref": "M",
+    "add": {
+      "alcool": 0,
+      "cigarro": 0,
+      "jogo": 0
+    },
+    "dis": [],
+    "edu": {
+      "deg": [
+        "fund",
+        "medio"
+      ],
+      "cur": null,
+      "club": null
+    },
+    "job": {
+      "id": "lanch",
+      "lvl": 0,
+      "perf": 55,
+      "yrs": 0,
+      "lvlYrs": 0,
+      "co": "Fixture",
+      "size": "média",
+      "mul": 1
+    },
+    "hist": [],
+    "rec": {
+      "arrests": 0,
+      "conv": 0,
+      "crimes": 0
+    },
+    "prison": null,
+    "lic": false,
+    "assets": [
+      {
+        "id": 10,
+        "k": "casa",
+        "n": "Quitinete numa rua arborizada",
+        "value": 48400,
+        "cond": 65,
+        "buy": 48400,
+        "loan": 38720,
+        "pay": 3116,
+        "country": "BR",
+        "mercadoIndice": 0.8046875,
+        "mercadoAno": 2010,
+        "loanRate": 0.063
+      }
+    ],
+    "loans": [],
+    "inv": {
+      "poup": 0,
+      "acoes": 0,
+      "cripto": 0
+    },
+    "social": null,
+    "office": null,
+    "ret": null,
+    "biz": {
+      "n": "Empresa do save antigo",
+      "sector": "Lanchonete",
+      "value": 40000,
+      "start": 40000,
+      "emp": 1,
+      "yrs": 0,
+      "mkt": 0,
+      "country": "BR",
+      "capital": 32000,
+      "caixa": 8000,
+      "contabil": 1,
+      "filiais": []
+    },
+    "royal": null,
+    "c": {
+      "countries": 1
+    },
+    "yr": {
+      "houses": [
+        {
+          "t": "Apartamento",
+          "n": "Apartamento perto da praia",
+          "v": 121600,
+          "cond": 82,
+          "q": 1,
+          "built": 1966,
+          "country": "BR",
+          "mercadoAno": 2010,
+          "mercadoIndice": 0.8046875
+        },
+        {
+          "t": "Casa",
+          "n": "Casa no centro",
+          "v": 182000,
+          "cond": 67,
+          "q": 4,
+          "built": 1953,
+          "country": "BR",
+          "mercadoAno": 2010,
+          "mercadoIndice": 0.8046875
+        },
+        {
+          "t": "Sobrado",
+          "n": "Sobrado numa rua arborizada",
+          "v": 217700,
+          "cond": 49,
+          "q": 3,
+          "built": 1958,
+          "country": "BR",
+          "mercadoAno": 2010,
+          "mercadoIndice": 0.8046875
+        },
+        {
+          "t": "Sítio",
+          "n": "Sítio numa rua arborizada",
+          "v": 322000,
+          "cond": 72,
+          "q": 1,
+          "built": 1991,
+          "country": "BR",
+          "mercadoAno": 2010,
+          "mercadoIndice": 0.8046875
+        },
+        {
+          "t": "Castelo",
+          "n": "Castelo perto da universidade",
+          "v": 11523000,
+          "cond": 50,
+          "q": 8,
+          "built": 1993,
+          "country": "BR",
+          "mercadoAno": 2010,
+          "mercadoIndice": 0.8046875
+        }
+      ],
+      "casasPais": "BR",
+      "casasAno": 2010
+    },
+    "alive": true,
+    "cause": null,
+    "genes": {
+      "hair": "preto",
+      "eyes": "castanhos",
+      "h": 162,
+      "from": {
+        "hair": "Graziele",
+        "eyes": "Fernando Tadeu",
+        "h": "Fernando Tadeu"
+      },
+      "skin": 0,
+      "style": 2,
+      "glasses": false,
+      "freckles": false,
+      "eyeShape": 1
+    },
+    "orient": "gay",
+    "ident": "cis",
+    "sexo": "M"
+  },
+  "gen": 1,
+  "flags": {
+    "diff": "normal",
+    "cls": "pobre",
+    "movedOut": 1
+  },
+  "ultScen": null,
+  "mundo": {
+    "_ano": 2010,
+    "BR": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 40,
+      "policia": 50,
+      "corrupcao": 35,
+      "saude": 65,
+      "macroVersao": 1,
+      "pib": 3128,
+      "crescimento": 0.019,
+      "inflacao": 0.038,
+      "juros": 0.063,
+      "desemprego": 0.068,
+      "estabilidade": 0.75,
+      "especialidade": "industria",
+      "dependenciaEnergia": 0.48000000000000004,
+      "energia": 1,
+      "cambio": 1.28,
+      "indices": {
+        "imoveis": 1.03,
+        "veiculos": 1.08,
+        "alimentos": 1.03,
+        "servicos": 1.18,
+        "salarios": 1.2799999999999998
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 53,
+          "demanda": 53,
+          "concorrencia": 63
+        },
+        "tecnologia": {
+          "oferta": 60,
+          "demanda": 64,
+          "concorrencia": 41
+        },
+        "alimentos": {
+          "oferta": 67,
+          "demanda": 50,
+          "concorrencia": 54
+        },
+        "industria": {
+          "oferta": 74,
+          "demanda": 61,
+          "concorrencia": 67
+        },
+        "servicos": {
+          "oferta": 56,
+          "demanda": 72,
+          "concorrencia": 45
+        },
+        "imoveis": {
+          "oferta": 63,
+          "demanda": 58,
+          "concorrencia": 58
+        },
+        "veiculos": {
+          "oferta": 70,
+          "demanda": 69,
+          "concorrencia": 36
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "PT",
+        "MX",
+        "FR"
+      ],
+      "poderCompra": 1.1583710407239818
+    },
+    "PT": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 41,
+      "policia": 51,
+      "corrupcao": 36,
+      "saude": 66,
+      "macroVersao": 1,
+      "pib": 3564,
+      "crescimento": 0.014,
+      "inflacao": 0.039,
+      "juros": 0.059,
+      "desemprego": 0.08399999999999999,
+      "estabilidade": 0.75,
+      "especialidade": "servicos",
+      "dependenciaEnergia": 0.64,
+      "energia": 1,
+      "cambio": 0.8400000000000001,
+      "indices": {
+        "imoveis": 1.19,
+        "veiculos": 1.24,
+        "alimentos": 1.19,
+        "servicos": 0.74,
+        "salarios": 1.14
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 64,
+          "demanda": 64,
+          "concorrencia": 44
+        },
+        "tecnologia": {
+          "oferta": 71,
+          "demanda": 50,
+          "concorrencia": 57
+        },
+        "alimentos": {
+          "oferta": 53,
+          "demanda": 61,
+          "concorrencia": 35
+        },
+        "industria": {
+          "oferta": 60,
+          "demanda": 72,
+          "concorrencia": 48
+        },
+        "servicos": {
+          "oferta": 67,
+          "demanda": 58,
+          "concorrencia": 61
+        },
+        "imoveis": {
+          "oferta": 74,
+          "demanda": 69,
+          "concorrencia": 39
+        },
+        "veiculos": {
+          "oferta": 56,
+          "demanda": 55,
+          "concorrencia": 52
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "US",
+        "JP",
+        "DE"
+      ],
+      "poderCompra": 1.1813471502590673
+    },
+    "US": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 42,
+      "policia": 52,
+      "corrupcao": 37,
+      "saude": 67,
+      "macroVersao": 1,
+      "pib": 3718,
+      "crescimento": 0.020999999999999998,
+      "inflacao": 0.028,
+      "juros": 0.073,
+      "desemprego": 0.098,
+      "estabilidade": 0.75,
+      "especialidade": "industria",
+      "dependenciaEnergia": 0.38,
+      "energia": 1,
+      "cambio": 1.58,
+      "indices": {
+        "imoveis": 1.33,
+        "veiculos": 0.98,
+        "alimentos": 0.9299999999999999,
+        "servicos": 1.48,
+        "salarios": 0.8799999999999999
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 68,
+          "demanda": 68,
+          "concorrencia": 58
+        },
+        "tecnologia": {
+          "oferta": 50,
+          "demanda": 54,
+          "concorrencia": 36
+        },
+        "alimentos": {
+          "oferta": 57,
+          "demanda": 65,
+          "concorrencia": 49
+        },
+        "industria": {
+          "oferta": 64,
+          "demanda": 51,
+          "concorrencia": 62
+        },
+        "servicos": {
+          "oferta": 71,
+          "demanda": 62,
+          "concorrencia": 40
+        },
+        "imoveis": {
+          "oferta": 53,
+          "demanda": 73,
+          "concorrencia": 53
+        },
+        "veiculos": {
+          "oferta": 60,
+          "demanda": 59,
+          "concorrencia": 66
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "AR",
+        "IT",
+        "GB"
+      ],
+      "poderCompra": 0.7302904564315351
+    },
+    "AR": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 43,
+      "policia": 53,
+      "corrupcao": 38,
+      "saude": 68,
+      "macroVersao": 1,
+      "pib": 3097,
+      "crescimento": 0.03,
+      "inflacao": 0.037000000000000005,
+      "juros": 0.07200000000000001,
+      "desemprego": 0.10700000000000001,
+      "estabilidade": 0.75,
+      "especialidade": "alimentos",
+      "dependenciaEnergia": 0.77,
+      "energia": 1,
+      "cambio": 0.9700000000000001,
+      "indices": {
+        "imoveis": 1.42,
+        "veiculos": 1.37,
+        "alimentos": 1.3199999999999998,
+        "servicos": 0.87,
+        "salarios": 0.97
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 72,
+          "demanda": 72,
+          "concorrencia": 67
+        },
+        "tecnologia": {
+          "oferta": 54,
+          "demanda": 58,
+          "concorrencia": 45
+        },
+        "alimentos": {
+          "oferta": 61,
+          "demanda": 69,
+          "concorrencia": 58
+        },
+        "industria": {
+          "oferta": 68,
+          "demanda": 55,
+          "concorrencia": 36
+        },
+        "servicos": {
+          "oferta": 50,
+          "demanda": 66,
+          "concorrencia": 49
+        },
+        "imoveis": {
+          "oferta": 57,
+          "demanda": 52,
+          "concorrencia": 62
+        },
+        "veiculos": {
+          "oferta": 64,
+          "demanda": 63,
+          "concorrencia": 40
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "MX",
+        "FR",
+        "AO"
+      ],
+      "poderCompra": 0.8858447488584474
+    },
+    "MX": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 44,
+      "policia": 54,
+      "corrupcao": 39,
+      "saude": 69,
+      "macroVersao": 1,
+      "pib": 3475,
+      "crescimento": 0.03,
+      "inflacao": 0.025,
+      "juros": 0.07,
+      "desemprego": 0.065,
+      "estabilidade": 0.75,
+      "especialidade": "energia",
+      "dependenciaEnergia": 0.35,
+      "energia": 1,
+      "cambio": 1.55,
+      "indices": {
+        "imoveis": 1,
+        "veiculos": 0.9500000000000001,
+        "alimentos": 0.9,
+        "servicos": 1.45,
+        "salarios": 1.15
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 50,
+          "demanda": 50,
+          "concorrencia": 60
+        },
+        "tecnologia": {
+          "oferta": 57,
+          "demanda": 61,
+          "concorrencia": 38
+        },
+        "alimentos": {
+          "oferta": 64,
+          "demanda": 72,
+          "concorrencia": 51
+        },
+        "industria": {
+          "oferta": 71,
+          "demanda": 58,
+          "concorrencia": 64
+        },
+        "servicos": {
+          "oferta": 53,
+          "demanda": 69,
+          "concorrencia": 42
+        },
+        "imoveis": {
+          "oferta": 60,
+          "demanda": 55,
+          "concorrencia": 55
+        },
+        "veiculos": {
+          "oferta": 67,
+          "demanda": 66,
+          "concorrencia": 68
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "JP",
+        "DE",
+        "CA"
+      ],
+      "poderCompra": 0.978723404255319
+    },
+    "JP": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 45,
+      "policia": 55,
+      "corrupcao": 40,
+      "saude": 70,
+      "macroVersao": 1,
+      "pib": 3374,
+      "crescimento": 0.013000000000000001,
+      "inflacao": 0.029,
+      "juros": 0.069,
+      "desemprego": 0.10400000000000001,
+      "estabilidade": 0.75,
+      "especialidade": "servicos",
+      "dependenciaEnergia": 0.54,
+      "energia": 1,
+      "cambio": 1.34,
+      "indices": {
+        "imoveis": 1.3900000000000001,
+        "veiculos": 1.1400000000000001,
+        "alimentos": 1.09,
+        "servicos": 1.24,
+        "salarios": 1.04
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 74,
+          "demanda": 74,
+          "concorrencia": 64
+        },
+        "tecnologia": {
+          "oferta": 56,
+          "demanda": 60,
+          "concorrencia": 42
+        },
+        "alimentos": {
+          "oferta": 63,
+          "demanda": 71,
+          "concorrencia": 55
+        },
+        "industria": {
+          "oferta": 70,
+          "demanda": 57,
+          "concorrencia": 68
+        },
+        "servicos": {
+          "oferta": 52,
+          "demanda": 68,
+          "concorrencia": 46
+        },
+        "imoveis": {
+          "oferta": 59,
+          "demanda": 54,
+          "concorrencia": 59
+        },
+        "veiculos": {
+          "oferta": 66,
+          "demanda": 65,
+          "concorrencia": 37
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "IT",
+        "GB",
+        "ES"
+      ],
+      "poderCompra": 0.8927038626609443
+    },
+    "IT": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 46,
+      "policia": 56,
+      "corrupcao": 41,
+      "saude": 71,
+      "macroVersao": 1,
+      "pib": 3347,
+      "crescimento": 0.028,
+      "inflacao": 0.032,
+      "juros": 0.062,
+      "desemprego": 0.077,
+      "estabilidade": 0.75,
+      "especialidade": "alimentos",
+      "dependenciaEnergia": 0.27,
+      "energia": 1,
+      "cambio": 1.07,
+      "indices": {
+        "imoveis": 1.12,
+        "veiculos": 0.8700000000000001,
+        "alimentos": 0.8200000000000001,
+        "servicos": 0.97,
+        "salarios": 0.77
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 72,
+          "demanda": 72,
+          "concorrencia": 37
+        },
+        "tecnologia": {
+          "oferta": 54,
+          "demanda": 58,
+          "concorrencia": 50
+        },
+        "alimentos": {
+          "oferta": 61,
+          "demanda": 69,
+          "concorrencia": 63
+        },
+        "industria": {
+          "oferta": 68,
+          "demanda": 55,
+          "concorrencia": 41
+        },
+        "servicos": {
+          "oferta": 50,
+          "demanda": 66,
+          "concorrencia": 54
+        },
+        "imoveis": {
+          "oferta": 57,
+          "demanda": 52,
+          "concorrencia": 67
+        },
+        "veiculos": {
+          "oferta": 64,
+          "demanda": 63,
+          "concorrencia": 45
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "FR",
+        "AO",
+        "KR"
+      ],
+      "poderCompra": 0.8603351955307262
+    },
+    "FR": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 47,
+      "policia": 57,
+      "corrupcao": 42,
+      "saude": 72,
+      "macroVersao": 1,
+      "pib": 3252,
+      "crescimento": 0.017,
+      "inflacao": 0.027000000000000003,
+      "juros": 0.067,
+      "desemprego": 0.052000000000000005,
+      "estabilidade": 0.75,
+      "especialidade": "alimentos",
+      "dependenciaEnergia": 0.52,
+      "energia": 1,
+      "cambio": 0.92,
+      "indices": {
+        "imoveis": 0.87,
+        "veiculos": 1.12,
+        "alimentos": 1.07,
+        "servicos": 0.82,
+        "salarios": 0.72
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 52,
+          "demanda": 52,
+          "concorrencia": 47
+        },
+        "tecnologia": {
+          "oferta": 59,
+          "demanda": 63,
+          "concorrencia": 60
+        },
+        "alimentos": {
+          "oferta": 66,
+          "demanda": 74,
+          "concorrencia": 38
+        },
+        "industria": {
+          "oferta": 73,
+          "demanda": 60,
+          "concorrencia": 51
+        },
+        "servicos": {
+          "oferta": 55,
+          "demanda": 71,
+          "concorrencia": 64
+        },
+        "imoveis": {
+          "oferta": 62,
+          "demanda": 57,
+          "concorrencia": 42
+        },
+        "veiculos": {
+          "oferta": 69,
+          "demanda": 68,
+          "concorrencia": 55
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "DE",
+        "CA",
+        "IN"
+      ],
+      "poderCompra": 0.7619047619047619
+    },
+    "DE": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 48,
+      "policia": 58,
+      "corrupcao": 43,
+      "saude": 73,
+      "macroVersao": 1,
+      "pib": 3177,
+      "crescimento": 0.026000000000000002,
+      "inflacao": 0.027000000000000003,
+      "juros": 0.07200000000000001,
+      "desemprego": 0.047,
+      "estabilidade": 0.75,
+      "especialidade": "alimentos",
+      "dependenciaEnergia": 0.37,
+      "energia": 1,
+      "cambio": 0.9700000000000001,
+      "indices": {
+        "imoveis": 0.8200000000000001,
+        "veiculos": 0.9700000000000001,
+        "alimentos": 0.92,
+        "servicos": 0.87,
+        "salarios": 0.87
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 52,
+          "demanda": 52,
+          "concorrencia": 42
+        },
+        "tecnologia": {
+          "oferta": 59,
+          "demanda": 63,
+          "concorrencia": 55
+        },
+        "alimentos": {
+          "oferta": 66,
+          "demanda": 74,
+          "concorrencia": 68
+        },
+        "industria": {
+          "oferta": 73,
+          "demanda": 60,
+          "concorrencia": 46
+        },
+        "servicos": {
+          "oferta": 55,
+          "demanda": 71,
+          "concorrencia": 59
+        },
+        "imoveis": {
+          "oferta": 62,
+          "demanda": 57,
+          "concorrencia": 37
+        },
+        "veiculos": {
+          "oferta": 69,
+          "demanda": 68,
+          "concorrencia": 50
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "GB",
+        "ES",
+        "BR"
+      ],
+      "poderCompra": 0.9720670391061452
+    },
+    "GB": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 49,
+      "policia": 59,
+      "corrupcao": 44,
+      "saude": 74,
+      "macroVersao": 1,
+      "pib": 3267,
+      "crescimento": 0.032,
+      "inflacao": 0.027000000000000003,
+      "juros": 0.062,
+      "desemprego": 0.067,
+      "estabilidade": 0.75,
+      "especialidade": "alimentos",
+      "dependenciaEnergia": 0.6699999999999999,
+      "energia": 1,
+      "cambio": 1.07,
+      "indices": {
+        "imoveis": 1.02,
+        "veiculos": 1.27,
+        "alimentos": 1.22,
+        "servicos": 0.97,
+        "salarios": 0.87
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 67,
+          "demanda": 67,
+          "concorrencia": 62
+        },
+        "tecnologia": {
+          "oferta": 74,
+          "demanda": 53,
+          "concorrencia": 40
+        },
+        "alimentos": {
+          "oferta": 56,
+          "demanda": 64,
+          "concorrencia": 53
+        },
+        "industria": {
+          "oferta": 63,
+          "demanda": 50,
+          "concorrencia": 66
+        },
+        "servicos": {
+          "oferta": 70,
+          "demanda": 61,
+          "concorrencia": 44
+        },
+        "imoveis": {
+          "oferta": 52,
+          "demanda": 72,
+          "concorrencia": 57
+        },
+        "veiculos": {
+          "oferta": 59,
+          "demanda": 58,
+          "concorrencia": 35
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "AO",
+        "KR",
+        "PT"
+      ],
+      "poderCompra": 0.7945205479452055
+    },
+    "AO": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 40,
+      "policia": 60,
+      "corrupcao": 45,
+      "saude": 75,
+      "macroVersao": 1,
+      "pib": 3094,
+      "crescimento": 0.027,
+      "inflacao": 0.034,
+      "juros": 0.069,
+      "desemprego": 0.10400000000000001,
+      "estabilidade": 0.75,
+      "especialidade": "servicos",
+      "dependenciaEnergia": 0.74,
+      "energia": 1,
+      "cambio": 0.9400000000000001,
+      "indices": {
+        "imoveis": 1.3900000000000001,
+        "veiculos": 1.34,
+        "alimentos": 1.29,
+        "servicos": 0.84,
+        "salarios": 0.94
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 69,
+          "demanda": 69,
+          "concorrencia": 64
+        },
+        "tecnologia": {
+          "oferta": 51,
+          "demanda": 55,
+          "concorrencia": 42
+        },
+        "alimentos": {
+          "oferta": 58,
+          "demanda": 66,
+          "concorrencia": 55
+        },
+        "industria": {
+          "oferta": 65,
+          "demanda": 52,
+          "concorrencia": 68
+        },
+        "servicos": {
+          "oferta": 72,
+          "demanda": 63,
+          "concorrencia": 46
+        },
+        "imoveis": {
+          "oferta": 54,
+          "demanda": 74,
+          "concorrencia": 59
+        },
+        "veiculos": {
+          "oferta": 61,
+          "demanda": 60,
+          "concorrencia": 37
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "CA",
+        "IN",
+        "US"
+      ],
+      "poderCompra": 0.8826291079812206
+    },
+    "CA": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 41,
+      "policia": 61,
+      "corrupcao": 46,
+      "saude": 76,
+      "macroVersao": 1,
+      "pib": 3142,
+      "crescimento": 0.012,
+      "inflacao": 0.037000000000000005,
+      "juros": 0.057,
+      "desemprego": 0.082,
+      "estabilidade": 0.75,
+      "especialidade": "alimentos",
+      "dependenciaEnergia": 0.62,
+      "energia": 1,
+      "cambio": 1.42,
+      "indices": {
+        "imoveis": 1.17,
+        "veiculos": 1.22,
+        "alimentos": 1.17,
+        "servicos": 1.3199999999999998,
+        "salarios": 1.42
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 67,
+          "demanda": 67,
+          "concorrencia": 42
+        },
+        "tecnologia": {
+          "oferta": 74,
+          "demanda": 53,
+          "concorrencia": 55
+        },
+        "alimentos": {
+          "oferta": 56,
+          "demanda": 64,
+          "concorrencia": 68
+        },
+        "industria": {
+          "oferta": 63,
+          "demanda": 50,
+          "concorrencia": 46
+        },
+        "servicos": {
+          "oferta": 70,
+          "demanda": 61,
+          "concorrencia": 59
+        },
+        "imoveis": {
+          "oferta": 52,
+          "demanda": 72,
+          "concorrencia": 37
+        },
+        "veiculos": {
+          "oferta": 59,
+          "demanda": 58,
+          "concorrencia": 50
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "ES",
+        "BR",
+        "AR"
+      ],
+      "poderCompra": 1.140562248995984
+    },
+    "ES": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 42,
+      "policia": 62,
+      "corrupcao": 47,
+      "saude": 77,
+      "macroVersao": 1,
+      "pib": 3222,
+      "crescimento": 0.029,
+      "inflacao": 0.027000000000000003,
+      "juros": 0.057,
+      "desemprego": 0.092,
+      "estabilidade": 0.75,
+      "especialidade": "alimentos",
+      "dependenciaEnergia": 0.22,
+      "energia": 1,
+      "cambio": 1.42,
+      "indices": {
+        "imoveis": 1.27,
+        "veiculos": 0.8200000000000001,
+        "alimentos": 0.77,
+        "servicos": 1.3199999999999998,
+        "salarios": 1.3199999999999998
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 72,
+          "demanda": 72,
+          "concorrencia": 52
+        },
+        "tecnologia": {
+          "oferta": 54,
+          "demanda": 58,
+          "concorrencia": 65
+        },
+        "alimentos": {
+          "oferta": 61,
+          "demanda": 69,
+          "concorrencia": 43
+        },
+        "industria": {
+          "oferta": 68,
+          "demanda": 55,
+          "concorrencia": 56
+        },
+        "servicos": {
+          "oferta": 50,
+          "demanda": 66,
+          "concorrencia": 69
+        },
+        "imoveis": {
+          "oferta": 57,
+          "demanda": 52,
+          "concorrencia": 47
+        },
+        "veiculos": {
+          "oferta": 64,
+          "demanda": 63,
+          "concorrencia": 60
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "KR",
+        "PT",
+        "MX"
+      ],
+      "poderCompra": 1.263157894736842
+    },
+    "KR": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 43,
+      "policia": 63,
+      "corrupcao": 48,
+      "saude": 78,
+      "macroVersao": 1,
+      "pib": 3407,
+      "crescimento": 0.025,
+      "inflacao": 0.032,
+      "juros": 0.062,
+      "desemprego": 0.067,
+      "estabilidade": 0.75,
+      "especialidade": "alimentos",
+      "dependenciaEnergia": 0.27,
+      "energia": 1,
+      "cambio": 0.8700000000000001,
+      "indices": {
+        "imoveis": 1.02,
+        "veiculos": 0.8700000000000001,
+        "alimentos": 0.8200000000000001,
+        "servicos": 0.77,
+        "salarios": 1.37
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 57,
+          "demanda": 57,
+          "concorrencia": 62
+        },
+        "tecnologia": {
+          "oferta": 64,
+          "demanda": 68,
+          "concorrencia": 40
+        },
+        "alimentos": {
+          "oferta": 71,
+          "demanda": 54,
+          "concorrencia": 53
+        },
+        "industria": {
+          "oferta": 53,
+          "demanda": 65,
+          "concorrencia": 66
+        },
+        "servicos": {
+          "oferta": 60,
+          "demanda": 51,
+          "concorrencia": 44
+        },
+        "imoveis": {
+          "oferta": 67,
+          "demanda": 62,
+          "concorrencia": 57
+        },
+        "veiculos": {
+          "oferta": 74,
+          "demanda": 73,
+          "concorrencia": 35
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "IN",
+        "US",
+        "JP"
+      ],
+      "poderCompra": 1.7232704402515724
+    },
+    "IN": {
+      "economia": 0,
+      "tensao": 30,
+      "politica": "equilibrio",
+      "ano": 2010,
+      "ate": 2013,
+      "noticias": [],
+      "crime": 44,
+      "policia": 64,
+      "corrupcao": 49,
+      "saude": 79,
+      "macroVersao": 1,
+      "pib": 3341,
+      "crescimento": 0.022,
+      "inflacao": 0.026000000000000002,
+      "juros": 0.056,
+      "desemprego": 0.07100000000000001,
+      "estabilidade": 0.75,
+      "especialidade": "tecnologia",
+      "dependenciaEnergia": 0.21000000000000002,
+      "energia": 1,
+      "cambio": 1.01,
+      "indices": {
+        "imoveis": 1.06,
+        "veiculos": 0.81,
+        "alimentos": 0.76,
+        "servicos": 0.9099999999999999,
+        "salarios": 0.71
+      },
+      "mercados": {
+        "energia": {
+          "oferta": 66,
+          "demanda": 66,
+          "concorrencia": 66
+        },
+        "tecnologia": {
+          "oferta": 73,
+          "demanda": 52,
+          "concorrencia": 44
+        },
+        "alimentos": {
+          "oferta": 55,
+          "demanda": 63,
+          "concorrencia": 57
+        },
+        "industria": {
+          "oferta": 62,
+          "demanda": 74,
+          "concorrencia": 35
+        },
+        "servicos": {
+          "oferta": 69,
+          "demanda": 60,
+          "concorrencia": 48
+        },
+        "imoveis": {
+          "oferta": 51,
+          "demanda": 71,
+          "concorrencia": 61
+        },
+        "veiculos": {
+          "oferta": 58,
+          "demanda": 57,
+          "concorrencia": 39
+        }
+      },
+      "historico": [],
+      "parceiros": [
+        "BR",
+        "AR",
+        "IT"
+      ],
+      "poderCompra": 0.8502994011976048
+    },
+    "_versao": 2
+  }
+}
