@@ -404,10 +404,11 @@ function yearMoney(){
     const ownHome=m.assets.some(a=>a.k==='casa');
     if(!S.flags.movedOut&&(m.age>=26||ownHome||people('conjuge').length||!parents().length)){ S.flags.movedOut=1; if(!ownHome&&parents().length) log('Saí da casa dos meus pais e aluguei um lugar só meu.'); }
     const atHome=!S.flags.movedOut;
-    let cost=atHome?1800:(ownHome?4500:9500)+Math.round(gross*.32); /* o padrão de vida sobe junto com o salário */
+    const custoLocal=typeof mercadoCusto==='function'?mercadoCusto():1;
+    let cost=atHome?Math.round(1800*custoLocal):Math.round((ownHome?4500:9500)*custoLocal)+Math.round(gross*.32); /* o padrão de vida sobe junto com o salário */
     cost+=m.assets.filter(a=>a.k==='carro').length*900+people('pet').reduce((s,p)=>s+(typeof petDef==='function'&&petDef(p)&&petDef(p).ex?1500:500),0);
-    if(m.edu.cur&&m.edu.cur.type!=='medio'&&m.age<26) cost=Math.min(cost,3000);
-    kids().filter(k=>k.age<18).forEach(()=>cost+=4000);
+    if(m.edu.cur&&m.edu.cur.type!=='medio'&&m.age<26) cost=Math.min(cost,Math.round(3000*custoLocal));
+    kids().filter(k=>k.age<18).forEach(()=>cost+=Math.round(4000*custoLocal));
     // morando com os pais e sem dinheiro: eles bancam o básico (sem dívida), mas o relacionamento sofre um pouco
     const ps=parents().filter(p=>p.money>0).sort((a,b)=>b.money-a.money);
     if(atHome&&m.money<cost&&ps.length){ ps[0].money-=cost; ps.forEach(p=>p.bond=clamp(p.bond-1)); if(R.chance(.3)) log(R.pick(['Meus pais bancaram minhas despesas mais um ano.','Meus pais pagaram minhas contas e jogaram na cara no almoço de domingo.'])); cost=0; }
@@ -442,7 +443,7 @@ function yearFame(){
 function yearAssets(){
   const m=S.me;
   for(const a of m.assets){
-    if(a.k==='casa'){ a.value=Math.round(a.value*(1+R.norm(.04,.05))); a.cond=clamp(a.cond-R.int(1,4)); m.money-=Math.round(a.value*.012); }
+    if(a.k==='casa'){ a.value=Math.round(a.value*(typeof mercadoValor==='function'?mercadoValor(a):1+R.norm(.04,.05))); a.cond=clamp(a.cond-R.int(1,4)); m.money-=Math.round(a.value*.012); }
     else if(a.k==='carro'&&a.classic){ a.value=Math.round(a.value*(1+R.norm(.05,.04))); a.cond=clamp(a.cond-R.int(0,2)); }
     else if(a.k==='carro'){ a.value=Math.round(a.value*R.f()*.08+a.value*.84); a.cond=clamp(a.cond-R.int(3,9)); m.money-=Math.round(a.value*.03); }
     else { a.value=Math.round(a.value*(1+R.norm(.01,.06))); }
