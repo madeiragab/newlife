@@ -176,7 +176,7 @@ V.career=()=>{
     it.push({html:`<div class="card"><p><b>${esc(b.n)}</b> · ${esc(b.sector)}</p>${kv('Valor de mercado',fmt(b.value))}${kv('Funcionários',b.emp)}${kv('Anos de vida',b.yrs)}${b.pub?kv('Bolsa de valores','Capital aberto'):''}</div>`});
     it.push({l:'Investir na empresa',on:()=>modal({t:'Investir quanto?',ch:[10000,100000,1000000].filter(v=>v<=m.money).map(v=>({l:fmt(v),fn:()=>{ const r=bizAct('invest',v); MQ.unshift({t:b.n,x:r}); }})).concat([{l:'Cancelar',cls:'alt'}])})});
     it.push({l:'Campanha de marketing',s:fmt(Math.max(2000,b.value*.05)),on:()=>act(()=>bizAct('mkt'),b.n)});
-    it.push({l:'Retirar lucros',s:'10% do valor',on:()=>act(()=>bizAct('lucro'),b.n)});
+    it.push({l:'Retirar lucros',s:'Somente caixa disponível',on:()=>act(()=>bizAct('lucro'),b.n)});
     it.push({l:'Abrir capital na bolsa',s:'Empresas acima de $50 milhões',on:()=>act(()=>bizAct('ipo'),b.n)});
     it.push({l:'Vender a empresa',on:()=>confirmBox('Vender?',`Vender a ${b.n}?`,'Vender',()=>act(()=>bizAct('vender'),b.n))});
     it.push({l:'Fechar a empresa',tone:'bad',on:()=>confirmBox('Fechar?','Perco tudo o que está investido.','Fechar',()=>act(()=>bizAct('fechar'),b.n))});

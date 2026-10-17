@@ -509,20 +509,7 @@ function yearRoyal(){
 }
 function crown(){ const m=S.me,r=m.royal; r.reign=true; r.pop=clamp(r.pop+10); m.c.reigned=1; if(m.job) endJob(); log(`Fui ${g('coroado rei|coroada rainha',m.gender)} de ${countryOf(m.country).n}!`,'good'); st('happy',25); }
 function royalTitle(){ const m=S.me,r=m.royal; if(!r||r.abd) return null; return r.reign?g('Rei|Rainha',m.gender):g('Príncipe|Princesa',m.gender); }
-function yearBiz(){
-  const m=S.me,b=m.biz; if(!b) return;
-  b.yrs++; const sec=BIZ_SECTORS.find(s=>s.n===b.sector)||BIZ_SECTORS[0];
-  const escala=Math.max(0,Math.log10(Math.max(1,b.value)/1e6));
-  const r=Math.max(-.65,Math.min(.35,R.norm(.03+(m.smarts-50)/800+Math.min(.15,b.mkt||0)+Math.min(.15,b.bonus||0)-escala*.025,sec.risk*1.15))); b.mkt=0; b.bonus=0;
-  b.value=Math.max(0,Math.round(b.value*(1+r)));
-  b.emp=Math.max(1,Math.round(b.emp*(1+r*.8)+R.int(-1,2)));
-  m.c.bizMax=Math.max(m.c.bizMax||0,b.value);
-  if(m.prison){ b.value=Math.round(b.value*.8); }
-  if(r>0&&!m.prison){ const p=Math.round(b.value*Math.min(.025,Math.max(0,r)*.2)*R.f()*diff().$); m.money+=p; if(p>1000) log(`A ${b.n} lucrou e me rendeu ${fmt(p)}.`,'good'); }
-  else if(r<-.2) log(`A ${b.n} teve um ano péssimo.`,'bad');
-  if((b.value<b.start*.3&&R.chance(.35))||(r<-.3&&R.chance(sec.risk*.4))){ log(`A ${b.n} faliu.`,'bad'); st('happy',-15); cnt('falencias'); if(R.chance(.5)){ const div=Math.round(b.start*R.f()*.5); m.money-=div; log(`Fiquei com ${fmt(div)} em dívidas da empresa.`,'bad'); } m.biz=null; }
-  if(b.value>1e8) m.fame=clamp(Math.max(m.fame,30+Math.log10(b.value)*4));
-}
+function yearBiz(){ return empresaAno(); }
 
 // ---------- morte ----------
 function deathP(age,health){ if(age<1) return .002; const base=age<45?.00035:.00028*Math.exp(.09*(age-30)); return Math.min(.9,base*Math.pow(1.6-health/100,2)); }
