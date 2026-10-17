@@ -332,4 +332,4 @@ button.row:active{transform:scale(.985)}
 #start .chip{padding:7px 13px;font-size:13px}
 @media (prefers-reduced-motion:reduce){.st-faces span{animation:none}}
 
-#newsBar{display:flex;align-items:center;gap:9px;flex-shrink:0;min-height:38px;padding:8px 14px;background:#fff;color:#19243a;text-align:left;border-bottom:1px solid #e0e4ed;font-size:12px;line-height:1.4;z-index:4}#newsBar[hidden]{display:none}#newsBar svg{flex-shrink:0}.news-label{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}.news-arrow{font-size:20px;color:#52627d}
+#newsBar{display:flex;align-items:center;gap:9px;flex-shrink:0;min-height:38px;padding:8px 14px;background:#fff;color:#19243a;text-align:left;border-bottom:1px solid #e0e4ed;font-size:12px;line-height:1.4;z-index:4}#newsBar[hidden]{display:none}#newsBar svg{flex-shrink:0}.news-window{flex:1;min-width:0;overflow:hidden;white-space:nowrap}.news-label{display:inline-block;white-space:nowrap;font-weight:600;will-change:transform;transform:translateX(100vw)}.news-arrow{font-size:20px;color:#52627d}

@@ -41,8 +41,12 @@ V.caso=c=>()=>{ const it=[{html:`<div class="card"><p><b>${c.tp[1]} ${esc(c.tp[0
 function startCaso(){ const m=S.me; if(!isCop()) return msg('Investigação','Só policiais investigam crimes. Que tal prestar o concurso?'); if(use('caso')>2) return msg('Investigação','Já peguei casos demais este ano.'); const c=novoCaso(); UI.push(V.caso(c)); }
 V.activities=(o=>()=>{ const r=o(); const m=S.me; if(m.prison||!r||!r.items) return r;
   if(isCop()) r.items.unshift({ic:'🕵️',l:'Investigar um crime',s:'Um caso novo: interrogue, reviste, chame a perícia e acuse',on:()=>startCaso()});
-  else r.items.push(Object.assign({ic:'🚓',l:'Concurso para a polícia',s:'Entre 18 e 40 anos · ensino médio · sem ficha criminal',on:()=>act(policeExam,'Concurso')},ageGate(18)));
+
   return r; })(V.activities);
+V.jobs=(o=>()=>{const r=o(),m=S.me;
+  if(!m.prison&&!isCop()&&m.age>=13)r.items.unshift({sec:'Concursos públicos'},Object.assign({ic:'🚓',l:'Concurso para a polícia',s:'Entre 18 e 40 anos · ensino médio · sem ficha criminal',on:()=>act(policeExam,'Concurso')},m.age>40?{dis:true,why:'O concurso aceita candidatos até os 40 anos.'}:ageGate(18)));
+  return r;
+})(V.jobs);
 // eventos da vida de policial
 pack({k:'Polícia',w:1.3,cd:8,min:18,when:m=>isCop()&&!m.prison},[
   ['Propina','Um traficante oferece {v} para você "não ver" uma entrega.',['Recusar e prender|?fight perf+10 k+8|Prendi ele e a carga.|hl-10 perf+4|Ele reagiu. Saí ferid{o}, mas prendi.','Aceitar|$v2 k-15|Ninguém viu. Eu acho.','Denunciar à corregedoria|perf+6 k+6|Ganhei inimigos dentro da corporação.'],{v:[5000,40000]}],
