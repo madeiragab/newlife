@@ -14,8 +14,8 @@ const RISCOS_MUNDO=['assalto','casa_assaltada','furto_celular'].map(id=>({id,bas
 yearEvents=(o=>function(){const w=mundo(),f=macroLim(.5+w.crime/100-w.policia/200,.15,1.5);for(const x of RISCOS_MUNDO)if(EVENTS[x.id])EVENTS[x.id].w=x.base*f;return o.apply(this,arguments);})(yearEvents);
 
 // Orçamento individual de NPC: nunca debita automaticamente o caixa do jogador.
-function npcChanceEmprego(p){const w=mundo(p.country),t=npcPerfil(p);return macroLim(.32+t.ambicao/600-w.desemprego*.8+w.crescimento+Math.min(.15,(p.vida?.semEmprego||0)*.025), .08,.65);}
-function npcDestino(p){return R.wpick(COUNTRIES.filter(c=>c.id!==p.country).map(c=>{const w=mundo(c.id);return [c,Math.max(.05,.3+w.crescimento*4-w.desemprego+w.poderCompra*.1)];}));}
+function npcChanceEmprego(p){const w=mundo(p.country),t=npcPerfil(p);return macroLim(.32+t.ambicao/600-w.desemprego*.8+w.crescimento+Math.min(.15,(p.vida?.semEmprego||0)*.025)+npcCarreiraBusca(p), .08,.65);}
+function npcDestino(p){return R.wpick(COUNTRIES.filter(c=>c.id!==p.country).map(c=>{const w=mundo(c.id);return [c,npcCarreiraDestinoPeso(p,c.id)];}));}
 function npcFinancasAno(p){const v=npcVida(p);if(v.financas?.ano===S.year)return v.financas;const w=mundo(p.country),indice=macroLim(mercadoIndice(p.country,'salarios'),.3,8),precos=macroLim((mercadoIndice(p.country,'alimentos')+mercadoIndice(p.country,'servicos'))/2,.3,8);let corte=false;
  const risco=macroLim(.008+Math.max(0,w.desemprego-.07)*.4+Math.max(0,-w.crescimento)*.7, .005,.18);
  if(p.job&&!p.monarch&&!v.aposentado&&R.chance(risco)){v.ultimoEmprego=p.job;p.job=null;v.emprego=null;corte=true;npcMarco(p,'demissao',p.first+' perdeu o emprego em '+countryOf(p.country).n+' durante o corte de vagas.',{pais:p.country});}

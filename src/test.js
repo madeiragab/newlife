@@ -31,6 +31,7 @@ function selfTest(){
     } finally { R.chance=chance; }
   });
   T('correções e evolução da vida comum',evolucaoSelfTest);
+  T('histórico profissional dos NPCs',carreiraNpcSelfTest);
   T('despesas familiares compartilhadas',familiaFinancasSelfTest);
   T('localização e residência',localizacaoSelfTest);
   T('decisões e memórias familiares',familiaDecisoesSelfTest);
