@@ -28,3 +28,8 @@ function realismoSelfTest(){const s0=S,rf=R.f,ns=window.NO_SAVE;let seed=31;R.f=
  m.dis=[{id:'otite',y:1,ctrl:false,k:false},{id:'apendicite',y:0,ctrl:false,k:false}];m.health=90;yearHealth();ok(!m.dis.some(d=>d.id==='apendicite'),'apendicite ficou sem cirurgia');ok(m.alive,'criança morreu na cirurgia simples');
  let restos=0;for(let i=0;i<20;i++){m.dis=[{id:'otite',y:1,ctrl:false,k:false}];yearHealth();if(m.dis.some(d=>d.id==='otite'))restos++;}ok(restos<=6,'otite não passa: '+restos);
  ok(DISEASES.febre_amarela.p<.0001&&DISEASES.tuberculose.p<.001,'chances antigas');return {ok:true};}finally{S=s0;R.f=rf;window.NO_SAVE=ns;}}
+// Divórcio como na vida real: cerca de um terço dos casamentos termina. Risco anual pequeno,
+// maior nos primeiros anos e quando o laço está fraco; casamentos longos e felizes quase não acabam.
+NL_GANCHOS_ANO.push(()=>{const m=S.me;if(m.age<18||m.prison||(typeof polyGrupo==='function'&&polyGrupo()))return;
+ for(const p of people('conjuge').filter(p=>p.alive)){const anos=p.yrs||0,ch=.004+(anos<10?.004:0)+Math.max(0,60-p.bond)/1800;
+  if(R.chance(ch)){log(`Depois de muita conversa, ${p.first} e eu decidimos nos separar.`,'bad');divorce(p,true);break;}}});
