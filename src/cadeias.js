@@ -8,20 +8,25 @@
 //   (o personagem da história vira uma pessoa da sua lista) · +cad:outra (começa outra história) · sem ">" a história termina
 // no texto: {p} nome do personagem da história · {pl} sobrenome · {o2} o/a dele(a) · {ele} ele/ela · e tudo do pack ({n}, {v}, {o}...)
 const CHAINS={};
+function cadFalha(e,local){if(window.NO_SAVE||window.NL_TEST_STRICT)throw new Error(local+': '+e.message);console.error(local,e);const l=S.errosSistemas||(S.errosSistemas=[]);l.push({ano:S.year,local,erro:e.message});if(l.length>10)l.shift();}
+function cadContextoValido(id,c){const o=CHAINS[id].o,p=c.d.pid&&P(c.d.pid);if(c.d.pid&&!p?.alive)return false;if(o.who==='partner'&&!partners().includes(p))return false;const j=c.d.contexto?.emprego;if(j&&['boss','colega'].includes(o.who)&&c.s!=='f'&&(S.me.job?.id!==j.id||S.me.job?.co!==j.co))return false;return true;}
+function cadContextoTexto(d){const ctx=d.contexto;if(!ctx)return '';const w=mundo(ctx.pais);return w.crescimento<0?' A economia de '+countryOf(ctx.pais).n+' está em recessão; oportunidades e custos acompanham esse contexto.':'';}
+
 function chain(id,o,steps){ CHAINS[id]={id,o,steps}; Object.entries(steps).forEach(([sid,st])=>cadReg(id,sid,st)); }
 const cadEv=(id,sid)=>'cad_'+id+'_'+sid;
 const cadState=()=>{ const m=S.me; m.cad=m.cad||{on:{},done:{}}; return m.cad; };
 function cadPerson(d){ const p=d.pid&&P(d.pid); if(p){ d.p=p.first; d.pl=p.last; d.o2=p.gender==='F'?'a':'o'; d.ele=p.gender==='F'?'ela':'ele'; d.idade=p.age; } if(d.ele){ const f=d.ele==='ela'; d.Ele=f?'Ela':'Ele'; d.a2=f?'a':''; d.O2=f?'A':'O'; d.irmao=f?'irmã':'irmão'; d.dele=f?'dela':'dele'; } d.padrinho=S.me.gender==='F'?'madrinha':'padrinho'; return p; }
 function cadReg(id,sid,st){ const [title,text,choices,so={}]=st;
   EVENTS[cadEv(id,sid)]={title,w:0,cad:id,cd:0,
-    when:m=>{ const c=cadState().on[id]; if(!c||c.s!==sid) return false; try{ return !so.when||so.when(m,c.d); }catch(e){ return false; } },
+    when:m=>{ const c=cadState().on[id]; if(!c||c.s!==sid) return false; try{ return !so.when||so.when(m,c.d); }catch(e){ cadFalha(e,'Condição da história '+id);return false; } },
     prep:m=>{ const c=cadState().on[id]; return c?Object.assign({},c.d):null; },
-    show:d=>{ const o=CHAINS[id].o; cadPerson(d); return {k:o.k||'História',t:tp(title,d),x:tp(Array.isArray(text)?text[(d.xi||0)%text.length]:text,d)+(d.ultimaDecisao?'\n\nAntes: '+tp(d.ultimaDecisao,d)+'.':''),ch:choices.map((c,i)=>[tp(c.split('|')[0],d),String(i)])}; },
+    show:d=>{ const o=CHAINS[id].o; cadPerson(d); return {k:o.k||'História',t:tp(title,d),x:tp(Array.isArray(text)?text[(d.xi||0)%text.length]:text,d)+cadContextoTexto(d)+(d.ultimaDecisao?'\n\nAntes: '+tp(d.ultimaDecisao,d)+'.':''),ch:choices.map((c,i)=>[tp(c.split('|')[0],d),String(i)])}; },
     pick:(key,d)=>cadPick(id,sid,choices[+key],d)};
 }
 // separa os efeitos próprios das cadeias (>etapa, vira:, +cad:) dos efeitos normais do pack
 function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$|separar$|pbond[+-]\d+$|caso[+-]$|curar$|morder$|fome[+-]\d+$|virar:\w+$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
 function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me; const d=c?c.d:dPend;
+  if(c&&!cadContextoValido(id,c)){delete st.on[id];st.done[id]=(st.done[id]||0)+1;return 'A situação mudou e essa história não pode continuar como antes.';}
   const parts=choice.split('|'); let fx1=parts[1]||'', t1=parts[2]||'', fx2=parts[3], t2=parts[4];
   const toks=fx1.trim().split(/\s+/); let chance=null, base='';
   const qi=toks.findIndex(t=>t.startsWith('?'));
@@ -68,10 +73,10 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
 // pode começar esta história agora?
 function cadCan(id,m){ const ch=CHAINS[id], o=ch.o, st=cadState(); if(st.on[id]) return false; if(st.done[id]&&!o.rep) return false;
   if(o.min!=null&&m.age<o.min) return false; if(o.max!=null&&m.age>o.max) return false; if(!!o.jail!==!!m.prison) return false;
-  try{ if(o.when&&!o.when(m)) return false; if(o.who&&!WHO[o.who]()) return false; }catch(e){ return false; } return true; }
+  try{ if(o.when&&!o.when(m)) return false; if(o.who&&!WHO[o.who]()) return false; }catch(e){ cadFalha(e,'Condição da história '+id);return false; } return true; }
 function cadStart(id,force){ const m=S.me, ch=CHAINS[id]; if(!ch) return false; if(!force&&!cadCan(id,m)) return false; if(cadState().on[id]) return false;
   const o=ch.o; let d;
-  try{ d=Object.assign(strangers(m,o),{v:amt((o.v||[500,5000])[0],(o.v||[500,5000])[1]),xi:R.int(0,5),city:m.city,lugar:R.pick(TRIPS)}); }catch(e){ return false; }
+  try{ d=Object.assign(strangers(m,o),{v:amt((o.v||[500,5000])[0],(o.v||[500,5000])[1]),xi:R.int(0,5),city:m.city,lugar:R.pick(TRIPS)}); }catch(e){ cadFalha(e,'Condição da história '+id);return false; }
   d.v2=d.v*4;
   // palavras sorteadas uma vez e mantidas na história inteira
   Object.assign(d,{materia:R.pick(['matemática','física','química','biologia','história','português','geografia']),prod:R.pick(['roupas de brechó','fones de ouvido','cosméticos naturais','camisetas estampadas','plantas','doces caseiros']),
@@ -79,14 +84,14 @@ function cadStart(id,force){ const m=S.me, ch=CHAINS[id]; if(!ch) return false; 
   if(o.who){ const p=WHO[o.who](); if(!p) return false; d.pid=p.id; }
   if(o.age) d.nAge=clamp(m.age+R.int(o.age[0],o.age[1]),1,99);
   if(o.npc){ d.p=d.n; d.pl=d.nl; d.o2=d.nG==='F'?'a':'o'; d.ele=d.nG==='F'?'ela':'ele'; }
-  cadPerson(d);
+  cadPerson(d);d.contexto={pais:m.country,ano:S.year,emprego:m.job?{id:m.job.id,co:m.job.co}:null};
   cadState().on[id]={s:'a',due:force?m.age+R.int(1,2):m.age,d,ini:m.age}; return true; }
 // todo ano: as histórias em andamento avançam e, de vez em quando, começa uma nova
 function cadYear(){ const m=S.me; if(!m||!m.alive||S.scen||m.age<5) return; const st=cadState(); let n=0;
   const pend=new Set(S.pending.map(e=>e.id));
   for(const [id,c] of Object.entries(st.on).sort((a,b)=>a[1].due-b[1].due)){
     if(!CHAINS[id]){ delete st.on[id]; continue; }
-    if(c.d.pid&&!(P(c.d.pid)&&P(c.d.pid).alive)){ delete st.on[id]; st.done[id]=(st.done[id]||0)+1; continue; }   // a pessoa da história morreu ou sumiu
+    if(!cadContextoValido(id,c)){ delete st.on[id]; st.done[id]=(st.done[id]||0)+1; continue; }   // a pessoa da história morreu ou sumiu
     if(c.due>m.age||n>=2||!!CHAINS[id].o.jail!==!!m.prison) continue;
     if(m.age-c.due>12){ delete st.on[id]; st.done[id]=(st.done[id]||0)+1; continue; }                              // ficou parada tempo demais
     const eid=cadEv(id,c.s), ev=EVENTS[eid]; if(!ev||pend.has(eid)) continue;
@@ -95,7 +100,7 @@ function cadYear(){ const m=S.me; if(!m||!m.alive||S.scen||m.age<5) return; cons
   const ativos=Object.keys(st.on).length;
   if(n<2&&ativos<4&&R.chance(ativos?.45:.7)){ const el=Object.keys(CHAINS).filter(id=>cadCan(id,m));
     if(el.length){ const id=R.wpick(el.map(id=>[id,CHAINS[id].o.w||1])); if(cadStart(id)){ const c=st.on[id], eid=cadEv(id,'a'); if(EVENTS[eid].when(m)) queue(eid,EVENTS[eid].prep(m)); } } } }
-yearEvents=(o=>function(){ const r=o.apply(this,arguments); try{ cadYear(); }catch(e){ console.error(e); } return r; })(yearEvents);
+yearEvents=(o=>function(){ const r=o.apply(this,arguments); try{ cadYear(); }catch(e){ cadFalha(e,'Avanço anual das histórias'); } return r; })(yearEvents);
 // conferência para o teste: toda etapa citada existe e toda etapa é alcançável
 function cadAudit(){ const errs=[]; let steps=0;
   for(const [id,ch] of Object.entries(CHAINS)){ const ss=ch.steps, reach=new Set(['a']); if(!ss.a) errs.push(id+': sem etapa a');
