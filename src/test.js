@@ -31,6 +31,7 @@ function selfTest(){
     } finally { R.chance=chance; }
   });
   T('correções e evolução da vida comum',evolucaoSelfTest);
+  T('localização e residência',localizacaoSelfTest);
   T('decisões e memórias familiares',familiaDecisoesSelfTest);
   T('envelhecimento e rotina',cotidianoIdadeSelfTest);
   T('três gerações por estilo',()=>{window.NL_TRES_GERACOES=evolucaoGeracoesSelfTest();});

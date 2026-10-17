@@ -652,7 +652,7 @@ function continueAs(k){
   people('pet').forEach(x=>keep.push(x));
   geracaoPessoas(k,old,keep,passado);
   const c=countryOf(old.country);
-  const m={ id:k.id,parentIds:k.parentIds||[],historiaPessoal:JSON.parse(JSON.stringify(k.vida?.historico||[])),first:k.first,last:k.last,gender:k.gender,age:k.age,country:k.country||old.country,city:k.country&&k.country!==old.country?R.pick(countryOf(k.country).cities):old.city,born:S.year-k.age,
+  const m={ id:k.id,parentIds:k.parentIds||[],historiaPessoal:JSON.parse(JSON.stringify(k.vida?.historico||[])),first:k.first,last:k.last,gender:k.gender,age:k.age,country:k.country||old.country,city:k.city||(k.country&&k.country!==old.country?R.pick(countryOf(k.country).cities):old.city),born:S.year-k.age,
     happy:R.int(40,70),health:clamp(Math.max(k.health,60)),smarts:k.smarts,looks:k.looks,karma:R.int(40,70),fame:Math.round(old.fame/3),money:inherit,
     talent:k.talent||randTalent(),will:k.will??R.int(5,100),fert:k.fert??R.int(15,100),fight:R.int(0,40),genes:k.genes||randGenes(k.gender),
     pref:R.chance(.88)?(k.gender==='M'?'F':'M'):R.pick([k.gender,'A']),add:{alcool:0,cigarro:0,jogo:0},dis:[],edu:{deg:[],cur:null,club:null},

@@ -1,0 +1,10 @@
+function localizacaoSelfTest(){const antes=S,random={...R},meta=JSON.stringify(META),snaps=SNAPS,noSave=window.NO_SAVE;window.NO_SAVE=true;const ok=(v,t)=>{if(!v)throw Error(t);};try{
+ newLife({country:'BR'});S.me.age=70;S.me.money=100000;S.pending=[];R.chance=()=>true;
+ const p=mkPerson({age:40,rel:'conjuge',country:'BR'}),q=mkPerson({age:39,rel:'conjuge',country:'PT'});S.people.push(p,q);
+ let d=familiaPlanoCriar(p,'mudanca');ok(d&&d.locais.includes(p.id)&&d.remotos.includes(q.id)&&familiaPlanoValido(d),'parceiro remoto invalida plano');const exterior=q.city;const j=JOBS.find(x=>x.id==='prog');p.job=g(j.l[0],p.gender);npcVida(p).emprego={id:j.id};familiaPlanoResolver('aceitar',d);ok(q.country==='PT'&&q.city===exterior,'consultado remoto foi deslocado');ok(p.city===S.me.city&&p.job&&p.vida.emprego.remoto,'programador perdeu trabalho remoto');
+ p.job='Garçom';p.vida.emprego={id:'garc'};npcMudarLocal(p,'BR',countryOf('BR').cities.find(c=>c!==p.city));ok(!p.job&&!p.vida.emprego,'emprego presencial mantido após mudança');
+ const a={id:newId(),k:'casa',n:'Residência',country:'BR',city:S.me.city,value:100000,cond:80,acessibilidade:{ano:S.year,custo:400}},b={...a,id:newId(),n:'Investimento'};S.me.assets=[a,b];S.me.localizacaoV=1;S.me.residenciaId=b.id;ok(!cotidianoIdadeCasa(a)&&cotidianoIdadeCasa(b),'propriedade confundida com residência');
+ const amigo=mkPerson({rel:'amigo',age:40,country:'BR',city:countryOf('BR').cities.find(c=>c!==S.me.city)});S.people.push(amigo);ok(!cotidianoIdadeValido({tipo:'vizinhanca',aid:b.id,pid:amigo.id}),'amigo de outra cidade é vizinho');amigo.city=S.me.city;ok(cotidianoIdadeValido({tipo:'vizinhanca',aid:b.id,pid:amigo.id}),'vizinho local rejeitado');
+ S.me.assets=[a];ok(!residenciaAtual(),'casa vendida ainda ocupada');residenciaOcupar(a);S=JSON.parse(JSON.stringify(S));fixSave(S);ok(residenciaAtual()?.id===a.id,'save perdeu residência');
+ return {ok:true,remotos:true,empregos:true,residencia:true,vizinhanca:true};
+ }finally{S=antes;Object.assign(R,random);META=JSON.parse(meta);SNAPS=snaps;window.NO_SAVE=noSave;}}
