@@ -368,3 +368,14 @@ Decisões cotidianas sobre escola, casa, amizades, trabalho e aposentadoria apar
 Ao continuar como um filho, IDs e pessoas permanecem no mundo. Vínculos do protagonista anterior ficam no arquivo familiar; o herdeiro conserva seu próprio saldo, país e família, além do patrimônio e contratos herdados. Mandatos e penas criminais não são transferidos.
 
 O pipeline verifica saves produzidos nos HTMLs publicados da 1.59 e 1.60, trajetórias de NPCs, três gerações e os percursos comuns, empresariais, familiares e criminosos. As projeções financeiras de 30 a 90 anos são diagnósticos automatizados, sem mortalidade; não equivalem a playtests humanos nem provam o equilíbrio de todas as estratégias.
+
+
+## Formação, família e rotina · 1.74
+
+NPCs precisam concluir cursos para assumir profissões qualificadas; duração, pagamentos, bolsas e pausas ficam na ficha. Negócios usam diferentes setores conforme capital, experiência, interesses e mercado.
+
+Parceiros e filhos adultos podem propor reformas, viagens, poupança e mudanças de cidade. Cada adulto decide por si; o jogador pode aceitar, negociar ou recusar. Custos são informados e não são cobrados de outros adultos automaticamente.
+
+Memórias influenciam a confiança temporariamente, diminuindo com o tempo e com a reconciliação. Aposentadoria, acessibilidade da casa e redes de apoio ganham escolhas persistentes na rotina.
+
+A verificação inclui cenários controlados com quatro estilos e três sucessões por estilo, sementes17401–17404, além das partidas automatizadas e dos saves antigos. Esses cenários não são sessões humanas nem demonstram por si só o equilíbrio de todas as estratégias.
