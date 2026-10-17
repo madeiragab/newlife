@@ -1,4 +1,4 @@
-# Publica usando os bytes exatos do Git no manifesto.
+# Publica pelo workflow protegido; nunca envia HTML diretamente para gh-pages.
 param([switch]$ReuseTest,[switch]$PrepareOnly)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
@@ -14,21 +14,14 @@ if ($PrepareOnly) {
  return
 }
 if ($env:GITHUB_ACTIONS -eq 'true') { throw 'No Actions, use -PrepareOnly e o job de deploy protegido pelos testes.' }
-$remote = git -C $root remote get-url origin
-$tmp = Join-Path $env:TEMP ('newlife-pages-' + [guid]::NewGuid().ToString('N'))
-git clone -q --branch gh-pages --single-branch $remote $tmp
-if ($LASTEXITCODE) { throw 'Clone falhou.' }
-Copy-Item (Join-Path $root 'outra-vida.html') (Join-Path $tmp 'index.html')
-Copy-Item (Join-Path $root 'desktop/outra-vida.html') (Join-Path $tmp 'app.html')
-Push-Location $tmp
+$dirty=git -C $root status --porcelain --untracked-files=no
+if ($dirty) { throw 'Envie as alterações para main antes de solicitar a publicação.' }
+$head=git -C $root rev-parse HEAD
+$remoteLine=git -C $root ls-remote origin refs/heads/main
+if ($LASTEXITCODE -ne 0 -or -not $remoteLine -or ($remoteLine -split '\s+')[0] -ne $head) { throw 'O commit local precisa estar no main remoto.' }
+Push-Location $root
 try {
- git add index.html app.html
- node (Join-Path $root 'tools/update-manifest.cjs')
- if ($LASTEXITCODE) { throw 'Manifesto falhou.' }
- git add version.json
- git commit -m 'Publica jogo e manifesto de integridade'
- if ($LASTEXITCODE) { throw 'Commit falhou.' }
- git push origin gh-pages
- if ($LASTEXITCODE) { throw 'Publicação falhou.' }
+ gh workflow run testes.yml --ref main
+ if ($LASTEXITCODE -ne 0) { throw 'Não foi possível iniciar o workflow. Confira a autenticação do gh.' }
 } finally { Pop-Location }
-"Publicado. Checkout preservado em $tmp."
+'Publicação solicitada ao Actions; o site só muda depois da aprovação dos testes remotos.'

@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 concurrency:
   group: newlife-${{ github.ref }}
   cancel-in-progress: true
@@ -27,16 +28,16 @@ jobs:
           name: relatorio-testes
           path: test-results/
       - name: Preparar somente os artefatos aprovados
-        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         shell: powershell
         run: .\publish-web.ps1 -ReuseTest -PrepareOnly
       - uses: actions/upload-pages-artifact@v3
-        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         with:
           path: test-results/pages
   publicar:
     needs: testes
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       pages: write
