@@ -10,19 +10,30 @@ EVENTS.biz_evento={show:d=>{ const b=S.me.biz; if(!b) return {k:'Empresa',t:'Emp
     incendio:['Incêndio',`Um curto-circuito causou um incêndio na ${b.n}.`,[['Reconstruir','r'],['Fechar as portas','f']]],
     funcionario:['O funcionário desonesto',`Um funcionário de confiança estava vendendo produtos da ${b.n} por fora.`,[['Demitir e denunciar','d'],['Dar uma segunda chance','s']]]}[d.t];
   return {k:'Empresa',t:T[0],x:T[1],ch:T[2]}; },
-  pick:(k,d)=>{ const m=S.me, b=m.biz; if(!b) return ''; const perde=f=>{ const v=Math.round(b.value*f); b.value=Math.max(0,b.value-v); return v; };
-    if(d.t==='roubo'){ if(k==='s'){ const v=perde(R.f()*.12); if(R.chance(.6)){ m.money+=Math.round(v*.7); return `O seguro cobriu parte do prejuízo de ${fmt(v)}.`; } return `O seguro achou uma cláusula e não pagou. Prejuízo de ${fmt(v)}.`; }
-      if(k==='r'){ const c=Math.round(b.value*.05)+2000; if(!canPay(c)) return `Segurança nova custaria ${fmt(c)}. Sem dinheiro, engoli o prejuízo de ${fmt(perde(R.f()*.15))}.`; m.money-=c; perde(R.f()*.08); return `Câmeras, alarme e vigia noturno: ${fmt(c)}.`; } return `Prejuízo de ${fmt(perde(R.f()*.15))}.`; }
-    if(d.t==='socio'){ const v=perde(R.f()*.3+.1); if(k==='p'&&canPay(8000)){ m.money-=8000; if(R.chance(.45)){ b.value+=Math.round(v*.6); return `Ganhei o processo e recuperei parte dos ${fmt(v)} desviados.`; } return `O sócio sumiu do país. Perdi ${fmt(v)} e o advogado.`; }
-      if(k==='a'){ b.value+=Math.round(v*.3); return `Recuperei um pouco no acordo. O resto dos ${fmt(v)} ficou com ele.`; } return `Perdi ${fmt(v)} e a confiança em sócios.`; }
-    if(d.t==='fiscal'){ const v=Math.round(b.value*(R.f()*.08+.02))+3000;
-      if(k==='p'){ m.money-=v; return `Paguei ${fmt(v)} entre impostos e multa.`; }
-      if(k==='c'){ m.money-=4000; if(R.chance(.5)){ m.money-=Math.round(v*.4); return 'O contador conseguiu reduzir a multa pela metade.'; } m.money-=v; return 'O recurso foi negado. Paguei tudo e o contador.'; }
-      m.karma=clamp(m.karma-8); if(R.chance(.55)){ m.money-=Math.round(v*.3); return 'O fiscal aceitou e "esqueceu" o assunto.'; } arrest('corrupção ativa',1,4); return 'O fiscal era honesto. Fui pres'+oa()+' por corrupção.'; }
-    if(d.t==='processo'){ const v=Math.round(R.int(15000,80000)*(b.emp>20?2:1)); if(k==='a'){ m.money-=Math.round(v*.5); return `Acordo de ${fmt(Math.round(v*.5))}.`; } if(R.chance(.4)) return 'Ganhei na justiça. Não paguei nada.'; m.money-=v; return `Perdi o processo: ${fmt(v)}.`; }
-    if(d.t==='crise'){ if(k==='d'){ b.emp=Math.max(1,Math.round(b.emp*.6)); perde(.1); m.karma=clamp(m.karma-3); return 'Demiti um monte de gente. A empresa sobreviveu, mas o clima morreu.'; }
-      if(k==='i'){ const c=Math.round(b.value*.15); if(!canPay(c)){ perde(.3); return 'Não tinha dinheiro para investir. A crise levou 30% da empresa.'; } m.money-=c; if(R.chance(.5)){ b.bonus=.15; return 'Investi na crise e saí na frente dos concorrentes.'; } perde(.2); return 'Investi e a crise engoliu o dinheiro também.'; }
-      return `A crise levou ${fmt(perde(R.f()*.3+.1))} do valor da empresa.`; }
-    if(d.t==='incendio'){ if(k==='r'){ const c=Math.round(b.value*.25); if(!canPay(c)){ const sobra=Math.round(b.value*.2); m.money+=sobra; log(`Fechei a ${b.n} depois do incêndio.`,'bad'); m.biz=null; return `Reconstruir custaria ${fmt(c)} e eu não tinha. Fechei a empresa e sobraram ${fmt(sobra)}.`; } m.money-=c; perde(.1); return `Reconstruir custou ${fmt(c)}.`; } const sobra=Math.round(b.value*.2); m.money+=sobra; log(`Fechei a ${b.n} depois do incêndio.`,'bad'); m.biz=null; return `Fechei a empresa. Sobraram ${fmt(sobra)}.`; }
-    if(d.t==='funcionario'){ if(k==='d'){ perde(.04); return 'Demiti e denunciei. Recuperei parte do estoque.'; } if(R.chance(.5)) return 'Ele nunca mais repetiu. Virou o funcionário mais fiel da empresa.'; return `Ele fez de novo. Prejuízo de ${fmt(perde(.1))}.`; }
+  pick:(k,d)=>{ const m=S.me, b=m.biz; if(!b) return ''; if(typeof empresaPreparar==='function') empresaPreparar(b);
+    // perdas e custos entram no modelo novo: caixa para dinheiro, capital para estrutura; a empresa paga antes do dono
+    const sync=()=>{ b.value=Math.max(0,Math.round((b.capital||0)+(b.caixa||0))); b.valorContabil=b.value; };
+    const caixaPerde=v=>{ v=Math.max(0,Math.round(v)); const x=Math.min(v,Math.max(0,b.caixa||0)); b.caixa-=x; if(v>x) b.capital=Math.max(0,(b.capital||0)-(v-x)); sync(); return v; };
+    const capitalPerde=f=>{ const v=Math.round((b.capital||0)*f); b.capital-=v; sync(); return v; };
+    const paga=v=>{ v=Math.round(v); const x=Math.min(v,Math.max(0,b.caixa||0)); b.caixa-=x; let r=v-x; if(r>0&&canPay(r)){ m.money-=r; r=0; } if(r>0) b.caixa-=r; sync(); return v; };
+    const recebe=v=>{ b.caixa=(b.caixa||0)+Math.round(v); sync(); };
+    const fechar=txt=>{ const sobra=Math.max(0,Math.round((b.caixa||0)+(b.capital||0)*.2)); m.money+=sobra; log(`Fechei a ${b.n}.`,'bad'); m.biz=null; return `${txt} Sobraram ${fmt(sobra)}.`; };
+    if(d.t==='roubo'){ const v=caixaPerde(Math.max(2000,(b.caixa||0)*R.f()*.3+(b.capital||0)*.03));
+      if(k==='s'){ if(R.chance(.6)){ recebe(v*.7); return `O seguro cobriu 70% do prejuízo de ${fmt(v)}.`; } return `O seguro achou uma cláusula e não pagou. Prejuízo de ${fmt(v)}.`; }
+      if(k==='r'){ const c=Math.round((b.capital||0)*.02)+2000; paga(c); return `Levaram ${fmt(v)}. Câmeras, alarme e vigia noturno custaram mais ${fmt(c)}.`; } return `Prejuízo de ${fmt(v)}.`; }
+    if(d.t==='socio'){ const v=caixaPerde((b.caixa||0)*(R.f()*.4+.2)+(b.capital||0)*.05);
+      if(k==='p'){ paga(8000); if(R.chance(.45)){ recebe(v*.6); return `Ganhei o processo e recuperei parte dos ${fmt(v)} desviados.`; } return `O sócio sumiu do país. Perdi ${fmt(v)} e o advogado.`; }
+      if(k==='a'){ recebe(v*.3); return `Recuperei um pouco no acordo. O resto dos ${fmt(v)} ficou com ele.`; } return `Perdi ${fmt(v)} e a confiança em sócios.`; }
+    if(d.t==='fiscal'){ const v=Math.round((b.value||0)*(R.f()*.05+.02))+3000;
+      if(k==='p'){ paga(v); return `A empresa pagou ${fmt(v)} entre impostos e multa.`; }
+      if(k==='c'){ paga(4000); if(R.chance(.5)){ paga(v*.5); return `O contador conseguiu reduzir a multa pela metade: ${fmt(Math.round(v*.5))}.`; } paga(v); return `O recurso foi negado. A empresa pagou ${fmt(v)} e o contador.`; }
+      m.karma=clamp(m.karma-8); if(R.chance(.55)){ paga(v*.3); return 'O fiscal aceitou e "esqueceu" o assunto.'; } arrest('corrupção ativa',1,4); return 'O fiscal era honesto. Fui pres'+oa()+' por corrupção.'; }
+    if(d.t==='processo'){ const v=Math.round(R.int(15000,80000)*((b.emp||1)>20?2:1)); if(k==='a'){ paga(v*.5); return `Acordo de ${fmt(Math.round(v*.5))}, pago pela empresa.`; } if(R.chance(.4)) return 'Ganhei na justiça. Não paguei nada.'; paga(v); return `Perdi o processo: ${fmt(v)}.`; }
+    if(d.t==='crise'){ if(k==='d'){ b.emp=Math.max(1,Math.round((b.emp||1)*.6)); paga(Math.round((b.emp||1)*3000)); capitalPerde(.08); m.karma=clamp(m.karma-3); return 'Demiti um monte de gente e paguei as rescisões. A empresa sobreviveu, mas o clima morreu.'; }
+      if(k==='i'){ const c=Math.round((b.capital||0)*.12); if((b.caixa||0)+Math.max(0,m.money)<c){ const v=capitalPerde(.25); return `Não havia dinheiro para investir. A crise levou ${fmt(v)} da estrutura.`; } paga(c); b.capital+=Math.round(c*.5); sync(); if(R.chance(.5)){ b.bonus=.15; return 'Investi na crise e saí na frente dos concorrentes.'; } capitalPerde(.15); return 'Investi e a crise engoliu o dinheiro também.'; }
+      return `A crise derrubou ${fmt(capitalPerde(R.f()*.25+.08))} da estrutura da empresa.`; }
+    if(d.t==='incendio'){ const dano=capitalPerde(R.f()*.3+.3);
+      if(k==='r'){ const c=Math.round(dano*.8); if((b.caixa||0)+Math.max(0,m.money)<c) return fechar(`O fogo destruiu ${fmt(dano)} e reconstruir custaria ${fmt(c)}. Não havia dinheiro.`); paga(c); b.capital+=c; sync(); return `O fogo destruiu ${fmt(dano)}. A reconstrução custou ${fmt(c)}.`; }
+      return fechar(`O fogo destruiu ${fmt(dano)}.`); }
+    if(d.t==='funcionario'){ if(k==='d'){ caixaPerde((b.caixa||0)*.03); return 'Demiti e denunciei. Recuperei parte do estoque.'; } if(R.chance(.5)) return 'Ele nunca mais repetiu. Virou o funcionário mais fiel da empresa.'; return `Ele fez de novo. Prejuízo de ${fmt(caixaPerde((b.caixa||0)*.1+2000))}.`; }
     return ''; }};

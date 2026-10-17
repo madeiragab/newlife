@@ -40,6 +40,7 @@ function selfTest(){
   T('conquistas da família',conquistasFamiliaSelfTest);
   T('peso das memórias',memoriaPesoSelfTest);
   T('acontecimentos que puxam histórias',encadeamentosSelfTest);
+  T('probabilidades realistas',realismoSelfTest);
   T('três gerações naturais',()=>{window.NL_GERACOES_NATURAIS=geracoesNaturaisSelfTest();});
   if(window.NL_MIG_FIXTURES)T('saves de versões publicadas',()=>{window.NL_MIGRACAO=migracaoVersoesSelfTest(window.NL_MIG_FIXTURES);});
   T('três gerações por estilo',()=>{window.NL_TRES_GERACOES=evolucaoGeracoesSelfTest();});

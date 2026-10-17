@@ -161,7 +161,7 @@ function uniqFirst(p){ const used=new Set([S.me&&S.me.first].concat(S.people.fil
 function eduOf(cur){ const n=cur.n; if(cur.type==='uni') return 'da faculdade de '+n; if(cur.type==='tec') return 'do curso de '+n; if(/^Resid/.test(n)) return 'da '+n; return 'do '+n.charAt(0).toLowerCase()+n.slice(1); }
 const living=()=>!S.me.prison;
 function jobTitle(j){ if(!j) return null; if(j.spc) return g(SPECIAL[j.spc].l[j.lvl],S.me.gender); const d=JOBS.find(x=>x.id===j.id); return g(d.l[Math.min(j.lvl,d.l.length-1)],S.me.gender); }
-function jobSalary(j){ if(j.spc){ return Math.round(SPECIAL[j.spc].sal[j.lvl]*(j.mul||1)); } const d=JOBS.find(x=>x.id===j.id); return Math.round(d.sal*(1+.42*j.lvl)*(j.mul||1)); }
+function jobSalary(j){ if(j.spc){ return Math.round(SPECIAL[j.spc].sal[j.lvl]*(j.mul||1)); } const d=JOBS.find(x=>x.id===j.id); return Math.round(d.sal*(1+.3*j.lvl)*Math.min(1.5,j.mul||1)); }
 function occupation(){
   const m=S.me;
   if(!m.alive) return m.cause;
@@ -283,10 +283,10 @@ function yearPeople(){
     const dp=deathP(p.age,p.health)*.85+(p.age<40?.0006:0);
     if(R.chance(dp)){ p.alive=false; const why=R.pick(p.age>70?['de causas naturais','dormindo','de infarto','de AVC','de pneumonia','de câncer']:['num acidente de carro','de infarto','de câncer','num acidente de trabalho','de AVC']);
       log(`${relLabel(p)} ${fullName(p)} morreu ${why}, aos ${p.age} anos.`,'bad'); const close=['mae','pai','filho','conjuge','irmao','adot','namoro','noivo'].includes(p.rel); st('happy',close?-25:-8);
-      if(['mae','pai','avo'].includes(p.rel)&&p.money>1000&&R.chance(p.rel==='avo'?.35:.6)){ const share=Math.round(p.money*(p.rel==='avo'?R.f()*.3:R.f()*.5+.2)); m.money+=share; log(`Recebi uma herança de ${fmt(share)}.`,'good'); }
+      if(['mae','pai','avo'].includes(p.rel)&&p.money>1000&&R.chance(p.rel==='avo'?.35:.9)){ /* herança dividida como na vida real: metade fica com o cônjuge vivo e o resto entre os filhos */ const viuvo=p.rel!=='avo'&&parents().some(q=>q!==p&&q.alive), irmaos=people('irmao').filter(q=>q.alive).length; const share=Math.round(p.money*(p.rel==='avo'?R.f()*.15:(viuvo?.5:1)/(1+irmaos))); m.money+=share; log(`Recebi uma herança de ${fmt(share)}.`,'good'); }
       if(p.rel==='conjuge') cnt('widow');
       continue; }
-    if(p.age>=18&&!['pet'].includes(p.rel)&&!npcAcompanhado(p)){ const mult={pobre:.35,media:1,rica:4,milionaria:20,realeza:60}[S.flags.cls]||1; const inc=p.job&&p.age<70?R.int(2000,14000)*(['mae','pai'].includes(p.rel)?mult:1):-R.int(0,2500); p.money=Math.round((p.money||0)*(p.money>0?1.02:1)+inc); }
+    if(p.age>=18&&!['pet'].includes(p.rel)&&!npcAcompanhado(p)){ const mult={pobre:.35,media:1,rica:4,milionaria:20,realeza:60}[S.flags.cls]||1; const inc=p.job&&p.age<70?R.int(-1000,6000)*(['mae','pai'].includes(p.rel)?mult:1):-R.int(0,2500); p.money=Math.round((p.money||0)*(p.money>0?1.01:1)+inc); }
     const fam=['mae','pai','filho','irmao','avo','neto','adot'].includes(p.rel);
     if(npcAcompanhado(p))p.bond=clamp(p.bond-npcDesgaste(p));else if(!fam&&p.rel!=='inimigo') p.bond=clamp(p.bond-R.int(0,5)); else p.bond=clamp(p.bond-R.int(-1,3));
     if(['namoro','noivo'].includes(p.rel)&&p.bond<18&&R.chance(.5)){ p.rel='ex'; log(`${p.first} terminou comigo.`,'bad'); st('happy',-15); }
@@ -409,7 +409,7 @@ function yearMoney(){
     if(!S.flags.movedOut&&(m.age>=26||ownHome||people('conjuge').length||!parents().length)){ S.flags.movedOut=1; if(!ownHome&&parents().length) log('Saí da casa dos meus pais e aluguei um lugar só meu.'); }
     const atHome=!S.flags.movedOut;
     const custoLocal=typeof mercadoCusto==='function'?mercadoCusto():1;
-    let cost=atHome?Math.round(1800*custoLocal):Math.round((ownHome?4500:9500)*custoLocal)+Math.round(gross*.32); /* o padrão de vida sobe junto com o salário */
+    let cost=atHome?Math.round((1800+gross*.25)*custoLocal):Math.round((ownHome?4500:9500)*custoLocal)+Math.round(gross*.5); /* o padrão de vida sobe junto com o salário */
     cost+=m.assets.filter(a=>a.k==='carro').length*900+people('pet').reduce((s,p)=>s+(typeof petDef==='function'&&petDef(p)&&petDef(p).ex?1500:500),0);
     if(m.edu.cur&&m.edu.cur.type!=='medio'&&m.age<26) cost=Math.min(cost,Math.round(3000*custoLocal));
     kids().filter(k=>k.age<18).forEach(()=>cost+=Math.round(4000*custoLocal));
@@ -517,7 +517,8 @@ function royalTitle(){ const m=S.me,r=m.royal; if(!r||r.abd) return null; return
 function yearBiz(){ return empresaAno(); }
 
 // ---------- morte ----------
-function deathP(age,health){ if(age<1) return .002; const base=age<45?.00035:.00028*Math.exp(.09*(age-30)); return Math.min(.9,base*Math.pow(1.6-health/100,2)); }
+/* mortalidade anual parecida com as tábuas de vida (Gompertz): ~1% aos 60, ~3% aos 70, ~7% aos 80, ~18% aos 90; a saúde multiplica o risco */
+function deathP(age,health){ if(age<1) return .002; const base=age<45?.00035:.012*Math.exp(.09*(age-60)); return Math.min(.9,base*Math.pow(1.6-health/100,2)/(age<45?1:.81)); }
 function deathRoll(){ const m=S.me; let p=deathP(m.age,m.health)*diff().d; for(const d of m.dis){ if(DISEASES[d.id].fatal) p+=.012+d.y*.01; } if(m.prison) p+=.003; return R.chance(p); }
 function causeFromHealth(roll){
   const m=S.me; const fatal=m.dis.filter(d=>DISEASES[d.id].fatal);

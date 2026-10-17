@@ -8,11 +8,12 @@
 //   (o personagem da história vira uma pessoa da sua lista) · +cad:outra (começa outra história) · sem ">" a história termina
 // no texto: {p} nome do personagem da história · {pl} sobrenome · {o2} o/a dele(a) · {ele} ele/ela · e tudo do pack ({n}, {v}, {o}...)
 const CHAINS={};
+const CAD_LOCAIS=new Set(['Bairro','Vizinhança','Escola','Infância','Esporte']);
 WHO.avo=()=>R.pick(people('avo').filter(p=>p.gender==='F'))||R.pick(people('avo'));
 WHO.partnerNaoCasado=()=>pickPartner(p=>p.rel!=='conjuge');
 WHO.parentOld=()=>R.pick(parents().filter(p=>p.age>=68));
 function cadFalha(e,local){if(window.NO_SAVE||window.NL_TEST_STRICT)throw new Error(local+': '+e.message);console.error(local,e);const l=S.errosSistemas||(S.errosSistemas=[]);l.push({ano:S.year,local,erro:e.message});if(l.length>10)l.shift();}
-function cadContextoValido(id,c){const o=CHAINS[id].o,p=c.d.pid&&P(c.d.pid);if(c.d.pid&&!p?.alive&&!c.d.morto)return false;if((String(o.who).startsWith('partner')||o.who==='spouse')&&!partners().includes(p))return false;const j=c.d.contexto?.emprego;if(j&&['boss','colega'].includes(o.who)&&c.s!=='f'&&(S.me.job?.id!==j.id||S.me.job?.co!==j.co))return false;return true;}
+function cadContextoValido(id,c){const o=CHAINS[id].o,p=c.d.pid&&P(c.d.pid);if(c.d.pid&&!p?.alive&&!c.d.morto)return false;if((String(o.who).startsWith('partner')||o.who==='spouse')&&!partners().includes(p))return false;if(o.date&&c.d.pid&&partners().some(q=>q.id!==c.d.pid)&&!(typeof polyGrupo==='function'&&polyGrupo()))return false;if(c.d.contexto?.pais&&S.me.country!==c.d.contexto.pais&&CAD_LOCAIS.has(o.k))return false;const j=c.d.contexto?.emprego;if(j&&['boss','colega'].includes(o.who)&&c.s!=='f'&&(S.me.job?.id!==j.id||S.me.job?.co!==j.co))return false;return true;}
 function cadContextoTexto(d){const ctx=d.contexto;if(!ctx)return '';const w=mundo(ctx.pais);return w.crescimento<0?' A economia de '+countryOf(ctx.pais).n+' está em recessão; oportunidades e custos acompanham esse contexto.':'';}
 
 function chain(id,o,steps){ CHAINS[id]={id,o,steps}; Object.entries(steps).forEach(([sid,st])=>cadReg(id,sid,st)); }
@@ -47,6 +48,8 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
   d.ultimaDecisao=choice.split('|')[0];
   const lembrancas=m.histDecisoes||(m.histDecisoes=[]);lembrancas.push({id,etapa:sid,escolha:d.decisoes[sid],ok,ano:S.year});if(lembrancas.length>60)lembrancas.shift();
   const b0=cadSplit(base), br=cadSplit(ok?fx1:(fx2||''));
+  { const custo=[b0.rest,br.rest].join(' ').split(/\s+/).reduce((t,x)=>{const mm=x.match(/^\$-(\d+|v2|v)$/);return t+(mm?(mm[1]==='v'?d.v:mm[1]==='v2'?d.v2:+mm[1]):0);},0);
+    if(custo>0&&!canPay(custo)){ if(c){ c.due=m.age+1; } return `Isso custaria ${fmt(custo)} e eu não tenho agora. Fica para quando der.`; } }
   const out=[]; let next=null, delay=null, para=false;
   b0.own.concat(br.own).forEach(t=>{ let mm;
     if(mm=t.match(/^>(\w+)(?:@(\d+)(?:-(\d+))?)?$/)){ next=mm[1]; if(mm[2]!=null) delay=mm[3]!=null?R.int(+mm[2],+mm[3]):+mm[2]; }

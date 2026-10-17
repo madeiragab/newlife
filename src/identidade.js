@@ -13,7 +13,7 @@ newLife=(o=>function(opt={}){ const r=o.apply(this,arguments); const m=S.me;
   if(!opt.pref) m.pref=prefDe(m.gender,m.orient);
   return r; })(newLife);
 // gravidez decidida pelo sexo biológico, não pelo gênero
-interact=(o=>function(p,k,extra){ if(k!=='amor') return o.apply(this,arguments); const m=S.me, g0=m.gender, pg=p.gender;
+interact=(o=>function(p,k,extra){ if(k!=='amor'&&k!=='filho') return o.apply(this,arguments); const m=S.me, g0=m.gender, pg=p.gender;
   // truque: troca temporariamente o gênero pelo sexo biológico só para a conta da gravidez
   m.gender=sexoDe(m); p.gender=sexoDe(p); let r; try{ r=o.apply(this,arguments); } finally{ m.gender=g0; p.gender=pg; } return r; })(interact);
 // tela "Eu": identidade e orientação

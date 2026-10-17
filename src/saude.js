@@ -33,7 +33,7 @@ addDisease=(o=>function(id){ const m=S.me;
   if(id==='catapora') m.genes.pox=1; if(id==='vitiligo') m.genes.vitiligo=1;
   const sx=sintoma(id); m.dis.push({id,y:0,ctrl:false,k:false,sx}); log(sx,'bad'); st('happy',-3); })(addDisease);
 // descobrir o que é (a qualidade do médico importa)
-const TIERS={posto:{n:'Posto de saúde',c:0,ac:.55,cu:.5},clinica:{n:'Clínica popular',c:120,ac:.75,cu:.75},doc:{n:'Médico particular',c:300,ac:.93,cu:1},hosp:{n:'Hospital',c:8000,ac:1,cu:1}};
+const TIERS={posto:{n:'Posto de saúde',c:0,ac:.72,cu:.75},clinica:{n:'Clínica popular',c:120,ac:.75,cu:.75},doc:{n:'Médico particular',c:300,ac:.93,cu:1},hosp:{n:'Hospital',c:8000,ac:1,cu:1}};
 function diagnose(d,tier){ const m=S.me, def=DISEASES[d.id]; if(d.k!==false) return '';
   const ac=TIERS[tier].ac*(CANCERS.has(d.id)?.85:1);
   if(!R.chance(ac)) return R.pick(['O médico disse que é "virose" e mandou tomar bastante água.','Fizeram uns exames, mas não acharam nada.','O médico mal olhou para mim e passou um remédio para dor.']);
@@ -45,7 +45,7 @@ treat=(o=>function(where,dis){ const m=S.me, def=DISEASES[dis.id];
   if(where==='psi') return o(where,dis);
   if(where==='alt') return treatAlt(dis);
   const T=TIERS[where]||TIERS.doc; if(T.c&&!canPay(T.c)) return `Não tenho ${fmt(T.c)} para ${T.n.toLowerCase()}.`; m.money-=T.c;
-  if(where==='posto'&&R.chance(.25)) return R.pick(['A fila do posto dobrava o quarteirão. Voltei para casa sem ser atendid'+oa()+'.','Não tinha médico no posto hoje.']);
+  if(where==='posto'&&R.chance(.15)) return R.pick(['A fila do posto dobrava o quarteirão. Voltei para casa sem ser atendid'+oa()+'.','Não tinha médico no posto hoje.']);
   const dg=diagnose(dis,where); if(dis.k===false) return dg;
   const nome=dn(def.n);
   if(def.ctrl){ if(R.chance(T.cu)){ dis.ctrl=true; st('health',2); return `${dg} ${nome[0].toUpperCase()+nome.slice(1)} agora está sob controle com remédios.`.trim(); } return `${dg} O remédio que me passaram não fez efeito.`.trim(); }
@@ -93,7 +93,7 @@ treat=(o=>function(where,dis){ const m=S.me, def=DISEASES[dis.id];
   m.money-=custo; let aviso='';
   if(dis.tAno!=null&&m.age-dis.tAno>1&&dis.tA>0){ dis.tA=Math.max(0,dis.tA-1); aviso=' Como parei o tratamento, perdi parte do progresso.'; }
   dis.tAno=m.age; dis.tA=(dis.tA||0)+1; dis.tNeed=dis.tNeed||R.int(2,4)+(cancer?1:0);
-  if(R.chance(cancer?(where==='hosp'?.04:.07):.02)){ die(`de complicações no tratamento de ${nome}`); return `O corpo não aguentou o tratamento de ${nome}.`; }
+  if(R.chance(cancer?(where==='hosp'?.012:.022):.004)){ die(`de complicações no tratamento de ${nome}`); return `O corpo não aguentou o tratamento de ${nome}.`; }
   st('health',R.int(5,12));
   if(dis.tA>=dis.tNeed){ if(R.chance(where==='hosp'?.7:where==='doc'?.5:.3)){ m.dis=m.dis.filter(x=>x!==dis); st('happy',20); log(`Depois de ${dis.tA} anos de tratamento, venci ${nome}.`,'good'); return `Depois de ${dis.tA} anos de tratamento, os exames vieram limpos. Venci ${nome}!`; }
     dis.tNeed++; return `Os exames mostraram que ${nome} ainda não acabou. Mais um ano de tratamento.${aviso}`; }

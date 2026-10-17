@@ -27,7 +27,7 @@ chain('loteria',{k:'Sorte',min:18,max:85,gap:[1,1]},{
  a:['O bilhete da semana','Comecei a apostar na loteria toda semana, sempre nos mesmos números.',['Apostar pouco|$-100 >b|Só para sonhar.','Apostar muito|$-1000 add.jogo+6 >c|Quanto mais aposta, mais chance. Certo?']],
  b:['Quase','Acertei quatro números. Ganhei um pouquinho.',['Comemorar com uma pizza|$+800 h+6 >d@1-3|Pizza paga pela sorte.','Apostar tudo de novo|$-800 add.jogo+4 >c|Agora vai!']],
  c:['O vício','A aposta virou obrigação. Escondo os recibos da família.',['Parar de vez|?will h+4 >d|Rasguei os bilhetes. Liberdade.|add.jogo+8 $-3000 >e|Não consegui parar.','Diminuir|add.jogo-5 >d|Uma aposta por mês.']],
- d:['Os números de sempre','Continuei jogando os mesmos números por anos, por superstição.',['Conferir o resultado|?3 $+500000 h+30 f+5|ACERTEI TUDO! Fiquei milionári{o}!|h+0|Nada de novo. Mas um dia...','Esquecer de apostar justo hoje|h-4|E se fosse hoje?']],
+ d:['Os números de sempre','Continuei jogando os mesmos números por anos, por superstição.',['Conferir o resultado|?2 $+45000 h+20|Acertei cinco números! Não é a bolada, mas é dinheiro de verdade.|h+0|Nada de novo. Mas um dia...','Esquecer de apostar justo hoje|h-4|E se fosse hoje?']],
  e:['Fundo do poço','Perdi um dinheiro que não tinha.',['Procurar ajuda para o vício|$-2000 add.jogo-30 h+6|Grupo de apoio toda quinta. Funciona.','Esconder da família|h-10 add.jogo+5|A mentira pesa.']],
 });
 chain('piramide',{k:'Dinheiro',min:20,max:75,who:'friend',v:[3000,20000],gap:[1,1]},{

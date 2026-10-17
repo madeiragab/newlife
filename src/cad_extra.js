@@ -8,7 +8,7 @@ chain('bilhete_errado',{k:'Acaso',min:16,max:80,npc:1,date:1,gap:[1,1]},{
 });
 chain('sorteio_carro',{k:'Sorte',min:18,max:80,gap:[1,1]},{
  a:['O sorteio do mercado','O mercado do bairro está sorteando um carro. Cada compra vale um cupom.',['Preencher vários cupons|h+2 >b|Fiz compras desnecessárias só pelos cupons.','Preencher um só|>b|Se for para ganhar, ganha com um.']],
- b:['O resultado','O sorteio foi transmitido ao vivo na frente do mercado.',['Ir assistir|?5 h+25 f+3 >c|Chamaram meu nome! Ganhei o carro!|h-1|Não fui eu. Ganhou a dona da padaria.','Não ir|h+0|Depois vejo o resultado.']],
+ b:['O resultado','O sorteio foi transmitido ao vivo na frente do mercado.',['Ir assistir|?2 h+25 f+3 >c|Chamaram meu nome! Ganhei o carro!|h-1|Não fui eu. Ganhou a dona da padaria.','Não ir|h+0|Depois vejo o resultado.']],
  c:['O carro novo','Ganhei um carro zero.',['Ficar com o carro|carro:Carro_do_sorteio:60000 h+10|Chave na mão e um laço vermelho no capô.','Vender e guardar o dinheiro|$+55000 h+8|Investi tudo.']],
 });
 chain('celebridade_encontro',{k:'Acaso',min:14,max:80,gap:[1,1]},{
