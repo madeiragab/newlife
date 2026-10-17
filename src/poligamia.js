@@ -5,7 +5,7 @@ function polyPerfil(p){
   // Migração estável dos saves antigos: abrir a tela novamente não sorteia outra personalidade.
   return p.polyPerfil||(p.polyPerfil={abertura:(p.id*37+(p.will||50)*13)%101,ciume:clamp((p.craze||0)*.65+(p.id*19%36))});
 }
-const polyChance=p=>{ const t=polyPerfil(p); return clamp(10+t.abertura*.75-t.ciume*.55+(p.bond-50)*.3+(typeof relConfiancaMemoria==='function'?relConfiancaMemoria(p):0),3,95)/100; };
+const polyChance=p=>{ const t=polyPerfil(p); return clamp(10+t.abertura*.75-t.ciume*.55+(p.bond-50)*.3,3,95)/100; };
 const polyGrupo=()=>{ const l=polyAmores(); return l.length<2||l.every(p=>l.every(q=>q.id===p.id||(p.polyCom||[]).includes(q.id))); };
 const polyRodada=()=>{ const r=S.me.polyRodada; return r&&r.chave===polyChave()?r:null; };
 const polyUnanime=()=>{ const l=polyAmores(),r=polyRodada(); return !!(l.length&&r&&l.every(p=>r.votos[p.id]===true&&!p.polyPausa)); };
