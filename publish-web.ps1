@@ -1,11 +1,19 @@
 # Publica usando os bytes exatos do Git no manifesto.
+param([switch]$ReuseTest,[switch]$PrepareOnly)
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-if ($env:NL_TESTED -ne '1') {
+if (-not $ReuseTest) {
  & (Join-Path $root 'test.ps1') 400 | Out-Host
  if ($LASTEXITCODE -ne 0) { throw 'Teste falhou.' }
 }
-& (Join-Path $root 'build.ps1') | Out-Null
+node (Join-Path $root 'tools/test-receipt.cjs') verify
+if ($LASTEXITCODE -ne 0) { throw 'Fontes ou artefatos diferentes dos aprovados nos testes.' }
+if ($PrepareOnly) {
+ node (Join-Path $root 'tools/prepare-pages.cjs')
+ if ($LASTEXITCODE -ne 0) { throw 'Preparação dos artefatos falhou.' }
+ return
+}
+if ($env:GITHUB_ACTIONS -eq 'true') { throw 'No Actions, use -PrepareOnly e o job de deploy protegido pelos testes.' }
 $remote = git -C $root remote get-url origin
 $tmp = Join-Path $env:TEMP ('newlife-pages-' + [guid]::NewGuid().ToString('N'))
 git clone -q --branch gh-pages --single-branch $remote $tmp

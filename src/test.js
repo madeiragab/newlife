@@ -1,7 +1,8 @@
 // ===== Teste automático (abre com #teste no endereço) =====
 function selfTest(){
+  const originalRandom=R.f;let seed=20261017;R.f=()=>{seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296;};
   const errs={},lives=[]; let years=0,events=0,actions=0;
-  const T=(name,fn)=>{ window.__T=name; (window.__TR=window.__TR||[]).push(name); if(window.__TR.length>30) window.__TR.shift(); try{ actions++; const r=fn(); if(S&&S.me&&!isFinite(S.me.money)){ const k='NaN após '+name; errs[k]=(errs[k]||0)+1; S.me.money=0; } return r; }catch(e){ const k=name+': '+e.message; errs[k]=(errs[k]||0)+1; if(errs[k]===1) errs[k+' @']=(e.stack||'').split('\n').slice(1,3).join(' | '); } };
+  const T=(name,fn)=>{ window.__T=name; (window.__TR=window.__TR||[]).push(name); if(window.__TR.length>30) window.__TR.shift(); try{ actions++; if(actions%5000===0&&window.nlTestNotify)window.nlTestNotify(JSON.stringify({teste:name,acoes:actions})); const r=fn(); if(S&&S.me&&!isFinite(S.me.money)){ const k='NaN após '+name; errs[k]=(errs[k]||0)+1; S.me.money=0; } return r; }catch(e){ const k=name+': '+e.message; errs[k]=(errs[k]||0)+1; if(errs[k]===1) errs[k+' @']=(e.stack||'').split('\n').slice(1,3).join(' | '); } };
   T('paranormal profissional',()=>{
     const assert=(ok,msg)=>{ if(!ok) throw Error(msg); };
     newLife({}); S.me.age=25; S.me.money=100000; S.me.health=100; S.me.prison=null; S.scen=null;
@@ -32,7 +33,10 @@ function selfTest(){
   T('família e saves',familySelfTest);
   T('sistemas públicos integrados',publicSystemsSelfTest);
   T('economia mundial',()=>mundoDiagnostico(100));
+  if(window.NL_SAVE_FIXTURE)T('save econômico da v1.46',()=>economiaCompatSelfTest(window.NL_SAVE_FIXTURE));
   T('idades e animais',idadeAnimaisSelfTest);
+  T('percursos completos',()=>{window.NL_PLAYTESTS=trajetoriasSelfTest();});
+  T('estratégias entre países',()=>{const r=estrategiasMundoDiagnostico();window.NL_ECON_DIAG=r;});
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
@@ -254,8 +258,8 @@ function selfTest(){
   const ages=lives.filter(l=>!l.startsWith(' ')).map(l=>+(l.match(/· (\d+)a ·/)||[0,0])[1]);
   lives.unshift(`IDADE MÉDIA: ${(ages.reduce((a,b)=>a+b,0)/ages.length).toFixed(1)} · acima de 70: ${Math.round(ages.filter(a=>a>=70).length/ages.length*100)}% · abaixo de 30: ${Math.round(ages.filter(a=>a<30).length/ages.length*100)}%`);
   const o=document.createElement('pre'); o.id='out'; o.style.cssText='position:fixed;inset:0;z-index:999;background:#fff;color:#000;overflow:auto;padding:10px;font-size:11px;white-space:pre-wrap';
-  o.textContent=`NOMES: ${Object.entries(NAME_DB).map(([c,d])=>c+' '+d.M.length+'/'+d.F.length+'/'+d.L.length).join(' · ')}\nEVENTOS: ${Object.keys(EVENTS).length} · TESTE: ${lives.length} vidas, ${years} anos, ${events} eventos, ${actions} ações, ${swept} eventos varridos\nERROS: ${Object.keys(errs).filter(k=>!k.endsWith(' @')).length}\n`+Object.entries(errs).map(([k,v])=>k.endsWith(' @')?'    '+v:`${v}x ${k}`).join('\n')+'\n\n'+lives.join('\n');
-  document.body.appendChild(o); const nErr=Object.keys(errs).filter(k=>!k.endsWith(' @')).length; o.dataset.erros=nErr; document.title=nErr?'TESTE FALHOU':'TESTE OK';
+  o.textContent=`SEMENTE: 20261017\nNOMES: ${Object.entries(NAME_DB).map(([c,d])=>c+' '+d.M.length+'/'+d.F.length+'/'+d.L.length).join(' · ')}\nEVENTOS: ${Object.keys(EVENTS).length} · TESTE: ${lives.length} vidas, ${years} anos, ${events} eventos, ${actions} ações, ${swept} eventos varridos\nERROS: ${Object.keys(errs).filter(k=>!k.endsWith(' @')).length}\n`+Object.entries(errs).map(([k,v])=>k.endsWith(' @')?'    '+v:`${v}x ${k}`).join('\n')+'\n\n'+lives.join('\n');
+  document.body.appendChild(o); R.f=originalRandom; const nErr=Object.keys(errs).filter(k=>!k.endsWith(' @')).length; o.dataset.erros=nErr; document.title=nErr?'TESTE FALHOU':'TESTE OK'; if(window.nlTestNotify)window.nlTestNotify(JSON.stringify({done:true,errors:nErr,text:o.textContent,economia:window.NL_ECON_DIAG,playtests:window.NL_PLAYTESTS}));
 }
 
 // ===== Diagnóstico das aventuras (#aventura): um jogador razoável joga cada modo 40 vezes =====

@@ -1,6 +1,15 @@
 // Mercados nacionais em moeda comum: cotação local / câmbio simulado.
 function mercadoIndice(pais,tipo){const w=mundo(pais);return w.indices[tipo]/w.cambio;}
 function mercadoCusto(){return .45*mercadoIndice(S.me.country,'alimentos')+.55*mercadoIndice(S.me.country,'servicos');}
+// Migração sem reprecificar bens nem substituir juros de contratos antigos.
+function mercadosMigrar(s){
+ if(!s?.me)return s;
+ for(const a of s.me.assets||[])if(['casa','carro'].includes(a.k)&&!a.country)a.country=s.me.country;
+ if(s.me.biz&&!s.me.biz.country)s.me.biz.country=s.me.country;
+ return s;
+}
+fixSave=(o=>function(s){return mercadosMigrar(o(s));})(fixSave);
+emigrate=(o=>function(){mercadosMigrar(S);return o.apply(this,arguments);})(emigrate);
 houseListings=(o=>function(){const m=S.me;if(m.yr.casasPais!==m.country||m.yr.casasAno!==S.year||!Array.isArray(m.yr.houses)){const idx=mercadoIndice(m.country,'imoveis');m.yr.houses=o.apply(this,arguments).map(l=>({...l,v:Math.max(1000,Math.round(l.v*idx/100)*100),country:m.country,mercadoAno:S.year,mercadoIndice:idx}));m.yr.casasPais=m.country;m.yr.casasAno=S.year;}return m.yr.houses;})(houseListings);
 carListings=(o=>function(){const m=S.me;if(m.yr.carrosPais!==m.country||m.yr.carrosAno!==S.year||!Array.isArray(m.yr.cars)){m.yr.cars=null;const idx=mercadoIndice(m.country,'veiculos');m.yr.cars=o.apply(this,arguments).map(l=>({...l,v:Math.max(100,Math.round(l.v*idx/100)*100),country:m.country,mercadoAno:S.year,mercadoIndice:idx}));m.yr.carrosPais=m.country;m.yr.carrosAno=S.year;}return m.yr.cars;})(carListings);
 function mercadoValor(a){if(!['casa','carro'].includes(a.k))return 1;const pais=a.country||(a.country=S.me.country),idx=mercadoIndice(pais,a.k==='casa'?'imoveis':'veiculos');if(!a.mercadoIndice){a.mercadoIndice=idx;a.mercadoAno=S.year;return 1;}if(a.mercadoAno===S.year)return 1;const f=idx/a.mercadoIndice;a.mercadoIndice=idx;a.mercadoAno=S.year;return macroLim(f,.5,1.5);}

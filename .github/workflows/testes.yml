@@ -3,12 +3,47 @@ on:
   push:
     branches: [main]
   pull_request:
+concurrency:
+  group: newlife-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
 jobs:
   testes:
     runs-on: windows-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Simular centenas de vidas
         shell: powershell
         run: .\test.ps1 3000
+      - name: Guardar relatório e diagnóstico do navegador
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-testes
+          path: test-results/
+      - name: Preparar somente os artefatos aprovados
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        shell: powershell
+        run: .\publish-web.ps1 -ReuseTest -PrepareOnly
+      - uses: actions/upload-pages-artifact@v3
+        if: success() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        with:
+          path: test-results/pages
+  publicar:
+    needs: testes
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/deploy-pages@v4
+        id: deployment

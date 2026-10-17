@@ -292,7 +292,11 @@ Rode `make-exe.ps1` antes do `make-apk.ps1`, porque ele gera o ícone usado pelo
 
 [![Testes](https://github.com/madeiragab/newlife/actions/workflows/testes.yml/badge.svg)](https://github.com/madeiragab/newlife/actions/workflows/testes.yml)
 
-`test.ps1` termina com falha se houver qualquer erro, e o `publish-web.ps1` não publica nada nesse caso. O GitHub Actions roda o mesmo teste a cada push.
+`test.ps1` usa Node 22+ e Edge sem janela, com semente reproduzível, progresso e relatórios em `test-results/`. A simulação inclui regressões familiares, judiciais, econômicas e um save sintético produzido na versão 1.46 (empresa, casa financiada e carro). O modo de teste mantém snapshots em memória para verificar a máquina do tempo, mas não grava saves no navegador.
+
+O Actions executa os testes antes de publicar no GitHub Pages. O job de publicação depende da aprovação e recebe exatamente o HTML testado. `publish-web.ps1 -ReuseTest` exige um comprovante local que confere os hashes de fontes e artefatos; mudanças durante ou depois do teste invalidam a aprovação. Sem esse parâmetro, o script executa a simulação completa. Não há liberação por variável de ambiente.
+
+Os relatórios incluem 180 projeções financeiras: quatro estratégias em 15 países e três sementes, dos 30 aos 90 anos, mantendo emprego e sem mortalidade. Também registram rankings operacionais por década e quatro percursos automatizados de vida. Isso ajuda a encontrar estratégias dominantes e regressões, mas não substitui sessões humanas nem demonstra equilíbrio econômico. O cálculo `empresaCalcular()` recebe unidade, conjuntura, preços, comércio e variação explicitamente, sem modificar suas entradas.
 
 | Comando | O que faz |
 |---|---|

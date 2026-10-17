@@ -1,0 +1,10 @@
+const fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
+const root=path.resolve(__dirname,'..'),dest=path.join(root,'test-results/pages');
+fs.mkdirSync(dest,{recursive:true});
+const app=fs.readFileSync(path.join(root,'desktop/outra-vida.html'));
+const web=fs.readFileSync(path.join(root,'outra-vida.html'));
+const v=app.toString('utf8').match(/NL_VER='(\d+)'/)[1];
+fs.writeFileSync(path.join(dest,'index.html'),web);
+fs.writeFileSync(path.join(dest,'app.html'),app);
+fs.writeFileSync(path.join(dest,'version.json'),JSON.stringify({v,size:app.length,sha256:crypto.createHash('sha256').update(app).digest('hex')}));
+console.log('Pages: HTML aprovado e manifesto preparados em '+dest);

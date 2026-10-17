@@ -1,0 +1,629 @@
+{
+  "v": 1,
+  "nextId": 9,
+  "year": 2018,
+  "people": [
+    {
+      "id": 1,
+      "first": "Neli",
+      "last": "Ribeiro",
+      "gender": "F",
+      "age": 38,
+      "rel": "mae",
+      "bond": 85,
+      "alive": true,
+      "looks": 57,
+      "smarts": 29,
+      "craze": 31,
+      "money": 580879,
+      "job": "Diretora de observatório",
+      "health": 59,
+      "talent": {
+        "acting": 11,
+        "musical": 0,
+        "athletic": 23,
+        "art": 40,
+        "dance": 29,
+        "writing": 9,
+        "comedy": 59
+      },
+      "will": 75,
+      "fert": 46,
+      "genes": {
+        "hair": "castanho-escuro",
+        "eyes": "castanhos",
+        "h": 158,
+        "skin": 2,
+        "style": 5,
+        "glasses": true,
+        "freckles": false,
+        "eyeShape": 0,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 2,
+      "first": "Eduardo",
+      "last": "Loiola",
+      "gender": "M",
+      "age": 40,
+      "rel": "pai",
+      "bond": 79,
+      "alive": true,
+      "looks": 77,
+      "smarts": 90,
+      "craze": 62,
+      "money": 764086,
+      "job": "Advogado júnior",
+      "health": 95,
+      "talent": {
+        "acting": 65,
+        "musical": 0,
+        "athletic": 22,
+        "art": 33,
+        "dance": 47,
+        "writing": 42,
+        "comedy": 54
+      },
+      "will": 12,
+      "fert": 66,
+      "genes": {
+        "hair": "preto",
+        "eyes": "pretos",
+        "h": 174,
+        "skin": 5,
+        "style": 1,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 1,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 3,
+      "first": "Gilmar",
+      "last": "Campos",
+      "gender": "M",
+      "age": 68,
+      "rel": "avo",
+      "bond": 89,
+      "alive": true,
+      "looks": 29,
+      "smarts": 46,
+      "craze": 14,
+      "money": 634319,
+      "job": null,
+      "health": 48,
+      "talent": {
+        "acting": 39,
+        "musical": 67,
+        "athletic": 50,
+        "art": 27,
+        "dance": 34,
+        "writing": 0,
+        "comedy": 56
+      },
+      "will": 14,
+      "fert": 51,
+      "genes": {
+        "hair": "loiro",
+        "eyes": "castanhos",
+        "h": 174,
+        "skin": 2,
+        "style": 5,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 0,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 4,
+      "first": "Diana",
+      "last": "Basílio",
+      "gender": "F",
+      "age": 36,
+      "rel": "colegaT",
+      "bond": 32,
+      "alive": true,
+      "looks": 51,
+      "smarts": 57,
+      "craze": 79,
+      "money": 0,
+      "job": null,
+      "health": 94,
+      "talent": {
+        "acting": 58,
+        "musical": 53,
+        "athletic": 56,
+        "art": 34,
+        "dance": 61,
+        "writing": 35,
+        "comedy": 74
+      },
+      "will": 88,
+      "fert": 32,
+      "genes": {
+        "hair": "castanho-escuro",
+        "eyes": "castanhos",
+        "h": 153,
+        "skin": 6,
+        "style": 2,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 2,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 5,
+      "first": "Weliton",
+      "last": "Xavier Hoffmann",
+      "gender": "M",
+      "age": 42,
+      "rel": "colegaT",
+      "bond": 43,
+      "alive": true,
+      "looks": 55,
+      "smarts": 66,
+      "craze": 53,
+      "money": 0,
+      "job": null,
+      "health": 67,
+      "talent": {
+        "acting": 18,
+        "musical": 38,
+        "athletic": 1,
+        "art": 4,
+        "dance": 48,
+        "writing": 35,
+        "comedy": 10
+      },
+      "will": 37,
+      "fert": 89,
+      "genes": {
+        "hair": "castanho-escuro",
+        "eyes": "castanhos",
+        "h": 159,
+        "skin": 0,
+        "style": 3,
+        "glasses": false,
+        "freckles": true,
+        "eyeShape": 2,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    },
+    {
+      "id": 6,
+      "first": "Donizete",
+      "last": "Azevedo Constantino",
+      "gender": "M",
+      "age": 57,
+      "rel": "chefe",
+      "bond": 45,
+      "alive": true,
+      "looks": 81,
+      "smarts": 70,
+      "craze": 11,
+      "money": 0,
+      "job": null,
+      "health": 84,
+      "talent": {
+        "acting": 19,
+        "musical": 0,
+        "athletic": 63,
+        "art": 51,
+        "dance": 68,
+        "writing": 28,
+        "comedy": 68
+      },
+      "will": 97,
+      "fert": 88,
+      "genes": {
+        "hair": "castanho",
+        "eyes": "castanhos",
+        "h": 187,
+        "skin": 2,
+        "style": 1,
+        "glasses": false,
+        "freckles": false,
+        "eyeShape": 2,
+        "from": {}
+      },
+      "species": null,
+      "life": null,
+      "parentId": null,
+      "yrs": 0,
+      "yr": {}
+    }
+  ],
+  "log": [
+    {
+      "age": 0,
+      "year": 2018,
+      "lines": [
+        {
+          "t": "Nasci menino em Belém, Brasil, no ano de 2018.",
+          "c": "big"
+        },
+        "Meu nome é Fábio Loiola.",
+        "Minha mãe é Neli Ribeiro, diretora de observatório, 38 anos.",
+        "Meu pai é Eduardo Loiola, advogado júnior, 40 anos.",
+        "Minha família é rica.",
+        "Tenho olhos pretos do meu pai e cabelo castanho-escuro da minha mãe.",
+        {
+          "t": "Fui contratado como ajudante de obra na Teste.",
+          "c": "good"
+        },
+        {
+          "t": "Comprei: quitinete num bairro tranquilo por $58.500.",
+          "c": "good"
+        },
+        {
+          "t": "Comprei: sabiá pica-pau 2005 por $12.700.",
+          "c": "good"
+        },
+        {
+          "t": "Abri minha empresa: Empresa antiga (lanchonete).",
+          "c": "good"
+        }
+      ]
+    }
+  ],
+  "pending": [],
+  "births": [],
+  "me": {
+    "first": "Teste",
+    "last": "Migração",
+    "gender": "M",
+    "age": 40,
+    "country": "BR",
+    "city": "Belém",
+    "born": 2018,
+    "happy": 100,
+    "health": 95,
+    "smarts": 58,
+    "looks": 77,
+    "karma": 51,
+    "fame": 0,
+    "money": 1935600,
+    "talent": {
+      "acting": 29,
+      "musical": 0,
+      "athletic": 26,
+      "art": 54,
+      "dance": 62,
+      "writing": 55,
+      "comedy": 50
+    },
+    "will": 22,
+    "fert": 70,
+    "fight": 29,
+    "pref": "A",
+    "add": {
+      "alcool": 0,
+      "cigarro": 0,
+      "jogo": 0
+    },
+    "dis": [],
+    "edu": {
+      "deg": [],
+      "cur": null,
+      "club": null
+    },
+    "job": {
+      "id": "obra",
+      "lvl": 0,
+      "perf": 55,
+      "yrs": 0,
+      "lvlYrs": 0,
+      "co": "Teste",
+      "size": "média",
+      "mul": 1
+    },
+    "hist": [],
+    "rec": {
+      "arrests": 0,
+      "conv": 0,
+      "crimes": 0
+    },
+    "prison": null,
+    "lic": false,
+    "assets": [
+      {
+        "id": 7,
+        "k": "casa",
+        "n": "Quitinete num bairro tranquilo",
+        "value": 58500,
+        "cond": 54,
+        "buy": 58500,
+        "loan": 46800,
+        "pay": 2527
+      },
+      {
+        "id": 8,
+        "k": "carro",
+        "n": "Sabiá Pica-Pau 2005",
+        "value": 12700,
+        "cond": 52,
+        "buy": 12700,
+        "ic": "🚗",
+        "classic": false
+      }
+    ],
+    "loans": [],
+    "inv": {
+      "poup": 0,
+      "acoes": 0,
+      "cripto": 0
+    },
+    "social": null,
+    "office": null,
+    "ret": null,
+    "biz": {
+      "n": "Empresa antiga",
+      "sector": "Lanchonete",
+      "value": 40000,
+      "start": 40000,
+      "emp": 2,
+      "yrs": 0,
+      "mkt": 0
+    },
+    "royal": null,
+    "c": {
+      "countries": 1
+    },
+    "yr": {
+      "houses": [
+        {
+          "t": "Casa",
+          "n": "Casa no centro",
+          "v": 182700,
+          "cond": 93,
+          "q": 4,
+          "built": 1983
+        },
+        {
+          "t": "Sobrado",
+          "n": "Sobrado no centro",
+          "v": 374800,
+          "cond": 88,
+          "q": 3,
+          "built": 2000
+        },
+        {
+          "t": "Sítio",
+          "n": "Sítio perto da universidade",
+          "v": 533500,
+          "cond": 81,
+          "q": 1,
+          "built": 2013
+        },
+        {
+          "t": "Cobertura",
+          "n": "Cobertura perto da universidade",
+          "v": 1024700,
+          "cond": 47,
+          "q": 4,
+          "built": 1987
+        },
+        {
+          "t": "Mansão",
+          "n": "Mansão numa vila antiga",
+          "v": 3832300,
+          "cond": 82,
+          "q": 2,
+          "built": 2007
+        }
+      ],
+      "cars": [
+        {
+          "model": {
+            "b": "Novena",
+            "m": "City",
+            "cat": "Popular",
+            "v": 58000,
+            "ic": "🚗"
+          },
+          "t": "Popular",
+          "n": "Novena City 2005",
+          "cor": "laranja",
+          "v": 14400,
+          "cond": 74,
+          "ic": "🚗",
+          "cat": "Popular",
+          "classic": false
+        },
+        {
+          "model": {
+            "b": "Hanzo",
+            "m": "Dot",
+            "cat": "Popular",
+            "v": 46000,
+            "ic": "🚗"
+          },
+          "t": "Popular",
+          "n": "Hanzo Dot 2010",
+          "cor": "branco",
+          "v": 20400,
+          "cond": 80,
+          "ic": "🚗",
+          "cat": "Popular",
+          "classic": false
+        },
+        {
+          "model": {
+            "b": "Hanzo",
+            "m": "Trail",
+            "cat": "SUV",
+            "v": 140000,
+            "ic": "🚙"
+          },
+          "t": "SUV",
+          "n": "Hanzo Trail 2013",
+          "cor": "amarelo",
+          "v": 86800,
+          "cond": 84,
+          "ic": "🚙",
+          "cat": "SUV",
+          "classic": false
+        },
+        {
+          "model": {
+            "b": "Ironhorse",
+            "m": "Estrada Livre",
+            "cat": "Moto",
+            "v": 140000,
+            "ic": "🏍️"
+          },
+          "t": "Moto",
+          "n": "Ironhorse Estrada Livre 0 km",
+          "cor": "laranja",
+          "v": 133500,
+          "cond": 100,
+          "ic": "🏍️",
+          "cat": "Moto",
+          "classic": false
+        },
+        {
+          "model": {
+            "b": "Lumina",
+            "m": "Folha",
+            "cat": "Elétrico",
+            "v": 180000,
+            "ic": "🔋"
+          },
+          "t": "Elétrico",
+          "n": "Lumina Folha 0 km",
+          "cor": "cinza-grafite",
+          "v": 180500,
+          "cond": 100,
+          "ic": "🔋",
+          "cat": "Elétrico",
+          "classic": false
+        },
+        {
+          "model": {
+            "b": "Astrex",
+            "m": "Executive",
+            "cat": "Sedã",
+            "v": 185000,
+            "ic": "🚘"
+          },
+          "t": "Sedã",
+          "n": "Astrex Executive 0 km",
+          "cor": "amarelo",
+          "v": 186400,
+          "cond": 100,
+          "ic": "🚘",
+          "cat": "Sedã",
+          "classic": false
+        },
+        {
+          "model": {
+            "b": "Kessler",
+            "m": "Turbo R",
+            "cat": "Esportivo",
+            "v": 1100000,
+            "ic": "🏎️"
+          },
+          "t": "Esportivo",
+          "n": "Kessler Turbo R 2006",
+          "cor": "vinho",
+          "v": 260400,
+          "cond": 64,
+          "ic": "🏎️",
+          "cat": "Esportivo",
+          "classic": false
+        },
+        {
+          "model": {
+            "b": "Raptora",
+            "m": "Clássico 1967",
+            "cat": "Clássico",
+            "v": 650000,
+            "ic": "🚗",
+            "classic": 1
+          },
+          "t": "Clássico",
+          "n": "Raptora Clássico 1967",
+          "cor": "cinza-grafite",
+          "v": 672400,
+          "cond": 87,
+          "ic": "🚗",
+          "cat": "Clássico",
+          "classic": true
+        },
+        {
+          "model": {
+            "b": "Aurelle",
+            "m": "Hyperion",
+            "cat": "Superesportivo",
+            "v": 18000000,
+            "ic": "🏎️"
+          },
+          "t": "Superesportivo",
+          "n": "Aurelle Hyperion 0 km",
+          "cor": "amarelo",
+          "v": 17925800,
+          "cond": 100,
+          "ic": "🏎️",
+          "cat": "Superesportivo",
+          "classic": false
+        }
+      ]
+    },
+    "alive": true,
+    "cause": null,
+    "genes": {
+      "hair": "castanho-escuro",
+      "eyes": "pretos",
+      "h": 165,
+      "from": {
+        "hair": "Neli",
+        "eyes": "Eduardo",
+        "h": "Neli"
+      },
+      "skin": 4,
+      "style": 5,
+      "glasses": true,
+      "freckles": false,
+      "eyeShape": 1
+    },
+    "orient": "bi",
+    "ident": "cis",
+    "sexo": "M"
+  },
+  "gen": 1,
+  "flags": {
+    "diff": "normal",
+    "cls": "rica",
+    "movedOut": 1
+  },
+  "ultScen": null
+}

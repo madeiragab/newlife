@@ -36,3 +36,5 @@ tools/fix*.py
 tools/cut_*.py
 /artifact.html
 *.idsig
+
+test-results/
