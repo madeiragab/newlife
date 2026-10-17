@@ -4,7 +4,7 @@ chain('lobo_controle',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,1]},{
  b:['Os primeiros sinais','Depois de meses, consegui fazer as unhas crescerem por vontade própria.',['Continuar treinando|fight+4 >c|Um passo de cada vez.','Exibir para os amigos|f+1 >d|Má ideia.']],
  c:['A transformação voluntária','Numa noite sem lua, me transformei por vontade própria. E voltei.',['Celebrar|fight+8 h+12 >e|Agora a fera obedece a mim.','Ter medo do próprio poder|h-4 >e|E se eu não conseguir voltar?']],
  d:['O susto','Os amigos acharam que era um truque. Um deles não achou.',['Pedir segredo|?k >c|Ele guardou.|>c|Ele espalhou, mas ninguém acreditou nele.','Rir e mudar de assunto|>c|Mágica, claro.']],
- e:['Mestre da fera','Agora a lua cheia não me domina mais. Eu escolho quando.',['Usar para proteger os outros|k+8 fome-20|Às vezes, a fera salva vidas.','Ensinar outros lobisomens|k+6 f+0|A alcateia inteira veio aprender.']],
+ e:['Mestre da fera','Agora a lua cheia não me domina mais. Eu escolho quando.',['Usar para proteger os outros|k+8 fome-20|Às vezes, a fera salva vidas.','Ensinar outros lobisomens|k+6|A alcateia inteira veio aprender.']],
 });
 chain('lobo_zoologico',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,1]},{
  a:['Acordei no zoológico','Acordei pelad{o}, dentro da jaula dos lobos do zoológico, com três lobos dormindo em volta de mim.',['Sair escondid{o} antes da abertura|?sm >b|Pulei a cerca com um uniforme roubado do vestiário.|>c|Os tratadores chegaram antes.','Ficar quiet{o} e esperar|>c|Não tinha como sair.']],
@@ -21,7 +21,7 @@ chain('lobo_policia_suspeito',{k:'Lobisomem',min:18,max:120,when:LOBO,npc:1,gn:'
  f:['Caso encerrado','O caso foi encerrado como "ataque de animal selvagem abatido".',['Agradecer a {p}|bond+10 h+8|Ela guarda meu segredo até hoje.','Seguir em frente|h+4|Mais uma lua.']],
 });
 chain('lobo_esporte',{k:'Lobisomem',min:16,max:60,when:LOBO,gap:[1,1]},{
- a:['Força demais','Desde a mordida, corro mais rápido e sou mais fort{o} do que qualquer atleta.',['Entrar para um time|tal.athletic+10 >b|O técnico ficou de queixo caído.','Esconder a força|h-2|Melhor não chamar atenção.']],
+ a:['Força demais','Desde a mordida, corro mais rápido e tenho mais força do que qualquer atleta.',['Entrar para um time|tal.athletic+10 >b|O técnico ficou de queixo caído.','Esconder a força|h-2|Melhor não chamar atenção.']],
  b:['O campeonato','Fui o destaque do campeonato. Quebrei um recorde regional.',['Continuar competindo|f+5 >c|Patrocinadores começaram a ligar.','Diminuir o ritmo|h+2 >d|Muita atenção.']],
  c:['O exame antidoping','Fui sortead{o} para o antidoping. Meu sangue é... diferente.',['Fazer o exame|?40 f+6 $+20000|O laboratório achou "anomalia genética rara". Liberad{o}.|f+3 h-10|Fui suspens{o} por "substância desconhecida".','Fugir do exame|f-5 h-6|Desclassificad{o} e fim de carreira.']],
  d:['A escolha','Brilhar no esporte ou proteger o segredo?',['Ficar no esporte amador|h+6|Ganho os campeonatos do bairro sem chamar atenção.','Largar o esporte|h-3|A fera não pode virar notícia.']],
@@ -42,6 +42,6 @@ chain('lobo_vampiros',{k:'Lobisomem',min:18,max:120,when:LOBO,gap:[1,1]},{
 chain('lobo_faro',{k:'Lobisomem',min:16,max:120,when:LOBO,npc:1,age:[-15,10],gap:[1,1]},{
  a:['O faro','Desde a mordida, sinto cheiros a quilômetros. Senti cheiro de medo vindo de uma casa no fim da rua.',['Investigar|>b|O cheiro vinha do porão.','Ignorar|k-3|Não é da minha conta.']],
  b:['A criança','No porão, uma criança desaparecida havia uma semana: {p}.',['Tirar {p} de lá|?fight k+12 f+5 >c|Arrombei a porta e levei {p} para a polícia.|hl-15 k+12 >c|O sequestrador me atacou, mas salvei {p}.','Chamar a polícia|k+10 >c|A polícia chegou em minutos.']],
- c:['Herói','O jornal chamou de "faro inexplicável".',['Dar entrevista|f+6 >d@1|Disse que foi intuição.','Ficar no anonimato|k+5 >d@1|Ninguém pode saber como eu sei.']],
+ c:['O salvamento','O jornal chamou de "faro inexplicável".',['Dar entrevista|f+6 >d@1|Disse que foi intuição.','Ficar no anonimato|k+5 >d@1|Ninguém pode saber como eu sei.']],
  d:['Os pedidos','Agora a polícia me procura para casos de desaparecidos.',['Ajudar|k+10 f+3|Já encontrei sete pessoas.','Recusar|h+2|É arriscado demais.']],
 });

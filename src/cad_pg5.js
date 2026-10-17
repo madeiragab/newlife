@@ -2,7 +2,7 @@
 chain('escola_assombrada',{k:'Assombração',min:8,max:17,when:m=>!m.prison&&!!m.edu.cur,w:.4,gap:[1,1]},{
  a:['O banheiro do terceiro andar','Todo mundo na escola fala da "Loira do Banheiro". Desafiaram você a ir lá sozinh{o} e chamar o nome dela três vezes.',['Aceitar o desafio|>b|O banheiro estava gelado e a torneira pingava.','Recusar|h-1|Chamaram de medros{o} o resto do ano.']],
  b:['Três vezes','Na terceira vez, a luz apagou e a descarga disparou sozinha.',['Sair correndo|f+1 h+4 >c|Saí gritando. Virei lenda da escola.','Ficar para ver|>d|No espelho, por um segundo, um rosto pálido atrás de mim.']],
- c:['Lenda da escola','Os colegas agora contam a história como se eu fosse um herói.',['Aumentar a história|f+2 h+4|A cada vez que conto, ela fica maior.','Contar a verdade|k+2|Só deu medo mesmo.']],
+ c:['Lenda da escola','Os colegas agora contam a história como se eu tivesse enfrentado um monstro.',['Aumentar a história|f+2 h+4|A cada vez que conto, ela fica maior.','Contar a verdade|k+2|Só deu medo mesmo.']],
  d:['O recado','No espelho embaçado, apareceu escrito: "Me ajuda a achar meu brinco."',['Procurar o brinco|>e|Atrás da pia, um brinco antigo de pérola.','Contar para a diretora|>c|Ela ficou pálida e mandou fechar o banheiro.']],
  e:['A ex-aluna','A diretora reconheceu o brinco: de uma aluna que morreu na escola em 1985.',['Entregar à família da aluna|k+8 h+8|O banheiro do terceiro andar nunca mais ficou gelado.','Guardar o brinco|h-3|Os pesadelos começaram.']],
 });

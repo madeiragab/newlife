@@ -10,7 +10,7 @@ chain('restaurante',{k:'Sonhos',min:22,max:65,v:[20000,60000],gap:[1,1]},{
  h:['Mês difícil','O restaurante está no vermelho há três meses.',['Mudar o cardápio|?50 $+5000 >g|Cardápio novo, clientes novos.|$-6000 h-8|Não adiantou. Fechei as portas.','Fechar e voltar ao delivery|h-6 >f|Recomeço menor.']],
 });
 chain('aurora_boreal',{k:'Viagem',min:25,max:80,v:[15000,30000],gap:[1,2]},{
- a:['A lista de sonhos','Na minha lista de sonhos, o primeiro item é ver a aurora boreal.',['Começar a juntar dinheiro|$+0 k+1 >b|Um cofrinho com o nome "aurora".','Achar que é caro demais|h-2 >c@3|Fica para outro dia.']],
+ a:['A lista de sonhos','Na minha lista de sonhos, o primeiro item é ver a aurora boreal.',['Começar a juntar dinheiro|k+1 >b|Um cofrinho com o nome "aurora".','Achar que é caro demais|h-2 >c@3|Fica para outro dia.']],
  b:['O dinheiro guardado','Depois de muito tempo, juntei o suficiente.',['Comprar as passagens|$-v h+12 >d|Vou para o norte do mundo!','Usar o dinheiro numa emergência|h-6 >c@2|A vida tinha outros planos.']],
  c:['A vontade volta','Vi uma foto de aurora boreal na internet e lembrei do meu sonho.',['Recomeçar a juntar|>b@1|Desta vez vai.','Desistir de vez|h-3|Algumas coisas ficam só na lista.']],
  d:['O frio','Trinta graus negativos. Três noites de céu nublado.',['Esperar mais uma noite|?50 h+25 >e|O céu ficou verde, depois roxo, depois tudo junto. Chorei congelad{o}.|h-6 >e|Não apareceu. Volto sem ver.','Fazer passeio de trenó com cães|h+12 >e|Pelo menos os cachorros foram incríveis.']],
@@ -36,8 +36,8 @@ chain('idioma',{k:'Estudos',min:16,max:75,npc:1,gap:[1,1]},{
 });
 chain('casa_propria',{k:'Sonhos',min:25,max:60,v:[60000,200000],gap:[1,2]},{
  a:['O sonho da casa própria','Cansei de pagar aluguel. Quero uma casa minha.',['Começar a guardar para a entrada|k+2 >b|Planilha e disciplina.','Entrar num consórcio|$-3000 >c|Parcelinha todo mês.']],
- b:['A entrada','Juntei o dinheiro da entrada.',['Financiar uma casa|$-v h+15 >d|As chaves na mão. Minha casa!','Comprar um apartamento menor à vista|$-v h+12 >d|Pequeno, mas sem dívida.']],
- c:['A contemplação','O consórcio me sorteou!',['Usar a carta de crédito|$-v h+15 >d|Casa nova, sem juros de banco.','Esperar mais um pouco|>b@1|Ainda não achei a casa certa.']],
+ b:['A entrada','Juntei o dinheiro da entrada.',['Financiar uma casa|casa:fin h+3 >d|As chaves na mão. Minha casa!','Comprar à vista o que der|casa:vista >d|Pequeno, mas sem dívida.']],
+ c:['A contemplação','O consórcio me sorteou!',['Usar a carta de crédito|casa:fin h+3 >d|Casa nova, com as parcelas do consórcio.','Esperar mais um pouco|>b@1|Ainda não achei a casa certa.']],
  d:['A primeira reforma','A casa precisa de reforma.',['Fazer tudo de uma vez|$-15000 h+6 >e|Pó por todo lado por três meses.','Ir aos poucos|$-5000 h+4 >e|Um cômodo por ano.']],
  e:['O lar','A casa finalmente tem a minha cara.',['Fazer uma festa de inauguração|$-1500 h+12|Churrasco na laje.','Curtir o silêncio|h+10|Minha casa, minhas regras.']],
 });

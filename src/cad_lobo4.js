@@ -1,15 +1,15 @@
 // ===== Histórias em cadeia: a vida de lobisomem (4) =====
 chain('lobo_selvagem',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,1]},{
  a:['O lobisomem selvagem','Um lobisomem sem controle está matando pessoas na região. Todos vão achar que fui eu.',['Caçar o selvagem|>b|Segui o cheiro de sangue pela mata.','Ficar escondid{o}|>c|Melhor não aparecer.']],
- b:['O encontro','O selvagem é maior que eu, e não tem nada de humano nos olhos.',['Lutar|?fight-10 k+10 f+0 >d|Venci. Ao amanhecer, era um homem sem nome, sem passado.|hl-35 >e|Ele quase me matou.','Tentar acalmar|?k >f|Ele parou. Por um segundo, vi alguém lá dentro.|hl-25 >e|Não adiantou.']],
+ b:['O encontro','O selvagem é maior que eu, e não tem nada de humano nos olhos.',['Lutar|?fight-10 k+10 >d|Venci. Ao amanhecer, era um homem sem nome, sem passado.|hl-35 >e|Ele quase me matou.','Tentar acalmar|?k >f|Ele parou. Por um segundo, vi alguém lá dentro.|hl-25 >e|Não adiantou.']],
  c:['O medo da cidade','A cidade inteira está com medo. Montaram grupos de caça.',['Caçar o selvagem antes deles|>b|Não posso deixar inocentes morrerem.','Sair da cidade até passar|$-3000 h-3|Fui para longe.']],
  d:['Paz na mata','Os ataques pararam. A mata voltou a ser segura.',['Enterrar o selvagem com respeito|k+5 h+3|Ele também foi vítima de uma mordida.','Contar aos caçadores que acabou|f+2|Eles nunca souberam quem matou a fera.']],
  e:['Ferid{o} na mata','Fugi ferid{o}. O selvagem ainda está solto.',['Pedir ajuda à alcateia|>b@1|Juntos somos mais fortes.','Me recuperar e tentar de novo|fight+5 >b@1|Desta vez, mais preparad{o}.']],
- f:['O humano lá dentro','Consegui acalmar o selvagem. Ele virou homem e chorou: não sabia o que tinha feito.',['Ajudar ele a se controlar|k+12|Ensinei tudo o que sei. Ele nunca mais matou.','Levar para uma alcateia|k+6|Eles cuidam dos seus.']],
+ f:['O humano lá dentro','Consegui acalmar o selvagem. Ele virou homem e chorou: não sabia o que tinha feito.',['Ajudá-lo a se controlar|k+12|Ensinei tudo o que sei. Ele nunca mais matou.','Levar para uma alcateia|k+6|Eles cuidam dos seus.']],
 });
 chain('lobo_sentidos',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,2]},{
  a:['O mundo mais alto','Desde a mordida, escuto conversas a três quadras e sinto o cheiro de mentira.',['Usar a meu favor|sm+3 >b|Sei quando alguém está mentindo para mim.','Sofrer com o barulho|h-4 >c|A cidade é alta demais.']],
- b:['O detector de mentiras','Num negócio importante, senti o cheiro de mentira do outro lado da mesa.',['Recusar o negócio|$+0 k+3 >d|Depois soube: era um golpe.','Usar para negociar melhor|$+5000 >d|Ganhei a negociação.']],
+ b:['O detector de mentiras','Num negócio importante, senti o cheiro de mentira do outro lado da mesa.',['Recusar o negócio|k+3 >d|Depois soube: era um golpe.','Usar para negociar melhor|$+5000 >d|Ganhei a negociação.']],
  c:['O excesso','O barulho da cidade me deixa irritad{o} e com dor de cabeça.',['Mudar para o interior|$-5000 h+8 >d|Silêncio, mato e passarinhos.','Usar protetor de ouvido|h+2 >d|Ajuda um pouco.']],
  d:['Equilíbrio','Aprendi a ligar e desligar os sentidos como um rádio.',['Usar com sabedoria|sm+3 h+5|Um dom, não uma maldição.','Ajudar a polícia a achar pessoas|k+6|Meu faro já salvou gente.']],
 });
@@ -31,10 +31,10 @@ chain('lobo_lua_vermelha',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[2,3]},{
  e:['A alcateia da serra','Os lobos da serra me convidaram para correr com eles toda lua de sangue.',['Aceitar|h+10|Uma família que só se encontra quando a lua sangra.','Agradecer e voltar sozinh{o}|h+4|Prefiro minha liberdade.']],
 });
 chain('lobo_pet',{k:'Lobisomem',min:16,max:120,when:LOBO,who:'pet',gap:[1,1]},{
- a:['O bicho de estimação','{p}, meu bicho de estimação, percebe a fera antes de todo mundo. Na lua cheia, se esconde embaixo da cama.',['Deixar com um vizinho nas luas cheias|k+3 >b|Ele fica seguro longe de mim.','Ficar com ele em casa|>c|Ele sempre foi meu companheiro.']],
+ a:['O bicho de estimação','{p}, meu bicho de estimação, percebe a fera antes de todo mundo. Na lua cheia, se esconde embaixo da cama.',['Deixar com um vizinho nas luas cheias|k+3 >b|{Ele} fica segur{o2} longe de mim.','Ficar com {ele} em casa|>c|{Ele} sempre foi minha companhia.']],
  b:['Saudade','O vizinho perguntou por que eu sempre "viajo" na lua cheia.',['Inventar um motivo|h+0 >d|Visita à família.','Contar a verdade|?k >d|O vizinho achou que era piada, mas continuou cuidando.|>d|O vizinho ficou com medo e devolveu o bicho.']],
- c:['A noite','Na lua cheia, a fera olhou para {p}, embaixo da cama.',['Controlar a fera|?will k+5 h+8 >d|A fera deitou do lado dele e dormiu. Ele também.|petdie h-25 >d|A fera venceu. Nunca vou me perdoar.']],
- d:['Companheiros','{p} aprendeu a conviver com a fera. Às vezes até deita do meu lado na lua cheia.',['Fazer carinho|h+8|Ele sabe quem eu sou, por dentro.','Comprar um petisco especial|$-50 h+6|Recompensa merecida.']],
+ c:['A noite','Na lua cheia, a fera olhou para {p}, embaixo da cama.',['Controlar a fera|?will k+5 h+8 >d|A fera deitou do lado {dele} e dormiu. {Ele} também.|petdie h-25 >d|A fera venceu. Nunca vou me perdoar.']],
+ d:['Companheiros','{p} aprendeu a conviver com a fera. Às vezes até deita do meu lado na lua cheia.',['Fazer carinho|h+8|{Ele} sabe quem eu sou, por dentro.','Comprar um petisco especial|$-50 h+6|Recompensa merecida.']],
 });
 chain('lobo_historia',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,2]},{
  a:['De onde veio a maldição','Quero entender de onde veio a maldição do lobo.',['Pesquisar em bibliotecas antigas|sm+4 >b|Livros em latim, contos de aldeias.','Perguntar aos lobos mais velhos|>c|Eles sabem histórias que não estão em livro.']],

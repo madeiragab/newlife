@@ -8,8 +8,11 @@
 //   (o personagem da história vira uma pessoa da sua lista) · +cad:outra (começa outra história) · sem ">" a história termina
 // no texto: {p} nome do personagem da história · {pl} sobrenome · {o2} o/a dele(a) · {ele} ele/ela · e tudo do pack ({n}, {v}, {o}...)
 const CHAINS={};
+WHO.avo=()=>R.pick(people('avo').filter(p=>p.gender==='F'))||R.pick(people('avo'));
+WHO.partnerNaoCasado=()=>pickPartner(p=>p.rel!=='conjuge');
+WHO.parentOld=()=>R.pick(parents().filter(p=>p.age>=68));
 function cadFalha(e,local){if(window.NO_SAVE||window.NL_TEST_STRICT)throw new Error(local+': '+e.message);console.error(local,e);const l=S.errosSistemas||(S.errosSistemas=[]);l.push({ano:S.year,local,erro:e.message});if(l.length>10)l.shift();}
-function cadContextoValido(id,c){const o=CHAINS[id].o,p=c.d.pid&&P(c.d.pid);if(c.d.pid&&!p?.alive)return false;if(o.who==='partner'&&!partners().includes(p))return false;const j=c.d.contexto?.emprego;if(j&&['boss','colega'].includes(o.who)&&c.s!=='f'&&(S.me.job?.id!==j.id||S.me.job?.co!==j.co))return false;return true;}
+function cadContextoValido(id,c){const o=CHAINS[id].o,p=c.d.pid&&P(c.d.pid);if(c.d.pid&&!p?.alive&&!c.d.morto)return false;if((String(o.who).startsWith('partner')||o.who==='spouse')&&!partners().includes(p))return false;const j=c.d.contexto?.emprego;if(j&&['boss','colega'].includes(o.who)&&c.s!=='f'&&(S.me.job?.id!==j.id||S.me.job?.co!==j.co))return false;return true;}
 function cadContextoTexto(d){const ctx=d.contexto;if(!ctx)return '';const w=mundo(ctx.pais);return w.crescimento<0?' A economia de '+countryOf(ctx.pais).n+' está em recessão; oportunidades e custos acompanham esse contexto.':'';}
 
 function chain(id,o,steps){ CHAINS[id]={id,o,steps}; Object.entries(steps).forEach(([sid,st])=>cadReg(id,sid,st)); }
@@ -24,7 +27,7 @@ function cadReg(id,sid,st){ const [title,text,choices,so={}]=st;
     pick:(key,d)=>cadPick(id,sid,choices[+key],d)};
 }
 // separa os efeitos próprios das cadeias (>etapa, vira:, +cad:) dos efeitos normais do pack
-function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$|separar$|pbond[+-]\d+$|caso[+-]$|curar$|morder$|fome[+-]\d+$|virar:\w+$|mem:\w+(?::\w+)?$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
+function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$|separar$|pbond[+-]\d+$|caso[+-]$|curar$|morder$|fome[+-]\d+$|virar:\w+$|mem:\w+(?::\w+)?$|morre$|mudarcidade$|aposentar$|diploma$|paisseparam$|casa:(fin|vista)$|empregonovo$|adotar$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
 function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me; const d=c?c.d:dPend;
   if(c&&!cadContextoValido(id,c)){delete st.on[id];st.done[id]=(st.done[id]||0)+1;return 'A situação mudou e essa história não pode continuar como antes.';}
   const parts=choice.split('|'); let fx1=parts[1]||'', t1=parts[2]||'', fx2=parts[3], t2=parts[4];
@@ -44,7 +47,7 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
   d.ultimaDecisao=choice.split('|')[0];
   const lembrancas=m.histDecisoes||(m.histDecisoes=[]);lembrancas.push({id,etapa:sid,escolha:d.decisoes[sid],ok,ano:S.year});if(lembrancas.length>60)lembrancas.shift();
   const b0=cadSplit(base), br=cadSplit(ok?fx1:(fx2||''));
-  const out=[]; let next=null, delay=null;
+  const out=[]; let next=null, delay=null, para=false;
   b0.own.concat(br.own).forEach(t=>{ let mm;
     if(mm=t.match(/^>(\w+)(?:@(\d+)(?:-(\d+))?)?$/)){ next=mm[1]; if(mm[2]!=null) delay=mm[3]!=null?R.int(+mm[2],+mm[3]):+mm[2]; }
     else if(mm=t.match(/^vira:(\w+)$/)){
@@ -58,6 +61,14 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
     else if(t==='noivar'||t==='casar'){ const p=d.pid&&P(d.pid); if(p&&p.alive&&['namoro','noivo'].includes(p.rel)&&polyPodeOficializar(p)){ if(t==='noivar'&&p.rel==='namoro'){ p.rel='noivo'; out.push(`Estou noiv${oa()} de ${p.first}!`); } else if(t==='casar'){ p.rel='conjuge'; p.yrs=0; cnt('marriages'); S.flags.movedOut=1; out.push(`Casei com ${p.first}!`); } } }
     else if(t==='separar'){ const pp=storyPartner(d); if(pp){ if(pp.rel==='conjuge') divorce(pp,true); else { pp.rel='ex'; m.happy=clamp(m.happy-15); log(`${pp.first} terminou comigo.`,'bad'); } out.push(`${pp.first} foi embora.`); } }
     else if(mm=t.match(/^pbond([+-]\d+)$/)){ const pp=storyPartner(d); if(pp) pp.bond=clamp(pp.bond+ +mm[1]); }
+    else if(t==='mudarcidade'){ const c=countryOf(m.country), op=c.cities.filter(x=>x!==m.city); if(op.length){ const nova=d.cidadeNova&&op.includes(d.cidadeNova)?d.cidadeNova:R.pick(op); m.city=nova; partners().concat(kids().filter(k=>k.age<18),!S.flags.movedOut?parents().concat(people('irmao').filter(k=>k.age<18)):[]).forEach(q=>npcMudarLocal(q,m.country,nova)); out.push(`Me mudei para ${nova}.`); if(m.job&&!m.job.hero){ endJob(); out.push('Deixei o emprego na cidade antiga.'); } } }
+    else if(t==='aposentar'){ if(m.job&&!m.job.hero){ retire(); if(m.ret) out.push(`Vou receber ${fmt(m.ret.pension)} por ano de aposentadoria.`); } }
+    else if(t==='diploma'){ if(!m.edu.deg.some(x=>x.startsWith('uni:'))){ const c=R.pick(COURSES); m.edu.deg.push('uni:'+c.id); out.push(`Agora tenho diploma de ${c.n}.`); } }
+    else if(mm=t.match(/^casa:(fin|vista)$/)){ const l=houseListings()[0], r=l?buy('casa',l,mm[1]==='fin'):'Não achei nenhuma casa à venda.'; if(/^Comprei/.test(r||'')) out.push(r); else { out.push((r||'Não deu para comprar.')+' O sonho da casa própria vai ter que esperar.'); para=true; } }
+    else if(t==='empregonovo'){ const op=openings().filter(o=>o.id!==m.job?.id&&!jobReqs(JOBS.find(j=>j.id===o.id)).length); if(op.length&&m.age>=16){ takeJob(R.pick(op)); out.push(`Agora sou ${jobTitle(m.job).toLowerCase()}.`); } else { out.push('A vaga não saiu. Continuo onde estou.'); para=true; } }
+    else if(t==='adotar'){ const gd=R.chance(.5)?'M':'F', k=mkPerson({rel:'adot',gender:gd,age:R.int(0,4),last:m.last,bond:R.int(80,100)}); uniqFirst(k); S.people.push(k); cnt('kids'); out.push(`${gd==='F'?'Minha filha':'Meu filho'} ${k.first} chegou em casa.`); }
+    else if(t==='paisseparam'){ if(parents().length>=2) S.flags.divorced=1; }
+    else if(t==='morre'){ const pp=d.pid&&P(d.pid); if(pp&&pp.alive&&pp!==m){ pp.alive=false; pp.cause=pp.cause||'de causas naturais'; d.morto=1; } }
     else if(mm=t.match(/^mem:(\w+)(?::(\w+))?$/)){ const pp=d.pid&&P(d.pid); if(pp&&typeof relMemoria==='function') relMemoria(pp,mm[1],mm[2]); }
     else if(mm=t.match(/^fome([+-]\d+)$/)){ if(m.criatura) m.fomeP=clamp((m.fomeP||0)+ +mm[1]); }
     else if(t==='curar'){ if(m.criatura){ const tp0=m.criatura; m.criatura=null; m.fomeP=0; log(`Deixei de ser ${g(CRIATURA[tp0][0],m.gender).toLowerCase()}.`,'good'); } }
@@ -65,12 +76,13 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
     else if(mm=t.match(/^virar:(\w+)$/)){ if(typeof virar==='function'&&!m.criatura&&CRIATURA[mm[1]]) out.push(virar(mm[1]).trim()); }
     else if(t==='caso+'){ m.caso={pid:d.pid||null,n:d.p,ini:m.age}; } else if(t==='caso-'){ m.caso=null; }
     else if(t==='bebe'){ const par=storyPartner(d); if(m.age>=18&&m.age<=50){ const gd=R.chance(.5)?'M':'F'; const k=mkPerson({rel:'filho',gender:gd,age:0,last:m.last,bond:R.int(85,100),parentId:par?par.id:null,from:par?[m,par]:undefined}); uniqFirst(k); S.people.push(k); cnt('kids'); out.push(`Nasceu ${gd==='F'?'minha filha':'meu filho'} ${k.first}!`); } } });
+  if(para) next=null;
   if(c){ if(next&&next!=='fim'&&CHAINS[id].steps[next]){ const g=CHAINS[id].o.gap||[1,3]; c.s=next; c.due=m.age+(delay!=null?delay:R.int(g[0],g[1])); c.n=(c.n||0)+1; }
     else { delete st.on[id]; st.done[id]=(st.done[id]||0)+1; cnt('historias'); } }
   const r0=dslApply(b0.rest,d), r1=dslApply(br.rest,d);
   storyPartner(d);
   cadPerson(d);
-  return [tp(ok?t1:(t2||'Não deu certo.'),d),r0,r1].concat(out).filter(Boolean).join(' '); }
+  return [para?'':tp(ok?t1:(t2||'Não deu certo.'),d),r0,r1].concat(out).filter(Boolean).join(' '); }
 // pode começar esta história agora?
 function cadCan(id,m){ const ch=CHAINS[id], o=ch.o, st=cadState(); if(st.on[id]) return false; if(st.done[id]&&!o.rep) return false;
   if(o.min!=null&&m.age<o.min) return false; if(o.max!=null&&m.age>o.max) return false; if(!!o.jail!==!!m.prison) return false;

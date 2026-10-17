@@ -33,7 +33,7 @@ chain('voluntariado_enchente',{k:'Bondade',min:16,max:75,npc:1,gap:[1,1]},{
  d:['A reconstrução','Meses depois, as famílias voltaram para casa.',['Ajudar na reconstrução|k+8 h+8|Pintei a casa de {p} com a família inteira.','Visitar o bairro|h+6|O bairro está de pé de novo.']],
 });
 chain('sindrome_impostor',{k:'Mente',min:22,max:60,when:m=>!!m.job,gap:[1,1]},{
- a:['Fraude?','Fui promovid{o}, mas sinto que a qualquer momento vão descobrir que eu não sei o que estou fazendo.',['Conversar com alguém de confiança|h+4 >b|"Todo mundo se sente assim às vezes."','Trabalhar o dobro para compensar|perf+8 hl-4 >c|Ninguém vai me pegar despreparad{o}.']],
+ a:['Fraude?','As pessoas no trabalho confiam em mim, mas sinto que a qualquer momento vão descobrir que eu não sei o que estou fazendo.',['Conversar com alguém de confiança|h+4 >b|"Todo mundo se sente assim às vezes."','Trabalhar o dobro para compensar|perf+8 hl-4 >c|Ninguém vai me pegar despreparad{o}.']],
  b:['A conversa','Uma colega mais experiente disse que sente a mesma coisa há vinte anos.',['Aceitar que é normal|h+8 >d|Alívio.','Procurar terapia|$-800 h+6 >d|Fui entender de onde vem isso.']],
  c:['O limite','Trabalhar o dobro me deixou esgotad{o}.',['Diminuir o ritmo|h+4 >d|Meu chefe nem percebeu a diferença.','Continuar|dis:burnout h-10|O corpo parou.']],
  d:['Confiança','Comecei a acreditar que mereço estar onde estou.',['Mentorar alguém novo|k+5 h+6|Disse para a pessoa nova o que eu precisava ouvir.','Pedir um aumento|?perf raise+10 h+6|Pedi e ganhei.|h+2|Não ganhei, mas pedi.']],

@@ -18,8 +18,8 @@ chain('lobo_fazendeiro',{k:'Lobisomem',min:16,max:120,when:LOBO,npc:1,gn:'M',age
  g:['O celeiro','Agora, toda lua cheia, durmo no celeiro do seu {p}. Ninguém mais perde gado.',['Ajudar no sítio durante o mês|k+6 h+6|Virei parte da família da fazenda.','Pagar aluguel do celeiro|$-500 h+4|Acordo justo.']],
 });
 chain('lobo_alcateia_lider',{k:'Lobisomem',min:18,max:120,when:LOBO,npc:1,gap:[1,1]},{
- a:['O desafio','{p}, o líder da alcateia da região, está velho. Alguém precisa assumir.',['Me candidatar à liderança|>b|Na tradição, o desafio é na lua cheia.','Apoiar outro candidato|>e|Prefiro não liderar.']],
- b:['O duelo','Na lua cheia, o duelo pela liderança: eu contra o mais forte da alcateia.',['Lutar com tudo|?fight fight+5 f+0 >c|Venci. A alcateia baixou a cabeça para mim.|hl-30 >d|Perdi. Saí sangrando.','Desistir no meio|h-6 >e|Melhor perder o posto que a vida.']],
+ a:['O desafio','{p}, que lidera a alcateia da região, está velh{o2}. Alguém precisa assumir.',['Me candidatar à liderança|>b|Na tradição, o desafio é na lua cheia.','Apoiar outro candidato|>e|Prefiro não liderar.']],
+ b:['O duelo','Na lua cheia, o duelo pela liderança: eu contra o mais forte da alcateia.',['Lutar com tudo|?fight fight+5 >c|Venci. A alcateia baixou a cabeça para mim.|hl-30 >d|Perdi. Saí sangrando.','Desistir no meio|h-6 >e|Melhor perder o posto que a vida.']],
  c:['Líder da alcateia','Agora sou responsável por oito lobisomens e suas famílias.',['Liderar com justiça|k+8 >f|Regras claras: ninguém mata humano.','Liderar com medo|k-6 fight+3 >f|Ninguém ousa me desobedecer.']],
  d:['Derrotad{o}','O novo líder me deixou ficar na alcateia, mas abaixo de todos.',['Aceitar|h-4 >e|Paciência.','Sair da alcateia|h-6|Lobo solitário.']],
  e:['O novo líder','O novo líder começou a quebrar as regras antigas e atacar humanos.',['Desafiar de novo|>b@1|Não posso deixar isso continuar.','Avisar os caçadores|k+4 >f|Traição à alcateia, para salvar humanos.']],
@@ -43,6 +43,6 @@ chain('lobo_filhote',{k:'Lobisomem',min:20,max:120,when:LOBO,npc:1,age:[-30,-15]
  a:['O filhote perdido','Na lua cheia, encontrei um lobinho perdido na mata: uma criança lobisomem.',['Proteger até amanhecer|k+6 >b|De manhã, era um menino ou menina de dez anos, chorando.','Ignorar|k-6|Não é minha responsabilidade.']],
  b:['A criança','{p} não sabe de onde veio nem quem a mordeu. Não tem família.',['Levar para casa|vira:amigo k+8 >c|Agora tenho uma criança lobisomem em casa.','Levar para a alcateia mais próxima|k+4 >e|Eles cuidam dos seus.']],
  c:['Ensinar','{p} precisa aprender a controlar a fera antes da próxima lua.',['Ensinar com paciência|bond+12 >d|Corrente, porão e muita conversa.','Deixar livre na mata|bond-5 >e|A natureza ensina.']],
- d:['A adoção','Os papéis da adoção chegaram. {p} agora é oficialmente da família.',['Comemorar|h+15 bond+10|Primeira lua cheia em família.','Contar para os outros da família|h+8|Nem todos entenderam. Mas aceitaram.']],
+ d:['A adoção','Os papéis da adoção chegaram. {p} agora é oficialmente da família.',['Comemorar|vira:adot h+15 bond+10|Primeira lua cheia em família.','Contar para os outros da família|vira:adot h+8|Nem todos entenderam. Mas aceitaram.']],
  e:['O reencontro','Anos depois, {p}, já crescid{o2}, me procurou para agradecer.',['Abraçar|h+10 k+5|Uma vida salva numa noite de lua.','Perguntar como está|h+6|Lidera uma alcateia no sul. Eu ensinei bem.']],
 });

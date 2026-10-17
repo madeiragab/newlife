@@ -5,7 +5,7 @@ chain('acidente_carro',{k:'Trânsito',min:18,max:80,when:m=>!!m.lic,npc:1,gap:[1
  c:['A discussão','A briga esquentou. Juntou gente em volta.',['Me acalmar e propor o seguro|k+3 >d|Respiramos e trocamos telefones.','Partir para cima|?fight hl-3 >e|Ganhei a briga e um processo.|hl-10 >e|Perdi a briga e ganhei um processo.']],
  d:['O laudo','A perícia analisou o acidente.',['Esperar o resultado|?50 $+2000 h+6 >f|A culpa foi d{ele}. O seguro d{ele} pagou tudo.|$-4000 >f|A culpa foi minha. Seguro, franquia e dor de cabeça.']],
  e:['O processo','{p} entrou com um processo por agressão.',['Fazer acordo|$-5000 >f|Paguei para encerrar.','Ir até o fim|?40 >f|O juiz arquivou.|$-8000 k-4 >f|Fui condenad{o} a pagar indenização.']],
- f:['Lição de trânsito','Depois daquilo, dirijo com o dobro de atenção.',['Fazer um curso de direção defensiva|$-500 sm+2|Aprendi a prever as besteiras dos outros.','Vender o carro e andar de ônibus|$+15000 h+2|Menos estresse, mais podcast.']],
+ f:['Lição de trânsito','Depois daquilo, dirijo com o dobro de atenção.',['Fazer um curso de direção defensiva|$-500 sm+2|Aprendi a prever as besteiras dos outros.','Deixar o carro na garagem e andar de ônibus|h+2 hl+1|Menos estresse, mais podcast.']],
  g:['Amizade improvável','{p} virou um dos meus melhores amigos. Sempre contamos a história da batida.',['Fazer uma festa de aniversário da batida|h+8 bond+10|Bolo com um carrinho amassado em cima.','Ajudar {p} numa mudança|k+4 bond+8|Amigo de verdade carrega geladeira.']],
 });
 chain('jurado',{k:'Justiça',min:21,max:70,gap:[1,1]},{
@@ -18,7 +18,7 @@ chain('jurado',{k:'Justiça',min:21,max:70,gap:[1,1]},{
  g:['A verdade','Anos depois, li no jornal: o homem que ajudei a condenar foi inocentado por um exame de DNA.',['Procurar a família dele|k+8 h-6|Pedi desculpas pessoalmente.','Carregar o peso|h-12|Nunca mais vou julgar ninguém tão rápido.']],
 });
 chain('amigo_trafico',{k:'Crime',min:16,max:45,who:'friend',gap:[1,1]},{
- a:['Dinheiro fácil','Meu amigo {p} anda de carro novo e tênis caro. Disse que tem um "trabalho" fácil para mim.',['Perguntar que trabalho é|>b|{p} riu e disse: "Entrega. Não pergunta o que é."','Recusar sem perguntar|bond-5 k+3|Já imagino.']],
+ a:['Dinheiro fácil','{p}, uma amizade antiga, anda de carro novo e tênis caro. Disse que tem um "trabalho" fácil para mim.',['Perguntar que trabalho é|>b|{p} riu e disse: "Entrega. Não pergunta o que é."','Recusar sem perguntar|bond-5 k+3|Já imagino.']],
  b:['A proposta','É só levar uma mochila de um ponto a outro da cidade.',['Aceitar uma vez|k-10 $+3000 >c|Foi a mochila mais pesada da minha vida.','Recusar e tentar tirar {p} dessa|k+6 >d|{p} disse que eu não entendo.']],
  c:['De novo','{p} quer que eu faça mais entregas.',['Continuar|k-10 $+8000 >e|Dinheiro fácil vicia.','Parar|bond-8 >d|{p} não gostou.']],
  d:['A operação','A polícia fez uma operação grande no bairro.',['Ligar para avisar {p}|k-3 bond+5 >f|{p} conseguiu fugir.','Não me meter|>f|{p} foi pres{o2}.']],
@@ -50,7 +50,7 @@ chain('denuncia_vizinho',{k:'Dilema',min:18,max:80,npc:1,age:[-15,25],gap:[1,1]}
  e:['Anos depois','Uma das crianças daquela casa, já crescida, me reconheceu na rua e me agradeceu.',['Abraçar|h+12 k+5|Ela disse que aquele dia mudou tudo.','Ficar sem palavras|h+10|Só sorri.']],
 });
 chain('processo_trabalhista',{k:'Justiça',min:20,max:70,gap:[1,1],when:m=>m.hist.length>0},{
- a:['Os direitos','Um advogado disse que a empresa onde eu trabalhava me deve horas extras.',['Entrar com a ação|>b|Junte os comprovantes.','Deixar para lá|h+0|Página virada.']],
+ a:['Os direitos','Um advogado disse que a empresa onde eu trabalhava me deve horas extras.',['Entrar com a ação|>b|Juntei os comprovantes.','Deixar para lá|h+0|Página virada.']],
  b:['A audiência','Na audiência, a empresa trouxe três advogados.',['Contar tudo com calma|?sm >c|O juiz pareceu do meu lado.|>d|A empresa apresentou documentos que eu nem lembrava.','Ficar nervos{o}|?35 >c|Mesmo nervos{o}, fui convincente.|>d|Me enrolei nas datas.']],
  c:['A vitória','Ganhei a causa.',['Receber o dinheiro|$+18000 h+12|Justiça. Tarde, mas justiça.','Doar parte para colegas que também foram prejudicados|$+9000 k+8|Ajudei quem não podia pagar advogado.']],
  d:['O acordo','A empresa ofereceu um acordo.',['Aceitar|$+7000 h+4|Melhor um acordo do que nada.','Recorrer|?40 $+15000 h+8|Ganhei no recurso.|$-2000 h-6|Perdi e ainda paguei custas.']],
@@ -60,5 +60,5 @@ chain('heroi_acidental',{k:'Coragem',min:16,max:75,npc:1,age:[-30,20],gap:[1,1]}
  b:['Herói','Os pais da criança, a família {pl}, vieram me agradecer em casa.',['Aceitar o agradecimento|h+12 >d|A mãe me deu um bolo que fez com as próprias mãos.','Dizer que qualquer um faria o mesmo|k+3 h+10 >d|Mas nem todo mundo fez.']],
  c:['O que eu não fiz','Fiquei pensando se deveria ter pulado.',['Fazer um curso de primeiros socorros|sm+3 k+4 >e@2|Da próxima vez, vou saber o que fazer.','Tentar esquecer|h-4|Fiz o que consegui.']],
  d:['A homenagem','A prefeitura me deu uma medalha de honra ao mérito.',['Ir à cerimônia|f+3 h+10 >e@3-8|Minha mãe guardou o recorte do jornal.','Pedir para não ter cerimônia|k+4 >e@3-8|A medalha chegou pelo correio.']],
- e:['O reencontro','Anos depois, alguém bateu na minha porta: "Lembra da criança do rio? Sou eu."',['Convidar para entrar|h+15 k+5|Conversamos a tarde inteira. Vai estudar para ser bombeiro.','Abraçar ali mesmo|h+15|Não precisei dizer nada.']],
+ e:['O reencontro','Anos depois, alguém bateu na minha porta: "Lembra da criança do rio? Sou eu."',['Convidar para entrar|h+15 k+5|Conversamos a tarde inteira. Vai estudar para entrar no Corpo de Bombeiros.','Abraçar ali mesmo|h+15|Não precisei dizer nada.']],
 });

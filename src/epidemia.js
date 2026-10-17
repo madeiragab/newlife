@@ -19,7 +19,7 @@ function epManchete(e){ return e.inf<25?R.pick(['Os casos ainda são poucos, mas
 function epStep(pr){ const m=S.me, b=pr.b, adv=()=>{ pr.fase++; };
   const e=pr.ep||(pr.ep={inf:R.int(3,14),gov:R.int(35,85),sup:100,seg:100,anos:0,local:0,vac:0,cidade:R.pick(EP_CIDADES)});
   if(pr.fase>0) epEvolve(e);
-  const Q=(t,x,ch)=>MQ.push({k:SCEN.zumbi.n,t:prT(t),x:prT(x)+'\n\n'+epBar(e),ch:ch.filter(Boolean)});
+  const Q=(t,x,ch)=>MQ.push({k:SCEN.zumbi.n,t:prT(t),x:prT(x)+'\n\n'+epBar(e),ch:ch.filter(Boolean).map(c=>Object.assign({},c,{l:prT(c.l)}))});
   if(e.controle>=2){
     log('A epidemia foi contida. Os hospitais esvaziaram e a cidade começou a voltar ao normal.','good');
     prolCancel(); st('happy',10);

@@ -3,7 +3,7 @@ chain('republica',{k:'Moradia',min:18,max:28,npc:1,gap:[1,1]},{
  a:['Dividir apartamento','Achei um anúncio: "{p} procura alguém para dividir apê perto do centro. Aluguel barato."',['Ir morar com {p}|$-2000 >b|Mudei com duas malas e um colchão.','Continuar onde estou|h+0|Melhor não arriscar com desconhecidos.']],
  b:['As regras da casa','{p} colou uma tabela de tarefas na geladeira. Eu nunca lavo a louça no meu dia.',['Cumprir as tarefas|k+3 vira:amigo >c|{p} desenhou uma estrelinha do lado do meu nome.','Deixar a louça acumular|k-3 >d|A pilha virou um ser vivo.']],
  c:['Amizade de apartamento','Eu e {p} viramos amigos de verdade. Noites de pizza, séries e conversas até tarde.',['Fazer uma festa no apê|h+8 >e|Os vizinhos reclamaram. Valeu a pena.','Manter a paz|h+4 >e|Rotina boa. Casa boa.']],
- d:['A briga','{p} explodiu por causa da louça e disse que eu sou um péssimo colega de casa.',['Pedir desculpas e mudar|k+4 >c|Comprei uma esponja nova e um bolo de desculpas.','Brigar de volta|h-6 vira:inimigo >f|Paramos de nos falar dentro do mesmo apartamento.']],
+ d:['A briga','{p} explodiu por causa da louça e disse que eu sou {o} pior colega de casa do mundo.',['Pedir desculpas e mudar|k+4 >c|Comprei uma esponja nova e um bolo de desculpas.','Brigar de volta|h-6 vira:inimigo >f|Paramos de nos falar dentro do mesmo apartamento.']],
  e:['O aluguel sumiu','{p} sumiu no meio do mês. O dinheiro do aluguel, que estava na conta d{ele}, também.',['Ligar sem parar|?50 >g|{p} atendeu chorando: perdeu o emprego e tinha vergonha de contar.|$-1500 >f|Ninguém atendeu. Tive que pagar tudo sozinh{o}.','Procurar a polícia|$-1500 k+1 >f|Fiz um boletim de ocorrência. Paguei o aluguel do mesmo jeito.']],
  f:['Morar sozinh{o}','Agora o apartamento é só meu. Silencioso demais.',['Gostar da liberdade|h+5|Danço de pijama na sala.','Arrumar outro colega|>b@0|Outro anúncio, outra aposta.']],
  g:['O pacto','{p} prometeu pagar tudo de volta assim que arrumar outro emprego.',['Ajudar {ele} a procurar vaga|k+6 bond+15 >h@1|Revisei o currículo d{ele} três vezes.','Cobrar com firmeza|bond-5 >h@1|Amizade e dinheiro não se misturam.']],
@@ -85,7 +85,7 @@ chain('concurso',{k:'Carreira',min:20,max:45,gap:[1,1],when:m=>m.edu.deg.include
 chain('pet_adulto',{k:'Bichos',min:20,max:60,gap:[1,3]},{
  a:['A feira de adoção','Passei por uma feira de adoção de animais no parque.',['Adotar|pet h+10 >b|Um par de olhos me escolheu. Não teve como resistir.','Só fazer carinho|h+3|Saí de coração partido.']],
  b:['Adaptação','O bicho novo destruiu um chinelo, dois cabos e meu coração (de amor).',['Fazer adestramento|$-600 >c|Agora atende pelo nome. Às vezes.','Deixar livre|h+3 >c|Caos feliz.']],
- c:['O susto','O bichinho comeu algo que não devia e passou muito mal.',['Correr para o veterinário|$-1500 h-2 >d|Salvo por pouco.','Esperar melhorar sozinho|?50 h+2 >d|Melhorou.|h-15 >e|Não resistiu. Nunca vou me perdoar.']],
+ c:['O susto','O bichinho comeu algo que não devia e passou muito mal.',['Correr para o veterinário|$-1500 h-2 >d|Salvo por pouco.','Esperar melhorar sozinho|?50 h+2 >d|Melhorou.|h-15 petdie >e|Não resistiu. Nunca vou me perdoar.']],
  d:['Companheiro','Anos de companhia. Nas piores fases, era quem me esperava na porta.',['Agradecer com um petisco especial|h+8|Ele não entende de gratidão. Entende de petisco.','Tirar uma foto juntos|h+6|Foto na parede da sala.']],
  e:['Luto','A casa ficou silenciosa demais.',['Adotar outro, com o tempo|pet h+6|Não substitui. Mas ajuda.','Ficar um tempo sozinh{o}|h-4|Cada um no seu tempo.']],
 });

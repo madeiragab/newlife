@@ -22,8 +22,8 @@ chain('vamp_ancestral',{k:'Vampiro',min:18,max:200,when:VAMP,npc:1,age:[200,300]
  b:['A oferta','{p} propõe proteção em troca de lealdade e de uma parte de tudo o que eu caçar.',['Aceitar|vira:amigo fome-20 >c|Agora sou súdit{o} de um vampiro ancião.','Recusar|vira:inimigo >e|{p} não gostou nada.']],
  c:['As lições','{p} me ensinou a hipnotizar com o olhar e a me mover sem fazer barulho.',['Aprender tudo|fight+6 sm+3 >d|Aprendi a dominar a noite.','Desconfiar das lições|>d|Por que tanta generosidade?']],
  d:['O preço','{p} pediu que eu elimine um caçador que está chegando perto d{ele}.',['Obedecer|?fight k-8 bond+15 >f|O caçador não vai mais incomodar.|hl-25 >f|O caçador era bom. Escapei por pouco.','Avisar o caçador para fugir|k+8 bond-20 >e|O caçador fugiu. {p} percebeu.']],
- e:['A ira do ancião','{p} declarou guerra a mim. Três vampiros me esperam toda noite.',['Lutar|?fight f+0 >f|Venci os três. {p} me respeita agora, de longe.|hl-30 >g|Fui derrotad{o} e humilhad{o}.','Fugir da cidade|$-6000 h-4|Cidade nova, território livre.']],
- f:['O herdeiro','{p} disse que está cansado da eternidade e quer que eu herde o território.',['Aceitar|f+0 h+10 k-2|A cidade agora é minha à noite.','Recusar|h+3|Liderar a noite não é para mim.']],
+ e:['A ira do ancião','{p} declarou guerra a mim. Três vampiros me esperam toda noite.',['Lutar|?fight >f|Venci os três. {p} me respeita agora, de longe.|hl-30 >g|Fui derrotad{o} e humilhad{o}.','Fugir da cidade|$-6000 h-4|Cidade nova, território livre.']],
+ f:['O herdeiro','{p} disse que está cansad{o2} da eternidade e quer que eu herde o território.',['Aceitar|h+10 k-2|A cidade agora é minha à noite.','Recusar|h+3|Liderar a noite não é para mim.']],
  g:['Cicatrizes','A derrota deixou marcas que nem o sangue cura.',['Treinar para a revanche|fight+8 >e@2|Um dia volto.','Viver discretamente|h-2|Sumir é a melhor proteção.']],
 });
 chain('vamp_espelho',{k:'Vampiro',min:30,max:200,when:VAMP,gap:[2,3]},{
@@ -40,7 +40,7 @@ chain('vamp_padre',{k:'Vampiro',min:16,max:200,when:VAMP,npc:1,gn:'M',age:[15,35
  c:['O confronto','O padre me encurralou num beco com água benta.',['Lutar|?fight k-6 >e|Desarmei o padre e fugi. Não feri.|hl-20 >e|A água benta queimou meu rosto.','Pedir para conversar|>d|Ele baixou a garrafa.']],
  d:['A conversa','O padre disse que não quer me destruir. Quer me salvar.',['Ouvir|k+5 >f|Ele falou de uma cura antiga, guardada num mosteiro.','Rir dele|>e|Ele foi embora triste.']],
  e:['Vigiad{o}','Desde então, o padre me vigia de longe.',['Fazer as pazes|>d|Bati na porta da casa paroquial.','Mudar de bairro|$-3000 h+2|Melhor manter distância de quem tem água benta.']],
- f:['O mosteiro','O padre me levou a um mosteiro nas montanhas. Os monges guardam um ritual de cura.',['Fazer o ritual|?40 curar h+25 k+10|Sete dias de jejum e reza. No oitavo, vi o sol nascer sem queimar.|hl-25 h-10|O ritual falhou. Quase morri de verdade.','Agradecer e recusar|k+3 h+3|Já aceitei quem eu sou. Mas virei amigo do padre.']],
+ f:['O mosteiro','O padre me levou a um mosteiro nas montanhas. Os monges guardam um ritual de cura.',['Fazer o ritual|?40 curar h+25 k+10|Sete dias de jejum e reza. No oitavo, vi o sol nascer sem queimar.|hl-25 h-10|O ritual falhou. Quase morri de verdade.','Agradecer e recusar|k+3 h+3|Já aceitei quem eu sou. Mas virei amig{o} do padre.']],
 });
 chain('vamp_festa',{k:'Vampiro',min:16,max:200,when:VAMP,gap:[1,1]},{
  a:['A festa lotada','Uma festa lotada, música alta, centenas de corações batendo ao meu redor. A sede apertou.',['Sair da festa|k+3 >b|Respirei o ar frio da rua.','Ficar e controlar|?will fome+10 h+4 >c|Dancei a noite inteira sem morder ninguém.|>d|A sede venceu.']],

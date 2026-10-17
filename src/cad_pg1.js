@@ -34,11 +34,11 @@ chain('crianca_fala_sozinha',{k:'Assombração',min:22,max:70,who:'child',w:.6,g
  e:['Lembrar','Descobri que o Tobias era filho dos primeiros donos da casa. Morreu de gripe aos seis anos.',['Fazer uma pequena homenagem com {p}|bond+10 k+6 >f|Acendemos uma vela e falamos o nome dele em voz alta.','Contar a história para a família|h+4 >f|Agora todo mundo conhece o Tobias.']],
  f:['Despedida','{p} disse que o Tobias foi embora feliz e deixou um abraço.',['Abraçar {p}|bond+8 h+8|Às vezes as crianças veem mais que a gente.','Ficar arrepiad{o}|h+3|Mas sorri.']],
 });
-chain('estrada_fantasma',{k:'Assombração',min:18,max:85,when:m=>!!m.lic&&!m.prison,w:.6,npc:1,gap:[1,1]},{
+chain('estrada_fantasma',{k:'Assombração',min:18,max:85,when:m=>!!m.lic&&!m.prison,w:.6,npc:1,gn:'F',gap:[1,1]},{
  a:['A carona na estrada','Numa estrada escura, uma pessoa de branco pediu carona no acostamento.',['Dar carona|>b|{p} entrou no carro sem dizer nada.','Passar direto|>e@2|Pelo retrovisor, não tinha ninguém no acostamento.']],
  b:['A passageira','{p} pediu para ser deixad{o2} numa casa a dez quilômetros dali. O carro ficou gelado.',['Puxar conversa|>c|{p} só disse: "Faz tanto tempo que eu tento voltar para casa."','Dirigir em silêncio|>c|Não tive coragem de olhar para o lado.']],
  c:['A casa','Parei na frente da casa. Quando olhei para o banco do passageiro, estava vazio.',['Bater na porta|>d|Uma senhora atendeu e ficou pálida quando eu descrevi {p}.','Ir embora acelerando|h-6|Nunca mais peguei aquela estrada à noite.']],
- d:['A senhora','"Essa é {p}, minha filha. Morreu nessa estrada há trinta anos. Você não é o primeiro que a traz."',['Abraçar a senhora|k+6 h+3 >f|Tomamos um café e ela me mostrou fotos.','Sair dali o mais rápido possível|h-4|Arrepio que não passa.']],
+ d:['A senhora','"Essa é {p}, minha filha. Morreu nessa estrada há trinta anos. Você não é {o} primeir{o} que a traz."',['Abraçar a senhora|k+6 h+3 >f|Tomamos um café e ela me mostrou fotos.','Sair dali o mais rápido possível|h-4|Arrepio que não passa.']],
  e:['De novo','Dois anos depois, na mesma estrada, a mesma pessoa de branco no acostamento.',['Parar desta vez|>b|Algo me disse para parar.','Acelerar|h-3|Vi no retrovisor: estava no banco de trás.']],
  f:['Em paz','A senhora me ligou meses depois: ninguém mais viu {p} na estrada.',['Sentir que ajudei|h+8 k+4|Algumas viagens terminam depois de trinta anos.','Contar a história|f+2|Virou a lenda da cidade.']],
 });

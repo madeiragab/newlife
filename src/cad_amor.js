@@ -33,7 +33,7 @@ chain('crise_casamento',{k:'Família',min:28,max:70,who:'spouse',gap:[1,1]},{
  e:['Mais fortes','Passamos pela crise e saímos mais unidos.',['Renovar os votos|$-3000 bond+15 h+12|Festinha no quintal, com os mesmos amigos de antes.','Só seguir juntos|bond+8 h+6|Amor maduro é escolher todo dia.']],
  f:['A decisão','Precisamos decidir o futuro do nosso casamento.',['Tentar mais uma vez|?45 bond+8 >e|Recomeçamos.|breakup h-15|Não teve jeito. Divórcio.','Separar|breakup h-12|Acabou. Com mais tristeza que raiva.']],
 });
-chain('bebe_planejado',{k:'Família',min:22,max:42,who:'partner',when:m=>kids().length<3,gap:[1,1]},{
+chain('bebe_planejado',{k:'Família',min:22,max:42,who:'partnerFertile',when:m=>kids().length<3,gap:[1,1]},{
  a:['Um filho?','{p} me perguntou num domingo à tarde: "E se a gente tivesse um filho?"',['Topar|bond+8 >b|Ficamos rindo de nervoso o resto do dia.','Pedir tempo|>c@1|Ainda tenho medo.','Dizer que não quero|bond-8 h-2|Conversa difícil.']],
  b:['Tentando','Faz meses que estamos tentando.',['Continuar tentando com calma|?55 >d|Duas listras no teste!|>e|Ainda nada.','Procurar um médico|$-2000 ?65 >d|O médico ajudou. Positivo!|>e|O médico pediu mais exames.']],
  c:['O medo','Medo de não dar conta, de não ter dinheiro, de errar.',['Conversar com amigos que já são pais|h+4 >b|"Ninguém está pronto." Isso me acalmou.','Desistir da ideia|bond-5|Não é para mim.']],
@@ -41,7 +41,7 @@ chain('bebe_planejado',{k:'Família',min:22,max:42,who:'partner',when:m=>kids().
  e:['A espera','Os meses passam e o teste continua negativo.',['Tentar tratamento|$-12000 ?50 >d|Funcionou!|h-10 >g|Não funcionou.','Pensar em adoção|>g|Existe mais de um jeito de ser família.']],
  f:['O nascimento','Chegou a hora. Corremos para a maternidade de madrugada.',['Segurar o bebê pela primeira vez|bebe h+25 bond+15|Nada no mundo se compara.','Desmaiar na sala de parto|bebe h+20 bond+10|Acordei com todo mundo rindo de mim. E um bebê lindo.']],
  g:['Adoção','Entramos na fila de adoção.',['Esperar com paciência|h+4 >h@1-3|A fila é longa, mas a gente espera.','Desistir|h-6|Talvez não seja para nós.']],
- h:['A ligação','O telefone tocou: tem uma criança esperando por nós.',['Ir conhecer|bebe h+25 bond+10|Foi amor no primeiro olhar.','Pedir mais um tempo|h-4|Ainda não estávamos prontos.']],
+ h:['A ligação','O telefone tocou: tem uma criança esperando por nós.',['Ir conhecer|adotar h+25 bond+10|Foi amor no primeiro olhar.','Pedir mais um tempo|h-4|Ainda não estávamos prontos.']],
 });
 chain('amor_antigo',{k:'Amor',min:38,max:75,npc:1,date:1,when:SOLTEIR,gap:[1,2]},{
  a:['Um rosto conhecido','No mercado, reconheci {p}, meu primeiro amor da escola. Faz mais de vinte anos.',['Ir falar com {ele}|>b|{p} me reconheceu na hora.','Me esconder atrás das prateleiras|h-2 >c@1|Coração de adolescente.']],
@@ -52,7 +52,7 @@ chain('amor_antigo',{k:'Amor',min:38,max:75,npc:1,date:1,when:SOLTEIR,gap:[1,2]}
  f:['A vida a dois','Envelhecer junto de quem me conhece desde sempre.',['Agradecer ao destino|h+10 bond+8|Algumas histórias só terminam bem depois.','Fazer uma viagem que planejávamos aos dezesseis|$-6000 h+12|Fomos até a praia que prometemos conhecer juntos.']],
 });
 chain('amizade_rachada',{k:'Amizade',min:18,max:70,who:'friend',v:[2000,15000],gap:[1,1]},{
- a:['O empréstimo','{p}, meu amigo de anos, pediu {v} emprestados para uma emergência.',['Emprestar|$-v bond+10 >b|"Te devolvo em três meses."','Emprestar só metade|bond-2 >b|O que eu podia.','Negar|bond-12 >e|{p} ficou magoad{o2}.']],
+ a:['O empréstimo','{p}, amizade de anos, pediu {v} emprestados para uma emergência.',['Emprestar|$-v bond+10 >b|"Te devolvo em três meses."','Emprestar só metade|bond-2 >b|O que eu podia.','Negar|bond-12 >e|{p} ficou magoad{o2}.']],
  b:['Os meses passam','Já faz um ano e {p} nunca mais tocou no assunto. Postou fotos de uma viagem.',['Cobrar com jeito|?50 $+v bond+3 >c|{p} pediu desculpas e pagou.|bond-10 >d|{p} ficou ofendid{o2} com a cobrança.','Esquecer o dinheiro|k+4 h-4 >c|Amizade vale mais.']],
  c:['Amizade salva','A amizade sobreviveu ao dinheiro.',['Combinar de nunca mais misturar|h+5 bond+5|Regra sagrada.','Seguir como antes|h+4|Amigos são para essas coisas.']],
  d:['A briga','{p} me chamou de mesquinh{o} por cobrar.',['Desabafar tudo|bond-15 h-6 >e|Falamos coisas que doeram.','Deixar o tempo passar|bond-5 >e|Silêncio.']],
@@ -68,16 +68,16 @@ chain('filho_adolescente',{k:'Família',min:30,max:65,who:'teen',gap:[1,1]},{
 });
 chain('filho_volta',{k:'Família',min:45,max:80,who:'adultkid',gap:[1,1]},{
  a:['De volta para casa','{p} perdeu o emprego e pediu para voltar a morar comigo por um tempo.',['Aceitar de braços abertos|bond+10 >b|O quarto de infância voltou a ter dono.','Aceitar com regras|bond+4 >b|Contas divididas e louça lavada.','Negar|bond-15 h-4|{p} foi morar com um amigo.']],
- b:['Convivência','Morar com um filho adulto é diferente. Ninguém sabe bem quem manda.',['Tratar como adulto|bond+6 >c|Conversas de igual para igual.','Voltar a tratar como criança|bond-6 >c|"Já sou adulto!"']],
+ b:['Convivência','Morar com um filho adulto é diferente. Ninguém sabe bem quem manda.',['Tratar como adulto|bond+6 >c|Conversas de igual para igual.','Voltar a tratar como criança|bond-6 >c|"Já sou adult{o2}!"']],
  c:['O emprego novo','{p} arrumou um emprego e vai se mudar de novo.',['Ajudar com a mudança|bond+8 h+5 >d|Carreguei caixas e segurei o choro.','Pedir para ficar mais um pouco|bond+3 >d|A casa ficou tão viva.']],
  d:['Ninho vazio, de novo','A casa ficou silenciosa outra vez.',['Transformar o quarto num escritório|h+4|Finalmente um escritório.','Deixar o quarto do jeito que está|h+2|Vai que {p} volta.']],
 });
-chain('cuidar_pai',{k:'Família',min:35,max:70,who:'parent',when:m=>parents().some(p=>p.age>=68),gap:[1,1]},{
+chain('cuidar_pai',{k:'Família',min:35,max:70,who:'parentOld',gap:[1,1]},{
  a:['O tombo','{p} caiu em casa e ficou horas no chão até alguém chegar.',['Levar para morar comigo|bond+12 h-4 >b|A casa ficou cheia de remédios e histórias antigas.','Contratar uma cuidadora|$-6000 >c|Alguém para ficar com {ele} durante o dia.','Sugerir um lar de idosos|bond-8 >d|{p} chorou.']],
  b:['A rotina de cuidar','Cuidar de {p} cansa, mas também aproxima.',['Ouvir as histórias de {p}|bond+10 h+3 >e|Descobri coisas da família que eu nunca soube.','Dividir com os irmãos|>f|Nem todo mundo ajudou do mesmo jeito.']],
  c:['A cuidadora','A cuidadora é ótima. {p} até voltou a sorrir.',['Visitar todo fim de semana|bond+8 >e|Almoço de domingo garantido.','Ligar todo dia|bond+5 >e|A voz de {p} melhora quando eu ligo.']],
  d:['O lar de idosos','{p} fez amigos no lar. Até arrumou namorad{o2}.',['Visitar sempre|bond+10 h+5 >e|O lugar é mais alegre do que eu imaginava.','Visitar pouco|bond-6 h-4 >e|A culpa pesa.']],
- e:['A despedida','{p} foi embora numa madrugada tranquila.',['Organizar uma despedida bonita|h-15 k+3 >g|Lotou a igreja de gente que {ele} ajudou.','Ficar em silêncio|h-18 >g|Ainda não caiu a ficha.']],
+ e:['A despedida','{p} foi embora numa madrugada tranquila.',['Organizar uma despedida bonita|morre h-15 k+3 >g|Lotou a igreja de gente que {ele} ajudou.','Ficar em silêncio|morre h-18 >g|Ainda não caiu a ficha.']],
  f:['A briga dos irmãos','Discutimos sobre quem cuida mais de {p}.',['Fazer uma escala justa|k+4 >e|Funcionou.','Assumir tudo sozinh{o}|hl-5 bond+8 >e|Cansei, mas não me arrependo.']],
  g:['A herança','Chegou a hora de dividir as coisas que {p} deixou.',['Dividir com justiça|$+20000 k+5|Ninguém brigou. {p} ia gostar.','Brigar pela casa|$+40000 k-8 h-8|Ganhei a casa e perdi os irmãos.']],
 });

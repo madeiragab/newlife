@@ -52,7 +52,6 @@ eduOk=(o=>function(req){ if(!req) return true; const deg=S.me.edu.deg;
 eduName=(o=>function(req){ if(req&&req.includes('+')) return req.split('+').map(r=>eduName(r)).join(' + ');
   if(req&&req.startsWith('tec:')&&req.includes(',')) return req.slice(4).split(',').map(x=>(TECHS.find(t=>t.id===x)||{}).n).join(' ou ');
   if(req==='post:esp') return 'Especialização (ou MBA, mestrado)'; return o(req); })(eduName);
-// quem tem pós vê as vagas que pedem pós; quem tem técnico vê as vagas do técnico
 // formação a mais rende mais no salário, como no mercado de verdade (mestrado +10%, doutorado +15%, MBA +8%, especialização +5%)
 function eduBonus(j){ if(!j||j.spc||!S||!S.me) return 0; const d=S.me.edu.deg, def=JOBS.find(x=>x.id===j.id); if(!def) return 0; let b=0;
   if(d.includes('post:dout')) b+=.15; else if(d.includes('post:mest')) b+=.10; if(d.includes('post:mba')) b+=.08; if(d.includes('post:esp')) b+=.05;

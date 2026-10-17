@@ -21,7 +21,7 @@ chain('lobo_festa_fantasia',{k:'Lobisomem',min:16,max:60,when:LOBO,gap:[1,1]},{
  d:['A fome','A fera quer caçar. A festa está cheia de gente.',['Correr para a mata|fome-20 k+3|Cacei um coelho e voltei para casa.','Atacar|fome-80 k-15 arrest:lesão_corporal:1:3|Mordi alguém. A polícia achou que era uma briga de fantasia.']],
 });
 chain('lobo_filho',{k:'Lobisomem',min:22,max:120,who:'kidpara',when:LOBO,gap:[1,1]},{
- a:['A primeira lua do filho','{p} teve a primeira transformação. Chorou de dor e de medo.',['Ficar com {ele} a noite toda|bond+15 h+4 >b|Corremos juntos pela mata. Eu cuidei d{ele}.','Acorrentar {p} no porão|bond-8 >c|Para segurança de todos.']],
+ a:['A primeira lua de {p}','{p} teve a primeira transformação. Chorou de dor e de medo.',['Ficar com {ele} a noite toda|bond+15 h+4 >b|Corremos juntos pela mata. Eu cuidei d{ele}.','Acorrentar {p} no porão|bond-8 >c|Para segurança de todos.']],
  b:['A matilha da família','Agora somos uma pequena matilha: eu e {p}.',['Ensinar a caçar animais, nunca pessoas|k+5 bond+10 >d|{p} aprende rápido.','Deixar {ele} aprender sozinh{o2}|bond-5 >c|Cada lobo tem seu caminho.']],
  c:['A revolta','{p} acha que eu escondi demais a verdade e está com raiva.',['Conversar|?bond bond+12 >d|Choramos juntos. Agora entendemos um ao outro.|bond-10 >d|{p} saiu batendo a porta.','Dar espaço|>d|O tempo cura.']],
  d:['O futuro','{p} está aprendendo a viver com a fera.',['Ter orgulho|h+10 bond+8|A fera não é maldição quando há amor.','Procurar uma cura para {ele}|$-5000 >e|Talvez {p} mereça uma vida normal.']],
@@ -35,7 +35,7 @@ chain('lobo_vizinho_desconfia',{k:'Lobisomem',min:16,max:120,when:LOBO,npc:1,gn:
  e:['O segredo','{p} ouviu tudo de boca aberta.',['Pedir segredo|?k vira:amigo h+6|Ele guarda até hoje. Às vezes até me avisa quando vem gente.|f+2 h-6|Ele contou para o bairro inteiro.','Mudar de casa|$-5000 h-2|Recomeço.']],
 });
 chain('lobo_ferido',{k:'Lobisomem',min:16,max:120,when:LOBO,gap:[1,1]},{
- a:['Atropelad{o}','Na forma de lobo, fui atropelad{o} numa estrada. Acordei humano, numa vala.',['Ir para o hospital|>b|Os médicos ficaram intrigados.','Me curar sozinh{o}|hl-15 >c|Lobisomem sara rápido.']],
+ a:['Atropelad{o}','Na forma de lobo, fui atropelad{o} numa estrada. Acordei de volta ao normal, numa vala.',['Ir para o hospital|>b|Os médicos ficaram intrigados.','Me curar sozinh{o}|hl-15 >c|Lobisomem sara rápido.']],
  b:['Os exames','Os ossos estão se regenerando rápido demais. O médico chamou colegas para ver.',['Fugir do hospital|>c|Saí pela janela de pijama.','Inventar uma doença rara|?sm >c|Disseram que é "condição genética".|>d|O médico ficou de olho em mim.']],
  c:['Recuperação','Em uma semana, estava novinh{o}.',['Agradecer à fera|hl+10 h+6|Às vezes a maldição é uma bênção.','Ficar mais cuidados{o} nas estradas|k+2 h+3|Lua cheia longe de asfalto.']],
  d:['O médico','O médico apareceu na minha casa: "Quero estudar sua regeneração."',['Aceitar|$+5000 >c|Doei sangue para a pesquisa, em segredo.','Recusar|h-2 >c|Não vou virar experimento.']],

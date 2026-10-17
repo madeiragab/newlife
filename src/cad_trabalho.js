@@ -27,7 +27,7 @@ chain('headhunter',{k:'Carreira',min:23,max:60,when:TRAB,gap:[1,1]},{
 chain('romance_trabalho',{k:'Amor',min:20,max:55,who:'colega',when:m=>TRAB(m)&&!partners().length,gap:[1,1]},{
  a:['Olhares no escritório','Comecei a perceber que {p}, do trabalho, sempre aparece na copa quando eu chego.',['Puxar conversa no café|bond+8 >b|Falamos de tudo, menos de trabalho.','Manter o profissionalismo|>e|Trabalho é trabalho.']],
  b:['O happy hour','Fomos ao happy hour da equipe e acabamos conversando sozinhos até o bar fechar.',['Chamar para sair de verdade|?lk vira:namoro h+12 >c|Começamos a namorar, em segredo.|bond-5 >e|{p} disse que não mistura trabalho e amor.','Deixar acontecer naturalmente|bond+6 >c@0|Sem pressa.']],
- c:['Segredo de escritório','Ninguém na empresa sabe do nosso namoro. Ainda.',['Contar para o chefe|?50 h+6 >d|Ele riu: "Todo mundo já sabia."|perf-6 >d|A empresa não gostou. Tivemos que mudar de setor.','Continuar escondendo|?40 h+4 >d|Sobrevivemos a uma festa de fim de ano inteira sem sermos descobertos.|h-6 >d|Fomos flagrados no estacionamento.']],
+ c:['Segredo de escritório','Ninguém na empresa sabe do nosso namoro. Ainda.',['Contar para o chefe|?50 h+6 >d|A chefia riu: "Todo mundo já sabia."|perf-6 >d|A empresa não gostou. Tivemos que mudar de setor.','Continuar escondendo|?40 h+4 >d|Sobrevivemos a uma festa de fim de ano inteira sem sermos descobertos.|h-6 >d|Fomos flagrados no estacionamento.']],
  d:['Casal de escritório','Agora somos o casal oficial da empresa.',['Pensar em algo sério|noivar h+10 bond+10|O pedido foi na sala de reuniões. Brega e perfeito.','Manter leve|h+5 bond+5|Um dia de cada vez.']],
  e:['Só colegas','Seguimos colegas. Às vezes fico imaginando.',['Seguir em frente|h+2|Profissionalismo acima de tudo.','Tentar de novo no futuro|>b@2|Quem sabe.']],
 });
@@ -89,6 +89,6 @@ chain('promocao_disputa',{k:'Carreira',min:22,max:60,who:'colega',when:TRAB,gap:
  b:['A decisão','A diretoria anunciou quem ficou com a vaga.',['Ouvir o anúncio|?perf promo h+12 >e|Fui eu!|h-8 >f|Foi {p}.']],
  c:['O pacto','A diretoria escolheu.',['Ouvir o anúncio|?perf promo h+12 bond+5 >e|Fui eu. Cumpri o pacto e trouxe {p} para perto.|h-4 bond+8 >f|Foi {p}. {Ele} cumpriu o pacto e me deu os melhores projetos.']],
  d:['Inimigos','{p} agora faz de tudo para me prejudicar.',['Pedir desculpas|?k bond+10 k+4|Fizemos as pazes.|h-4|Não aceitou.','Revidar|k-4 perf-4 h-4|Guerra fria no escritório.']],
- e:['Coordenador{a}','Agora coordeno a equipe, incluindo {p}.',['Ser justo com {ele}|k+5 bond+6|Viramos uma ótima dupla.','Mostrar quem manda|bond-10 h+2|O poder subiu à cabeça.']],
+ e:['Coordenador{a}','Agora coordeno a equipe, incluindo {p}.',['Ser just{o} com {ele}|k+5 bond+6|Viramos uma ótima dupla.','Mostrar quem manda|bond-10 h+2|O poder subiu à cabeça.']],
  f:['A derrota','Ver {p} na cadeira que eu queria dói.',['Dar parabéns de verdade|k+5 bond+8|{p} ficou emocionad{o2}.','Procurar emprego em outro lugar|+cad:headhunter h-2|Talvez minha vez seja em outra empresa.']],
 });

@@ -8,7 +8,7 @@ chain('carona',{k:'Acaso',min:18,max:75,npc:1,gap:[1,1]},{
 });
 chain('apartamento_vazio',{k:'Mistério',min:16,max:80,gap:[1,1]},{
  a:['O apartamento vazio','O apartamento de cima está vazio há meses, mas toda noite ouço passos.',['Investigar|>b|Subi com uma lanterna.','Chamar o síndico|>c|O síndico ficou pálido.','Colocar fone e dormir|h-2|Problema de amanhã.']],
- b:['A descoberta','A porta estava encostada. Lá dentro, um gato enorme e uma janela aberta.',['Adotar o gato|pet h+8 >d|Mistério resolvido. Ele pesa oito quilos.','Avisar o abrigo de animais|k+3 >d|Levaram o gato. Os passos acabaram.']],
+ b:['A descoberta','A porta estava encostada. Lá dentro, um gato enorme e uma janela aberta.',['Adotar o gato|pet:Gato h+8 >d|Mistério resolvido. Ele pesa oito quilos.','Avisar o abrigo de animais|k+3 >d|Levaram o gato. Os passos acabaram.']],
  c:['A história do prédio','O síndico contou que o antigo morador era um pianista que tocava toda madrugada.',['Ouvir mais|>b|Mas eu quis ver com meus próprios olhos.','Mudar de apartamento|$-3000 h-2|Não pago para ver.']],
  d:['A risada','Contei a história no grupo do prédio. Todo mundo riu do "fantasma de oito quilos".',['Rir junto|h+6|Agora o gato é a mascote do prédio.','Fazer um vídeo|follow+800 h+5|O vídeo do gato fantasma bombou.']],
 });
@@ -28,5 +28,5 @@ chain('maquina_cafe',{k:'Trabalho',min:18,max:65,when:m=>!!m.job,gap:[1,1]},{
  a:['A máquina de café','A máquina de café do escritório quebrou. O clima ficou insuportável.',['Consertar eu mesm{o}|?sm f+1 h+6 >b|Consertei! Virei herói da copa.|h-2 >c|Piorei o estrago.','Fazer uma vaquinha para uma nova|$-50 k+3 >b|Todo mundo contribuiu.']],
  b:['Herói do café','Agora todo mundo me chama quando algo quebra no escritório.',['Aceitar o título|perf+3 h+4 >d|Sou a pessoa da manutenção não oficial.','Explicar que não é meu trabalho|h+2 >d|Voltaram a chamar o técnico.']],
  c:['O desastre','A máquina soltou fumaça. O alarme de incêndio tocou e o prédio foi evacuado.',['Assumir a culpa|k+5 h-4 >d|Viralizou no grupo da empresa.','Ficar quiet{o}|k-3 >d|Nunca descobriram.']],
- d:['A nova máquina','A empresa comprou uma máquina de café profissional.',['Ser o primeiro a usar|h+6|O melhor café da minha vida corporativa.','Organizar a fila|k+2 h+3|Ordem na copa.']],
+ d:['A nova máquina','A empresa comprou uma máquina de café profissional.',['Ser {o} primeir{o} a usar|h+6|O melhor café da minha vida corporativa.','Organizar a fila|k+2 h+3|Ordem na copa.']],
 });

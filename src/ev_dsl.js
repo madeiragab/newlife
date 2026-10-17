@@ -22,7 +22,7 @@ function dslChance(tok){
   if(S.scen&&typeof scChance==='function'){ const sv=scChance(key); if(sv!=null) return Math.max(.03,Math.min(.97,(sv+mod)/100)); }
   let v= /^\d+$/.test(key)?+key : key==='sm'?m.smarts : key==='lk'?m.looks : key==='hl'?m.health : key==='h'?m.happy : key==='k'?m.karma : key==='fight'?m.fight
     : key==='perf'?(m.job?m.job.perf:50) : key==='grade'?(m.edu.cur?m.edu.cur.grade:50) : key==='appr'?(m.office?m.office.appr:50) : key==='pop'?(m.royal?m.royal.pop:50)
-    : key.startsWith('tal.')?(m.talent[key.slice(4)]||30) : 50;
+    : key==='f'?(m.fame||0) : key==='will'?(m.will??50) : key.startsWith('tal.')?(m.talent[key.slice(4)]||30) : 50;
   return Math.max(.03,Math.min(.97,(v+mod)/100));
 }
 function dslApply(s,d){
@@ -55,7 +55,7 @@ function dslApply(s,d){
     else if(tok==='kill'){ cnt('kills'); }
     else if(mm=tok.match(/^item:([^:]+):(\d+)$/)){ const n=mm[1]==='coisa'&&d.coisa?d.coisa.replace(/^(um|uma|uns|umas) /,''):mm[1].replace(/_/g,' '); m.assets.push({id:newId(),k:'item',n:n[0].toUpperCase()+n.slice(1),value:+mm[2],buy:0,cond:100}); }
     else if(tok==='petdie'||tok==='petgone'){ const p=d.pid&&P(d.pid); if(petRetirar(p,tok==='petdie'?'morto':'ausente',tok==='petdie'?'durante um evento':'saída dos meus cuidados'))st('happy',tok==='petdie'?-10:-5); }
-    else if(tok==='pet'){ const p=addPet(R.pick(['Cachorro','Cachorro','Gato','Gato','Coelho','Calopsita'])); out.push(`Chama-se ${p.first}.`); }
+    else if(mm=tok.match(/^pet(?::(\w+))?$/)){ const p=addPet(mm[1]||R.pick(['Cachorro','Cachorro','Gato','Gato','Coelho','Calopsita'])); if(d&&!d.pid) d.pid=p.id; out.push(`Chama-se ${p.first}.`); }
     else if(mm=tok.match(/^dis:(\w+)$/)) addDisease(mm[1]);
     else if(mm=tok.match(/^c:(\w+)$/)) cnt(mm[1]);
     else if(mm=tok.match(/^arrest:([^:]+):(\d+):(\d+)$/)) arrest(mm[1].replace(/_/g,' '),+mm[2],+mm[3]);

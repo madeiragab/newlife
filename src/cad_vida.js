@@ -3,7 +3,7 @@ chain('mudar_carreira',{k:'Carreira',min:28,max:55,when:m=>!!m.job&&!m.job.hero,
  a:['Insatisfação','Acordo todo dia sem vontade de ir trabalhar. Sinto que escolhi a profissão errada.',['Fazer um teste vocacional|$-300 sm+2 >b|O resultado me surpreendeu.','Conversar com quem já mudou de carreira|>c|Um amigo largou o banco para ser marceneiro.','Aguentar até a aposentadoria|h-6|Faltam só trinta anos.']],
  b:['A descoberta','O teste disse que eu tenho perfil para trabalhar com pessoas e criatividade.',['Fazer um curso na área nova|$-3000 sm+4 >d|Aulas à noite depois do trabalho.','Rir do teste|>c|Teste de internet.']],
  c:['A conversa','Meu amigo disse que o mais difícil foi o primeiro ano ganhando menos.',['Planejar uma reserva antes de mudar|k+3 >d|Seis meses de reserva no banco.','Mudar de qualquer jeito|h+8 >e|A vida é curta.']],
- d:['O primeiro trabalho na área nova','Consegui um trabalho na área nova, ganhando menos.',['Aceitar|fire h+12 >f|Pedi demissão do emprego antigo. Frio na barriga.','Recusar e ficar onde estou|h-4|Ainda não tive coragem.']],
+ d:['O primeiro trabalho na área nova','Consegui um trabalho na área nova, ganhando menos.',['Aceitar|empregonovo raise-15 h+12 >f|Pedi demissão do emprego antigo. Frio na barriga.','Recusar e ficar onde estou|h-4|Ainda não tive coragem.']],
  e:['O salto no escuro','Pedi demissão sem plano.',['Fazer bicos enquanto procuro|fire $+1500 >f|Aperto, mas felicidade.','Me desesperar|fire h-8 >f|O dinheiro acabou rápido.']],
  f:['Um ano depois','Faz um ano que mudei de carreira.',['Valeu a pena|h+15 sm+3|Ganho menos, mas acordo feliz.','Me arrependi|h-6|Às vezes a grama do vizinho é só grama.']],
 });
@@ -26,7 +26,7 @@ chain('emprego_exterior',{k:'Carreira',min:24,max:50,when:m=>!!m.job&&!m.job.her
  a:['A proposta internacional','A empresa quer me transferir para a filial em {lugar} por dois anos.',['Aceitar|raise+30 h+8 >b|Fiz as malas com a vida inteira dentro.','Recusar|h-2|Minha vida está aqui.','Negociar levar a família|?perf raise+30 >b|A empresa aceitou pagar tudo.|>a@1|Não aceitaram. Vou pensar mais.']],
  b:['Adaptação','Os primeiros meses são de solidão e frio.',['Fazer amigos locais|h+6 sm+3 >c|Uma colega me apresentou a cidade.','Ficar só com outros estrangeiros|h+4 >c|Bolha de expatriados.']],
  c:['A saudade','Perdi o aniversário da minha mãe e o casamento de um amigo.',['Fazer chamadas de vídeo toda semana|h+3 >d|Tela não abraça, mas ajuda.','Voltar numa folga|$-5000 h+10 >d|Abraço de verdade.']],
- d:['O fim do contrato','Os dois anos acabaram. A empresa quer que eu fique de vez.',['Ficar para sempre|raise+15 h+6|Agora aqui também é casa.','Voltar|h+12 sm+3|Voltei com outra cabeça.']],
+ d:['O fim do contrato','Os dois anos acabaram. A empresa quer que eu fique de vez.',['Renovar por mais dois anos|raise+15 h+6|Agora aqui também é casa. Um dia eu volto.','Voltar|h+12 sm+3|Voltei com outra cabeça.']],
 });
 chain('doacao_medula',{k:'Bondade',min:18,max:55,gap:[1,1]},{
  a:['O cadastro','Uma campanha na empresa pede cadastro de doadores de medula.',['Me cadastrar|k+5 >b@2-6|Uma picadinha no dedo e meu nome no cadastro.','Achar que nunca vão me chamar|h+0|Deixei para lá.']],

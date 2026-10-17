@@ -14,7 +14,7 @@ chain('maldicao_cigana',{k:'Maldição',min:16,max:85,when:LIVRE,w:.4,npc:1,gn:'
  d:['A origem','Minha tia-avó contou: meu bisavô enganou uma família pobre e foi amaldiçoado.',['Procurar os descendentes da família|k+6 >e|Achei uma neta deles, vivendo com dificuldade.','Desistir|h-3|O peso continua.']],
  e:['A reparação','Decidi reparar o que meu bisavô fez.',['Ajudar a família com dinheiro|$-5000 k+12 h+10|Senti, literalmente, um peso saindo das costas.','Pedir perdão em nome da família|k+8 h+6|A senhora aceitou. Disse que a mãe dela tinha perdoado antes de morrer.']],
 });
-chain('medium',{k:'Mistério',min:16,max:85,when:LIVRE,w:.4,npc:1,age:[10,40],gap:[1,1]},{
+chain('medium',{k:'Mistério',min:16,max:85,when:LIVRE,w:.4,npc:1,gn:'F',age:[10,40],gap:[1,1]},{
  a:['A médium','Uma amiga me levou numa médium famosa, {p}, só por curiosidade.',['Fazer uma consulta|$-300 >b|Ela fechou os olhos e começou a falar com a voz diferente.','Ficar na sala de espera|h+0|Fiquei lendo revista velha.']],
  b:['A mensagem','{p} disse coisas que só eu e uma pessoa que já morreu sabíamos.',['Chorar|h+8 >c|Fazia anos que eu queria ouvir aquilo.','Desconfiar|sm+2 >d|Deve ter pesquisado sobre mim.']],
  c:['O recado','{p} disse que essa pessoa quer que eu procure uma caixa escondida na casa antiga da família.',['Procurar a caixa|?50 $+3000 h+12|Achei a caixa com cartas e economias guardadas. Um presente do além.|h-2|Não achei nada. Mas a busca trouxe lembranças boas.','Deixar para lá|h+2|Já recebi o que precisava.']],
@@ -47,7 +47,7 @@ chain('chupacabra',{k:'Mistério',min:12,max:85,when:LIVRE,w:.4,gap:[1,1]},{
  a:['Os bichos mortos','No sítio da família, galinhas e cabras aparecem mortas, sem sangue, com dois furinhos no pescoço.',['Montar uma câmera|>b|Se tem alguma coisa, vai aparecer.','Achar que foi raposa|>c@1|Raposa come. Isso não comeu.']],
  b:['A gravação','A câmera gravou um vulto curvado, com olhos vermelhos e espinhos nas costas.',['Mandar para um programa de TV|f+5 $+1000 >d|Virou "o chupa-cabra do sítio".','Mostrar só para a família|>c|Ninguém dormiu.']],
  c:['A espera','Fiquei de vigia com uma lanterna e uma enxada.',['Encarar o bicho|?fight >d|Ele fugiu ganindo pelo mato.|hl-10 >d|Ele me arranhou e fugiu.','Gritar e acender todas as luzes|>d|O bicho fugiu.']],
- d:['O fim dos ataques','Os ataques pararam. Mas pegadas estranhas ainda aparecem na lama.',['Contar a história para os netos|h+4|A melhor história do sítio.','Vender o sítio|$+20000 h+2|Que o próximo dono se vire.']],
+ d:['O fim dos ataques','Os ataques pararam. Mas pegadas estranhas ainda aparecem na lama.',['Contar a história para os netos|h+4|A melhor história do sítio.','Convencer a família a vender o sítio|$+5000 h+2|Fiquei com a minha parte. Que o próximo dono se vire.']],
 });
 chain('lenda_curupira',{k:'Lenda',min:8,max:60,when:LIVRE,w:.4,gap:[1,1]},{
  a:['Perdid{o} na mata','Numa trilha, as pegadas que eu seguia de volta estavam ao contrário, com os calcanhares para frente.',['Seguir as pegadas mesmo assim|>b|Andei em círculos por horas.','Parar e esperar ajuda|>c|Escureceu.']],

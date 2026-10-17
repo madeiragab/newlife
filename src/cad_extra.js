@@ -20,17 +20,17 @@ chain('animal_perdido',{k:'Bichos',min:10,max:80,npc:1,gap:[1,1]},{
  a:['O cachorro perdido','Achei um cachorro de raça, com coleira, perdido na avenida.',['Levar para casa e procurar o dono|k+5 >b|Coloquei cartazes pelo bairro.','Deixar onde estava|k-4|Alguém deve achar.']],
  b:['O dono','Uma semana depois, {p} ligou chorando: era o cachorro d{ele}.',['Devolver|k+8 h+10 >c|O cachorro pulou no colo de {p} como se não houvesse amanhã.','Pedir a recompensa do cartaz|$+1000 h+6 >c|{p} pagou feliz.']],
  c:['A amizade','{p} me convidou para um almoço de agradecimento.',['Ir|vira:amigo h+6 >d|Descobrimos que temos muito em comum.','Recusar|h+2|Fiz só o que era certo.']],
- d:['O filhote','O cachorro de {p} teve filhotes e um tem meu nome. Ou quase.',['Adotar um filhote|pet h+12|Agora temos cachorros irmãos.','Visitar sempre|h+6 bond+5|Tio postiço de cachorro.']],
+ d:['O filhote','O cachorro de {p} teve filhotes e um tem meu nome. Ou quase.',['Adotar um filhote|pet:Cachorro h+12|Agora temos cachorros irmãos.','Visitar sempre|h+6 bond+5|Tio postiço de cachorro.']],
 });
 chain('blackout',{k:'Acaso',min:10,max:85,npc:1,gap:[1,1]},{
  a:['O apagão','Um apagão deixou o bairro inteiro sem luz por três dias.',['Ajudar os vizinhos idosos|k+6 >b|Levei água e velas para quem não podia sair.','Ficar em casa no escuro|h-4 >c|Tédio absoluto.']],
- b:['A vizinha do 7','{p}, do apartamento 7, mora sozinh{o2} e estava com medo do escuro.',['Fazer companhia|vira:amigo k+6 h+6 >c|Jogamos baralho à luz de vela a noite inteira.','Deixar uma lanterna|k+3 >c|Pelo menos {ele} tem luz.']],
+ b:['Quem mora no 7','{p}, do apartamento 7, mora sozinh{o2} e estava com medo do escuro.',['Fazer companhia|vira:amigo k+6 h+6 >c|Jogamos baralho à luz de vela a noite inteira.','Deixar uma lanterna|k+3 >c|Pelo menos {ele} tem luz.']],
  c:['A rua no escuro','Sem luz, os vizinhos saíram para a rua e começaram a conversar.',['Puxar uma roda de violão|h+10 >d|A rua inteira cantou.','Fazer um churrasco antes da carne estragar|h+8 k+3 >d|Churrasco comunitário.']],
  d:['A luz voltou','A luz voltou, mas a rua ficou diferente.',['Organizar uma festa anual|k+5 h+8|"Festa do apagão", todo ano.','Seguir a vida|h+3|Mas agora cumprimento todo mundo.']],
 });
 chain('heranca_bicho',{k:'Bichos',min:25,max:80,npc:1,age:[30,50],gap:[1,1]},{
  a:['O papagaio','{p}, que mora ao lado há décadas, pediu para eu cuidar do papagaio d{ele} se algo acontecesse.',['Prometer cuidar|k+5 vira:amigo >b@1-4|{p} ficou aliviad{o2}.','Dizer que não gosto de pássaros|h+0|{Ele} entendeu.']],
- b:['A promessa','{p} faleceu. O papagaio veio morar comigo.',['Cumprir a promessa|pet k+6 h-3 >c|O papagaio fala o nome de {p} toda manhã.','Doar para um santuário|k+3 h-2|Ele vai ter companhia.']],
+ b:['A promessa','{p} faleceu. O papagaio veio morar comigo.',['Cumprir a promessa|morre pet:Papagaio k+6 h-3 >c|O papagaio fala o nome de {p} toda manhã.','Doar para um santuário|morre k+3 h-2|Ele vai ter companhia.']],
  c:['O papagaio falante','O papagaio sabe cinquenta palavras, a maioria impublicável.',['Ensinar palavras novas|h+8 >d|Agora ele também canta o hino do meu time.','Proibir visitas sensíveis|h+5 >d|Minha mãe não pode ouvir.']],
  d:['Companhia','O papagaio vive muito. Pode ser que viva mais do que eu.',['Deixar no testamento|k+3 h+5|Já escolhi quem vai cuidar dele.','Aproveitar cada dia|h+6|Ele me acorda cantando.']],
 });

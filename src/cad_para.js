@@ -5,10 +5,10 @@ chain('cla_vampiro',{k:'Maldição',min:16,max:120,npc:1,when:CRI('vampiro'),gap
  a:['O convite','Um bilhete com selo de cera chegou pela janela: "Os seus irmãos de sangue querem conhecer você. Assinado: {p}."',['Ir ao encontro|>b|Um casarão antigo, velas e gente pálida demais.','Queimar o bilhete|h+0 >f@2|Não quero fazer parte de nada.']],
  b:['O clã','{p} lidera um clã de vampiros que vive escondido há séculos. Querem que eu entre.',['Entrar no clã|vira:amigo >c|Jurei lealdade com uma taça que não era de vinho.','Recusar com educação|vira:inimigo >f|{p} sorriu de um jeito que me deu medo.']],
  c:['As regras','O clã tem três regras: nunca matar no próprio bairro, nunca contar a um humano, nunca trair o clã.',['Seguir as regras|k+2 >d|O clã me ensinou a controlar a sede.','Quebrar uma regra em segredo|k-6 >e|Ninguém vai saber.']],
- d:['A guerra dos clãs','Um clã rival quer tomar a cidade.',['Lutar ao lado de {p}|?fight f+0 k-4 bond+15 >g|Vencemos. Ganhei respeito entre os meus.|hl-25 >g|Perdemos. Escapei por pouco.','Negociar a paz|?sm k+5 bond+10 >g|Consegui uma trégua.|>g|A negociação falhou.']],
+ d:['A guerra dos clãs','Um clã rival quer tomar a cidade.',['Lutar ao lado de {p}|?fight k-4 bond+15 >g|Vencemos. Ganhei respeito entre os meus.|hl-25 >g|Perdemos. Escapei por pouco.','Negociar a paz|?sm k+5 bond+10 >g|Consegui uma trégua.|>g|A negociação falhou.']],
  e:['A traição descoberta','{p} descobriu que eu quebrei uma regra.',['Pedir perdão|?40 bond-15 >d|Fui perdoad{o}, com uma marca na mão para lembrar.|hl-30 >f|O castigo foi cruel.','Fugir da cidade|$-8000 h-8 >f|Comecei de novo em outro lugar.']],
  f:['Sozinh{o}','Viver como vampiro sem um clã é mais solitário e mais perigoso.',['Seguir sozinh{o}|h-4|Prefiro minha liberdade.','Procurar outro clã|>a@2|Talvez em outra cidade.']],
- g:['Herdeir{o} do clã','{p} me chamou: quer que eu lidere o clã quando {ele} partir.',['Aceitar|f+0 h+10 k-2|Agora a noite da cidade responde a mim.','Recusar|h+3|Liderar vampiros não é para mim.']],
+ g:['Herdeir{o} do clã','{p} me chamou: quer que eu lidere o clã quando {ele} partir.',['Aceitar|h+10 k-2|Agora a noite da cidade responde a mim.','Recusar|h+3|Liderar vampiros não é para mim.']],
 });
 chain('alcateia',{k:'Maldição',min:14,max:110,npc:1,when:CRI('lobisomem'),gap:[1,1]},{
  a:['Pegadas na lama','Na lua cheia, acordei na mata ao lado de pegadas iguais às minhas. Outra pessoa como eu.',['Seguir as pegadas|>b|Elas levavam até uma cabana.','Ignorar|>e@2|Prefiro não saber.']],

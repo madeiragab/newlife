@@ -7,13 +7,13 @@ chain('meia_idade',{k:'Vida',min:40,max:55,gap:[1,1]},{
 });
 chain('neto',{k:'Família',min:45,max:90,who:'grandkid',gap:[1,2]},{
  a:['Uma geração nova','Segurar {p} pela primeira vez me fez entender tudo de novo.',['Prometer ser a melhor companhia do mundo|h+15 bond+10 >b|Já comprei brinquedo demais.','Chorar escondid{o}|h+12 >b|Lágrimas boas.']],
- b:['Os fins de semana','{p} passa os fins de semana comigo.',['Ensinar o que eu sei|bond+10 h+8 >c|Ensinei a pescar, a fazer bolo e a perder no dominó.','Mimar sem limites|bond+12 h+10 >c|Em casa de avó não tem regra.']],
+ b:['Os fins de semana','{p} passa os fins de semana comigo.',['Ensinar o que eu sei|bond+10 h+8 >c|Ensinei a pescar, a fazer bolo e a perder no dominó.','Mimar sem limites|bond+12 h+10 >c|Em casa de vô e vó não tem regra.']],
  c:['A pergunta','{p} me perguntou como era o mundo quando eu era criança.',['Contar histórias da minha vida|bond+10 h+8 >d|{p} ficou de boca aberta com cada aventura.','Mostrar fotos antigas|bond+8 h+6 >d|"Você tinha cabelo?"']],
  d:['Crescendo','{p} cresceu e agora me visita menos.',['Ligar e chamar para um almoço|bond+8 h+6|{p} veio, e trouxe a namorada para me conhecer.','Entender que é assim mesmo|h+2|Também fui assim com meus avós.']],
 });
 chain('aposentadoria',{k:'Vida',min:58,max:72,when:m=>!!m.job&&!m.job.hero,gap:[1,1]},{
  a:['A conta da aposentadoria','Fiz as contas: posso me aposentar daqui a pouco.',['Planejar a aposentadoria|sm+3 >b|Planilha de despesas e de sonhos.','Não pensar nisso ainda|>b@2|Trabalhar me faz bem.']],
- b:['O último dia','Hoje é meu último dia de trabalho. A equipe preparou uma festa.',['Fazer um discurso|h+12 f+1 fire >c|Agradeci a cada um pelo nome.','Sair sem alarde|h+8 fire >c|Peguei minha caneca e fui embora sorrindo.']],
+ b:['O último dia','Hoje é meu último dia de trabalho. A equipe preparou uma festa.',['Fazer um discurso|h+12 f+1 aposentar >c|Agradeci a cada um pelo nome.','Sair sem alarde|h+8 aposentar >c|Peguei minha caneca e fui embora sorrindo.']],
  c:['As primeiras semanas','Os primeiros dias de aposentadoria são estranhos. Acordo cedo sem motivo.',['Criar uma rotina nova|h+6 hl+3 >d|Caminhada, jornal e café na padaria.','Ficar em casa vendo TV|h-6 >e|Os dias ficaram longos demais.']],
  d:['Um novo propósito','Descobri que a aposentadoria pode ser o começo de algo.',['Fazer trabalho voluntário|k+8 h+8|Ensino jovens a fazer o que eu fazia.','Viajar|$-15000 h+15|Conheci lugares que sempre quis.','Cuidar de um jardim|h+8 hl+3|Plantas não têm pressa. Nem eu.']],
  e:['O vazio','Me sinto inútil sem o trabalho.',['Procurar ajuda|$-1000 h+6 >d|A terapia me ajudou a achar outro sentido.','Arrumar um bico|$+2000 h+4 >d|Voltei a trabalhar meio período. Me sinto útil de novo.']],
@@ -42,7 +42,7 @@ chain('faculdade_tardia',{k:'Estudos',min:45,max:80,gap:[1,1]},{
  a:['Nunca é tarde','Sempre quis fazer faculdade. Agora, com mais de quarenta e cinco, decidi tentar.',['Prestar vestibular|?sm >b|Passei! Vou ser {o} mais velh{o} da turma.|>c|Não passei desta vez.','Desistir da ideia|h-3|Fica para outra vida.']],
  b:['A turma','A turma tem a idade dos meus filhos. No começo me olhavam de um jeito curioso.',['Me enturmar|h+8 sm+3 >d|Virei a pessoa que todo mundo procura para conselhos.','Ficar na minha|sm+4 >d|Sentei na primeira fila e anotei tudo.']],
  c:['Tentar de novo','Faltou pouco no vestibular.',['Fazer cursinho|$-3000 sm+3 >b@1|Desta vez vai.','Fazer um curso livre|sm+3 h+4|Aprender não precisa de diploma.']],
- d:['A formatura','Chegou o dia da minha formatura.',['Subir no palco|sm+5 h+20 f+1|Meus netos gritaram meu nome na plateia.','Fazer o discurso da turma|?sm h+20 f+3|Falei sobre começar de novo. Ninguém segurou o choro.|h+15|Gaguejei, mas me aplaudiram de pé.']],
+ d:['A formatura','Chegou o dia da minha formatura.',['Subir no palco|diploma sm+5 h+20 f+1|Meus netos gritaram meu nome na plateia.','Fazer o discurso da turma|diploma ?sm h+20 f+3|Falei sobre começar de novo. Ninguém segurou o choro.|h+15|Gaguejei, mas me aplaudiram de pé.']],
 });
 chain('casa_praia',{k:'Sonhos',min:40,max:80,v:[80000,250000],gap:[1,2]},{
  a:['A casa na praia','Sempre sonhei com uma casa na praia. Vi uma à venda.',['Comprar|$-v h+15 >b|Cheiro de maresia todos os dias.','Alugar por temporada|$-3000 h+8|Só um gostinho.']],
@@ -51,10 +51,10 @@ chain('casa_praia',{k:'Sonhos',min:40,max:80,v:[80000,250000],gap:[1,2]},{
  d:['Para sempre','Decidi passar a velhice ali.',['Mudar de vez|h+15 hl+5|Acordo com o barulho das ondas.','Deixar para os filhos|k+4|Um lugar para a família se reunir quando eu não estiver.']],
 });
 chain('amigo_doente',{k:'Amizade',min:50,max:90,who:'friend',gap:[1,1]},{
- a:['A notícia','{p}, meu amigo de tantos anos, me contou que está muito doente.',['Ficar ao lado d{ele}|bond+12 h-6 >b|Prometi não deixar {ele} sozinh{o2}.','Ter dificuldade de lidar|h-8 >c|Não sei o que dizer.']],
+ a:['A notícia','{p}, amizade de tantos anos, me contou que está muito doente.',['Ficar ao lado d{ele}|bond+12 h-6 >b|Prometi não deixar {ele} sozinh{o2}.','Ter dificuldade de lidar|h-8 >c|Não sei o que dizer.']],
  b:['Últimos desejos','{p} tem uma lista de coisas que quer fazer.',['Realizar a lista junto|$-5000 h+8 bond+15 >d|Fomos ao estádio, à praia e a um show de rock.','Fazer uma festa surpresa|$-2000 h+10 bond+10 >d|Todos os amigos de uma vida inteira.']],
  c:['O afastamento','Fiquei semanas sem visitar {p}.',['Criar coragem e ir|bond+10 >b|{p} só disse: "Que bom que você veio."','Mandar mensagens|bond+3 >d|Não é o mesmo.']],
- d:['A despedida','{p} se foi.',['Fazer a homenagem no velório|h-12 k+4|Contei como nos conhecemos. Riram e choraram.','Guardar o luto em silêncio|h-15|A saudade é do tamanho da amizade.']],
+ d:['A despedida','{p} se foi.',['Fazer a homenagem no velório|morre h-12 k+4|Contei como nos conhecemos. Riram e choraram.','Guardar o luto em silêncio|morre h-15|A saudade é do tamanho da amizade.']],
 });
 chain('hobby_velhice',{k:'Vida',min:55,max:95,gap:[1,1]},{
  a:['Tempo livre','Com mais tempo livre, quero aprender algo que nunca tive tempo.',['Xadrez na praça|sm+4 >b|Os velhinhos da praça me receberam com desconfiança.','Marcenaria|sm+3 >c|Primeiro projeto: um banquinho torto.','Dança de salão|tal.dance+6 h+8 >d|Dois pra lá, dois pra cá.']],

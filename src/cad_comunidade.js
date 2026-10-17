@@ -8,8 +8,8 @@ chain('horta',{k:'Bairro',min:16,max:85,npc:1,age:[20,40],gap:[1,1]},{
 });
 chain('abrigo',{k:'Bichos',min:14,max:80,gap:[1,1]},{
  a:['O abrigo de animais','O abrigo de animais do bairro está pedindo voluntários.',['Ser voluntári{o} aos sábados|k+5 h+6 >b|Banho em cachorro, limpeza de baia e muito amor.','Doar ração|$-200 k+3|Fiz minha parte.']],
- b:['O cão que ninguém quer','Tem um cachorro velho e cego no abrigo há três anos. Ninguém adota.',['Adotar|pet k+8 h+10 >c|Ele dormiu no meu pé na primeira noite.','Fazer uma campanha para ele|?k f+2 k+5 >c|Uma família adotou depois de ver o vídeo!|h-2 >c|Ninguém adotou ainda.']],
- c:['A crise','O abrigo vai fechar por falta de dinheiro.',['Organizar uma feira beneficente|?k $+0 k+8 f+3 h+10 >d|Arrecadamos o suficiente para um ano!|h-6 >d|Não deu. Os animais foram redistribuídos.','Doar do próprio bolso|$-3000 k+8 >d|Ajudei a pagar o aluguel do mês.']],
+ b:['O cão que ninguém quer','Tem um cachorro velho e cego no abrigo há três anos. Ninguém adota.',['Adotar|pet:Cachorro k+8 h+10 >c|Ele dormiu no meu pé na primeira noite.','Fazer uma campanha para ele|?k f+2 k+5 >c|Uma família adotou depois de ver o vídeo!|h-2 >c|Ninguém adotou ainda.']],
+ c:['A crise','O abrigo vai fechar por falta de dinheiro.',['Organizar uma feira beneficente|?k k+8 f+3 h+10 >d|Arrecadamos o suficiente para um ano!|h-6 >d|Não deu. Os animais foram redistribuídos.','Doar do próprio bolso|$-3000 k+8 >d|Ajudei a pagar o aluguel do mês.']],
  d:['Coordenação','Me convidaram para coordenar os voluntários.',['Aceitar|k+5 h+6|Agora tenho uma equipe de trinta pessoas e duzentos bichos.','Continuar só nos sábados|h+4|É o meu jeito de ajudar.']],
 });
 chain('maratona',{k:'Saúde',min:18,max:65,gap:[1,1]},{
@@ -38,7 +38,7 @@ chain('associacao',{k:'Bairro',min:22,max:80,gap:[1,1]},{
  a:['A associação de moradores','A associação de moradores do bairro está abandonada. Ninguém quer ser presidente.',['Me candidatar|f+1 >b|Ganhei por falta de concorrente.','Ajudar sem cargo|k+3|Faço o que dá.']],
  b:['A primeira reunião','Na primeira reunião, todo mundo reclamou de tudo ao mesmo tempo.',['Fazer uma lista de prioridades|sm+3 k+3 >c|Iluminação, buracos e a praça.','Prometer resolver tudo|>c|Promessa é dívida.']],
  c:['A prefeitura','Levei as reivindicações à prefeitura.',['Insistir até ser ouvid{o}|?k f+3 k+5 >d|Trocaram as lâmpadas da rua inteira!|h-6 >d|Me fizeram esperar quatro horas para nada.','Fazer barulho na imprensa|?40 f+5 >d|Uma reportagem pressionou e funcionou.|h-4 >d|A reportagem nunca saiu.']],
- d:['Liderança','O bairro começou a me reconhecer como liderança.',['Candidatar-me a vereador{a}|?f f+6 h+10|Fui eleit{o} vereador{a}!|h-6|Não fui eleit{o}, mas tive muitos votos no bairro.','Continuar no bairro|k+5 h+6|Meu lugar é aqui.']],
+ d:['Liderança','O bairro começou a me reconhecer como liderança.',['Representar o bairro no conselho da cidade|?f f+6 h+10|Virei conselheir{o} da cidade pelo bairro!|h-6|Escolheram outra pessoa, mas o bairro sabe quem trabalhou.','Continuar no bairro|k+5 h+6|Meu lugar é aqui.']],
 });
 chain('incendio',{k:'Bairro',min:16,max:75,npc:1,gap:[1,2]},{
  a:['Fumaça','Vi fumaça saindo da casa de {p}, vizinh{o2} de duas casas para lá.',['Correr para ajudar|?hl k+10 f+4 >b|Tirei {p} de lá antes do fogo se espalhar.|hl-12 k+8 >b|Tirei {p} de lá, mas me queimei.','Chamar os bombeiros|k+5 >c|Os bombeiros chegaram em dez minutos.']],
@@ -59,7 +59,7 @@ chain('voluntario_hospital',{k:'Bondade',min:16,max:85,npc:1,age:[-10,10],gap:[1
 });
 chain('mudar_cidade',{k:'Vida',min:22,max:65,gap:[1,1]},{
  a:['Vontade de mudar','Ando cansad{o} da cidade. Trânsito, barulho, pressa.',['Pesquisar cidades menores|>b|Montei uma lista com prós e contras.','Fazer uma viagem para pensar|$-2000 h+6 >b|Voltei com mais dúvidas.','Deixar a ideia de lado|h-2|Talvez um dia.']],
- b:['A decisão','Achei uma cidade pequena perto do mar.',['Mudar|$-8000 h+12 >c|Caminhão de mudança e coração acelerado.','Desistir de última hora|h-4|Medo do desconhecido.']],
+ b:['A decisão','Achei uma cidade pequena perto do mar.',['Mudar|$-8000 mudarcidade h+12 >c|Caminhão de mudança e coração acelerado.','Desistir de última hora|h-4|Medo do desconhecido.']],
  c:['Vida nova','Na cidade nova, todo mundo sabe o nome de todo mundo.',['Me enturmar|h+8 >d|Já sou "a pessoa da casa amarela".','Sentir falta da cidade grande|h-6 >d|Saudade do caos.']],
- d:['Um ano depois','Faz um ano que me mudei.',['Ficar para sempre|h+10 hl+4|Encontrei meu lugar.','Voltar para a cidade grande|$-5000 h+2|Descobri que eu gosto do caos.']],
+ d:['Um ano depois','Faz um ano que me mudei.',['Ficar para sempre|h+10 hl+4|Encontrei meu lugar.','Voltar para a cidade grande|$-5000 mudarcidade h+2|Descobri que eu gosto do caos.']],
 });

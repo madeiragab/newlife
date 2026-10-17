@@ -27,7 +27,7 @@ chain('tcc',{k:'Faculdade',min:20,max:35,when:NA_FACUL,npc:1,age:[15,35],gap:[1,
  b:['As correções','{p} devolveu meu primeiro capítulo todo riscado de vermelho.',['Reescrever tudo|sm+4 grade+4 >d|Ficou dez vezes melhor.','Discutir as correções|?sm >d|{Ele} admitiu que eu tinha razão em uma.|>d|{Ele} não gostou.']],
  c:['TCC tranquilo','O orientador mal lê o que eu mando.',['Fazer bem feito mesmo assim|sm+3 >d|Faço por mim.','Fazer o mínimo|h+3 >e|Nota sete e liberdade.']],
  d:['A banca','Chegou o dia de apresentar o TCC para a banca.',['Apresentar com confiança|?sm grade+10 h+15 >f|Nota máxima! A banca sugeriu publicar.|h-4 >e|A banca fez perguntas que eu não soube responder.','Ficar nervos{o}|?40 grade+6 h+10 >e|Deu certo.|h-6 >e|Gaguejei. Passei raspando.']],
- e:['Aprovad{o}','O TCC foi aprovado. Acabou a faculdade!',['Comemorar|h+12|Joguei o chapéu de formatura para o alto.','Dormir dois dias seguidos|hl+4 h+8|Merecido.']],
+ e:['Aprovad{o}','O TCC foi aprovado. Agora falta pouco para o diploma!',['Comemorar|h+12|Joguei os rascunhos para o alto.','Dormir dois dias seguidos|hl+4 h+8|Merecido.']],
  f:['Mestrado?','{O2} professor{a2} {p} me convidou para fazer mestrado com {ele}.',['Aceitar|sm+5 h+8|Vou seguir na pesquisa.','Recusar para trabalhar|$+2000 h+4|O mercado me chama.']],
 });
 chain('intercambio_escola',{k:'Estudos',min:15,max:24,npc:1,gap:[1,1],when:m=>!!m.edu.cur},{
@@ -41,7 +41,7 @@ chain('bolsa_faculdade',{k:'Faculdade',min:17,max:30,when:NA_FACUL,gap:[1,1]},{
  a:['A mensalidade','A mensalidade da faculdade subiu e minha família não consegue pagar.',['Procurar uma bolsa|>b|Preenchi doze formulários.','Trancar a matrícula|h-8 >e|Vou trabalhar e voltar depois.','Arrumar um emprego à noite|$+1500 hl-3 >c|Trabalho de dia, estudo de noite.']],
  b:['A entrevista da bolsa','A entrevista para a bolsa é amanhã.',['Contar minha história com sinceridade|?k+10 $+5000 h+12 >d|Ganhei bolsa integral!|>c|Não consegui. Vou trabalhar à noite.','Exagerar um pouco a situação|?40 $+5000 k-4 >d|Funcionou.|k-4 >c|Perceberam.']],
  c:['Jornada dupla','Trabalhar e estudar está me esgotando.',['Aguentar até o fim|hl-4 grade-3 >d|Durmo no ônibus.','Diminuir as matérias|grade+3 >d|Vou demorar mais para formar, mas com saúde.']],
- d:['Formad{o}','Consegui me formar, com muito esforço.',['Agradecer a quem ajudou|k+5 h+15|Liguei para cada pessoa que me apoiou.','Comemorar sem parar|h+15|Ninguém sabe o que custou.']],
+ d:['Reta final','Cheguei ao último ano da faculdade, com muito esforço.',['Agradecer a quem ajudou|k+5 h+15|Liguei para cada pessoa que me apoiou.','Comemorar sem parar|h+15|Ninguém sabe o quanto custou chegar até aqui.']],
  e:['A volta','Depois de um ano trabalhando, posso voltar à faculdade.',['Voltar|grade+3 h+8 >d|Voltei mais madur{o}.','Não voltar|h-3|O trabalho me engoliu.']],
 });
 chain('professor_carreira',{k:'Carreira',min:22,max:60,when:m=>!!m.job&&['prof','univ','psub','pedg'].includes(m.job.id),npc:1,age:[-20,-10],gap:[1,1]},{

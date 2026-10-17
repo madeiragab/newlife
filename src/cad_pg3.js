@@ -4,7 +4,7 @@ chain('casa_bruxa',{k:'Bruxaria',min:18,max:85,when:LIVRE,w:.4,gap:[1,1]},{
  b:['O grimório','No porão, um livro de capa de couro com receitas, rezas e feitiços escritos à mão.',['Ler o livro|sm+3 >c|Tem um feitiço para cada problema da vida.','Queimar o livro|>e|O fogo ficou verde.']],
  c:['O primeiro feitiço','Testei um feitiço simples de sorte.',['Fazer certinho|?50 $+2000 h+8 >d|No dia seguinte, achei dinheiro na rua. Muito dinheiro.|h-4 >d|Nada aconteceu. Ou quase: meu cabelo ficou azul por um dia.','Desistir no meio|>d|Senti que algo me observava.']],
  d:['O preço','A última página do grimório avisa: "Todo feitiço cobra um preço. Sempre."',['Parar de usar|k+3 h+3 >f|Guardei o livro num lugar seguro.','Fazer um feitiço maior|?40 $+15000 f+3 >g|Funcionou. Mas o espelho do banheiro rachou sozinho.|hl-15 >g|O feitiço deu errado e passei uma semana de cama.']],
- e:['Os gatos','Os gatos da tia começaram a me seguir pela casa, como se esperassem algo.',['Cuidar dos gatos|pet k+5 h+6 >f|Sete gatos agora são meus.','Doar os gatos|k-2 >f|Na mesma noite, a casa ficou fria.']],
+ e:['Os gatos','Os gatos da tia começaram a me seguir pela casa, como se esperassem algo.',['Cuidar dos gatos|pet:Gato k+5 h+6 >f|Sete gatos agora são meus.','Doar os gatos|k-2 >f|Na mesma noite, a casa ficou fria.']],
  f:['A vizinha','Uma vizinha idosa bateu na porta pedindo uma "simpatia" que minha tia fazia.',['Ajudar com o que aprendi|k+6 f+2 >h|A vizinha voltou dias depois, curada de uma dor antiga.','Dizer que não sei fazer|h+0|Ela foi embora decepcionada.']],
  g:['A cobrança','O preço veio: perdi algo que eu amava.',['Aceitar e parar de vez|h-10 k+4|Aprendi da pior forma.','Tentar desfazer com outro feitiço|?30 h+8|Consegui desfazer.|hl-20|Piorei tudo.']],
  h:['A nova bruxa da cidade','A cidade começou a me procurar como procuravam minha tia.',['Assumir o papel|f+3 k+5 $+3000|Chás, rezas e conselhos. Virei a nova benzedeira da região.','Vender a casa e ir embora|$+40000|Não é a minha vida.']],
@@ -12,7 +12,7 @@ chain('casa_bruxa',{k:'Bruxaria',min:18,max:85,when:LIVRE,w:.4,gap:[1,1]},{
 chain('duplo',{k:'Mistério',min:16,max:85,when:LIVRE,w:.35,gap:[1,1]},{
  a:['Eu mesm{o}','Uma amiga jurou que me viu no shopping ontem. Eu estava em casa o dia inteiro.',['Rir|>b|Deve ser alguém parecido.','Perguntar detalhes|>b|"Você estava com a mesma roupa que está agora."']],
  b:['De novo','Mais três pessoas disseram ter me visto em lugares onde eu não estive.',['Investigar|>c|Fui aos lugares. Ninguém lembrava de nada.','Ignorar|h-3 >d|Comecei a ficar paranoic{o}.']],
- c:['O encontro','No metrô, vi alguém igual a mim do outro lado da plataforma. Ela sorriu.',['Correr até lá|>d|O trem passou. Do outro lado, ninguém.','Ficar paralisad{o}|h-6 >d|Senti um frio que não passava.']],
+ c:['O encontro','No metrô, vi alguém igual a mim do outro lado da plataforma. A pessoa sorriu.',['Correr até lá|>d|O trem passou. Do outro lado, ninguém.','Ficar paralisad{o}|h-6 >d|Senti um frio que não passava.']],
  d:['O aviso','Dizem que ver o próprio duplo é um aviso.',['Ir ao médico fazer exames|$-500 ?50 hl+5 >e|Descobri um problema cedo e tratei. O duplo me salvou.|>e|Tudo normal.','Mudar a rotina toda|h+2 >e|Se é aviso, vou ser cuidados{o}.']],
  e:['Nunca mais','O duplo nunca mais apareceu.',['Agradecer|h+4|Se era aviso, funcionou.','Ficar com medo dele voltar|h-2|Às vezes olho duas vezes para o espelho.']],
 });
@@ -50,11 +50,11 @@ chain('investigador_podcast',{k:'Paranormal',min:16,max:70,when:m=>!!m.para&&m.p
  b:['A parceria','{p} propôs fazermos um programa juntos, investigando lugares assombrados.',['Topar|>c|Microfones, câmeras e uma van velha.','Recusar|bond-5|{p} achou outro parceiro.']],
  c:['O primeiro episódio','Primeira investigação: um hospital psiquiátrico abandonado.',['Ir de noite|?50 f+5 follow+20000 >d|Captamos uma voz clara pedindo ajuda. Viralizou.|hl-8 >d|Uma porta bateu na minha mão. Mas o episódio ficou ótimo.','Ir de dia|f+2 >d|Menos medo, menos audiência.']],
  d:['O sucesso','O programa virou o maior podcast de mistério do país.',['Assinar com uma plataforma grande|$+40000 f+6 >e|Contrato de três temporadas.','Manter independente|f+3 k+3 >e|Liberdade acima de tudo.']],
- e:['O episódio proibido','Para o final da temporada, {p} quer investigar um lugar onde três investigadores sumiram.',['Ir|?k f+10 $+20000|Voltamos com o maior episódio da história do programa.|hl-25 h-15|Só eu voltei. {p} nunca foi encontrad{o2}.','Recusar|bond-10|{p} foi com outra pessoa. Voltaram, mas nunca mais foram os mesmos.']],
+ e:['O episódio proibido','Para o final da temporada, {p} quer investigar um lugar onde três investigadores sumiram.',['Ir|?k f+10 $+20000|Voltamos com o maior episódio da história do programa.|morre hl-25 h-15|Só eu voltei. {p} nunca foi encontrad{o2}.','Recusar|bond-10|{p} foi com outra pessoa. Voltaram, mas nunca mais foram os mesmos.']],
 });
 chain('sessao_espirita',{k:'Mistério',min:16,max:85,when:m=>!m.prison&&S.people.some(p=>!p.alive&&['mae','pai','avo','irmao','conjuge','filho','amigo'].includes(p.rel)),w:.5,gap:[1,1]},{
  a:['Saudade de quem foi','Uma amiga me convidou para uma sessão espírita. Disse que eu poderia receber notícias de quem já partiu.',['Ir|>b|Uma sala simples, luz baixa e gente de mãos dadas.','Recusar|h+0|Prefiro guardar a saudade do meu jeito.']],
- b:['A mensagem','A médium disse um apelido que só a pessoa que eu perdi usava comigo.',['Pedir mais|>c|"Ela diz que está bem. E que você precisa parar de se culpar."','Ficar em choque|h+4 >c|Ninguém sabia daquele apelido.']],
+ b:['A mensagem','A médium disse um apelido que só a pessoa que eu perdi usava comigo.',['Pedir mais|>c|"Diz que está tudo bem. E que você precisa parar de se culpar."','Ficar em choque|h+4 >c|Ninguém sabia daquele apelido.']],
  c:['O alívio','Saí de lá mais leve do que entrei.',['Voltar outras vezes|h+6 >d|Virou um consolo mensal.','Não voltar nunca mais|h+8|Recebi o que precisava. Uma vez basta.']],
  d:['A dependência','Comecei a ir toda semana. Gasto dinheiro e tempo esperando novas mensagens.',['Parar e viver o luto de verdade|h+6 k+3|A pessoa que eu perdi ia querer que eu vivesse.','Continuar|$-2000 h-3|Não consigo largar.']],
 });

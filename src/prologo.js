@@ -41,7 +41,7 @@ function prolCompCh(pr,max,next,verbo){ const g=prolGente(),ch=[],v=verbo||'Ir';
 const prolAdv=pr=>()=>{ pr.fase++; };
 const prolPago=(v,o)=>S.me.money>=v?Object.assign(o,{l:`${o.l} (${fmt(v)})`}):null;
 function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; const id=pr.id, f=pr.fase, b=pr.b, adv=prolAdv(pr);
-  const Q=(t,x,ch)=>MQ.push({k:SCEN[id].n,t:prT(t),x:prT(x),ch:ch.filter(Boolean)});
+  const Q=(t,x,ch)=>MQ.push({k:SCEN[id].n,t:prT(t),x:prT(x),ch:ch.filter(Boolean).map(c=>Object.assign({},c,{l:prT(c.l)}))});
   if(id==='zumbi'){
     if(f===0) Q('Notícia de rodapé',`No jornal da noite, uma nota rápida: um surto de "raiva agressiva" num hospital de ${R.pick(['Manila','Lagos','Bucareste','Lima','Jacarta','Karachi'])}. Pacientes mordendo enfermeiros. O apresentador sorriu e passou para o futebol.`,[
       {l:'Mudar de canal',fn:()=>{ adv(); log('Vi no jornal uma notícia estranha sobre um surto de raiva num hospital do outro lado do mundo.','warn'); }},
@@ -75,7 +75,7 @@ function prolStep(){ const m=S.me, pr=m.prol; if(!pr||S.scen||!m.alive) return; 
       {l:'Ignorar e seguir a vida',fn:()=>{ adv(); log('Tive sonhos estranhos o ano inteiro.','warn'); }},
       prolPago(1200,{l:'Procurar um psicólogo',fn:()=>{ adv(); m.money-=1200; b.calma=1; log('Fui a um psicólogo por causa de uns sonhos. Ele também anotou tudo.','warn'); }})]);
     else { const g=prolGente(); const ch=[{l:'Seguir a luz',fn:()=>{ pr.junto=[]; prolGo(); }}];
-      if(g.p) ch.push({l:`Segurar a mão de ${g.p.first}`,fn:()=>{ pr.junto=[g.p.id]; prolGo(); }});
+      g.pares.forEach(p=>ch.push({l:`Segurar a mão de ${p.first}`,fn:()=>{ pr.junto=[p.id]; prolGo(); }}));
       ch.push({l:'Resistir com todas as forças',cls:'alt',fn:()=>{ if(R.chance(.5)) prolCancel('Uma luz quase me levou para outro mundo. Resisti. Os sonhos pararam.'); else { MQ.unshift({t:'Não deu',x:'Você resistiu, mas a luz foi mais forte.'}); prolGo(); } }});
       Q('A passagem',(PROL_ISK[pr.v]||PROL_ISK.caminhao)+' A voz falou de novo, agora bem perto: "Venha."',ch); }
   }

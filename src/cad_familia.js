@@ -19,26 +19,26 @@ chain('casamento_irmao',{k:'Família',min:18,max:70,who:'sib',gap:[1,1]},{
  d:['A festa','O casamento foi lindo. Dancei com a família inteira.',['Fazer um brinde aos noivos|h+10 bond+8|Contei uma história da nossa infância.','Dançar até o fim|h+12|Fui a última pessoa a sair da pista.']],
  e:['O casamento cancelado','A família inteira ficou sabendo que fui eu quem fez {p} pensar melhor.',['Assumir|k+3 h-3|Era o certo.','Pedir para {p} não contar|h+1|Tarde demais.']],
 });
-chain('avos_historias',{k:'Família',min:8,max:30,gap:[1,2],when:m=>people('avo').length>0},{
- a:['Histórias da vó','Minha avó começou a contar histórias de quando era jovem, no interior.',['Pedir para contar mais|h+5 sm+2 >b|Ela fugiu de casa para ir a um baile. Quem diria.','Gravar as histórias no celular|h+4 >b|Um dia vou querer ouvir de novo.']],
- b:['A receita secreta','Ela quer me ensinar a receita do bolo que só ela sabe fazer.',['Aprender passo a passo|h+6 >c|"Uma xícara é a minha xícara, não a sua."','Anotar tudo num caderno|sm+2 >c|Caderno sujo de farinha.']],
- c:['O álbum','Ela mostrou um álbum de fotos que eu nunca tinha visto.',['Escanear todas as fotos|k+3 h+5 >d@2-5|Mandei para a família inteira.','Ouvir a história de cada foto|h+8 >d@2-5|Uma tarde inteira de memórias.']],
- d:['A falta','Minha avó partiu. A receita do bolo ficou comigo.',['Fazer o bolo no aniversário dela|h-4 k+3|Ficou quase igual. Quase.','Ouvir as gravações|h-6|A voz dela ainda está aqui.']],
+chain('avos_historias',{k:'Família',min:8,max:30,gap:[1,2],who:'avo'},{
+ a:['Histórias de {p}','{p} começou a contar histórias de quando era jovem, no interior.',['Pedir para contar mais|h+5 sm+2 bond+5 >b|{Ele} fugiu de casa para ir a um baile. Quem diria.','Gravar as histórias no celular|h+4 >b|Um dia vou querer ouvir de novo.']],
+ b:['A receita secreta','{p} quer me ensinar a receita do bolo que só {ele} sabe fazer.',['Aprender passo a passo|h+6 >c|"Uma xícara é a minha xícara, não a sua."','Anotar tudo num caderno|sm+2 >c|Caderno sujo de farinha.']],
+ c:['O álbum','{p} mostrou um álbum de fotos que eu nunca tinha visto.',['Escanear todas as fotos|k+3 h+5 >d@2-5|Mandei para a família inteira.','Ouvir a história de cada foto|h+8 >d@2-5|Uma tarde inteira de memórias.']],
+ d:['A falta','{p} partiu. A receita do bolo ficou comigo.',['Fazer o bolo no aniversário {dele}|morre h-4 k+3|Ficou quase igual. Quase.','Ouvir as gravações|morre h-6|A voz {dele} ainda está aqui.']],
 });
-chain('gemeos',{k:'Família',min:22,max:45,who:'partner',when:m=>kids().length===0,gap:[1,1]},{
+chain('gemeos',{k:'Família',min:22,max:45,who:'partnerFertile',when:m=>kids().length===0,gap:[1,1]},{
  a:['O ultrassom','No ultrassom, o médico ficou em silêncio e depois sorriu: "Tem dois aqui".',['Rir de nervoso|h+10 bond+8 >b|Dois berços, dois carrinhos, duas vezes tudo.','Desmaiar|h+8 >b|Acordei com {p} me abanando.']],
  b:['A preparação','Preparar a casa para gêmeos exige um exército.',['Pedir ajuda à família|k+3 >c|Minha mãe se mudou para casa por um mês.','Fazer tudo sozinhos|hl-4 bond+5 >c|Nós dois contra o mundo.']],
  c:['O nascimento','Nasceram dois bebês saudáveis!',['Segurar os dois de uma vez|bebe bebe h+25 bond+15 >d@1|Dois chorando, um coração explodindo.','Chorar mais que os bebês|bebe bebe h+22 >d@1|Ninguém estava preparado para tanta emoção.']],
  d:['O primeiro ano','O primeiro ano com gêmeos foi uma maratona sem linha de chegada.',['Celebrar o primeiro aniversário|$-1500 h+12 bond+8|Dois bolos, porque cada um merece o seu.','Dormir oito horas pela primeira vez|hl+5 h+10|Um milagre.']],
 });
 chain('mudanca_familia',{k:'Família',min:10,max:16,gap:[1,1],when:m=>parents().length>0},{
- a:['A mudança','Meus pais anunciaram: vamos nos mudar para outra cidade por causa do trabalho.',['Ficar animad{o}|h+4 >b|Cidade nova, vida nova.','Brigar e chorar|h-8 >c|Não quero deixar meus amigos.']],
+ a:['A mudança','Meus pais anunciaram: vamos nos mudar para outra cidade por causa do trabalho.',['Ficar animad{o}|mudarcidade h+4 >b|Cidade nova, vida nova.','Brigar e chorar|mudarcidade h-8 >c|Não quero deixar meus amigos.']],
  b:['A escola nova','Primeiro dia na escola nova. Não conheço ninguém.',['Puxar conversa com alguém|?lk h+8 >d|Fiz amizade no recreio.|h-4 >d|Almocei sozinh{o}.','Ficar quiet{o} observando|>d|Primeiro entender o lugar.']],
  c:['A despedida','Meus amigos fizeram uma despedida surpresa.',['Prometer manter contato|h+4 >b|Choramos todos juntos.','Ficar com raiva dos meus pais|h-6 >b|Fiquei uma semana sem falar com eles.']],
  d:['Adaptação','Seis meses depois, a cidade nova já parece casa.',['Agradecer aos meus pais|h+6|Eles estavam certos, no fim.','Sentir saudade das duas cidades|h+3|Agora tenho dois lugares no coração.']],
 });
 chain('divorcio_pais_adulto',{k:'Família',min:25,max:60,gap:[1,1],when:m=>parents().length>=2&&parents().every(p=>p.age>=50)},{
- a:['A notícia','Meus pais, depois de trinta anos, vão se divorciar.',['Apoiar a decisão|k+4 >b|Eles merecem ser felizes, mesmo separados.','Tentar convencer a ficarem juntos|>c|Organizei um jantar só para os dois.','Ficar do lado de um deles|h-6 >d|A família rachou.']],
+ a:['A notícia','Meus pais, depois de trinta anos, vão se divorciar.',['Apoiar a decisão|paisseparam k+4 >b|Eles merecem ser felizes, mesmo separados.','Tentar convencer a ficarem juntos|paisseparam >c|Organizei um jantar só para os dois.','Ficar do lado de um deles|paisseparam h-6 >d|A família rachou.']],
  b:['Vida nova','Minha mãe começou a viajar e meu pai a fazer aula de dança.',['Achar ótimo|h+6|Pais felizes, família tranquila.','Estranhar|h+2|Vai levar um tempo.']],
  c:['O jantar','O jantar romântico que organizei para os dois foi constrangedor.',['Aceitar a separação|k+3 >b|Não dá para forçar.','Insistir mais um pouco|h-4 >b|Não adiantou.']],
  d:['A divisão','Ter que escolher onde passar o Natal virou um pesadelo.',['Passar a manhã com um e a noite com outro|k+3 h+2|Duas ceias, dois perus.','Fazer uma ceia para todos juntos|?k h+10|Conseguimos reunir todo mundo.|h-6|Não deu certo. Briga na sobremesa.']],

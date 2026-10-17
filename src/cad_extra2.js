@@ -13,7 +13,7 @@ chain('presente_errado',{k:'Família',min:16,max:80,who:'partner',gap:[1,1]},{
 chain('emprego_sonho',{k:'Carreira',min:20,max:50,gap:[1,1]},{
  a:['A vaga dos sonhos','Abriu uma vaga na empresa onde sempre sonhei trabalhar.',['Me candidatar|>b|Reescrevi o currículo dez vezes.','Achar que não tenho chance|h-3|Nem tentei.']],
  b:['As etapas','O processo seletivo tem cinco etapas: provas, dinâmica e entrevistas.',['Me preparar muito|?sm >c|Passei para a final!|h-6 >e|Fui eliminad{o} na dinâmica.','Ir com naturalidade|?lk >c|Passei!|h-4 >e|Fui eliminad{o}.']],
- c:['A entrevista final','A entrevista final é com o diretor.',['Ser sincer{o} sobre meus defeitos|?k raise+20 h+15 >d|Fui contratad{o}! O diretor gostou da sinceridade.|h-8 >e|Não fui escolhid{o}.','Dizer que meu defeito é ser perfeccionista|?30 raise+15 h+12 >d|Funcionou, por incrível que pareça.|h-8 >e|Ele riu. Não foi um bom sinal.']],
+ c:['A entrevista final','A entrevista final é com o diretor.',['Ser sincer{o} sobre meus defeitos|?k empregonovo raise+20 h+15 >d|Fui contratad{o}! O diretor gostou da sinceridade.|h-8 >e|Não fui escolhid{o}.','Dizer que meu defeito é ser perfeccionista|?30 empregonovo raise+15 h+12 >d|Funcionou, por incrível que pareça.|h-8 >e|Ele riu. Não foi um bom sinal.']],
  d:['O sonho realizado','Primeiro dia na empresa dos sonhos.',['Dar o meu melhor|perf+10 h+10|Valeu cada etapa.','Descobrir que não é tão bom assim|h-4|Sonhos de longe são mais bonitos.']],
  e:['Não foi desta vez','Recebi o e-mail de "seguiremos com outros candidatos".',['Pedir feedback|sm+3 >a@2|Anotei tudo para a próxima.','Desistir dessa empresa|h-3|Não era para ser.']],
 });
@@ -37,7 +37,7 @@ chain('concurso_culinaria',{k:'Diversão',min:16,max:80,gap:[1,1]},{
 });
 chain('gato_telhado',{k:'Bichos',min:6,max:80,gap:[1,1]},{
  a:['O gato no telhado','Um gato filhote ficou preso no telhado da vizinha, miando sem parar.',['Subir para buscar|?hl k+6 >b|Salvei o gato!|hl-8 >b|Escorreguei, mas salvei o gato.','Chamar os bombeiros|k+3 >b|Os bombeiros vieram e o gato desceu sozinho antes.']],
- b:['O gato sem dono','Ninguém sabe de quem é o gato.',['Adotar|pet h+10 >c|Ele dormiu no meu colo na primeira noite.','Levar para um abrigo|k+3|Logo ele vai achar uma casa.']],
+ b:['O gato sem dono','Ninguém sabe de quem é o gato.',['Adotar|pet:Gato h+10 >c|Ele dormiu no meu colo na primeira noite.','Levar para um abrigo|k+3|Logo ele vai achar uma casa.']],
  c:['O gato aventureiro','O gato vive fugindo para o mesmo telhado.',['Colocar uma rede de proteção|$-300 h+4|Agora ele só olha o telhado de longe.','Deixar ser livre|h+3|Ele sempre volta para o jantar.']],
 });
 chain('reencontro_pai',{k:'Família',min:18,max:60,npc:1,gn:'M',age:[20,35],gap:[1,1],when:m=>!people('pai').length},{
@@ -49,7 +49,7 @@ chain('reencontro_pai',{k:'Família',min:18,max:60,npc:1,gn:'M',age:[20,35],gap:
 chain('mentira_curriculo',{k:'Dilema',min:18,max:50,gap:[1,1]},{
  a:['O currículo','Um amigo sugeriu colocar no currículo um curso que eu não terminei.',['Colocar|k-5 >b|Só um detalhe.','Ser honest{o}|k+3|Prefiro dormir tranquil{o}.']],
  b:['A contratação','Fui contratad{o}. Ninguém conferiu.',['Terminar o curso escondido|$-2000 sm+3 k+3 >c|Agora é verdade.','Torcer para ninguém conferir|>d@1|Sigo trabalhando com aquilo na cabeça.']],
- c:['Verdade atrasada','O curso está terminado. A mentira virou verdade.',['Contar para o chefe|?50 k+5 perf+3|Ele riu e disse que valorizou a honestidade.|perf-5|Ele ficou desconfiado.','Deixar quieto|h+2|Página virada.']],
+ c:['Verdade atrasada','O curso está terminado. A mentira virou verdade.',['Contar para o chefe|?50 k+5 perf+3|A chefia riu e disse que valorizou a honestidade.|perf-5|A chefia ficou desconfiada.','Deixar quieto|h+2|Página virada.']],
  d:['A auditoria','A empresa fez uma auditoria nos diplomas.',['Confessar antes|?40 k+4 perf-6|Levei uma advertência, mas fiquei.|fire h-10|Fui demitid{o}.','Esperar|?30 h+2|Pularam o meu nome.|fire h-12 k-4|Descobriram. Demissão por justa causa.']],
 });
 chain('noite_hospital',{k:'Família',min:20,max:80,who:'kid',gap:[1,1]},{

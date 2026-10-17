@@ -59,7 +59,7 @@ chain('vamp_familia_humana',{k:'Vampiro',min:18,max:200,when:m=>VAMP(m)&&parents
 chain('vamp_guerra_lobo',{k:'Vampiro',min:18,max:200,when:VAMP,gap:[1,1]},{
  a:['Território','Uma alcateia de lobisomens chegou à cidade. Vampiros e lobos nunca dividem território.',['Tentar uma trégua|>b|Marquei um encontro num terreno neutro.','Preparar para a guerra|fight+4 >c|Juntei outros vampiros.']],
  b:['O encontro','O líder da alcateia me olhou com desprezo, mas aceitou ouvir.',['Propor dividir a cidade|?k k+6 >d|Rio como fronteira. Eles do lado de lá.|>c|Ele rosnou e foi embora.','Ameaçar|>c|Má ideia.']],
- c:['A guerra','Na lua cheia, os lobos atacaram.',['Lutar|?fight f+0 k-4 >d|Expulsamos a alcateia.|hl-35 >e|Perdemos. Fugi ferid{o}.','Fugir com os mais fracos|k+6 >e|Salvei quem pude.']],
+ c:['A guerra','Na lua cheia, os lobos atacaram.',['Lutar|?fight k-4 >d|Expulsamos a alcateia.|hl-35 >e|Perdemos. Fugi ferid{o}.','Fugir com os mais fracos|k+6 >e|Salvei quem pude.']],
  d:['A paz','A cidade foi dividida. Vampiros de um lado, lobos do outro.',['Respeitar a fronteira|h+6 k+3|Paz frágil, mas paz.','Atravessar escondid{o}|?40 h+4|Ninguém viu.|hl-20|Um lobo me pegou.']],
  e:['Recomeçar','A cidade ficou com os lobos.',['Mudar de cidade|$-5000 h-3|Outra cidade, outro território.','Planejar a volta|fight+6 >c@2|Um dia, a noite volta a ser nossa.']],
 });
@@ -74,5 +74,5 @@ chain('vamp_alma',{k:'Vampiro',min:20,max:200,when:VAMP,gap:[2,3]},{
  a:['A dúvida','Será que eu ainda tenho alma?',['Procurar respostas na religião|>b|Fui conversar com um líder religioso, à noite.','Procurar respostas em livros|sm+4 >c|Bibliotecas antigas, à luz de velas.']],
  b:['A conversa','O líder religioso não se assustou. Disse que alma é o que a gente faz com a vida que tem.',['Concordar|k+6 >d|Saí de lá mais leve.','Discordar|>c|Preciso de mais.']],
  c:['O manuscrito','Num manuscrito antigo, a história de um vampiro que conquistou a paz fazendo o bem por cem anos.',['Seguir o exemplo|k+10 >d|Cem anos é pouco para quem tem a eternidade.','Achar lenda|h-2|Mais uma história.']],
- d:['Paz','Descobri que a resposta não importa tanto. Importa quem eu escolho ser.',['Fazer o bem todos os dias|k+12 h+10|Ajudo quem a noite esquece.','Viver em paz comigo|h+12|Sou vampiro. E sou eu.']],
+ d:['Paz','Descobri que a resposta não importa tanto. Importa quem eu escolho ser.',['Fazer o bem todos os dias|k+12 h+10|Ajudo quem a noite esquece.','Viver em paz comigo|h+12|Sou uma criatura da noite. E sou eu.']],
 });
