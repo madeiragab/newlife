@@ -33,6 +33,7 @@ function selfTest(){
   T('correções e evolução da vida comum',evolucaoSelfTest);
   T('decisões e memórias familiares',familiaDecisoesSelfTest);
   T('envelhecimento e rotina',cotidianoIdadeSelfTest);
+  T('três gerações por estilo',()=>{window.NL_TRES_GERACOES=evolucaoGeracoesSelfTest();});
   T('trajetórias persistentes',continuidadeSelfTest);
   T('NPCs ao longo de décadas',()=>{window.NL_NPC_DECADAS=npcDecadasSelfTest();});
   if(window.NL_CONT_FIXTURES)T('saves reais da 1.59 e 1.60',()=>{window.NL_CONT_COMPAT=continuidadeCompatSelfTest(window.NL_CONT_FIXTURES);});
@@ -266,7 +267,7 @@ function selfTest(){
   lives.unshift(`IDADE MÉDIA: ${(ages.reduce((a,b)=>a+b,0)/ages.length).toFixed(1)} · acima de 70: ${Math.round(ages.filter(a=>a>=70).length/ages.length*100)}% · abaixo de 30: ${Math.round(ages.filter(a=>a<30).length/ages.length*100)}%`);
   const o=document.createElement('pre'); o.id='out'; o.style.cssText='position:fixed;inset:0;z-index:999;background:#fff;color:#000;overflow:auto;padding:10px;font-size:11px;white-space:pre-wrap';
   o.textContent=`SEMENTE: 20261017\nNOMES: ${Object.entries(NAME_DB).map(([c,d])=>c+' '+d.M.length+'/'+d.F.length+'/'+d.L.length).join(' · ')}\nEVENTOS: ${Object.keys(EVENTS).length} · TESTE: ${lives.length} vidas, ${years} anos, ${events} eventos, ${actions} ações, ${swept} eventos varridos\nERROS: ${Object.keys(errs).filter(k=>!k.endsWith(' @')).length}\n`+Object.entries(errs).map(([k,v])=>k.endsWith(' @')?'    '+v:`${v}x ${k}`).join('\n')+'\n\n'+lives.join('\n');
-  document.body.appendChild(o); R.f=originalRandom; const nErr=Object.keys(errs).filter(k=>!k.endsWith(' @')).length; o.dataset.erros=nErr; document.title=nErr?'TESTE FALHOU':'TESTE OK'; if(window.nlTestNotify)window.nlTestNotify(JSON.stringify({done:true,errors:nErr,text:o.textContent,economia:window.NL_ECON_DIAG,playtests:window.NL_PLAYTESTS,continuidade:{decadas:window.NL_NPC_DECADAS,compatibilidade:window.NL_CONT_COMPAT}}));
+  document.body.appendChild(o); R.f=originalRandom; const nErr=Object.keys(errs).filter(k=>!k.endsWith(' @')).length; o.dataset.erros=nErr; document.title=nErr?'TESTE FALHOU':'TESTE OK'; if(window.nlTestNotify)window.nlTestNotify(JSON.stringify({done:true,errors:nErr,text:o.textContent,economia:window.NL_ECON_DIAG,playtests:window.NL_PLAYTESTS,continuidade:{decadas:window.NL_NPC_DECADAS,compatibilidade:window.NL_CONT_COMPAT,geracoes:window.NL_TRES_GERACOES}}));
 }
 
 // ===== Diagnóstico das aventuras (#aventura): um jogador razoável joga cada modo 40 vezes =====

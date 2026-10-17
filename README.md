@@ -368,3 +368,12 @@ Decisões cotidianas sobre escola, casa, amizades, trabalho e aposentadoria apar
 Ao continuar como um filho, IDs e pessoas permanecem no mundo. Vínculos do protagonista anterior ficam no arquivo familiar; o herdeiro conserva seu próprio saldo, país e família, além do patrimônio e contratos herdados. Mandatos e penas criminais não são transferidos.
 
 O pipeline verifica saves produzidos nos HTMLs publicados da 1.59 e 1.60, trajetórias de NPCs, três gerações e os percursos comuns, empresariais, familiares e criminosos. As projeções financeiras de 30 a 90 anos são diagnósticos automatizados, sem mortalidade; não equivalem a playtests humanos nem provam o equilíbrio de todas as estratégias.
+
+
+## Evolução da vida comum · 1.69–1.74
+
+As versões foram publicadas separadamente: 1.69 corrige ajuda familiar, sucessão, parentesco e gestores; 1.70 melhora acontecimentos e recuperação financeira; 1.71 traz formação e empresas de NPCs; 1.72 inclui decisões familiares e memória; 1.73 aprofunda envelhecimento e rotina; 1.74 verifica a integração e a estabilidade.
+
+NPCs precisam concluir cursos para assumir profissões qualificadas. Parceiros e filhos adultos podem propor reformas, viagens, poupança e mudanças de cidade; cada adulto decide por si e os custos são informados. Memórias influenciam confiança por tempo limitado. Aposentadoria, acessibilidade e redes de apoio têm efeitos leves e persistentes.
+
+Testes controlados de quatro estilos usam sementes 17401–17404 para exercitar três sucessões por estilo, além das partidas automatizadas existentes. Não são sessões humanas nem prova de equilíbrio de todas as estratégias.
