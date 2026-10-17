@@ -2,7 +2,7 @@
 // Noite fora (boate, boate adulta, bar): diversão, gasto e, para quem tem par, risco de ciúme e de começar um caso.
 function noiteFora(tipo){ const m=S.me, p=pickPartner();
   if(use('noite')>2) return 'Já saí demais este ano. Meu fígado e meu bolso pediram pausa.';
-  const custo={boate:250,adulta:600,bar:120}[tipo]; m.money-=custo;
+  const custo={boate:250,adulta:600,bar:120}[tipo]; if(!canPay(custo)) return `Sair hoje custaria uns ${fmt(custo)}. Fiquei em casa.`; m.money-=custo;
   if(tipo==='adulta'){ cnt('boateAdulta'); st('happy',R.int(3,8)); if(p){ m.susp=(m.susp||0)+R.int(15,30); if(R.chance(.25)) queue('par_descobre_boate',{pid:p.id}); }
     return R.pick(['Luzes vermelhas, música alta e uma conta que eu preferia não ter visto.','Fui com os amigos numa boate adulta. Ninguém conta o que acontece lá dentro, e eu também não.','A noite foi cara e esquisita. Saí antes de os amigos terminarem a terceira rodada.']); }
   st('happy',R.int(4,9)); if(tipo==='bar') add_bebida();
@@ -21,7 +21,7 @@ EVENTS.par_descobre_boate={show:d=>({k:'Amor',t:'A fatura do cartão',x:`${P(d.p
   pick:(k,d)=>{ const p=P(d.pid); if(!p) return ''; const m=S.me;
     if(k==='v'){ p.bond=clamp(p.bond-12); m.susp=Math.max(0,(m.susp||0)-10); return `${p.first} ficou chatead${p.gender==='F'?'a':'o'}, mas valorizou a sinceridade. Dormi no sofá.`; }
     if(R.chance(k==='m'?.55:.3)){ p.bond=clamp(p.bond-3); return 'Colou. Por enquanto.'; }
-    p.bond=clamp(p.bond-25); m.susp=(m.susp||0)+20; if(p.bond<15&&R.chance(.5)){ if(p.rel==='conjuge') divorce(p,true); else p.rel='ex'; return `${p.first} descobriu a mentira e foi embora.`; } return 'A mentira não colou. A briga durou a semana inteira.'; }};
+    p.bond=clamp(p.bond-25); m.susp=(m.susp||0)+20; relMemoria(p,'conflito'); if(p.bond<15&&R.chance(.5)){ if(p.rel==='conjuge') divorce(p,true); else p.rel='ex'; return `${p.first} descobriu a mentira e foi embora.`; } return 'A mentira não colou. A briga durou a semana inteira.'; }};
 // caso secreto: quanto mais tempo, maior a chance de ser descoberto
 yearMoney=(o=>function(){ const r=o.apply(this,arguments); const m=S.me; try{ if(m.alive&&!S.scen){
   const p=pickPartner();
@@ -33,7 +33,7 @@ yearMoney=(o=>function(){ const r=o.apply(this,arguments); const m=S.me; try{ if
     if(!ks.length){ log('Meus filhos fizeram 18 anos. A pensão acabou.','good'); m.pensao=null; }
     else { const v=m.pensao.valor*ks.length; if(m.pensao.paga){ m.money-=v; if(R.chance(.3)) log(`Paguei ${fmt(v)} de pensão este ano.`); } else { m.money+=v; if(R.chance(.3)) log(`Recebi ${fmt(v)} de pensão para as crianças.`); }
       if(m.pensao.paga) ks.forEach(k=>k.bond=clamp(k.bond-R.int(0,4))); } }
-  } }catch(e){ console.error(e); } return r; })(yearMoney);
+  } }catch(e){ cadFalha(e,'Caso secreto e pensão'); } return r; })(yearMoney);
 EVENTS.caso_descoberto={show:d=>({k:'Amor',t:'Descobriu tudo',x:`${P(d.pid).first} achou as mensagens. Sabe de tudo sobre ${S.me.caso&&S.me.caso.n?S.me.caso.n:'o meu caso'}.`,ch:[['Pedir perdão de joelhos','p'],['Negar até o fim','n'],['Assumir e ir embora','a']]}),
   pick:(k,d)=>{ const m=S.me, p=P(d.pid); if(!p||!p.alive) return ''; cnt('traicoes'); m.susp=0;
     const sai=()=>{ if(p.rel==='conjuge') divorce(p,true); else { p.rel='ex'; st('happy',-15); } };
@@ -43,7 +43,7 @@ EVENTS.caso_descoberto={show:d=>({k:'Amor',t:'Descobriu tudo',x:`${P(d.pid).firs
 // divórcio com filhos menores: briga pela guarda e pensão
 divorce=(o=>function(p,theyAsked){ const r=o.apply(this,arguments); const m=S.me; try{
   const ks=kids().filter(k=>k.age<18&&k.alive&&(k.parentId===p.id||!k.parentId));
-  if(ks.length&&!m.pensao) queue('guarda',{pid:p.id,kids:ks.map(k=>k.id)}); }catch(e){} return r; })(divorce);
+  if(ks.length&&!m.pensao) queue('guarda',{pid:p.id,kids:ks.map(k=>k.id)}); }catch(e){ cadFalha(e,'Guarda após o divórcio'); } return r; })(divorce);
 EVENTS.guarda={show:d=>({k:'Família',t:'A guarda das crianças',x:`O divórcio com ${P(d.pid).first} foi parar na justiça. Quem fica com ${d.kids.length>1?'as crianças':'a criança'}?`,ch:[['Lutar pela guarda na justiça ($10.000 de advogado)','l'],['Propor guarda compartilhada','c'],['Deixar com '+P(d.pid).first+' e pagar pensão','e']]}),
   pick:(k,d)=>{ const m=S.me, p=P(d.pid), ks=d.kids.map(P).filter(Boolean); const sal=m.job?jobSalary(m.job):20000; const valor=Math.max(3000,Math.round(sal*.12));
     if(k==='l'){ m.money-=10000; const ch=.35+(m.karma-50)/200+(m.money>0?.1:-.1)+(m.caso||m.c.traicoes?-.15:0)+(m.add.alcool>50?-.2:0);

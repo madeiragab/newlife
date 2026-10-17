@@ -127,8 +127,12 @@ function eduOk(req){
   if(k==='post') return deg.includes('post:'+v)||(v==='mest'&&deg.includes('post:dout'));
   return false;
 }
+const PAIS_ART={BR:'o',PT:'',US:'os',AR:'a',MX:'o',JP:'o',IT:'a',FR:'a',DE:'a',GB:'o',AO:'',CA:'o',ES:'a',KR:'a',IN:'a'};
+// "no Brasil", "em Portugal", "nos Estados Unidos"; para:true dá "para o Brasil"
+function noPais(id,para){const c=countryOf(id),a=PAIS_ART[c.id]??'';return para?'para '+(a?a+' ':'')+c.n:(a?{o:'no',a:'na',os:'nos'}[a]:'em')+' '+c.n;}
 function eduName(req){
   if(!req) return 'Nenhuma';
+  if(req==='fund') return 'Ensino fundamental';
   if(req==='medio') return 'Ensino médio';
   const [k,v]=req.split(':');
   if(k==='tec') return (TECHS.find(t=>t.id===v)||{}).n;

@@ -10,7 +10,7 @@ yearMoney=(o=>function(){ const r=o.apply(this,arguments); const m=S.me; try{ if
   if(m.alive&&!S.scen) kids().filter(k=>k.criatura&&k.alive).forEach(k=>{ k.fomeP=clamp((k.fomeP||10)+(k.age>=12?R.int(15,30):R.int(3,10)));
     if(k.age>=5&&!k.paraSinal){ k.paraSinal=1; queue('filho_sinal',{pid:k.id}); }
     else if(k.age>=12&&k.fomeP>=100&&!S.pending.some(e=>e.id==='filho_ataque')){ queue('filho_ataque',{pid:k.id}); } });
-  }catch(e){ console.error(e); } return r; })(yearMoney);
+  }catch(e){ cadFalha(e,'Fome da criatura'); } return r; })(yearMoney);
 // quando vira criatura, guarda a idade (para saber quais filhos nasceram depois)
 virar=(o=>function(tipo,quem){ const m=S.me, was=m.criatura; const r=o.apply(this,arguments); if(!was&&m.criatura){ m.criaturaIdade=m.age; m.fomeP=30; } return r; })(virar);
 function alimentar(modo){ const m=S.me; if(!m.criatura) return ''; if(use('alim_'+modo)>1) return 'Já fiz isso este ano. Chamaria atenção demais.';
@@ -32,7 +32,7 @@ EVENTS.frenesi={show:()=>{ const m=S.me, vamp=m.criatura==='vampiro'; return {k:
     if(!perto.length) return alimentar('pessoa');
     const v=R.pick(perto); m.fomeP=0; m.karma=clamp(m.karma-20); cnt('ataquesPara'); v.bond=clamp(v.bond-40);
     if(R.chance(.3)){ v.alive=false; v.cause=m.criatura==='vampiro'?'sem sangue, atacad'+(v.gender==='F'?'a':'o')+' por uma criatura':'atacad'+(v.gender==='F'?'a':'o')+' por uma fera'; cnt('kills'); st('happy',-30); log(`Perdi o controle e ${v.first} morreu nas minhas mãos.`,'bad'); if(R.chance(.4)) arrest('homicídio',10,25); return `Perdi o controle. Quando voltei a mim, ${v.first} estava no chão. Nunca vou me perdoar.`; }
-    v.health=clamp(v.health-35); st('happy',-15); log(`Ataquei ${v.first} num momento de frenesi.`,'bad');
+    v.health=clamp(v.health-35); relMemoria(v,'ataque'); st('happy',-15); log(`Ataquei ${v.first} num momento de frenesi.`,'bad');
     if(v.rel==='conjuge'||v.rel==='namoro'||v.rel==='noivo'){ if(R.chance(.5)){ if(v.rel==='conjuge') divorce(v,true); else v.rel='ex'; return `Ataquei ${v.first}. Sobreviveu, mas foi embora com medo de mim.`; } }
     return `Ataquei ${v.first}. Sobreviveu, e agora me olha com medo.`; }};
 // filhos com a maldição
@@ -44,11 +44,11 @@ EVENTS.filho_sinal={show:d=>{ const k=P(d.pid), vamp=k.criatura==='vampiro'; ret
 EVENTS.filho_ataque={show:d=>{ const k=P(d.pid); return {k:'Maldição',t:'A fera dentro de casa',x:`${k.first} perdeu o controle durante a noite. Os gritos acordaram a casa inteira.`,ch:[['Enfrentar '+k.first+' para proteger os outros','l'],['Trancar '+k.first+' no porão','t'],['Levar '+k.first+' para a mata','m']]}; },
   pick:(key,d)=>{ const k=P(d.pid), m=S.me; if(!k) return ''; k.fomeP=20;
     const alvo=R.pick(S.people.filter(p=>p.alive&&p!==k&&['conjuge','filho','irmao','mae','pai','amigo'].includes(p.rel)));
-    if(key==='l'){ const forca=(m.criatura?40:0)+(m.fight||0); if(R.chance(.3+forca/200)){ k.bond=clamp(k.bond-5); return `Segurei ${k.first} até a fera passar. Ninguém se feriu.`; } st('health',-R.int(15,30)); if(m.health<=0) die('atacad'+oa()+' pelo próprio filho, numa noite de maldição'); return `${k.first} me atacou antes de voltar a si. Os arranhões vão virar cicatriz.`; }
+    if(key==='l'){ const forca=(m.criatura?40:0)+(m.fight||0); if(R.chance(.3+forca/200)){ k.bond=clamp(k.bond-5); relMemoria(k,'salvamento'); return `Segurei ${k.first} até a fera passar. Ninguém se feriu.`; } st('health',-R.int(15,30)); if(m.health<=0) die('atacad'+oa()+' pelo próprio filho, numa noite de maldição'); return `${k.first} me atacou antes de voltar a si. Os arranhões vão virar cicatriz.`; }
     if(key==='t'){ if(R.chance(.7+(k.paraCtrl||0)/200)) return `Passei a noite ouvindo ${k.first} uivar atrás da porta. De manhã, só pedia desculpas.`; }
     if(key==='m'){ if(R.chance(.6)){ return `Corremos juntos pela mata até a fome de ${k.first} passar. Um animal pagou o preço.`; } }
     if(alvo){ if(R.chance(.25)){ alvo.alive=false; alvo.cause='atacad'+(alvo.gender==='F'?'a':'o')+' por uma criatura dentro de casa'; st('happy',-30); log(`${k.first} perdeu o controle e matou ${alvo.first}.`,'bad'); return `${k.first} escapou e atacou ${alvo.first}. Não deu tempo de salvar.`; }
-      alvo.health=clamp(alvo.health-30); alvo.bond=clamp(alvo.bond-10); return `${k.first} escapou e feriu ${alvo.first}. Vai sobreviver, mas a família nunca mais foi a mesma.`; }
+      alvo.health=clamp(alvo.health-30); alvo.bond=clamp(alvo.bond-10); relMemoria(alvo,'ataque'); return `${k.first} escapou e feriu ${alvo.first}. Vai sobreviver, mas a família nunca mais foi a mesma.`; }
     return `${k.first} fugiu e só voltou de manhã, coberto de lama.`; }};
 // a barra na tela principal e as opções no menu paranormal
 render=(o=>function(){ const r=o.apply(this,arguments); try{ const m=S&&S.me; if(m&&m.criatura&&!S.scen){ const v=m.fomeP||0, el=$('#stats');

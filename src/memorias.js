@@ -4,7 +4,7 @@ const REL_MEM_NOME={amizade_antiga:'os anos da nossa amizade',retribuicao:'uma o
 divorce=(o=>function(p){const r=o.apply(this,arguments);relMemoria(p,'separacao');return r;})(divorce);
 relFim=(o=>function(p){const was=p&&partners().includes(p),r=o.apply(this,arguments);if(was&&p.rel==='ex')relMemoria(p,'separacao');return r;})(relFim);
 relResolver=(o=>function(p,k){const r=o.apply(this,arguments);if(p&&k==='ignorar')relMemoria(p,'conflito');return r;})(relResolver);
-amorContaTudo=(o=>function(dedo){const l=amores().filter(p=>p!==dedo);const r=o.apply(this,arguments);l.forEach(p=>relMemoria(p,'traicao'));return r;})(amorContaTudo);
+amorContaTudo=(o=>function(dedo){const l=amores().filter(p=>p!==dedo);const r=o.apply(this,arguments);l.forEach(p=>relMemoria(p,'traicao','grave'));return r;})(amorContaTudo);
 interact=(o=>function(p,k){const antes=p.rel,r=o.apply(this,arguments);if(['namoro','noivo','conjuge'].includes(antes)&&p.rel==='ex')relMemoria(p,'separacao');if(['discutir','insulto'].includes(k)&&p.bond<50)relMemoria(p,'conflito');return r;})(interact);
 const REL_MEM_POSITIVA=new Set(['amizade_antiga','retribuicao','apoio','reconciliacao','decisao_conjunta']);
 Object.assign(REL_MEM_NOME,{decisao_conjunta:'uma decisão que tomamos em conjunto',decisao_recusada:'um plano familiar que não seguimos'});

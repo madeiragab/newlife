@@ -72,7 +72,7 @@ const INICIOS={
 const PODER_FRASE={'superforça':'levantar um carro com uma mão só','invisibilidade':'ficar invisível','telecinese':'mover coisas com a mente','supervelocidade':'correr mais rápido que um carro','regeneração':'se curar de qualquer ferimento','teletransporte':'se teletransportar','grito sônico':'gritar tão alto que o concreto racha','elasticidade':'esticar o corpo como borracha','magnetismo':'controlar metais com a mente','encolher':'encolher até o tamanho de uma formiga','visão de raio X':'enxergar através das paredes'};
 const INI_TT=t=>t.replace(/\{o\}/g,oa()).replace(/\{a\}/g,S.me.gender==='F'?'a':'');
 scStart=(o=>function(id){ const vs=INICIOS[id], fv=typeof INI_FORCE!=='undefined'&&INI_FORCE&&vs?vs.find(x=>x.k===INI_FORCE):null, v=fv||(vs?R.pick(vs):null); const r=o.apply(this,arguments); const sc=S.scen; if(!v||!sc||sc.id!==id) return r;
-  try{ v.fx&&v.fx(sc); }catch(e){ console.error(e); }
+  try{ v.fx&&v.fx(sc); }catch(e){ cadFalha(e,'Efeito do início fictício'); }
   sc.inicio=v.k;
   const txt=INI_TT(v.t).replace(/\{poder\}/g,PODER_FRASE[sc.poder]||sc.poder||'').replace(/\{inimigo\}/g,sc.inimigo||'').replace(/\{codinome\}/g,sc.codinome||'');
   if(sc.log[0]&&sc.log[0].lines.length) sc.log[0].lines[0]={t:txt,c:'warn'};

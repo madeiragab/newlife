@@ -18,7 +18,7 @@ function npcChanceEmprego(p){const w=mundo(p.country),t=npcPerfil(p);return macr
 function npcDestino(p){return R.wpick(COUNTRIES.filter(c=>c.id!==p.country).map(c=>{const w=mundo(c.id);return [c,npcCarreiraDestinoPeso(p,c.id)];}));}
 function npcFinancasAno(p){const v=npcVida(p);if(v.financas?.ano===S.year)return v.financas;const w=mundo(p.country),indice=macroLim(mercadoIndice(p.country,'salarios'),.3,8),precos=macroLim((mercadoIndice(p.country,'alimentos')+mercadoIndice(p.country,'servicos'))/2,.3,8);let corte=false;
  const risco=macroLim(.008+Math.max(0,w.desemprego-.07)*.4+Math.max(0,-w.crescimento)*.7, .005,.18);
- if(p.job&&!p.monarch&&!v.aposentado&&R.chance(risco)){v.ultimoEmprego=p.job;p.job=null;v.emprego=null;corte=true;npcMarco(p,'demissao',p.first+' perdeu o emprego em '+countryOf(p.country).n+' durante o corte de vagas.',{pais:p.country});}
+ if(p.job&&!p.monarch&&!v.aposentado&&R.chance(risco)){v.ultimoEmprego=p.job;p.job=null;v.emprego=null;corte=true;npcMarco(p,'demissao',p.first+' perdeu o emprego '+noPais(p.country)+' durante o corte de vagas.',{pais:p.country});}
  const d=JOBS.find(j=>j.id===v.emprego?.id)||JOBS.find(j=>j.l.some(t=>g(t,p.gender)===p.job));
  const base=Math.round((v.aposentado?6000:p.job?(d?.sal||18000):0)*indice),bicos=!p.job&&!v.aposentado&&R.chance(.5+p.smarts/300)?Math.round(3500*indice):0,renda=base+bicos,anterior=Number.isFinite(p.money)?p.money:0;
  v.semEmprego=p.job||v.aposentado?0:(v.semEmprego||0)+1;const t=npcPerfil(p);v.padrao||=(t.ambicao>70?'confortavel':t.lealdade>70?'economico':'equilibrado');

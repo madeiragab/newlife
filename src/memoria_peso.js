@@ -2,8 +2,8 @@
 // e um salvamento ou uma ajuda decisiva nunca desaparece por completo.
 const MEM_PESO={leve:{anos:6,mult:.5,piso:0,nome:'leve'},normal:{anos:12,mult:1,piso:0,nome:''},grave:{anos:25,mult:1.6,piso:0,nome:'marcou fundo'},extraordinario:{anos:40,mult:2.2,piso:.3,nome:'inesquecível'}};
 const MEM_PESO_ORDEM=['leve','normal','grave','extraordinario'];
-const MEM_PESO_PADRAO={conflito:'leve',decisao_recusada:'leve',decisao_conjunta:'leve',salvamento:'extraordinario',ajuda_decisiva:'extraordinario',abandono:'grave'};
-Object.assign(REL_MEM_NOME,{salvamento:'o dia em que salvou minha vida',ajuda_decisiva:'a ajuda que mudou tudo',conquista_compartilhada:'uma conquista que comemoramos juntos',abandono:'quando fui deixado sozinho'});
+const MEM_PESO_PADRAO={conflito:'leve',decisao_recusada:'leve',decisao_conjunta:'leve',salvamento:'extraordinario',ajuda_decisiva:'extraordinario',abandono:'grave',ataque:'grave'};
+Object.assign(REL_MEM_NOME,{salvamento:'o dia em que salvou minha vida',ajuda_decisiva:'a ajuda que mudou tudo',conquista_compartilhada:'uma conquista que comemoramos juntos',abandono:'quando fui deixado sozinho',ataque:'a noite em que fui atacado'});
 ['salvamento','ajuda_decisiva','conquista_compartilhada'].forEach(t=>REL_MEM_POSITIVA.add(t));
 function memPeso(m){return MEM_PESO[m?.peso]||MEM_PESO[MEM_PESO_PADRAO[m?.tipo]]||MEM_PESO.normal;}
 function memAtiva(m,ano=S.year){const w=memPeso(m),idade=Math.max(0,ano-m.ano);return w.piso>0||idade<w.anos;}

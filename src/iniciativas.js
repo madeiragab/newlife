@@ -48,7 +48,7 @@ function npcTrajetoria(p){if(!p.alive||!npcAcompanhado(p))return;const v=npcVida
 }
 function npcTrajetoriasAno(){if(S.scen||!S.me.alive)return;S._npcResumo=[];const mae=people('mae')[0],pai=people('pai')[0];if(S.flags.divorced&&mae?.vida?.par===pai?.id&&pai){mae.vida.par=null;if(pai.vida)pai.vida.par=null;npcMarco(mae,'separacao','Meus pais encerraram a união.');}for(const p of S.people.slice())npcTrajetoria(p);for(const h of S._npcResumo.slice(0,3))log(h.texto,h.tipo==='separacao'||h.tipo==='viuvez'?'warn':'');delete S._npcResumo;}
 yearPeople=(o=>function(){const r=o.apply(this,arguments);npcTrajetoriasAno();return r;})(yearPeople);
-V.person=(o=>function(p){const r=o(p);if(r&&npcAcompanhado(p)){const v=npcVida(p),q=v.par&&P(v.par);r.items.push({sec:'Trajetória pessoal'},{l:'Vida em '+countryOf(p.country).n,s:(v.aposentado?'Aposentadoria':p.job||'Sem emprego')+(q?.alive?' · casado com '+fullName(q):'')},...npcCarreiraResumo(p).map(s=>({l:'Planos profissionais',s})),...v.historico.slice(-6).reverse().map(h=>({l:String(h.ano),s:h.texto})));}return r;})(V.person);
+V.person=(o=>function(p){const r=o(p);if(r&&npcAcompanhado(p)){const v=npcVida(p),q=v.par&&P(v.par);r.items.push({sec:'Trajetória pessoal'},{l:'Vida '+noPais(p.country),s:(v.aposentado?'Aposentadoria':p.job||'Sem emprego')+(q?.alive?' · casado com '+fullName(q):'')},...npcCarreiraResumo(p).map(s=>({l:'Planos profissionais',s})),...v.historico.slice(-6).reverse().map(h=>({l:String(h.ano),s:h.texto})));}return r;})(V.person);
 
 function npcContato(p){if(p&&p.alive)npcVida(p).contato=S.year;}
 function npcDesgaste(p){const v=npcVida(p),t=npcPerfil(p),anos=S.year-(v.contato??v.inicio);if(anos<=2)return 0;return R.chance(t.lealdade>65?.25:.55)?1:0;}
