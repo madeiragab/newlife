@@ -9,25 +9,78 @@ const bar=(l,v)=>`<div class="mini"><b>${esc(l)}</b><div class="bar"><i style="w
 const kv=(k,v)=>`<div class="kv"><span>${esc(k)}</span><b>${esc(v)}</b></div>`;
 
 // ---------- painel deslizante ----------
+const uiBuscaTexto=x=>String(x||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const UI={
-  stack:[],items:[],
-  open(v){ this.stack=[v]; this.draw(); },
-  push(v){ this.stack.push(v); this.draw(); },
-  back(){ this.stack.pop(); this.stack.length?this.draw():this.close(); },
-  close(){ this.stack=[]; $('#sheetWrap').hidden=true; },
-  refresh(){ if(this.stack.length&&!$('#sheetWrap').hidden) this.draw(); },
-  draw(){
-    const v=this.stack[this.stack.length-1]; let r;
-    try{ r=v(); }catch(e){ showErr(e); return; }
-    if(!r){ this.back(); return; }
-    this.items=r.items;
-    $('#sheetTitle').textContent=r.title;
-    $('#sheetBack').style.visibility=this.stack.length>1?'visible':'hidden';
-    $('#sheetBody').innerHTML=r.items.map(rowHtml).join('');
-    $('#sheetWrap').hidden=false;
-    if(r.after) r.after($('#sheetBody'));
-  },
+ stack:[],items:[],frames:[],roots:new WeakMap(),
+ remember(){const f=this.frames[this.stack.length-1];if(f&&f.v===this.stack.at(-1))f.scroll=$('#sheetBody').scrollTop;},
+ open(v){
+  this.remember();if(this.stack[0]&&this.frames[0])this.roots.set(this.stack[0],{...this.frames[0]});
+  if(this.life!==S?.me){this.roots=new WeakMap();this.life=S?.me;}
+  if($('#sheetWrap').hidden)this.returnFocus=document.activeElement;
+  this.stack=[v];this.frames=[{v,q:'',available:false,scroll:0,...this.roots.get(v)}];this.draw();$('#sheetTitle').focus({preventScroll:true});
+ },
+ push(v){this.remember();this.stack.push(v);this.frames.push({v,q:'',available:false,scroll:0});this.draw();$('#sheetTitle').focus({preventScroll:true});},
+ back(){if(this.stack.length===1)return this.close();this.remember();this.stack.pop();this.frames.pop();this.stack.length?this.draw():this.close();},
+ close(){
+  this.remember();if(this.stack[0]&&this.frames[0])this.roots.set(this.stack[0],{...this.frames[0]});
+  this.stack=[];this.frames=[];$('#sheetWrap').hidden=true;this.markNav();
+  if(this.returnFocus?.isConnected)this.returnFocus.focus({preventScroll:true});
+ },
+ refresh(){if(this.stack.length&&!$('#sheetWrap').hidden){this.remember();this.draw();}},
+ markNav(){
+  for(const [id,v]of [['nCareer',V.career],['nAssets',V.assets],['nRel',V.relations],['nAct',V.activities]]){
+   const active=this.stack[0]===v;$('#'+id).classList.toggle('nav-active',active);if(active)$('#'+id).setAttribute('aria-current','page');else $('#'+id).removeAttribute('aria-current');
+  }
+  $('#menuBtn').setAttribute('aria-expanded',String(this.stack[0]===V.menu));
+ },
+ paint(){
+  const f=this.frames.at(-1),q=uiBuscaTexto(f.q).trim(),filtered=!!q||f.available,body=$('#sheetBody');let count=0;
+  const matches=it=>it&&!it.sec&&(!f.available||!it.dis&&it.r!=='Não atendo')&&(!q||uiBuscaTexto([it.l,it.s,it.r,...(it.btns||[]).map(b=>b.l)].join(' ')).includes(q));
+  let section='';const keep=this.items.map(it=>{if(it?.sec)section=it.sec;return matches(it)||!!q&&!it?.html&&!it?.sec&&(!f.available||!it.dis&&it.r!=='Não atendo')&&uiBuscaTexto(section).includes(q);});
+  body.innerHTML=this.items.map((it,i)=>{
+   if(!it)return '';
+   if(it.sec){if(filtered){let j=i+1;while(j<this.items.length&&!this.items[j]?.sec){if(keep[j])break;j++;}if(j===this.items.length||this.items[j]?.sec)return '';}
+    return `<div class="sec" id="sheetSec${i}">${esc(it.sec)}</div>`;}
+   if(filtered&&(it.html!=null||!keep[i]))return '';
+   if(it.l||it.btns)count++;return rowHtml(it,i);
+  }).join('');
+  if(filtered&&!count)body.innerHTML='<div class="nav-empty"><b>Nenhuma opção encontrada</b><p>Tente outro termo ou desative o filtro de disponibilidade.</p></div>';
+  $('#sheetResults').textContent=filtered?(count===1?'1 opção encontrada':count+' opções encontradas'):'';
+  const chips=[...$('#sheetSections').querySelectorAll('[data-section]')];for(const b of chips)b.hidden=filtered&&!document.getElementById('sheetSec'+b.dataset.section);$('#sheetSections').hidden=chips.filter(b=>!b.hidden).length<3;
+  $('#sheetClear').hidden=!f.q;$('#sheetAvailable').setAttribute('aria-pressed',String(f.available));
+  if(this.view.after)this.view.after(body);
+ },
+ draw(){
+  const v=this.stack.at(-1);let r;try{r=v();}catch(e){showErr(e);return;}if(!r){this.back();return;}
+  const depth=this.stack.length-1;this.frames.length=this.stack.length;
+  if(this.frames[depth]?.v!==v)this.frames[depth]={v,q:'',available:false,scroll:0};
+  const f=this.frames[depth];f.title=r.title;this.view=r;this.items=r.items;
+  const active=document.activeElement,focusId=active?.closest('#sheetBody')?active.id:null,pos=typeof active?.selectionStart==='number'?active.selectionStart:null;
+  $('#sheetTitle').textContent=r.title;$('#sheetBack').style.visibility='visible';$('#sheetBack').setAttribute('aria-label',depth?'Voltar para '+this.frames[depth-1]?.title:$('#start').hidden?'Voltar ao diário':'Voltar ao início');
+  $('#sheetPath').innerHTML='<button data-depth="-1">'+($('#start').hidden?'Diário':'Início')+'</button>'+this.frames.slice(0,-1).map((x,i)=>'<span aria-hidden="true">›</span><button data-depth="'+i+'">'+esc(x.title)+'</button>').join('');
+  $('#sheetPath').onclick=e=>{const b=e.target.closest('[data-depth]');if(!b)return;const d=+b.dataset.depth;if(d<0)return this.close();this.remember();this.stack.length=d+1;this.frames.length=d+1;this.draw();};
+  const ownForm=r.items.some(it=>it?.html&&/<(?:input|select|textarea)\b/i.test(it.html));
+  const searchable=!ownForm&&!r.after&&r.items.filter(it=>it?.l).length>=8;
+  if(!searchable){f.q='';f.available=false;}
+  $('#sheetSearchRow').hidden=!searchable;$('#sheetSearch').value=f.q;
+  $('#sheetSearch').oninput=e=>{f.q=e.target.value;f.scroll=0;this.paint();$('#sheetBody').scrollTop=0;};
+  $('#sheetSearch').onkeydown=e=>{if(e.key==='Escape'&&f.q){e.stopPropagation();f.q='';e.target.value='';this.paint();}};
+  $('#sheetClear').onclick=()=>{f.q='';$('#sheetSearch').value='';this.paint();$('#sheetSearch').focus();};
+  $('#sheetAvailable').onclick=()=>{f.available=!f.available;this.paint();$('#sheetBody').scrollTop=0;};
+  const sections=r.items.map((it,i)=>({it,i})).filter(x=>x.it?.sec);
+  $('#sheetSections').hidden=sections.length<3;
+  $('#sheetSections').innerHTML=sections.map(({it,i})=>'<button data-section="'+i+'">'+esc(it.sec)+'</button>').join('');
+  $('#sheetSections').onclick=e=>{const b=e.target.closest('[data-section]');if(b)document.getElementById('sheetSec'+b.dataset.section)?.scrollIntoView({block:'start',behavior:'smooth'});};
+  $('#sheetTools').hidden=!searchable&&sections.length<3;
+  $('#sheetWrap').hidden=false;this.paint();$('#sheetBody').scrollTop=f.scroll||0;
+  const nav=[['📖','Diário',null],['💼','Carreira',V.career],['🏠','Bens',V.assets],['❤️','Relações',V.relations],['✨','Atividades',V.activities]];
+  $('#sheetNav').hidden=!S?.me?.alive||!!S.scen||!$('#start').hidden||!$('#death').hidden;
+  $('#sheetNav').innerHTML=nav.map(([ic,l,fn],i)=>'<button data-tab="'+i+'" '+(fn===this.stack[0]?'aria-current="page"':'')+'><span aria-hidden="true">'+ic+'</span>'+l+'</button>').join('');
+  $('#sheetNav').onclick=e=>{const b=e.target.closest('[data-tab]');if(!b)return;const fn=nav[+b.dataset.tab][2];fn?this.open(fn):this.close();};this.markNav();
+  if(focusId){const next=document.getElementById(focusId);if(next){next.focus({preventScroll:true});if(pos!=null&&next.setSelectionRange)next.setSelectionRange(pos,pos);}}
+ },
 };
+
 const ICONS=[
  [/^eu:/i,'🙂'],[/academia|malhar/i,'🏋️'],[/biblioteca|ler |livro|escrever|escrita|literatura/i,'📚'],[/medita|ioga/i,'🧘'],[/caminhada|passear/i,'🚶'],[/artes marciais|karatê|jiu|capoeira|judô|boxe|muay|taekwondo|kung/i,'🥋'],
  [/música|musical|banda|dj/i,'🎵'],[/teatro|atuação/i,'🎭'],[/esport|treino/i,'⚽'],[/pintura|artes plásticas|desenho/i,'🎨'],[/humor|comédia|piada|streaming/i,'😂'],[/salão|cabelo|corte/i,'💇'],
@@ -52,7 +105,7 @@ function rowHtml(it,i){
   const tag=it.on||it.why?'button':'div';
   const icon=it.ic!==false&&(it.ic||iconFor(it.l||''));
   const lead=it.face?`<span class="fw">${it.face}</span>`:!it.dot&&icon?`<span class="ic">${icon}</span>`:'';
-  return `<${tag} class="row ${it.dis?'dis':''} ${it.tone||''}" data-i="${i}">${lead}${it.dot?`<span class="dot" style="background:${it.dot[1]}">${esc(it.dot[0])}</span>`:''}<span class="tx"><span class="l">${esc(it.l)}</span>${it.s?`<span class="s">${esc(it.s)}</span>`:''}${it.bars?`<span class="rbars">${it.bars.map(([ic,v,c])=>`<span class="rb"><b>${ic}</b><span class="rbt"><i style="width:${v}%;background:${c}"></i></span></span>`).join('')}</span>`:''}</span>${it.r!=null?`<span class="r">${esc(it.r)}</span>`:''}</${tag}>`;
+  return `<${tag} class="row ${it.dis?'dis':''} ${it.tone||''}" data-i="${i}">${lead}${it.dot?`<span class="dot" style="background:${it.dot[1]}">${esc(it.dot[0])}</span>`:''}<span class="tx"><span class="l">${esc(it.l)}</span>${it.s?`<span class="s">${esc(it.s)}</span>`:''}${it.bars?`<span class="rbars">${it.bars.map(([ic,v,c])=>`<span class="rb"><b>${ic}</b><span class="rbt"><i style="width:${v}%;background:${c}"></i></span></span>`).join('')}</span>`:''}</span>${it.r!=null?`<span class="r">${esc(it.r)}</span>`:''}${tag==='button'?`<span class="row-end" aria-hidden="true">${it.dis?'🔒':'›'}</span>`:''}</${tag}>`;
 }
 function sheetClick(e){
   const el=e.target.closest('[data-i]'); if(!el) return;
@@ -91,7 +144,7 @@ function pump(){
   $('#modal').onclick=ev=>{ const b=ev.target.closest('[data-c]'); if(!b) return; const c=ch[+b.dataset.c]; $('#modalWrap').hidden=true; modalOpen=false; if(c.fn) c.fn(); after(); };
   const first=$('#modal').querySelector('button'); if(first) first.focus({preventScroll:true});
 }
-function after(){ const m=S.me; coverMinor(); if(m.alive&&m.health<=0) die(causeFromHealth()); save(); render(); UI.refresh(); pump(); }
+function after(){ if(!S?.me){UI.refresh();pump();return;} const m=S.me; coverMinor(); if(m.alive&&m.health<=0) die(causeFromHealth()); save(); render(); UI.refresh(); pump(); }
 function act(fn,title){
   if(!S.me.alive) return;
   const before=S.log[S.log.length-1].lines.length;
@@ -499,7 +552,7 @@ V.emigrate=()=>({title:'Emigrar',items:[{html:`<div class="card"><p>Custa ${fmt(
 // ---------- menu, início, morte ----------
 V.menu=()=>({title:'Menu',items:[
   {ic:'🏳️',l:'Desistir desta vida',s:'Encerra a vida atual agora',tone:'bad',on:()=>{ if(!S||!S.me.alive) return msg('Desistir','Essa vida já terminou.'); UI.close(); giveUpFlow(); }},
-  {l:'Nova vida',on:()=>confirmBox('Nova vida?','A vida atual será perdida.','Começar de novo',()=>{ UI.close(); showStart(); })},
+  {ic:'🏡',l:'Tela inicial',s:'Continuar, criar uma vida ou ver novidades',on:()=>showStart()},
   ...(godUnlocked()?[{l:'Modo Deus',s:'Editar atributos, talentos e genética',on:()=>S.me.alive?UI.push(V.god):msg('Modo Deus','Só funciona com o personagem vivo.')},
   {l:'Máquina do tempo',s:SNAPS.length?`Voltar até ${SNAPS.length} ano(s)`:'Nenhum ano salvo ainda',on:()=>UI.push(V.time)}]:[]),
   ...(S.me&&S.me.alive&&S.me.age>=18&&!S.scen&&!S.me.prison?[{ic:'🌀',l:'Modos fictícios',s:'Zumbis, ilha deserta, isekai, superpoderes, Marte',on:()=>UI.push(V.scenPick)}]:[]),
@@ -536,33 +589,37 @@ V.ribbons=()=>({title:'Selos',items:RIBBONS.map(r=>({l:r.n,s:r.d,r:META.ribbons[
 V.grave=()=>({title:'Cemitério',items:META.grave.length?META.grave.map(x=>({l:`${x.n} (${x.a} anos)`,s:`${x.c}${x.job?' · '+x.job:''} · ${(RIBBONS.find(r=>r.id===x.r)||{}).n}${x.gen>1?' · '+x.gen+'ª geração':''}`,r:fmt(x.w)})):[{html:'<div class="card"><p>Ninguém morreu ainda.</p></div>'}]});
 function applyTheme(){ const t=META.theme||'auto'; if(t==='auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme',t); }
 
-function showStart(){
-  const has=S&&S.me&&S.me.alive;
-  const c=COUNTRIES.map(c=>`<option value="${c.id}">${esc(c.n)}</option>`).join('');
-  $('#start').innerHTML=`<div class="full-in">
-    <div class="st-hero"><div class="st-faces">${[0,1,2,3,4,5].map(i=>{ const gd=i%2?'F':'M'; return `<span style="--i:${i}">${faceSVG({id:i+1,gender:gd,age:[4,22,35,48,70,16][i],bond:R.int(60,95),genes:randGenes(gd)},64)}</span>`; }).join('')}</div><div class="logo">New<em>Life</em></div><p class="tag">Um simulador de vida. Cada ano é um sorteio.</p></div>
-    ${has?`<button class="btn sun" id="stCont">Continuar a vida de ${esc(S.me.first)} (${S.me.age} anos)</button>`:''}
-    <button class="btn ${has?'alt':'sun'}" id="stRand">Vida completamente aleatória</button>
-    <div class="card" style="display:flex;flex-direction:column;gap:10px">
-      <b>Vida personalizada</b>
-      <div class="grid2"><label class="f">Nome<input class="in" id="fFirst" placeholder="Aleatório" autocomplete="off"></label><label class="f">Sobrenome<input class="in" id="fLast" placeholder="Aleatório" autocomplete="off"></label></div>
-      <div class="grid2"><label class="f">Gênero<select class="in" id="fGender"><option value="">Aleatório</option><option value="F">Feminino</option><option value="M">Masculino</option></select></label>
-      <label class="f">País<select class="in" id="fCountry"><option value="">Aleatório</option>${c}</select></label></div>
-      <label class="f">Dificuldade<select class="in" id="fDiff"><option value="normal">Normal</option><option value="facil">Fácil</option><option value="dificil">Difícil</option></select></label>
-      <p style="color:var(--muted);font-size:12.5px;margin:0">A família onde você nasce (rica, pobre ou até da realeza) é sempre sorteada.</p>
-      ${godUnlocked()?'<label class="f" style="flex-direction:row;align-items:center;gap:8px;color:var(--ink)"><input type="checkbox" id="fGod"> Abrir o Modo Deus ao nascer</label>':''}
-      <button class="btn" id="stCustom">Nascer</button>
-    </div>
-    <div class="chips"><button class="chip" id="stConq">🏆 Conquistas: ${typeof conqGot==='function'?Object.keys(conqGot()).length:0}/${typeof CONQ!=='undefined'?CONQ.length:0}</button><button class="chip" id="stRib">Selos: ${Object.keys(META.ribbons).length}/${RIBBONS.length}</button><button class="chip" id="stCh">Desafios: ${Object.keys(META.ch||{}).length}/${CHALLENGES.length}</button><button class="chip" id="stGrave">Cemitério: ${META.grave.length}</button></div>
-  </div>`;
-  $('#start').hidden=false; $('#death').hidden=true;
-  const go=(o,god)=>{ newLife(o); $('#start').hidden=true; MQ.length=0; render.jump=true; render(); pump(); if(god) UI.open(V.god); };
-  if(has) $('#stCont').onclick=()=>{ $('#start').hidden=true; render(); pump(); };
-  $('#stRand').onclick=()=>go({royal:R.chance(.01)});
-  $('#stCustom').onclick=()=>{ go({first:$('#fFirst').value.trim()||undefined,last:$('#fLast').value.trim()||undefined,gender:$('#fGender').value||undefined,country:$('#fCountry').value||undefined,royal:R.chance(.01),diff:$('#fDiff').value},($('#fGod')||{}).checked); };
-  if($('#stConq')) $('#stConq').onclick=()=>{ UI.open(V.conquistas); };
-  $('#stRib').onclick=()=>{ UI.open(V.ribbons); }; $('#stGrave').onclick=()=>{ UI.open(V.grave); }; $('#stCh').onclick=()=>{ UI.open(V.challenges); };
+function startHero(){return `<div class="st-hero"><div class="st-faces">${[0,1,2,3,4,5].map(i=>{const gd=i%2?'F':'M';return `<span style="--i:${i}">${faceSVG({id:i+1,gender:gd,age:[4,22,35,48,70,16][i],bond:80,genes:randGenes(gd)},64)}</span>`;}).join('')}</div><div class="logo">New<em>Life</em></div><p class="tag">Cada vida, uma nova história.</p></div>`;}
+function showStart(tela='inicio'){
+ UI.close();const has=!!S?.me;$('#start').hidden=false;$('#death').hidden=true;
+ if(tela!=='nova'){
+  $('#start').innerHTML=`<div class="full-in home-screen">${startHero()}<div class="home-intro"><h1>Sua próxima história começa aqui</h1><p>Comece do zero ou volte para a vida que você salvou.</p></div><div class="home-actions">
+   <button class="home-action home-primary" id="stNew"><span class="home-icon" aria-hidden="true">🌱</span><span><b>Nova vida</b><small>Escolha seu personagem ou deixe a sorte decidir</small></span><span aria-hidden="true">›</span></button>
+   <button class="home-action" id="stCont" ${has?'':'disabled'}><span class="home-icon" aria-hidden="true">▶</span><span><b>Continuar</b><small>${has?esc(S.me.first+' '+S.me.last)+' · '+S.me.age+' anos'+(S.me.alive?' · sua vida salva':' · ver o legado'):'Nenhuma vida salva ainda'}</small></span><span aria-hidden="true">›</span></button>
+   <button class="home-action" id="stNews"><span class="home-icon" aria-hidden="true">📰</span><span><b>Novidades</b><small>Atualizações e histórico de todas as versões</small></span><span aria-hidden="true">›</span></button>
+  </div><p class="home-version">NewLife · ${typeof CHANGELOG!=='undefined'?'v'+esc(CHANGELOG[0].v):''}</p></div>`;
+  $('#stNew').onclick=()=>showStart('nova');
+  $('#stCont').onclick=()=>{if(!S?.me)return;$('#start').hidden=true;render();S.me.alive?pump():showDeath();};
+  $('#stNews').onclick=()=>UI.open(V.novidades);
+  return;
+ }
+ const countries=COUNTRIES.map(c=>`<option value="${c.id}">${esc(c.n)}</option>`).join('');
+ $('#start').innerHTML=`<div class="full-in start-form"><div class="start-form-head"><button id="stHome" class="start-back">← Início</button><h1>Nova vida</h1><p>Personalize sua história. Campos em branco serão sorteados.</p></div>
+  <div class="card start-fields"><div class="grid2"><label class="f">Nome<input class="in" id="fFirst" placeholder="Aleatório" autocomplete="off"></label><label class="f">Sobrenome<input class="in" id="fLast" placeholder="Aleatório" autocomplete="off"></label></div>
+  <div class="grid2"><label class="f">Gênero<select class="in" id="fGender"><option value="">Aleatório</option><option value="F">Feminino</option><option value="M">Masculino</option></select></label><label class="f">País<select class="in" id="fCountry"><option value="">Aleatório</option>${countries}</select></label></div>
+  <label class="f">Dificuldade<select class="in" id="fDiff"><option value="normal">Normal</option><option value="facil">Fácil</option><option value="dificil">Difícil</option></select></label>
+  <p class="form-hint">A família onde você nasce é sempre sorteada: pode ser pobre, rica ou até da realeza.</p>
+  ${godUnlocked()?'<label class="f god-choice"><input type="checkbox" id="fGod"> Abrir o Modo Deus ao nascer</label>':''}
+  <button class="btn" id="stCustom">Começar esta vida</button></div><div class="start-or">ou deixe tudo com a sorte</div><button class="btn alt" id="stRand">Vida completamente aleatória</button></div>`;
+ $('#stHome').onclick=()=>showStart();
+ const go=(o,god)=>{
+  const start=()=>{newLife(o);$('#start').hidden=true;MQ.length=0;render.jump=true;render();pump();if(god)UI.open(V.god);};
+  if(S?.me?.alive)confirmBox('Começar uma nova vida?','A vida salva de '+S.me.first+' será substituída. Você pode cancelar e continuar de onde parou.','Começar nova vida',start);else start();
+ };
+ $('#stRand').onclick=()=>go({royal:R.chance(.01)});
+ $('#stCustom').onclick=()=>go({first:$('#fFirst').value.trim()||undefined,last:$('#fLast').value.trim()||undefined,gender:$('#fGender').value||undefined,country:$('#fCountry').value||undefined,royal:R.chance(.01),diff:$('#fDiff').value,orient:$('#fOrient')?.value||undefined,ident:$('#fIdent')?.value||undefined},$('#fGod')?.checked);
 }
+
 function showDeath(){
   const m=S.me,rib=RIBBONS.find(r=>r.id===S.ribbon)||RIBBONS[RIBBONS.length-1];
   const heirs=kids().filter(k=>k.alive);
@@ -637,7 +694,13 @@ function boot(){
   $('#nRel').onclick=()=>S.me.alive&&UI.open(V.relations);
   $('#nAct').onclick=()=>S.me.alive&&UI.open(V.activities);
   document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'){ if(!$('#sheetWrap').hidden) UI.back(); return; }
+    if(e.key==='Tab'&&!$('#sheetWrap').hidden&&$('#modalWrap').hidden&&$('#gameWrap').hidden){
+      const controls=[...$('#sheetWrap').querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled),a[href]')].filter(el=>el.getClientRects().length);
+      const first=controls[0],last=controls.at(-1),active=document.activeElement;
+      if(e.shiftKey&&(active===first||!controls.includes(active))){e.preventDefault();last?.focus();}
+      else if(!e.shiftKey&&(active===last||!controls.includes(active))){e.preventDefault();first?.focus();}
+    }
+    if(e.key==='Escape'){ if(!modalOpen&&$('#gameWrap').hidden&&!$('#sheetWrap').hidden) UI.back(); return; }
     const idle=$('#sheetWrap').hidden&&$('#modalWrap').hidden&&$('#start').hidden&&$('#death').hidden;
     if(idle&&(e.key===' '||e.key==='+')&&!/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)){ e.preventDefault(); doAge(); }
   });
@@ -669,7 +732,6 @@ function boot(){
       if(hs.includes('desistir')){ if(!partner()){ const p=candidate(false); p.rel='conjuge'; p.bond=88; S.people.push(p); } if(!kids().length){ S.people.push(mkPerson({rel:'filho',age:7,last:m.last,bond:95})); } render(); giveUpFlow(); } }
     else if(hs.includes('idades')){ document.body.innerHTML=faceAges(); } else if(hs.includes('rostos')){ document.body.innerHTML=faceGallery(hs.includes('grande'),+(hs.match(/p(\d+)/)||[0,0])[1]); } if(hs.includes('garagem')){ document.body.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:8px;background:#fff\">'+CAR_MODELS.map((c,i)=>'<div style="text-align:center;font:10px sans-serif\">'+carSVG(c,Object.keys(PAINT)[i%10],110)+'<br>'+c.b+' '+c.m+'</div>').join('')+'</div>'; } },50); for(let i=0;i<24&&S.me.alive;i++){ ageUp(); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; const sh=EVENTS[e.id].show(e.d); const r=EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); if(r) log(sh.t.replace(/[!?.…]+$/,'')+': '+r); } } render.jump=true; render(); return; }
   const saved=loadKey(SAVE_KEY);
-  if(saved&&saved.me&&saved.v===1){ S=fixSave(saved); render.jump=true; render(); if(SAVE_RECOVERED) setTimeout(()=>{ try{ modal({k:'NewLife',t:'Save recuperado',x:'O último salvamento estava danificado. Abri a cópia de segurança anterior: você pode ter perdido só a última ação.'}); }catch(e){} },900); if(S.me.alive){ showStart(); } else showDeath(); }
-  else if(!META.lives){ newLife({royal:R.chance(.01)}); render.jump=true; render(); pump(); }
+  if(saved&&saved.me&&saved.v===1){ S=fixSave(saved); render.jump=true; render(); if(SAVE_RECOVERED) setTimeout(()=>{ try{ modal({k:'NewLife',t:'Save recuperado',x:'O último salvamento estava danificado. Abri a cópia de segurança anterior: você pode ter perdido só a última ação.'}); }catch(e){} },900); showStart(); }
   else showStart();
 }

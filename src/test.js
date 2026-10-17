@@ -35,6 +35,7 @@ function selfTest(){
   T('economia mundial',()=>mundoDiagnostico(100));
   if(window.NL_SAVE_FIXTURE)T('save econômico da v1.46',()=>economiaCompatSelfTest(window.NL_SAVE_FIXTURE));
   T('idades e animais',idadeAnimaisSelfTest);
+  T('aprendizado pela leitura',leituraSelfTest);
   T('percursos completos',()=>{window.NL_PLAYTESTS=trajetoriasSelfTest();});
   T('estratégias entre países',()=>{const r=estrategiasMundoDiagnostico();window.NL_ECON_DIAG=r;});
   const views=()=>{
@@ -395,3 +396,29 @@ function publicSystemsSelfTest(){const before=S,meta=JSON.stringify(META),snaps=
 function idadeAnimaisSelfTest(){const before=S,meta=JSON.stringify(META),snaps=SNAPS,noSave=window.NO_SAVE,chance=R.chance;window.NO_SAVE=true;const ok=(v,t)=>{if(!v)throw Error(t)};try{newLife({});const p=parents()[0];for(const a of [0,11]){S.me.age=a;ok(!V.person(p).items.some(x=>x.l==='Falar sobre política'),'política na interface');const antes=JSON.stringify(S);interact(p,'politica');ok(JSON.stringify(S)===antes,'política alterou estado infantil');}S.me.age=12;ok(V.person(p).items.some(x=>x.l==='Falar sobre política'),'política ausente aos 12');interact(p,'politica');for(const a of [0,3,4,11,12,17]){S.me.age=a;S.me.yr={};const texto=tempoTodos();ok(!/Fiz um churrasco|Organizei|Alugamos/.test(texto),'organização incompatível com a idade');}
  const a=addPet('Cachorro','Rex'),b=addPet('Cachorro','Toby');dslApply('petdie',{pid:a.id});ok(!a.alive&&a.morte&&b.alive,'alvo do falecimento');const idade=a.age,h=S.me.happy;dslApply('petdie',{pid:a.id});ok(S.me.happy===h,'falecimento repetido');R.chance=()=>false;yearPeople();ok(a.age===idade,'animal morto envelheceu');const antes=JSON.stringify(a);interact(a,'vet');ok(JSON.stringify(a)===antes,'ação em animal morto');S=JSON.parse(JSON.stringify(S));fixSave(S);ok(!P(a.id).alive&&V.person(P(a.id)),'histórico e save');return 'PASSOU: política 0/11/12, encontros por idade e estado persistente dos animais';
  }finally{S=before;META=JSON.parse(meta);SNAPS=snaps;window.NO_SAVE=noSave;R.chance=chance;}}
+
+function leituraSelfTest(){
+ const before=S,meta=JSON.stringify(META),snaps=SNAPS,noSave=window.NO_SAVE;
+ window.NO_SAVE=true;const ok=(v,t)=>{if(!v)throw Error(t);},result=[];
+ try{
+  for(const inicial of [20,50,80,95]){
+   newLife({});S.me.smarts=inicial;
+   for(let idade=4;idade<=18;idade++){
+    S.me.age=idade;S.year++;S.me.yr={};const antes=S.me.smarts;
+    for(let i=0;i<6;i++)body('lib',livrosFaixa().titulos[i]);
+    ok(S.me.smarts-antes<=2,'mais de dois pontos por ano lendo');
+    const load=S.me.yr.load,n=S.me.c.books;body('lib');prisonAct('ler');
+    ok(S.me.smarts-antes<=2&&S.me.c.books===n&&S.me.yr.load===load,'limite burlado pela prisão');
+    S=JSON.parse(JSON.stringify(S));ok(leituraAno().titulos.length===6,'save perdeu leituras anuais');
+   }
+   ok(S.me.smarts-inicial<=30,'leitura de infância elevou demais a inteligência');
+   if(inicial===50)ok(S.me.smarts<=80,'leitura isolada chegou perto do máximo cedo demais');
+   result.push({inicial,aos18:S.me.smarts});
+  }
+  newLife({});S.me.age=30;S.me.smarts=90;
+  for(let i=0;i<6;i++)lerLivro(livrosFaixa().titulos[i]);ok(S.me.smarts===90,'leitura avançada sem esforço acumulado');
+  S=JSON.parse(JSON.stringify(S));S.year++;for(let i=0;i<6;i++)lerLivro(livrosFaixa().titulos[i]);
+  ok(S.me.smarts===91,'progresso entre anos ou saves não preservado');
+  return result;
+ }finally{S=before;META=JSON.parse(meta);SNAPS=snaps;window.NO_SAVE=noSave;}
+}

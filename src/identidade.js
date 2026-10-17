@@ -40,5 +40,4 @@ EVENTS.transicao={w:2.5,min:14,max:40,onceLife:1,cd:99,when:m=>m.age>=14&&m.age<
 showStart=(o=>function(){ const r=o.apply(this,arguments); try{ const gsel=document.getElementById('fGender'); if(gsel&&!document.getElementById('fOrient')){
   const row=gsel.closest('.grid2'); row.insertAdjacentHTML('afterend',`<div class="grid2"><label class="f">Orientação<select class="in" id="fOrient"><option value="">Aleatória</option>${Object.entries(ORIENT).map(([k,v])=>`<option value="${k}">${v.replace('|','/')}</option>`).join('')}</select></label>
     <label class="f">Identidade<select class="in" id="fIdent"><option value="">Aleatória</option><option value="cis">Cis</option><option value="trans">Trans</option><option value="nb">Não binárie</option></select></label></div>`);
-  const btn=document.getElementById('stCustom'); const old=btn.onclick; btn.onclick=ev=>{ window.__nlId={orient:document.getElementById('fOrient').value||undefined,ident:document.getElementById('fIdent').value||undefined}; return old&&old.call(btn,ev); }; } }catch(e){} return r; })(showStart);
-newLife=(o=>function(opt={}){ if(window.__nlId){ opt=Object.assign({},opt,window.__nlId); window.__nlId=null; } return o.call(this,opt); })(newLife);
+ } }catch(e){showErr(e);} return r; })(showStart);

@@ -18,13 +18,19 @@
   </nav>
 </div>
 <div id="sheetWrap" class="overlay" hidden>
-  <div class="sheet" role="dialog" aria-labelledby="sheetTitle">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
     <div class="sheet-head">
       <button class="icon-btn" id="sheetBack" aria-label="Voltar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
-      <h2 id="sheetTitle"></h2>
+      <div class="sheet-heading"><nav id="sheetPath" aria-label="Caminho de navegação"></nav><h2 id="sheetTitle" tabindex="-1"></h2></div>
       <button class="icon-btn" id="sheetClose" aria-label="Fechar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
+    <div id="sheetTools" hidden>
+      <div id="sheetSearchRow" hidden><label class="sheet-search">🔎 <input id="sheetSearch" type="search" placeholder="Buscar nesta tela" aria-label="Buscar nesta tela" autocomplete="off"><button id="sheetClear" aria-label="Limpar busca" hidden>×</button></label><button id="sheetAvailable" aria-pressed="false">Só disponíveis</button></div>
+      <nav id="sheetSections" aria-label="Ir para uma seção" hidden></nav>
+      <p id="sheetResults" role="status"></p>
+    </div>
     <div class="sheet-body" id="sheetBody"></div>
+    <nav id="sheetNav" aria-label="Áreas do jogo"></nav>
   </div>
 </div>
 <div id="modalWrap" class="overlay" hidden><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>

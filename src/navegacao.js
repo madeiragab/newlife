@@ -20,7 +20,14 @@ V.menu=()=>{
 };
 V.activities=(o=>()=>{const r=o();r.items.push({sec:'Mundo e notícias'},
  ...(!S.scen?[{ic:'🌎',l:'O mundo ao redor',s:'Países, economia e acontecimentos sociais',on:()=>UI.push(V.mundo)}]:[]),
- {ic:'📰',l:'Jornal do personagem e do mundo',s:'Manchetes, arquivo e repercussão pública',on:()=>UI.push(V.jornal)});return r;})(V.activities);
+ {ic:'📰',l:'Jornal do personagem e do mundo',s:'Manchetes, arquivo e repercussão pública',on:()=>UI.push(V.jornal)});
+ if(!S.scen&&!S.me.prison){
+  const grupos=[['Cuidados e aprendizado',/visual|mente e corpo|saude|autoescola/],['Pessoas e família',/amor|bichos|adotar|redes sociais/],['Lazer e viagens',/diversao|viagens|noite fora/],['Mundo e mudanças',/mundo|jornal|emigrar|religiao/],['Investigações e criminalidade',/investigar|crimes/]];
+  const rows=r.items.filter(x=>x&&!x.sec),usados=new Set(),out=[];
+  for(const [nome,re]of grupos){const encontrados=rows.filter(x=>x.l&&re.test(uiBuscaTexto(x.l)));if(encontrados.length){out.push({sec:nome},...encontrados);encontrados.forEach(x=>usados.add(x));}}
+  const outros=rows.filter(x=>!usados.has(x));if(outros.length)out.push({sec:'Mais atividades'},...outros);r.items=out;
+ }
+ return r;})(V.activities);
 V.career=(o=>()=>{const r=o();r.items.push({sec:'Vida pública'},
  {ic:'⚖️',l:'Investigações e processos',s:'Casos, bloqueios e decisões da Justiça',on:()=>UI.push(V.justica)},
  {ic:'🏛️',l:'Sucessão e poder',s:'Disputas e lideranças políticas, religiosas e empresariais',on:()=>UI.push(V.sucessao)});return r;})(V.career);
