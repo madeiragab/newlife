@@ -401,7 +401,7 @@ function yearMoney(){
   if(m.social&&m.social.f>20000){ const sp=Math.round(m.social.f*R.f()*.08*(typeof opiniaoReceita==='function'?opiniaoReceita():1)); m.money+=sp; if(sp>2000&&R.chance(.45)) log(R.pick([`Ganhei ${fmt(sp)} com publicidade nas redes.`,`Fechei parceria com uma marca de ${R.pick(['tênis','cosméticos','energético','celular','roupas'])} e ganhei ${fmt(sp)}.`,`Meus posts patrocinados renderam ${fmt(sp)} este ano.`]),'good'); }
   if(m.age<18&&S.flags.cls!=='pobre'&&parents().length&&m.age>=8){ const a={media:300,rica:2000,milionaria:12000,realeza:50000}[S.flags.cls]||0; m.money+=a; }
   if(m.age>=18){
-    const ownHome=m.assets.some(a=>a.k==='casa');
+    const ownHome=!!residenciaAtual();
     if(!S.flags.movedOut&&(m.age>=26||ownHome||people('conjuge').length||!parents().length)){ S.flags.movedOut=1; if(!ownHome&&parents().length) log('Saí da casa dos meus pais e aluguei um lugar só meu.'); }
     const atHome=!S.flags.movedOut;
     const custoLocal=typeof mercadoCusto==='function'?mercadoCusto():1;
