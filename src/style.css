@@ -324,9 +324,8 @@ button.row:active{transform:scale(.985)}
 .st-hero .logo em{color:#FFD23F}
 .st-hero .tag{color:rgba(255,255,255,.88);margin:6px 0 0;font-size:15px}
 .st-faces{display:flex;justify-content:center;align-items:flex-end}
-.st-faces span{display:block;margin:0 -7px;border-radius:50%;box-shadow:0 0 0 4px rgba(255,255,255,.9),0 6px 14px rgba(0,0,0,.2);transform:translateY(calc((var(--i) - 2.5) * (var(--i) - 2.5) * 2px)) rotate(calc((var(--i) - 2.5) * 5deg));animation:faceIn .5s ease-out both;animation-delay:calc(var(--i) * .07s)}
+.st-faces span{display:block;margin:0 -7px;border-radius:50%;box-shadow:0 0 0 4px rgba(255,255,255,.9),0 6px 14px rgba(0,0,0,.2);transform:translateY(var(--face-y)) rotate(var(--face-angle))}
 .st-faces span:nth-child(3),.st-faces span:nth-child(4){z-index:2}
-@keyframes faceIn{from{opacity:0;transform:translateY(20px) scale(.8)}}
 #start .btn{font-size:16px;padding:15px 16px}
 #start .chips{justify-content:center}
 #start .chip{padding:7px 13px;font-size:13px}
@@ -401,15 +400,24 @@ button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(
 
 .grid2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2>*{min-width:0}input.in,select.in{min-width:0}
 
-/* Movimento discreto no início, sem interferir na faixa de notícias. */
-@keyframes homeEnter{from{opacity:0;translate:0 10px}to{opacity:var(--home-opacity,1);translate:0 0}}
-@keyframes homeGlow{from{transform:translate(-8px,0) scale(1)}to{transform:translate(12px,8px) scale(1.08)}}
-.st-hero::before{content:"";position:absolute;pointer-events:none;width:210px;height:210px;right:-70px;top:-90px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.13),rgba(255,255,255,0) 70%);animation:homeGlow 8s ease-in-out infinite alternate}
-.home-intro,.start-form-head,.start-fields{animation:homeEnter .32s ease-out both}
-.home-action{animation:homeEnter .36s ease-out both;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
-.home-action:nth-child(2){animation-delay:.07s}.home-action:nth-child(3){animation-delay:.14s}
-.home-action:disabled{--home-opacity:.55}
-.home-icon{transition:transform .18s ease}
-@media(hover:hover){.home-action:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(20,28,60,.12)}.home-action:not(:disabled):hover .home-icon{transform:rotate(-4deg)}}
-.home-action:not(:disabled):active{transform:scale(.985)}
-@media(prefers-reduced-motion:reduce){.st-hero::before,.home-intro,.start-form-head,.start-fields,.home-action{animation:none}.home-action,.home-icon{transition:none}.home-action:not(:disabled):hover,.home-action:not(:disabled):active,.home-action:not(:disabled):hover .home-icon{transform:none}}
+/* Ícones se movem sozinhos; textos e áreas de toque permanecem estáveis. */
+@keyframes iconDrift{0%,100%{transform:translateY(0) rotate(0deg)}25%{transform:translateY(-1px) rotate(-2deg)}50%{transform:translateY(-2px) rotate(0deg)}75%{transform:translateY(-1px) rotate(2deg)}}
+@keyframes iconBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+.ambient-icon{display:inline-grid;place-items:center;transform-origin:center;animation:iconDrift 7s ease-in-out infinite}
+.home-action{animation:none;transition:none}
+.home-intro,.start-form-head,.start-fields{animation:none}
+.home-action:not(:disabled):hover,.home-action:not(:disabled):active,.home-action:not(:disabled):hover .home-icon{transform:none}
+.home-action:nth-child(2) .ambient-icon{animation-delay:-2.3s}.home-action:nth-child(3) .ambient-icon{animation-delay:-4.6s}
+.home-action:disabled .ambient-icon{animation:none}
+.st-faces>span>svg{display:block;animation:iconBreathe 8s ease-in-out infinite;animation-delay:calc(var(--i) * -1.3s);transform-origin:center}
+#nav button>svg,#sheetNav button>span{animation:iconDrift 8s ease-in-out infinite;transform-origin:center}
+#nav button:nth-child(2)>svg,#sheetNav button:nth-child(2)>span{animation-delay:-1.6s}
+#nav button:nth-child(4)>svg,#sheetNav button:nth-child(4)>span{animation-delay:-3.2s}
+#nav button:nth-child(5)>svg,#sheetNav button:nth-child(5)>span{animation-delay:-4.8s}
+#nAge .plus{animation:iconBreathe 7s ease-in-out infinite}
+.st .se{animation:iconBreathe 8s ease-in-out infinite;transform-origin:center}
+.st:nth-child(even) .se{animation-delay:-4s}
+.row .ambient-icon{animation:none}
+.row:not(.dis):nth-child(-n+8) .ambient-icon{animation:iconDrift 9s ease-in-out infinite;animation-delay:-1s}
+.row:not(.dis):nth-child(even) .ambient-icon{animation-delay:-5s}
+@media(prefers-reduced-motion:reduce){.ambient-icon,.st-faces>span>svg,#nav button>svg,#sheetNav button>span,#nAge .plus,.st .se,.row:not(.dis):nth-child(-n+8) .ambient-icon{animation:none}}

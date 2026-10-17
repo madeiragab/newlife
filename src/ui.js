@@ -104,7 +104,7 @@ function rowHtml(it,i){
   if(it.btns) return `<div class="btns">${it.btns.map((b,j)=>`<button class="btn ${b.cls||''}" data-i="${i}" data-j="${j}" ${b.dis?'disabled':''}>${esc(b.l)}</button>`).join('')}</div>`;
   const tag=it.on||it.why?'button':'div';
   const icon=it.ic!==false&&(it.ic||iconFor(it.l||''));
-  const lead=it.face?`<span class="fw">${it.face}</span>`:!it.dot&&icon?`<span class="ic">${icon}</span>`:'';
+  const lead=it.face?`<span class="fw">${it.face}</span>`:!it.dot&&icon?`<span class="ic"><span class="ambient-icon">${icon}</span></span>`:'';
   return `<${tag} class="row ${it.dis?'dis':''} ${it.tone||''}" data-i="${i}">${lead}${it.dot?`<span class="dot" style="background:${it.dot[1]}">${esc(it.dot[0])}</span>`:''}<span class="tx"><span class="l">${esc(it.l)}</span>${it.s?`<span class="s">${esc(it.s)}</span>`:''}${it.bars?`<span class="rbars">${it.bars.map(([ic,v,c])=>`<span class="rb"><b>${ic}</b><span class="rbt"><i style="width:${v}%;background:${c}"></i></span></span>`).join('')}</span>`:''}</span>${it.r!=null?`<span class="r">${esc(it.r)}</span>`:''}${tag==='button'?`<span class="row-end" aria-hidden="true">${it.dis?'🔒':'›'}</span>`:''}</${tag}>`;
 }
 function sheetClick(e){
@@ -589,14 +589,14 @@ V.ribbons=()=>({title:'Selos',items:RIBBONS.map(r=>({l:r.n,s:r.d,r:META.ribbons[
 V.grave=()=>({title:'Cemitério',items:META.grave.length?META.grave.map(x=>({l:`${x.n} (${x.a} anos)`,s:`${x.c}${x.job?' · '+x.job:''} · ${(RIBBONS.find(r=>r.id===x.r)||{}).n}${x.gen>1?' · '+x.gen+'ª geração':''}`,r:fmt(x.w)})):[{html:'<div class="card"><p>Ninguém morreu ainda.</p></div>'}]});
 function applyTheme(){ const t=META.theme||'auto'; if(t==='auto') document.documentElement.removeAttribute('data-theme'); else document.documentElement.setAttribute('data-theme',t); }
 
-function startHero(){return `<div class="st-hero"><div class="st-faces">${[0,1,2,3,4,5].map(i=>{const gd=i%2?'F':'M';return `<span style="--i:${i}">${faceSVG({id:i+1,gender:gd,age:[4,22,35,48,70,16][i],bond:80,genes:randGenes(gd)},64)}</span>`;}).join('')}</div><div class="logo">New<em>Life</em></div><p class="tag">Cada vida, uma nova história.</p></div>`;}
+function startHero(){return `<div class="st-hero"><div class="st-faces">${[0,1,2,3,4,5].map(i=>{const gd=i%2?'F':'M';return `<span style="--i:${i};--face-y:${(i-2.5)**2*2}px;--face-angle:${(i-2.5)*5}deg">${faceSVG({id:i+1,gender:gd,age:[4,22,35,48,70,16][i],bond:80,genes:randGenes(gd)},64)}</span>`;}).join('')}</div><div class="logo">New<em>Life</em></div><p class="tag">Cada vida, uma nova história.</p></div>`;}
 function showStart(tela='inicio'){
  UI.close();const has=!!S?.me;$('#start').hidden=false;$('#death').hidden=true;
  if(tela!=='nova'){
   $('#start').innerHTML=`<div class="full-in home-screen">${startHero()}<div class="home-intro"><h1>Sua próxima história começa aqui</h1><p>Comece do zero ou volte para a vida que você salvou.</p></div><div class="home-actions">
-   <button class="home-action home-primary" id="stNew"><span class="home-icon" aria-hidden="true">🌱</span><span><b>Nova vida</b><small>Escolha seu personagem ou deixe a sorte decidir</small></span><span aria-hidden="true">›</span></button>
-   <button class="home-action" id="stCont" ${has?'':'disabled'}><span class="home-icon" aria-hidden="true">▶</span><span><b>Continuar</b><small>${has?esc(S.me.first+' '+S.me.last)+' · '+S.me.age+' anos'+(S.me.alive?' · sua vida salva':' · ver o legado'):'Nenhuma vida salva ainda'}</small></span><span aria-hidden="true">›</span></button>
-   <button class="home-action" id="stNews"><span class="home-icon" aria-hidden="true">📰</span><span><b>Novidades</b><small>Atualizações e histórico de todas as versões</small></span><span aria-hidden="true">›</span></button>
+   <button class="home-action home-primary" id="stNew"><span class="home-icon" aria-hidden="true"><span class="ambient-icon">🌱</span></span><span><b>Nova vida</b><small>Escolha seu personagem ou deixe a sorte decidir</small></span><span aria-hidden="true">›</span></button>
+   <button class="home-action" id="stCont" ${has?'':'disabled'}><span class="home-icon" aria-hidden="true"><span class="ambient-icon">▶</span></span><span><b>Continuar</b><small>${has?esc(S.me.first+' '+S.me.last)+' · '+S.me.age+' anos'+(S.me.alive?' · sua vida salva':' · ver o legado'):'Nenhuma vida salva ainda'}</small></span><span aria-hidden="true">›</span></button>
+   <button class="home-action" id="stNews"><span class="home-icon" aria-hidden="true"><span class="ambient-icon">📰</span></span><span><b>Novidades</b><small>Atualizações e histórico de todas as versões</small></span><span aria-hidden="true">›</span></button>
   </div><p class="home-version">NewLife · ${typeof CHANGELOG!=='undefined'?'v'+esc(CHANGELOG[0].v):''}</p></div>`;
   $('#stNew').onclick=()=>showStart('nova');
   $('#stCont').onclick=()=>{if(!S?.me)return;$('#start').hidden=true;render();S.me.alive?pump():showDeath();};
