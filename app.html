@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610170038'</script>
+<title>NewLife</title><script>window.NL_VER='2610170040'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -14786,6 +14786,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.55',d:'16/10/2026',t:'Revisão de integração e regressões',itens:['Regressão curta cobre o limite de 12 anos, encontros infantis e falecimento persistente do animal correto.','Criminalidade e policiamento também mudam a frequência dos assaltos já existentes.','A barra prioriza manchetes recentes de maior importância. A simulação automática completa recebeu um limite compatível com os 15 países, mantendo suas verificações.']},
  {v:'1.54',d:'16/10/2026',t:'Relatos de quem joga',itens:['Menu → Relatar problema gera um registro com versão, idade, país, eventos e últimos acontecimentos.','O jogador descreve o que ocorreu, o que esperava e escolhe se inclui a partida completa para reproduzir.','O relatório pode ser revisado, copiado ou baixado para compartilhar com quem desenvolve o jogo. Nada é enviado automaticamente.']},
  {v:'1.53',d:'16/10/2026',t:'Diagnóstico da economia mundial',itens:['Diagnóstico reproduzível acompanha até 200 anos nos 15 países, verificando preços, inflação, recuperação de crises e integridade do save.','Projeções dos 30 aos 90 anos com salário, ações, cripto e empresa ajudam a identificar fortunas inválidas e diferenças entre estratégias.','As projeções isolam as finanças e não simulam mortalidade; os resultados servem para orientar novos ajustes de equilíbrio.']},
  {v:'1.52',d:'16/10/2026',t:'O jornal mostra um mundo vivo',itens:['Manchetes internacionais nascem de mudanças relevantes nos indicadores, com bandeira e país corretos.','Jornal dividido entre meu país, internacionais e minha história; matérias abrem indicadores e planejamento de emigração.','Presidentes definem prioridades de emprego, segurança, saúde e transparência com efeitos por vários anos. Grandes operações privadas também influenciam a economia, em escala limitada.','O motor e a migração de animais foram otimizados para não repetir trabalho a cada consulta.']},
@@ -15318,7 +15319,7 @@ V.mundo=(o=>()=>{const r=o();r.items.unshift({ic:'🌐',l:'Economia dos 15 país
 function jornal(){return S.jornal||(S.jornal={itens:[],next:1});}
 function noticia(titulo,texto,tipo='mundo',chave,pais=S.me.country,importancia=50){const j=jornal();if(chave&&j.itens.some(n=>n.chave===chave))return null;const n={id:j.next++,ano:S.year,pais,titulo,texto,tipo,chave,importancia};j.itens.unshift(n);j.itens=j.itens.slice(0,100);noticiaBarra();return n;}
 function noticiasObservar(){if(!S||!S.me||S.scen)return;const m=S.me,mar=m.newsMarcos||(m.newsMarcos={});for(const [lim,t] of [[15,'Uma nova estrela em ascensão'],[40,'Nome em destaque na imprensa nacional'],[75,'Uma celebridade reconhecida em todo o país']])if(m.fame>=lim&&!mar['f'+lim]){mar['f'+lim]=true;noticia(t+': '+m.first,fullName(m)+' ganhou visibilidade com sua trajetória. Sua fama chegou a '+Math.round(m.fame)+'%.','personagem','fama:'+S.gen+':'+lim);}if(m.office&&mar.cargo!==m.office.id){mar.cargo=m.office.id;noticia(fullName(m)+' assume cargo público','O novo mandato de '+g(OFFICES.find(o=>o.id===m.office.id).n,m.gender).toLowerCase()+' começa com '+Math.round(m.office.appr)+'% de aprovação.','politica');}if(!m.office)mar.cargo=null;}
-function noticiaBarra(){const el=document.getElementById('newsBar');if(!el||!S||!S.me)return;el.hidden=!!S.scen;const n=jornal().itens[0];el.innerHTML=flagSVG(n?.pais||S.me.country,22)+'<span class="news-label">'+esc(n?n.titulo:'Notícias de '+countryOf(S.me.country).n+' · abrir jornal')+'</span><span class="news-arrow">›</span>';el.title=n?n.titulo:'Abrir jornal';el.onclick=()=>UI.open(V.jornal);}
+function noticiaBarra(){const el=document.getElementById('newsBar');if(!el||!S||!S.me)return;el.hidden=!!S.scen;const recentes=jornal().itens.filter(n=>S.year-n.ano<=1);const n=(recentes.length?recentes.slice().sort((a,b)=>(b.importancia||50)-(a.importancia||50)||b.id-a.id):jornal().itens)[0];el.innerHTML=flagSVG(n?.pais||S.me.country,22)+'<span class="news-label">'+esc(n?n.titulo:'Notícias de '+countryOf(S.me.country).n+' · abrir jornal')+'</span><span class="news-arrow">›</span>';el.title=n?n.titulo:'Abrir jornal';el.onclick=()=>UI.open(V.jornal);}
 render=(o=>Object.assign(function(){const r=o.apply(this,arguments);noticiasObservar();noticiaBarra();return r;},o))(render);
 arrest=(o=>function(crime){const preso=!!S.me.prison,r=o.apply(this,arguments);if(!preso&&S.me.prison)noticia(fullName(S.me)+' é preso','A prisão está relacionada a '+crime+'. A Justiça acompanha o caso.','justica');return r;})(arrest);
 die=(o=>function(c){const vivo=S.me.alive,r=o.apply(this,arguments);if(vivo)noticia('Morre '+fullName(S.me),'Aos '+S.me.age+' anos, termina a trajetória de '+S.me.first+'. Familiares e pessoas próximas se despedem.','personagem');return r;})(die);
@@ -15495,6 +15496,9 @@ function chanceVisto(c){const m=S.me,w=mundo(c.id);return macroLim(.4+m.smarts/2
 function macroSaude(){const w=mundo();return 1+(60-w.saude)/150+(w.choque?.tipo==='epidemia'?.5:0);}
 justicaRegistrar=(o=>function(crime,v,fonte){const c=o.apply(this,arguments);if(fonte==='crime'&&R.chance(chanceIdentificacao()))justicaAbrir(c);return c;})(justicaRegistrar);
 V.jobs=(o=>()=>{const r=o();if(r)r.items.unshift({html:'<div class="card">'+kv('Desemprego no país',(mundo().desemprego*100).toFixed(1)+'%')+'<p>Vagas, salários e risco de corte acompanham o país e o setor. As ofertas ficam estáveis neste ano.</p></div>'});return r;})(V.jobs);
+// Índices de segurança também alteram a frequência dos eventos de vitimização existentes.
+const RISCOS_MUNDO=['assalto','casa_assaltada','furto_celular'].map(id=>({id,base:EVENTS[id]?.w||1}));
+yearEvents=(o=>function(){const w=mundo(),f=macroLim(.5+w.crime/100-w.policia/200,.15,1.5);for(const x of RISCOS_MUNDO)if(EVENTS[x.id])EVENTS[x.id].w=x.base*f;return o.apply(this,arguments);})(yearEvents);
 
 // Empresa: receita operacional menos salários, insumos, despesas e tributos.
 function empresaSetor(nome){return /tecnologia|marketing/.test(nome)?'tecnologia':/Lanchonete|Cervejaria/.test(nome)?'alimentos':/Construtora/.test(nome)?'imoveis':/aérea/.test(nome)?'industria':'servicos';}
@@ -15785,6 +15789,7 @@ function selfTest(){
   T('família e saves',familySelfTest);
   T('sistemas públicos integrados',publicSystemsSelfTest);
   T('economia mundial',()=>mundoDiagnostico(100));
+  T('idades e animais',idadeAnimaisSelfTest);
   const views=()=>{
     const all=[V.god,V.time,V.challenges,V.bizList,V.career,V.assets,V.relations,V.activities,V.mind,V.health,V.love,V.fun,V.trips,V.crimes,V.pets,V.social,V.emigrate,V.menu,V.ribbons,V.grave,V.special,V.politics,V.uniList,V.techList,V.postList,V.clubs,V.shop,V.invest,V.houses,V.cars,V.surgery,V.me,V.roulette,V.slots,V.blackjack(),V.horses(),V.jobs];
     all.forEach((v,i)=>T('view'+i,()=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }));
@@ -16140,6 +16145,9 @@ function publicSystemsSelfTest(){const before=S,meta=JSON.stringify(META),snaps=
  const k=mkPerson({rel:'filho',age:20,parentId:b.id,bond:80});S.people.push(k);const saldo=S.me.money;die('de teste de regressão');continueAs(k);ok(!S.me.prison&&!S.me.office,'filho não herda prisão nem mandato');ok(S.me.money===Math.max(0,Math.round(saldo*.85)),'herança sem duplicar bloqueio');ok(P(b.id)&&['mae','pai'].includes(P(b.id).rel),'parentesco após prisão e morte');ok(S.jornal&&S.jornal.itens.length,'histórico público entre gerações');ok(Number.isFinite(S.me.money),'saldo íntegro');
  return 'PASSOU: presidente + culto + crime, dois casamentos, save, prisão, morte e herança';
  }finally{S=before;META=JSON.parse(meta);SNAPS=snaps;R.chance=chance;window.NO_SAVE=noSave;}}
+function idadeAnimaisSelfTest(){const before=S,meta=JSON.stringify(META),snaps=SNAPS,noSave=window.NO_SAVE,chance=R.chance;window.NO_SAVE=true;const ok=(v,t)=>{if(!v)throw Error(t)};try{newLife({});const p=parents()[0];for(const a of [0,11]){S.me.age=a;ok(!V.person(p).items.some(x=>x.l==='Falar sobre política'),'política na interface');const antes=JSON.stringify(S);interact(p,'politica');ok(JSON.stringify(S)===antes,'política alterou estado infantil');}S.me.age=12;ok(V.person(p).items.some(x=>x.l==='Falar sobre política'),'política ausente aos 12');interact(p,'politica');for(const a of [0,3,4,11,12,17]){S.me.age=a;S.me.yr={};const texto=tempoTodos();ok(!/Fiz um churrasco|Organizei|Alugamos/.test(texto),'organização incompatível com a idade');}
+ const a=addPet('Cachorro','Rex'),b=addPet('Cachorro','Toby');dslApply('petdie',{pid:a.id});ok(!a.alive&&a.morte&&b.alive,'alvo do falecimento');const idade=a.age,h=S.me.happy;dslApply('petdie',{pid:a.id});ok(S.me.happy===h,'falecimento repetido');R.chance=()=>false;yearPeople();ok(a.age===idade,'animal morto envelheceu');const antes=JSON.stringify(a);interact(a,'vet');ok(JSON.stringify(a)===antes,'ação em animal morto');S=JSON.parse(JSON.stringify(S));fixSave(S);ok(!P(a.id).alive&&V.person(P(a.id)),'histórico e save');return 'PASSOU: política 0/11/12, encontros por idade e estado persistente dos animais';
+ }finally{S=before;META=JSON.parse(meta);SNAPS=snaps;window.NO_SAVE=noSave;R.chance=chance;}}
 
 startApp();
 </script>
