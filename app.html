@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2610170043'</script>
+<title>NewLife</title><script>window.NL_VER='2610170053'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -3747,11 +3747,11 @@ function invest(k,v){ const m=S.me; if(!['poup','acoes','cripto'].includes(k)||!
 
 // ---------- mente e corpo ----------
 function body(k,extra){
+  if(k==='lib') return lerLivro(extra);
   const m=S.me; const n=use('b_'+k); const tired=n>3;
   const r=x=>tired?Math.round(x/3):x;
   switch(k){
     case 'gym': st('health',r(R.int(1,5))); st('looks',r(R.int(0,3))); st('happy',r(R.int(0,3))); m.talent.athletic=clamp(m.talent.athletic+r(1)); if(R.chance(.03)){ st('health',-8); return 'Exagerei no supino e me machuquei.'; } return R.pick(['Malhei pesado.','Fiz uma aula de spinning.','Treinei perna e mal consegui andar depois.','Corri 5 km na esteira.']);
-    case 'lib': st('smarts',r(R.int(1,4))); st('happy',r(R.int(0,2))); return `Li ${R.pick(['um romance policial','uma biografia','um livro de filosofia','uma enciclopédia antiga','um livro de autoajuda duvidoso','um clássico da literatura','um mangá inteiro','um livro de história do Brasil'])}.`;
     case 'med': st('happy',r(R.int(1,5))); st('health',r(R.int(0,2))); m.will=clamp(m.will+r(1)); return R.pick(['Meditei por uma hora.','Fiz um retiro de silêncio de um dia.','Meditei e quase dormi.']);
     case 'walk': st('health',r(R.int(1,3))); st('happy',r(R.int(0,2))); return R.pick(['Caminhei no parque ao entardecer.','Fiz uma trilha na mata.','Corri na orla.']);
     case 'yoga': st('health',r(R.int(1,3))); st('happy',r(R.int(1,3))); st('looks',r(R.int(0,1))); return 'Fiz uma aula de ioga.';
@@ -3905,9 +3905,9 @@ function crime(c){
 
 // ---------- prisão ----------
 function prisonAct(k){
+  if(k==='ler') return lerLivro();
   const m=S.me,pr=m.prison; if(use('pr_'+k)>3) return 'Já fiz isso demais este ano.';
   if(k==='malhar'){ st('health',R.int(2,5)); m.fight=clamp(m.fight+2); return 'Malhei no pátio com halteres de garrafa pet.'; }
-  if(k==='ler'){ st('smarts',R.int(1,4)); pr.behav=clamp(pr.behav+3); return 'Li livros da biblioteca da prisão.'; }
   if(k==='trabalho'){ pr.behav=clamp(pr.behav+6); if(R.chance(.3)&&pr.left>1){ pr.left--; return 'Trabalhei na cozinha e ganhei remição de pena: um ano a menos!'; } return 'Trabalhei na lavanderia.'; }
   if(k==='brigar'){ cnt('fights'); pr.behav=clamp(pr.behav-15); if(R.chance(.4+m.fight/200)){ return 'Ganhei a briga. Agora me respeitam.'; } st('health',-R.int(8,20)); return 'Apanhei feio.'; }
   if(k==='apelar'){ m.money-=5000; if(R.chance(.12)){ m.prison=null; st('happy',25); log('Ganhei o recurso e fui solt'+oa()+'!','good'); return 'O recurso foi aceito! Estou livre!'; } return 'O recurso foi negado.'; }
@@ -5337,8 +5337,7 @@ function prisonDo(k){
   const m=S.me,pr=m.prison; if(!pr) return 'Não estou pres'+oa()+'.';
   if(k==='comportar'){ if(use('pr_comp')>3) return 'Já sou o detento mais exemplar da ala este ano.'; pr.behav=clamp(pr.behav+R.int(7,12)); st('happy',-1);
     return R.pick(['Cumpri todas as regras, ajudei na limpeza e não arrumei confusão.','Fiquei na minha. Os guardas notaram.','Ajudei um guarda a separar uma briga. Ponto para mim.']); }
-  if(k==='livro'){ if(use('pr_livro')>3) return 'Já li todos os livros bons da biblioteca este ano.'; st('smarts',R.int(1,4)); pr.behav=clamp(pr.behav+3); cnt('books');
-    return `Li ${R.pick(['"Dom Casmurro"','"O Conde de Monte Cristo"','"Crime e Castigo"','"Memórias do Cárcere"','"O Pequeno Príncipe"','"Cem Anos de Solidão"','um livro de direito penal','uma biografia de Mandela','"O Alquimista"'])}.`; }
+  if(k==='livro') return lerLivro();
   if(k==='criarGrupo'){ if(pr.gang) return 'Já faço parte de um grupo.'; if(m.fight<35&&!(m.c.kills>0)) return 'Ninguém me levou a sério. Preciso de mais respeito no pátio (luta 35%+).';
     const n=R.pick(GANG_NAMES); pr.gang={n,rank:2,rep:30,own:1}; pr.behav=clamp(pr.behav-10); cnt('gangs'); log(`Fundei um grupo na prisão: ${n}.`,'warn'); return `Fundei o grupo "${n}". Agora sou o líder.`; }
   if(k==='entrarGrupo'){ if(pr.gang) return 'Já faço parte de um grupo.'; if(use('pr_grupo')>1) return 'Já tentei este ano.'; const n=R.pick(GANG_NAMES);
@@ -14786,6 +14785,7 @@ function hideSplash(){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'1.56',d:'16/10/2026',t:'Livros para cada idade',itens:['Biblioteca com títulos próprios para 4–7, 8–11, 12–17 e adultos. Crianças pequenas exploram figuras, cores e palavras com um responsável.','Limite de seis títulos por ano, sem repetir o mesmo título para ganhar atributos. A leitura na prisão compartilha esse limite.','Progresso preservado no save e renovado a cada ano.']},
  {v:'1.55.1',d:'16/10/2026',t:'Ajustes finais de integração',itens:['Ajudar a organizar um evento mantém o avanço da história em cadeia, com participação adequada à idade.','Ofertas de emprego removidas após entrevistas não reaparecem ao reabrir a lista.','Custos de importação também afetam veículos e alimentos. A ficha mundial reúne indicadores econômicos e sociais.','Bens obtidos em crimes entram no rastreamento de origem e no valor financeiro investigado.']},
  {v:'1.55',d:'16/10/2026',t:'Revisão de integração e regressões',itens:['Regressão curta cobre o limite de 12 anos, encontros infantis e falecimento persistente do animal correto.','Criminalidade e policiamento também mudam a frequência dos assaltos já existentes.','A barra prioriza manchetes recentes de maior importância. A simulação automática completa recebeu um limite compatível com os 15 países, mantendo suas verificações.']},
  {v:'1.54',d:'16/10/2026',t:'Relatos de quem joga',itens:['Menu → Relatar problema gera um registro com versão, idade, país, eventos e últimos acontecimentos.','O jogador descreve o que ocorreu, o que esperava e escolhe se inclui a partida completa para reproduzir.','O relatório pode ser revisado, copiado ou baixado para compartilhar com quem desenvolve o jogo. Nada é enviado automaticamente.']},
@@ -15551,6 +15551,41 @@ async function relatoCopiar(){const txt=$('#relatoJSON').value;if(!txt)return;tr
 function relatoBaixar(){const txt=$('#relatoJSON').value;if(!txt)return;const url=URL.createObjectURL(new Blob([txt],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download='newlife-relato-'+CHANGELOG[0].v+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}
 V.feedback=()=>({title:'Relatar problema',items:[{html:'<div class="card"><p>Conte o que aconteceu e o que você esperava. O relatório inclui a versão, a idade, o país e os últimos acontecimentos da partida.</p><label>O que aconteceu?<textarea class="in" id="relatoDescricao" rows="4" maxlength="3000" placeholder="Ex.: o jogo disse que meu cachorro morreu, mas ele ainda estava vivo."></textarea></label><label>O que deveria acontecer?<textarea class="in" id="relatoEsperado" rows="3" maxlength="2000"></textarea></label><label><input type="checkbox" id="relatoSave"> Incluir esta partida completa para reproduzir o problema</label><p>Revise o relatório antes de compartilhar. Ele é gerado no aparelho; nada é enviado automaticamente.</p></div>'},{l:'Gerar relatório para revisar',on:relatoGerar},{html:'<div id="relatoResultado" class="card" hidden><label>Relatório gerado<textarea class="in" id="relatoJSON" rows="12" readonly></textarea></label><button class="btn" id="relatoCopiar">Copiar</button><button class="btn alt" id="relatoBaixar">Baixar arquivo</button></div>'},...((META.relatos||[]).length?[{sec:'Seus relatos recentes'},...(META.relatos||[]).slice(0,5).map(r=>({l:r.descricao.slice(0,100),s:'Versão '+r.versao+' · '+r.contexto.idade+' anos'}))]:[])],after:el=>{el.querySelector('#relatoCopiar').onclick=relatoCopiar;el.querySelector('#relatoBaixar').onclick=relatoBaixar;}});
 V.menu=(o=>()=>{const r=o();r.items.push({ic:'🛠️',l:'Relatar problema ou situação estranha',s:'Gerar relato com versão e contexto da partida',on:()=>UI.push(V.feedback)});return r;})(V.menu);
+
+// Catálogo fictício: cada faixa tem títulos e atividades próprios.
+const LIVROS_FAIXAS=[
+ {min:4,max:7,n:'Gravuras, cores e primeiras palavras',tipo:'ilustrado',titulos:['As Cores do Meu Quintal','Bichinhos para Colorir','Meu Primeiro Livro de Figuras','A Festa das Formas','Palavras com a Vovó','O Ursinho e a Lua','Contando Estrelinhas','Onde Está o Gatinho?']},
+ {min:8,max:11,n:'Aventuras e descobertas',titulos:['O Mistério da Casa na Árvore','A Turma do Rio Azul','Pequenos Exploradores do Espaço','O Atlas dos Bichos','O Dragão que Tinha Medo','Experiências no Quintal','O Mapa da Ilha Esquecida','A Biblioteca Secreta']},
+ {min:12,max:17,n:'Literatura juvenil e conhecimento',titulos:['O Último Verão da Turma','Mensagens de Outro Planeta','Diário de uma Nova Escola','Ciência no Dia a Dia','A Cidade Além do Muro','Histórias que Mudaram o Mundo','Entre Amigos e Escolhas','O Enigma do Observatório']},
+ {min:18,max:Infinity,n:'Romances, história e reflexão',titulos:['O Silêncio da Testemunha','Caminhos de uma Vida','Filosofia para Dias Comuns','Retratos da História do Brasil','O Peso das Escolhas','Economia da Vida Cotidiana','Cartas de uma Cidade Distante','A Memória das Marés']}
+];
+const LEITURA_LIMITE=6;
+const livrosFaixa=()=>LIVROS_FAIXAS.find(f=>S.me.age>=f.min&&S.me.age<=f.max);
+function leituraAno(){
+ const m=S.me;
+ if(!m.leitura||m.leitura.ano!==S.year) m.leitura={ano:S.year,titulos:[]};
+ if(!Array.isArray(m.leitura.titulos)) m.leitura.titulos=[];
+ return m.leitura;
+}
+function lerLivro(titulo){
+ const m=S.me,f=livrosFaixa();
+ if(!m.alive) return 'Esta vida já terminou.';
+ if(!f) return 'A biblioteca infantil fica disponível a partir dos 4 anos.';
+ if(titulo&&!f.titulos.includes(titulo)) return 'Esse título não faz parte do catálogo para minha idade.';
+ const l=leituraAno();
+ if(l.titulos.length>=LEITURA_LIMITE) return 'Já concluí meus seis livros deste ano. Posso escolher novos no próximo ano.';
+ titulo=titulo||R.pick(f.titulos.filter(t=>!l.titulos.includes(t)));
+ if(l.titulos.includes(titulo)) return 'Já concluí esse livro neste ano. Vou escolher outro título.';
+ l.titulos.push(titulo); use('b_lib'); cnt('books');
+ st('smarts',R.int(1,3));st('happy',R.int(1,2));
+ if(m.prison) m.prison.behav=clamp(m.prison.behav+3);
+ return f.tipo==='ilustrado'?`Explorei “${titulo}” com ajuda de um responsável: figuras, cores e primeiras palavras. (${l.titulos.length}/${LEITURA_LIMITE} neste ano)`:`Li “${titulo}”. (${l.titulos.length}/${LEITURA_LIMITE} neste ano)`;
+}
+V.biblioteca=()=>{
+ const f=livrosFaixa(),l=leituraAno();
+ return {title:'Biblioteca',items:[{html:`<div class="card"><p>${f?esc(f.n):'Disponível a partir dos 4 anos.'}</p><p>${l.titulos.length} de ${LEITURA_LIMITE} livros neste ano. Cada título conta uma vez; o limite renova ao envelhecer.</p></div>`},...(f?f.titulos.map(t=>({ic:'📖',l:t,s:l.titulos.includes(t)?'Concluído neste ano':f.tipo==='ilustrado'?'Atividade acompanhada por um responsável':'Disponível para sua idade',dis:l.titulos.includes(t)||l.titulos.length>=LEITURA_LIMITE,why:'Escolha outro título ou aguarde o próximo ano.',on:()=>act(()=>body('lib',t),'Biblioteca')})):[])]};
+};
+V.mind=(o=>()=>{const r=o(),b=r.items.find(x=>x.l==='Biblioteca');if(b){b.on=()=>UI.push(V.biblioteca);b.s='Títulos por idade · até 6 por ano';}return r;})(V.mind);
 
 // Textos originais das releases, preservados integralmente; não são mensagens de commits.
 const NL_LANCAMENTOS=[
