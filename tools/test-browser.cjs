@@ -13,10 +13,18 @@ async function run(){
  const inicio=Date.now();
  try{
   const active=path.join(profile,'DevToolsActivePort');
-  while(!fs.existsSync(active)){if(Date.now()-inicio>20000)throw Error('Edge não abriu o protocolo DevTools');await sleep(100);}
-  const port=fs.readFileSync(active,'utf8').split('\n')[0];
-  const targets=await(await fetch('http://127.0.0.1:'+port+'/json/list')).json();
-  const target=targets.find(t=>t.type==='page');if(!target)throw Error('Edge sem página de teste');
+  let port,target;
+  while(Date.now()-inicio<20000){
+   try{const value=fs.readFileSync(active,'utf8').split('\n')[0].trim();if(/^\d+$/.test(value)){port=value;break;}}
+   catch(e){if(!['ENOENT','EBUSY','EACCES','EPERM'].includes(e.code))throw e;}
+   await sleep(100);
+  }
+  if(!port)throw Error('Edge não liberou DevToolsActivePort em 20 segundos');
+  while(Date.now()-inicio<25000){
+   try{const targets=await(await fetch('http://127.0.0.1:'+port+'/json/list')).json();target=targets.find(t=>t.type==='page');if(target)break;}catch(e){}
+   await sleep(100);
+  }
+  if(!target)throw Error('Edge sem página de teste');
   ws=new WebSocket(target.webSocketDebuggerUrl);
   await new Promise((resolve,reject)=>{ws.onopen=resolve;ws.onerror=reject;});
   let seq=0;const pending=new Map();
