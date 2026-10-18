@@ -15,7 +15,7 @@ EVENTS.biz_evento={show:d=>{ const b=S.me.biz; if(!b) return {k:'Empresa',t:'Emp
     const sync=()=>{ b.value=Math.max(0,Math.round((b.capital||0)+(b.caixa||0))); b.valorContabil=b.value; };
     const caixaPerde=v=>{ v=Math.max(0,Math.round(v)); const x=Math.min(v,Math.max(0,b.caixa||0)); b.caixa-=x; const y=Math.min(v-x,Math.max(0,b.capital||0)); b.capital-=y; sync(); return x+y; }; /* devolve só a perda que de fato aconteceu: seguro e acordos não passam do que existia */
     const capitalPerde=f=>{ const v=Math.max(0,Math.round(Math.max(0,b.capital||0)*f)); b.capital-=v; sync(); return v; };
-    const paga=v=>{ v=Math.round(v); const x=Math.min(v,Math.max(0,b.caixa||0)); b.caixa-=x; let r=v-x; if(r>0&&canPay(r)){ m.money-=r; r=0; } if(r>0) b.caixa-=r; sync(); return v; };
+    const paga=v=>{ v=Math.round(v); const x=Math.min(v,Math.max(0,b.caixa||0)); b.caixa-=x; let r=v-x; if(r>0&&canPay(r)){ m.money-=r; r=0; } if(r>0){ /* sem caixa e sem dinheiro do dono: vira dívida registrada, não caixa negativo */ const n='Dívida da '+b.n; let l=m.loans.find(q=>q.n===n); if(!l){ l={n,bal:0,pay:0}; m.loans.push(l); } l.bal+=r; l.pay=Math.max(l.pay,Math.round(l.bal/5*1.15)); } sync(); return v; };
     const recebe=v=>{ b.caixa=(b.caixa||0)+Math.round(v); sync(); };
     const fechar=txt=>{ const sobra=Math.max(0,Math.round((b.caixa||0)+(b.capital||0)*.2)); m.money+=sobra; log(`Fechei a ${b.n}.`,'bad'); m.biz=null; return `${txt} Sobraram ${fmt(sobra)}.`; };
     if(d.t==='roubo'){ const v=caixaPerde(Math.max(2000,(b.caixa||0)*R.f()*.3+(b.capital||0)*.03)); if(!v) return 'Os ladrões entraram, mas não havia nada de valor para levar.';
@@ -42,7 +42,7 @@ function empresasEventosSelfTest(){const s0=S,rf=R.f,ns=window.NO_SAVE;let x=505
  const tipos={roubo:['s','r','e'],socio:['p','a','d'],fiscal:['p','c'],processo:['a','f'],crise:['d','i','e'],incendio:['r','f'],funcionario:['d','s']};
  for(const vazia of [false,true])for(const [t,ks] of Object.entries(tipos))for(const k of ks){newLife({country:'BR'});const m=S.me;m.age=40;m.money=5e6;openBiz(BIZ_SECTORS[0],'Teste');const b=m.biz;ok(b,'empresa não abriu');m.money=vazia?0:500000;if(typeof empresaPreparar==='function')empresaPreparar(b);
   if(vazia){b.caixa=0;b.capital=0;b.value=0;b.valorContabil=0;}const antes=m.money+(b.caixa||0)+(b.capital||0);EVENTS.biz_evento.pick(k,{t});
-  const bb=m.biz;if(bb){ok(Number.isFinite(bb.value)&&Math.abs(bb.value-Math.max(0,Math.round((bb.capital||0)+(bb.caixa||0))))<=1,'valor desalinhado em '+t+'/'+k);ok((bb.capital||0)>=0,'capital negativo em '+t+'/'+k);}
+  const bb=m.biz;if(bb){ok(Number.isFinite(bb.value)&&Math.abs(bb.value-Math.max(0,Math.round((bb.capital||0)+(bb.caixa||0))))<=1,'valor desalinhado em '+t+'/'+k);ok((bb.capital||0)>=0,'capital negativo em '+t+'/'+k);ok((bb.caixa||0)>=0,'caixa negativo em '+t+'/'+k);}
   ok(Number.isFinite(m.money),'dinheiro inválido em '+t+'/'+k);
   if(vazia&&t==='roubo'&&k==='s')ok(m.money+(bb?(bb.caixa||0)+(bb.capital||0):0)<=antes,'seguro pagou por perda que não existia');}
  return {ok:true};}finally{S=s0;R.f=rf;window.NO_SAVE=ns;}}

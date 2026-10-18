@@ -13,39 +13,51 @@ const torneioDe=c=>TORNEIOS[c.tipo||'copa'];
 const torneioLista=(m,c)=>c.tipo==='olimp'?(m.olimps||(m.olimps=[])):(m.copas||(m.copas=[]));
 function copaAno(ano=S.year){return ano>=2026&&(ano-2026)%4===0;}
 function copaSede(ano=S.year){return COPA_SEDES[ano]||R.pick(['Brasil','Alemanha','Japão e Coreia do Sul','Argentina e Uruguai','Inglaterra','Austrália e Nova Zelândia','Itália','França']);}
-function copaSelecao(m=S.me){return COPA_NOMES[m.country]||countryOf(m.country).n;}
-function copaRival(d,fase){const usados=d.rivais||[];const pool=COPA_RIVAIS.concat(Object.entries(COPA_FORCA).filter(([id])=>id!==S.me.country).map(([id,f])=>[COPA_NOMES[id],f])).filter(r=>!usados.includes(r[0]));
+/* nacionalidade esportiva: o país que o jogador defende, independente de onde mora */
+function futNac(m=S.me){return m.nac||(m.nac=m.country);}
+function copaSelecao(m=S.me){const n=futNac(m);return COPA_NOMES[n]||countryOf(n).n;}
+function copaRival(d,fase){const usados=d.rivais||[];const pool=COPA_RIVAIS.concat(Object.entries(COPA_FORCA).filter(([id])=>id!==futNac()).map(([id,f])=>[COPA_NOMES[id],f])).filter(r=>!usados.includes(r[0]));
  const T=torneioDe(d),rel=fase-(T.fim-1);const forte=rel>=0?pool.filter(r=>r[1]>=83):fase>=3?pool.filter(r=>r[1]>=76):pool;const r=R.pick(forte.length?forte:pool);d.rivais=usados.concat(r[0]);return r;}
 // convocação no ano de Copa
 NL_GANCHOS_ANO.push(()=>{const m=S.me;if(m.copaAtual&&m.copaAtual.ano<S.year){(m.copas||(m.copas=[])).push({ano:m.copaAtual.ano,resultado:'eliminado',gols:m.copaAtual.gols});m.copaAtual=null;}if(!copaAno()||!futEhJogador(m)||!m.job.clube||m.prison||S.scen)return;m.copas||(m.copas=[]);if(m.copas.some(c=>c.ano===S.year))return;
  const r=futRating(m);if(m.age<19||m.age>36||m.job.clube.tier<4||r<74)return;const ch=r>=88?.9:r>=82?.65:.35;
  if(!R.chance(ch)){m.copas.push({ano:S.year,resultado:'fora da lista'});log(`Fiquei fora da lista da seleção para a Copa do Mundo de ${S.year}.`,'warn');return;}
- queue('copa_convocacao',{ano:S.year,sede:copaSede(),forca:COPA_FORCA[m.country]??70});});
+ queue('copa_convocacao',{ano:S.year,sede:copaSede(),forca:COPA_FORCA[futNac(m)]??70});});
 NL_GANCHOS_ANO.push(()=>{const m=S.me;if(!olimpAno()||!futEhJogador(m)||!m.job.clube||m.prison||S.scen||m.copaAtual)return;m.olimps||(m.olimps=[]);if(m.olimps.some(c=>c.ano===S.year))return;
  const r=futRating(m),base=m.age<=23&&m.age>=17&&r>=66&&m.job.clube.tier>=2?.6:m.age>23&&m.age<=34&&r>=88?.25:0;if(!base||!R.chance(base))return;
- queue('olimp_convocacao',{ano:S.year,sede:olimpSede(),forca:(COPA_FORCA[m.country]??70)-3});});
+ queue('olimp_convocacao',{ano:S.year,sede:olimpSede(),forca:(COPA_FORCA[futNac(m)]??70)-3});});
 EVENTS.olimp_convocacao={show:d=>({k:'Olimpíadas',t:`Convocad${oa()} para as Olimpíadas!`,x:`Fui chamad${oa()} para o futebol olímpico em ${d.sede}, nos Jogos de ${d.ano}. A vila olímpica, os atletas de todos os esportes, o sonho da medalha. Como vou me preparar?`,ch:[['Treinar dobrado','dobrado'],['Seguir o treino da comissão técnica','normal'],['Aproveitar a vila olímpica com calma','calma']]}),
- pick:(k,d)=>{const m=S.me;if(!futEhJogador(m))return 'A convocação perdeu o sentido.';m.olimps||(m.olimps=[]);if(k==='dobrado'&&R.chance(.07)){m.olimps.push({ano:d.ano,resultado:'cortado por lesão'});st('happy',-15);return 'Me machuquei no treino e fui cortad'+oa()+' dos Jogos.';}
+ pick:(k,d)=>{const m=S.me;if(!futEhJogador(m))return 'A convocação perdeu o sentido.';m.olimps||(m.olimps=[]);if(k==='dobrado'&&R.chance(.07)){m.olimps.push({ano:d.ano,resultado:'cortado por lesão'});if(typeof olimpPublicar==='function')olimpPublicar(d.ano);st('happy',-15);return 'Me machuquei no treino e fui cortad'+oa()+' dos Jogos.';}
   const c={tipo:'olimp',ano:d.ano,sede:d.sede,forca:d.forca,forma:k==='dobrado'?9:k==='normal'?5:2,fase:0,pts:0,gols:0,rivais:[]};if(k==='calma')st('happy',6);m.fame=clamp(m.fame+3);const [rn,rf]=copaRival(c,0);c.rival=rn;c.rforca=rf;m.copaAtual=c;queue('copa_jogo',{ano:d.ano});
   return k==='calma'?'Conheci atletas do mundo inteiro no refeitório da vila. Que lugar!':'Cheguei pront'+oa()+' para a estreia.';}};
 EVENTS.copa_convocacao={show:d=>({k:'Copa do Mundo',t:`Convocad${oa()} para a Copa!`,x:`Meu nome está na lista da seleção ${copaSelecao()==='Brasil'?'brasileira':'de '+copaSelecao()} para a Copa do Mundo de ${d.ano}, em ${d.sede}. Faltam semanas para a estreia. Como vou me preparar?`,ch:[['Treinar dobrado todos os dias','dobrado'],['Seguir o treino da comissão técnica','normal'],['Cuidar do corpo: fisioterapia e sono','corpo']]}),
  pick:(k,d)=>{const m=S.me;if(!futEhJogador(m))return 'A convocação perdeu o sentido.';const c={ano:d.ano,sede:d.sede,forca:d.forca,forma:k==='dobrado'?10:k==='normal'?5:2,fase:0,pts:0,gols:0,rivais:[]};
-  if(k==='dobrado'&&R.chance(.08)){m.copas.push({ano:d.ano,resultado:'cortado por lesão'});st('happy',-20);st('health',-8);log(`Me machuquei na preparação e fui cortad${oa()} da Copa de ${d.ano}.`,'bad');return 'Senti a coxa no último treino antes da viagem. O médico da seleção balançou a cabeça. Fui cortad'+oa()+'.';}
+  if(k==='dobrado'&&R.chance(.08)){m.copas.push({ano:d.ano,resultado:'cortado por lesão'});if(typeof copaPublicar==='function')copaPublicar(d.ano);st('happy',-20);st('health',-8);log(`Me machuquei na preparação e fui cortad${oa()} da Copa de ${d.ano}.`,'bad');return 'Senti a coxa no último treino antes da viagem. O médico da seleção balançou a cabeça. Fui cortad'+oa()+'.';}
   if(k==='corpo')st('health',3);m.fame=clamp(m.fame+4);const [rn,rf]=copaRival(c,0);c.rival=rn;c.rforca=rf;m.copaAtual=c;queue('copa_jogo',{ano:d.ano});
   return k==='dobrado'?'Treinei como nunca. Cheguei voando na concentração.':k==='normal'?'Fiz tudo o que a comissão pediu. O grupo está fechado.':'Cheguei descansad'+oa()+' e sem dor nenhuma.';}};
-function copaChance(c,k){const m=S.me,eu=Math.max(0,(futRating(m)-70)/8)+c.forma/5;const mod={drible:1.5,coletivo:1,chute:0,marcar:.5}[k]||0;const dif=c.forca+eu+mod-c.rforca;return Math.max(.08,Math.min(.85,.45+dif/40));}
+// a melhor forma de jogar depende do adversário: contra seleção mais forte, marcar e tocar a bola; contra mais fraca, ousar
+const COPA_TATICA={forte:{drible:2,chute:1,coletivo:0,marcar:-1},fraco:{drible:-1.5,chute:.5,coletivo:0,marcar:2}};
+const COPA_DESGASTE={drible:4,chute:2,coletivo:1,marcar:3}, COPA_GOL={drible:.45,chute:.35,coletivo:.25,marcar:.08};
+function copaChance(c,k){const m=S.me,eu=Math.max(0,(futRating(m)-70)/8)+c.forma/5;const mod=(c.forca>=c.rforca?COPA_TATICA.forte:COPA_TATICA.fraco)[k]||0;const dif=c.forca+eu+mod-c.rforca;return Math.max(.08,Math.min(.82,.41+dif/45));}
 EVENTS.copa_jogo={show:d=>{const c=S.me.copaAtual;if(!c)return {k:'Copa do Mundo',t:'Fim do torneio',x:'O torneio terminou para mim.',ch:[['Seguir','x']]};const T=torneioDe(c);
   return {k:T.nome,t:`${T.fases[c.fase]}: ${copaSelecao()} x ${c.rival}`,x:`${c.fase<3?`Fase de grupos · ${c.pts} ${c.pts===1?'ponto':'pontos'} até aqui.`:'Mata-mata: quem perde volta para casa.'} O estádio está lotado e o país inteiro está assistindo. Como vou jogar?`,
    ch:[['Partir para cima no drible','drible'],['Jogar coletivo e tocar a bola','coletivo'],['Arriscar chutes de longe','chute'],['Ajudar na marcação','marcar']]};},
  pick:(k,d)=>{const m=S.me,c=m.copaAtual;if(!c||!futEhJogador(m))return 'O torneio acabou para mim.';const T=torneioDe(c),F=T.fim,lista=torneioLista(m,c);
-  const p=copaChance(c,k),meu=R.chance({drible:.35,coletivo:.2,chute:.25,marcar:.08}[k]||.15)?1:0;c.gols+=meu;let venceu=R.chance(p),empate=!venceu&&R.chance(.28),txt='';
-  const placar=v=>{const a=R.int(1,3)+meu*0,b=v?R.int(0,a-1):a+R.int(1,2);return v?`${Math.max(a,meu+1)} a ${b}`:`${a-1} a ${b}`;};
-  if(c.fase<3){if(venceu){c.pts+=3;txt=`Vitória sobre ${c.rival}, ${placar(true)}.`;}else if(empate){c.pts+=1;txt=`Empate com ${c.rival}.`;}else txt=`Derrota para ${c.rival}, ${placar(false)}.`;}
-  else if(!venceu&&empate){venceu=R.chance(.5+c.forma/100);txt=`Empate no tempo normal contra ${c.rival}. Nos pênaltis, ${venceu?'deu a gente!':'o sonho acabou.'}`;}
-  else txt=venceu?`Vitória sobre ${c.rival}, ${placar(true)}.`:`Derrota para ${c.rival}, ${placar(false)}. Eliminados.`;
-  if(meu)txt+=R.pick([' Fiz um gol e corri para a bandeirinha de escanteio.',' Marquei e apontei para o céu.',' Meu gol virou meme no país inteiro.']);
-  m.fame=clamp(m.fame+(meu?3:1));c.forma=clamp(c.forma-2,0,20);
-  const fim=res=>{lista.push({ano:c.ano,resultado:res,gols:c.gols});m.copaAtual=null;return res;};
+  // primeiro o placar; depois a participação do jogador, sempre dentro do placar
+  const p=copaChance(c,k);let venceu=R.chance(p),empate=!venceu&&R.chance(.28),nos,eles;
+  if(venceu){nos=R.int(1,3);eles=R.int(0,nos-1);}else if(empate){nos=eles=R.int(0,2);}else{eles=R.int(1,3);nos=R.int(0,eles-1);}
+  const meu=nos>0&&R.chance(COPA_GOL[k]||.2)?(nos>=2&&R.chance(.15)?2:1):0;c.gols+=meu;c.ultimo={nos,eles,meu,k};let txt='';
+  if(c.fase<3){if(venceu){c.pts+=3;txt=`Vitória sobre ${c.rival}, ${nos} a ${eles}.`;}else if(empate){c.pts+=1;txt=`Empate com ${c.rival}, ${nos} a ${eles}.`;}else txt=`Derrota para ${c.rival}, ${nos} a ${eles}.`;}
+  else if(empate){venceu=R.chance(.5+c.forma/100);c.ultimo.penaltis=venceu;txt=`Empate em ${nos} a ${eles} no tempo normal contra ${c.rival}. Nos pênaltis, ${venceu?'deu a gente!':'o sonho acabou.'}`;}
+  else txt=venceu?`Vitória sobre ${c.rival}, ${nos} a ${eles}.`:`Derrota para ${c.rival}, ${nos} a ${eles}. Eliminados.`;
+  if(meu)txt+=meu>1?' Fiz dois gols. Saí de campo com a bola debaixo do braço.':R.pick([' Fiz um dos gols e corri para a bandeirinha de escanteio.',' Marquei um dos gols e apontei para o céu.',' Meu gol virou meme no país inteiro.']);
+  m.fame=clamp(m.fame+(meu?3:1));
+  // desgaste: jogar no limite cansa e pode machucar
+  c.forma=clamp(c.forma-(COPA_DESGASTE[k]||2)+1.5,-10,14);
+  if(c.forma<0&&R.chance(k==='drible'?.25:.1)){const res='saiu lesionad'+oa()+' ('+T.fases[c.fase].toLowerCase()+')';lista.push({ano:c.ano,resultado:res,gols:c.gols});m.copaAtual=null;st('health',-6);st('happy',-10);
+   if(c.tipo==='olimp'){if(typeof olimpPublicar==='function')olimpPublicar(c.ano);}else if(typeof copaPublicar==='function')copaPublicar(c.ano,null,null,c.fase);
+   return txt+' No fim do jogo, senti a coxa travar. O cansaço cobrou o preço: estou fora do resto do torneio.';}
+  const fim=res=>{lista.push({ano:c.ano,resultado:res,gols:c.gols});m.copaAtual=null;if(c.tipo==='olimp'){if(typeof olimpPublicar==='function')olimpPublicar(c.ano,res);}else if(typeof copaPublicar==='function')copaPublicar(c.ano,res,res==='vice-campeão'?c.rival:null);return res;};
   if(c.fase===2){if(c.pts>=4||(c.pts===3&&R.chance(.45))){txt+=` Classificados para as ${T.prox} com ${c.pts} pontos!`;}else{fim('eliminado na fase de grupos');st('happy',-12);return txt+` Com ${c.pts} pontos, caímos na fase de grupos.`;}}
   else if(c.fase>=3&&!venceu){const res=c.fase===F?'vice-campeão':'eliminado nas '+T.elim[c.fase-3];fim(res);st('happy',c.fase===F?-10:-15);
    if(c.fase===F){const olimp=c.tipo==='olimp';m.assets.push({id:newId(),k:'item',n:olimp?`Medalha de prata olímpica de ${c.ano}`:`Medalha de prata da Copa do Mundo de ${c.ano}`,value:olimp?120000:250000,buy:0,cond:100});m.fame=clamp(m.fame+(olimp?8:12));log(`Fui vice-campe${m.gender==='F'?'ã':'ão'} ${olimp?'olímpic'+oa():'da Copa do Mundo'} de ${c.ano}.`,'warn');return txt+' Perdemos a final. A medalha de prata pesa no peito, mas um dia vou ter orgulho dela.';}

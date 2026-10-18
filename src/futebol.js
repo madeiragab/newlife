@@ -17,6 +17,7 @@ const FUT={
  IN:{ligas:['I-League 2','I-League','Indian Super League','Indian Super League','Indian Super League'],t:[['Delhi FC','Sporting Bengaluru'],['Gokulam Kerala','Sreenidi Deccan','Rajasthan United'],['Punjab FC','Chennaiyin','Odisha FC'],['Kerala Blasters','FC Goa','Bengaluru FC'],['Mohun Bagan Super Giant','East Bengal','Mumbai City']]},
  AO:{ligas:['Segundona','Girabola','Girabola','Girabola','Girabola'],t:[['Académica do Lobito','Recreativo do Libolo'],['Sporting de Cabinda','Santa Rita de Cássia'],['Interclube','Progresso do Sambizanga','Kabuscorp'],['Desportivo da Huíla','Sagrada Esperança','Wiliete'],['Petro de Luanda','1º de Agosto']]},
 };
+newLife=(o=>function(){const r=o.apply(this,arguments);if(S&&S.me)S.me.nac=S.me.country;return r;})(newLife);
 const FUT_EUROPA=['ES','GB','IT','DE','FR'];
 const FUT_MUL=[.25,.45,.7,1,1.6];
 function futPais(id){return FUT[id]?id:'BR';}
@@ -24,7 +25,7 @@ function futLiga(c){return FUT[c.pais].ligas[c.tier-1];}
 function futNovo(pais,tier,evita){pais=futPais(pais);tier=Math.max(1,Math.min(5,tier));const l=FUT[pais].t[tier-1].filter(n=>n!==evita);return {n:R.pick(l.length?l:FUT[pais].t[tier-1]),pais,tier,desde:S.year};}
 function futRating(m){const j=m.job,idade=m.age<20?-(20-m.age)*3:m.age>31?-(m.age-31)*4:0;return Math.round(m.talent.athletic*.6+(j?.perf||50)*.4+idade);}
 function futEhJogador(m=S.me){return !!(m.job&&m.job.spc==='atleta'&&m.job.esporte==='futebol');}
-function futAssinar(c,origem){const m=S.me,j=m.job;const antes=j.clube;j.clube=c;j.co=c.n;j.perf=clamp((j.perf||55)-(antes&&c.tier>antes.tier?8:0));
+function futAssinar(c,origem){const m=S.me,j=m.job;if(!m.nac)m.nac=m.country;const antes=j.clube;j.clube=c;j.co=c.n;j.perf=clamp((j.perf||55)-(antes&&c.tier>antes.tier?8:0));
  if(c.pais!==m.country){const pais=countryOf(c.pais);m.country=c.pais;m.city=R.pick(pais.cities);partners().concat(kids().filter(k=>k.age<18)).forEach(q=>typeof npcMudarLocal==='function'&&npcMudarLocal(q,c.pais,m.city));log(`Me mudei para ${m.city}, ${pais.n}, para jogar no ${c.n}.`,'good');}
  m.fame=clamp(m.fame+Math.max(0,c.tier-(antes?.tier||1))*4);return `Assinei com o ${c.n} (${futLiga(c)}, ${countryOf(c.pais).n}).`;}
 // ao entrar na carreira de esporte, o jogador escolhe o futebol e começa num clube do próprio país

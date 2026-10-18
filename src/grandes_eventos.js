@@ -4,18 +4,28 @@ const OLIMP_MEDALHAS={US:110,GB:60,FR:55,JP:45,IT:40,DE:35,KR:30,CA:25,ES:20,BR:
 function torneioCampeao(){const pool=COPA_RIVAIS.concat(Object.entries(COPA_FORCA).map(([id,f])=>[COPA_NOMES[id],f]));return R.wpick(pool.map(([n,f])=>[n,Math.exp((f-80)/3.5)]));}
 function torneioPaisResultado(f){const passa=R.chance(Math.max(.15,Math.min(.95,.5+(f-78)/25)));if(!passa)return 'eliminado na fase de grupos';
  const fases=['oitavas','quartas','semifinais','final'];for(const fs of fases){if(!R.chance(Math.max(.1,Math.min(.85,.45+(f-82)/30))))return fs==='final'?'vice-campeão':'eliminado nas '+fs;}return 'campeão';}
+// Um só resultado oficial por torneio: se o personagem está jogando, o mundo espera a campanha terminar;
+// o campeão anunciado, o resultado do país e as medalhas incluem o que aconteceu com o jogador.
+function torneioJogando(tipo){const m=S.me,c=m.copaAtual;if(c&&(c.tipo||'copa')===tipo)return true;return S.pending.some(e=>e.id===(tipo==='copa'?'copa_convocacao':'olimp_convocacao'));}
+function copaPublicar(ano,res,campeaoQueVenceu){const m=S.me;S.torneios||(S.torneios={});const k='copa'+ano;if(S.torneios[k])return S.torneios[k];
+ const nac=futNac(m),pais=COPA_NOMES[nac]||countryOf(nac).n,f=COPA_FORCA[nac]??65;
+ if(!res||/fora|cortado|lesionad/.test(res))res=torneioPaisResultado(f);
+ let campeao=res==='campeão'?pais:campeaoQueVenceu;if(!campeao){do campeao=torneioCampeao();while(campeao===pais);}
+ const t=S.torneios[k]={campeao,pais,res,sede:copaSede(ano)};
+ log(`Copa do Mundo de ${ano}: ${campeao} é campeã do mundo.${campeao===pais?'':` A seleção de ${pais} terminou ${res}.`}`,'big');
+ const aqui=m.country===nac;if(res==='campeão'&&aqui){st('happy',8);people().filter(p=>p.alive).forEach(p=>p.bond=clamp(p.bond+1));log('O país parou para comemorar o título. Carreata, fogos e ninguém trabalhou no dia seguinte.','good');}
+ else if(/semifinais|vice/.test(res)&&aqui){st('happy',-3);log('A eliminação doeu no país inteiro. Silêncio nos bares por uma semana.','warn');}
+ return t;}
+function olimpPublicar(ano,resJogador){const m=S.me;S.torneios||(S.torneios={});const k='olimp'+ano;if(S.torneios[k])return S.torneios[k];
+ const nac=futNac(m),base=OLIMP_MEDALHAS[nac]??3;let med=Math.max(0,Math.round(base*(.8+R.f()*.4))),ouros=Math.round(med*.32);
+ if(resJogador==='campeão'){med++;ouros++;}else if(resJogador==='vice-campeão')med++;
+ const lider=R.wpick([['Estados Unidos',6],['China',5],['Japão',1],['Grã-Bretanha',1]]);const t=S.torneios[k]={lider,med,ouros,sede:olimpSede(ano),doJogador:resJogador||null};
+ log(`Olimpíadas de ${ano}: ${lider} lidera o quadro de medalhas. ${countryOf(nac).n} conquistou ${med} ${med===1?'medalha':'medalhas'}, ${ouros} de ouro${resJogador==='campeão'?', uma delas no futebol, com a minha participação':''}.`,'big');
+ if(ouros>=10&&m.country===nac)st('happy',3);return t;}
 function grandesEventosMundo(){const m=S.me;S.torneios||(S.torneios={});
- if(copaAno()&&!S.torneios['copa'+S.year]){const meu=(m.copas||[]).find(c=>c.ano===S.year&&!/fora|cortado/.test(c.resultado));
-  const pais=COPA_NOMES[m.country]||countryOf(m.country).n,f=COPA_FORCA[m.country]??65,res=meu?meu.resultado:torneioPaisResultado(f);
-  const campeao=res==='campeão'?pais:(()=>{let c=torneioCampeao();while(c===pais)c=torneioCampeao();return c;})();
-  S.torneios['copa'+S.year]={campeao,pais,res,sede:copaSede()};
-  log(`Copa do Mundo de ${S.year}: ${campeao} é campeã do mundo. ${campeao===pais?'':`A seleção de ${pais} terminou ${res}.`}`,'big');
-  if(res==='campeão'){st('happy',8);people().filter(p=>p.alive).forEach(p=>p.bond=clamp(p.bond+1));log('O país parou para comemorar o título. Carreata, fogos e ninguém trabalhou no dia seguinte.','good');}
-  else if(/semifinais|vice/.test(res)){st('happy',-3);log('A eliminação doeu no país inteiro. Silêncio nos bares por uma semana.','warn');}}
- if(olimpAno()&&!S.torneios['olimp'+S.year]){const base=OLIMP_MEDALHAS[m.country]??3,med=Math.max(0,Math.round(base*(.8+R.f()*.4))),ouros=Math.round(med*.32);
-  const lider=R.wpick([['Estados Unidos',6],['China',5],['Japão',1],['Grã-Bretanha',1]]);S.torneios['olimp'+S.year]={lider,med,ouros,sede:olimpSede()};
-  log(`Olimpíadas de ${S.year}: ${lider} lidera o quadro de medalhas. ${countryOf(m.country).n} conquistou ${med} ${med===1?'medalha':'medalhas'}, ${ouros} de ouro.`,'big');
-  if(ouros>=10)st('happy',3);}}
+ for(let a=S.year-4;a<S.year;a++){if(copaAno(a)&&!S.torneios['copa'+a])copaPublicar(a,(m.copas||[]).find(c=>c.ano===a)?.resultado);if(olimpAno(a)&&!S.torneios['olimp'+a])olimpPublicar(a,(m.olimps||[]).find(c=>c.ano===a)?.resultado);}
+ if(copaAno()&&!S.torneios['copa'+S.year]&&!torneioJogando('copa'))copaPublicar(S.year,(m.copas||[]).find(c=>c.ano===S.year)?.resultado);
+ if(olimpAno()&&!S.torneios['olimp'+S.year]&&!torneioJogando('olimp'))olimpPublicar(S.year,(m.olimps||[]).find(c=>c.ano===S.year)?.resultado);}
 NL_GANCHOS_ANO.push(()=>{if(!S.scen)grandesEventosMundo();});
 const ANO_COPA=m=>copaAno()&&!S.scen&&!m.prison, ANO_OLIMP=m=>olimpAno()&&!S.scen&&!m.prison;
 const SEDE_AQUI=m=>{const t=copaAno()?copaSede():olimpAno()?olimpSede():'';return !!t&&t.includes(countryOf(m.country).n.split(' ')[0])&&!S.scen&&!m.prison;};
@@ -48,10 +58,25 @@ pack({k:'Sede do evento',w:3,cd:4,min:16,when:SEDE_AQUI},[
  ['Turistas na cidade','Turistas procuram lugar para ficar e pagam bem.',['Alugar um quarto|$+v h+2|Hospedei uma família estrangeira. Ganhei dinheiro e um convite para visitá-los.','Não alugar|h+0|Minha casa, meu sossego.'],{v:[2000,9000],when:m=>m.assets.some(a=>a.k==='casa')}],
  ['Preços nas alturas','Com o evento, tudo na cidade ficou mais caro: comida, aluguel e transporte.',['Apertar o orçamento|$-v h-3|Arroz e feijão até o fim dos jogos.','Sair da cidade durante o evento|$-v2 h+4|Fugi da muvuca.'],{v:[300,1500]}],
 ]);
+// valores dos eventos da sede seguem a economia do país: imóveis, salários e serviços
+for(const [id,ev] of Object.entries(EVENTS)){if(!/^Sede do evento/.test(ev.cond||''))continue;const indice={'Emprego temporário':'salarios','Turistas na cidade':'imoveis','Preços nas alturas':'servicos'}[ev.title];if(!indice)continue;
+ const prep0=ev.prep;ev.prep=m=>{const d=prep0(m);if(d&&typeof mercadoIndice==='function'){let f=1;try{f=mercadoIndice(m.country,indice);const w=mundo(m.country);if(indice==='imoveis')f*=1+Math.max(0,w.crescimento||0)*3;if(indice==='servicos')f*=1+Math.max(0,w.inflacao||0);}catch(e){f=1;}f=Math.max(.3,Math.min(4,f||1));d.v=Math.round(d.v*f/10)*10;d.v2=Math.round(d.v2*f/10)*10;d.indice=f;}return d;};}
 function grandesEventosSelfTest(){const s0=S,rf=R.f,ns=window.NO_SAVE;let x=2026;R.f=()=>{x=(Math.imul(x,1664525)+1013904223)>>>0;return x/4294967296;};const ok=(v,t)=>{if(!v)throw Error('Grandes eventos · '+t);};try{window.NO_SAVE=true;
- newLife({country:'BR',year:2030});const m=S.me;m.age=30;m.born=S.year-30;grandesEventosMundo();const t=S.torneios.copa2030;ok(t&&t.campeao&&t.res,'Copa sem resultado no mundo');grandesEventosMundo();ok(Object.keys(S.torneios).length===1,'resultado repetido');
+ newLife({country:'BR',year:2030});const m=S.me;m.age=30;m.born=S.year-30;grandesEventosMundo();const t=S.torneios.copa2030;ok(t&&t.campeao&&t.res,'Copa sem resultado no mundo');const n0=Object.keys(S.torneios).length;grandesEventosMundo();ok(S.torneios.copa2030===t&&Object.keys(S.torneios).length===n0,'resultado repetido');ok(S.torneios.olimp2028,'Olimpíadas do ano anterior sem resultado');
  const ids=Object.keys(EVENTS).filter(id=>EVENTS[id].title&&/Copa|Olimp|Sede/.test(EVENTS[id].cond||''));ok(ids.length>=20,'poucos eventos dos grandes torneios: '+ids.length);
  const deCopa=ids.filter(id=>{try{return EVENTS[id].when(m);}catch(e){return false;}});ok(deCopa.length>=5,'nenhum evento de Copa liberado para quem não é atleta');
  S.year=2028;S.torneios={};grandesEventosMundo();ok(S.torneios.olimp2028&&S.torneios.olimp2028.lider,'Olimpíadas sem quadro de medalhas');ok(ids.some(id=>{try{return EVENTS[id].when(m);}catch(e){return false;}}),'nenhum evento olímpico liberado');
  S.year=2027;ok(!ids.some(id=>{try{return EVENTS[id].when(m);}catch(e){return false;}}),'evento de Copa fora do ano de Copa');
+ newLife({country:'BR',year:2030});const j=S.me;j.age=27;j.born=S.year-27;j.talent.athletic=97;j.job={spc:'atleta',lvl:3,perf:95,yrs:6,esporte:'futebol',clube:futNovo('BR',5)};
+ futAssinar(futNovo('ES',5));ok(j.country==='ES'&&copaSelecao()==='Brasil','transferência mudou a seleção do jogador');
+ const forca=COPA_FORCA.BR;COPA_FORCA.BR=140;try{let ok2=false;for(let t=0;t<8&&!ok2;t++){S.torneios={};j.copas=[];j.copaAtual=null;S.pending=[];queue('copa_convocacao',{ano:2030,sede:'x',forca:140});
+   grandesEventosMundo();ok(!S.torneios.copa2030,'mundo publicou o campeão antes da campanha');S.pending=[];EVENTS.copa_convocacao.pick('corpo',{ano:2030,sede:'x',forca:140});let n=0;
+   while(j.copaAtual&&n++<10)EVENTS.copa_jogo.pick(R.pick(['coletivo','drible']),{});
+   const r=j.copas[0].resultado,pub=S.torneios.copa2030;ok(pub,'campanha terminou sem publicação');
+   if(r==='campeão'){ok(pub.campeao==='Brasil','campeão do mundo diferente do jogador campeão');ok2=true;}else if(r==='vice-campeão')ok(pub.campeao!=='Brasil','vice com o próprio país campeão');}
+  ok(ok2,'jogador nunca foi campeão com seleção forte');}finally{COPA_FORCA.BR=forca;}
+ const c={tipo:'copa',ano:2034,forca:85,forma:8,fase:0,pts:0,gols:0,rivais:[],rival:'X',rforca:80};j.copas=[];
+ for(let i=0;i<200;i++){c.fase=0;c.pts=0;c.forma=8;c.rivais=[];S.torneios={};j.copaAtual=c;EVENTS.copa_jogo.pick(R.pick(['drible','coletivo','chute','marcar']),{});const u=c.ultimo;if(u)ok(u.meu<=u.nos,'gol do jogador fora do placar');}
+ const melhor=rf=>{const cc={forca:80,rforca:rf,forma:8};return ['drible','coletivo','chute','marcar'].sort((a,b)=>copaChance(cc,b)-copaChance(cc,a))[0];};ok(melhor(70)!==melhor(90),'a mesma tática é sempre a melhor');
+ S.torneios={};const base=olimpPublicar(2032,'campeão');ok(base.ouros>=1&&base.doJogador==='campeão','ouro do jogador fora do quadro');
  return {eventos:ids.length};}finally{S=s0;R.f=rf;window.NO_SAVE=ns;}}
