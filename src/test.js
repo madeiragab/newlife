@@ -44,6 +44,7 @@ function selfTest(){
   T('separações e relações plurais',separacoesSelfTest);
   T('carreira no futebol',futebolSelfTest);
   T('Copa do Mundo',copaSelfTest);
+  T('Copa e Olimpíadas no mundo',grandesEventosSelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);
