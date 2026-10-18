@@ -43,6 +43,7 @@ function selfTest(){
   T('probabilidades realistas',realismoSelfTest);
   T('separações e relações plurais',separacoesSelfTest);
   T('carreira no futebol',futebolSelfTest);
+  T('Copa do Mundo',copaSelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);
