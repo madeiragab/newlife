@@ -81,7 +81,7 @@ takeJob=(o=>function(oo){ const m=S.me; const r=o.apply(this,arguments); const j
   return r; })(takeJob);
 // ---------- ano a ano ----------
 NL_GANCHOS_ANO.push(()=>{ const m=S.me; if(!m||!m.alive||m.prison||S.scen) return; const c=escCur(m); if(!c) return;
-  if(m.age>=7) escQuiz('provas');
+  if(m.age>=7) escQuiz('provas',{rotina:1});
   if(c.type==='medio'&&c.yr>=c.len-1&&!m.c.vestFeito) queue('esc_vestibular',{});
   if(c.type==='uni'&&c.yr>=c.len-1&&!c.tcc) queue('esc_tcc',{e:0});
   if(c.estagio) m.money+=R.int(7000,12000);
@@ -103,7 +103,7 @@ V.career=(o=>function(){ const r=o.apply(this,arguments), m=S.me, c=escCur(m); i
     if(m.age>=9) A('🔬','Feira de ciências','Escolha um projeto · medalha conta no vestibular',()=>{ if(use('esc_feira')>0) return 'Só tem uma feira por ano.'; queue('esc_feira',{}); return ''; });
     if(m.age>=8) A('👥','Trabalho em grupo','Nota e amizades',()=>{ if(use('esc_grupo')>1) return 'Já fiz trabalhos em grupo demais.'; queue('esc_grupo',{}); return ''; });
     A('🔔','Recreio','Bola, papo, biblioteca',()=>{ if(use('esc_rec')>2) return 'O recreio acabou.'; queue('esc_recreio',{}); return ''; });
-    if(c.type==='medio'&&!m.c.vestFeito) A('🎓','Fazer o vestibular agora','5 questões · soma pontos para a faculdade',()=>{ queue('esc_vestibular',{}); return ''; });
+    if(c.type==='medio'&&!m.c.vestFeito) A('🎓','Fazer o vestibular agora','5 questões · soma pontos para a faculdade',()=>{ queue('esc_vestibular',{manual:1}); return ''; });
   } else {
     A('🎤','Apresentar um seminário','2 questões · nota e turma',()=>{ if(use('esc_sem')>1) return 'Já apresentei seminários demais este semestre.'; return escQuiz('seminario'); });
     if(c.type==='uni'){ A('💼','Procurar estágio',c.estagio?'Já faço estágio':'A partir do 2º ano · bolsa e experiência',escEstagio); A('🔬','Iniciação científica',c.ic?'Já faço':'Bolsa e inteligência',escIC); if(c.yr>=c.len-1&&!c.tcc) A('📚','Começar o TCC','Tema, orientador e defesa',()=>{ queue('esc_tcc',{e:0}); return ''; }); }

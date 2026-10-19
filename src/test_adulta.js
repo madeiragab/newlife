@@ -9,10 +9,13 @@ function adultaSelfTest(){ const s0=S,rf=R.f,ns=window.NO_SAVE,nn=window.NO_NEWS
     const c=mkPerson({rel:'conjuge',gender:m.gender==='M'?'F':'M',age:idade,bond:50}); S.people.push(c,mkPerson({rel:'filho',age:Math.max(1,idade-28),bond:60,parentId:c.id}),mkPerson({rel:'amigo',age:idade,bond:50})); if(idade>=60) S.people.push(mkPerson({rel:'neto',age:8,bond:60}),mkPerson({rel:'neto',age:23,bond:60})); return m; };
   try{
     // hobbies sobem de nível e o mestre ganha competição
-    vida(35); for(let i=0;i<16;i++){ m.yr={}; hobbyPraticar('marcenaria'); } ok(hobbyNivel(m.hobbies.marcenaria)===4,'hobby não chegou a mestre'); ok(S.pending.some(e=>e.id==='hobby_torneio'),'mestre sem competição'); todas('hobby_torneio',{k:'marcenaria'});
+    vida(35); for(let i=0;i<16;i++){ m.yr={}; hobbyPraticar('marcenaria'); } const hb=JSON.parse(JSON.stringify(m.hobbies)); ok(hobbyNivel(m.hobbies.marcenaria)===4,'hobby não chegou a mestre'); ok(S.pending.some(e=>e.id==='hobby_torneio'),'mestre sem competição'); todas('hobby_torneio',{k:'marcenaria'}); m.hobbies=hb;
     for(const k of Object.keys(HOBBIES)){ m.yr={}; ok(!BAD.test(hobbyPraticar(k)),'hobby '+k); }
     todas('ferias',{e:0}); todas('ferias',{e:1,dest:'cruzeiro'}); todas('contas_mes',{e:0,pts:0}); todas('contas_mes',{e:2,pts:4}); todas('churrasco',{}); todas('crise40',{});
-    const din=m.money; S.pending=[]; EVENTS.contas_mes.pick('total',{e:0,pts:0}); let d=S.pending[0].d; S.pending=[]; EVENTS.contas_mes.pick('reserva',d); d=S.pending[0].d; S.pending=[]; EVENTS.contas_mes.pick('corta',d); ok(m.money>din,'contas bem feitas não deram dinheiro');
+    const pat=netWorth(), din=m.money; S.pending=[]; EVENTS.contas_mes.pick('total',{e:0,pts:0}); let d=S.pending[0].d; S.pending=[]; EVENTS.contas_mes.pick('reserva',d); d=S.pending[0].d; S.pending=[]; EVENTS.contas_mes.pick('corta',d);
+    ok(Math.abs(netWorth()-pat)<1,'contas criaram ou sumiram com dinheiro: '+(netWorth()-pat)); ok(m.money<din&&m.inv.poup>0,'reserva não foi para a poupança'); ok(m.economia&&m.economia.v>0,'corte de assinaturas sem economia');
+    S.year++; const d0=m.money; for(const f of NL_GANCHOS_ANO) f(); ok(m.money>d0,'economia das assinaturas não chegou no ano seguinte'); S.year--;
+    m.hobbies={}; ok(!EVENTS.hobby_torneio.when(m)&&EVENTS.hobby_torneio.prep(m)==null,'iniciante convidado para competição'); ok(/só para mestres/.test(EVENTS.hobby_torneio.pick('vai',{k:'xadrez'})),'competição aceitou iniciante');
     // check-up descobre doença escondida
     m.dis=[{id:Object.keys(DISEASES).find(k=>DISEASES[k].chronic)||Object.keys(DISEASES)[0],y:1,ctrl:false,k:false}]; const r1=checkup(); ok(m.dis[0].k&&/acharam|encontraram/.test(r1),'check-up não achou a doença: '+r1+' '+JSON.stringify(m.dis));
     V.vidaAdulta().items.forEach(it=>ok(!BAD.test(String(it.l||'')+String(it.s||'')+String(it.html||'')),'tela adulta: '+(it.l||'')));

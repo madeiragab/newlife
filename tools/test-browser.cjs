@@ -48,7 +48,7 @@ async function run(){
   const fixture=fs.readFileSync(path.join(__dirname,'fixtures/save-1.46.json'),'utf8');
   const migracao=fs.readdirSync(path.join(__dirname,'fixtures')).map(n=>n.match(/^save-([\d.]+)\.json$/)).filter(Boolean).map(x=>({versao:x[1],save:JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures',x[0]),'utf8'))})).sort((a,b)=>parseFloat(a.versao)-parseFloat(b.versao));
   await send('Page.addScriptToEvaluateOnNewDocument',{source:'window.NL_SAVE_FIXTURE='+fixture+';window.NL_CONT_FIXTURES='+JSON.stringify(continuidade)+';window.NL_MIG_FIXTURES='+JSON.stringify(migracao)+';'});
-  timer=setTimeout(()=>rejectDone(Error('Limite de 9 minutos; último progresso: '+last)),540000);
+  timer=setTimeout(()=>rejectDone(Error('Limite de 12 minutos; último progresso: '+last)),720000);
   send('Page.navigate',{url:pathToFileURL(page).href+'#teste'}).catch(rejectDone);
   const result=await done;
   fs.writeFileSync(report,result.text,'utf8');

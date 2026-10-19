@@ -52,6 +52,10 @@ function selfTest(){
   T('provas, vestibular, minigames da escola e faculdade',escolaSelfTest);
   T('idade para beber, saídas, festas, brincadeiras e relacionamentos',socialSelfTest);
   T('vida adulta, velhice, lista de desejos e netos',adultaSelfTest);
+  T('expectativa de vida',longevidadeSelfTest);
+  T('eventos coerentes com a idade',idadeCoerenteSelfTest);
+  T('minigames automáticos',minigamesAutoSelfTest);
+  T('eventos de cada país',paisesSelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);
