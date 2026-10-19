@@ -62,6 +62,7 @@ function selfTest(){
   T('política de cada país',politica4SelfTest);
   T('bens da família e caxumba',ajustes201SelfTest);
   T('gastos, contas e serviços ilegais',gastosSelfTest);
+  T('dificuldade das perguntas',quizDificuldadeSelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);
