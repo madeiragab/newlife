@@ -94,6 +94,7 @@ function coberturaEventosSelfTest(limiteMs=60000){
   for(const age of [17,18])candidatos.push([age,null,0,m=>{m.edu.cur={type:'medio',n:'Ensino Médio',len:3,yr:2,grade:70};}]);
   candidatos.push([35,null,0,m=>{m.job=null;takeJob({id:JOBS.find(j=>!j.pt&&!j.spc&&!jobReqs(j).length).id,co:'Teste',size:'média',mul:1});m.c.work=12;}]);
   for(const n of [1,3,6])for(const fieis of [6000,60000])candidatos.push([45,null,0,m=>{seitaFundar(Object.keys(SEITA_TIPOS)[0],'Teste');Object.assign(m.seita,{fieis,fama:80,templo:6,caixa:5e6,devo:80,susp:20,anos:12,dom:(typeof SEITA_DOM!=='undefined'?SEITA_DOM:['o bairro','a cidade','o estado','o país']).slice(0,n).map(x=>typeof x==='string'?x:x.n||x[0])});}]);
+  for(let k=0;k<48;k++)candidatos.push([R.pick([25,40]),null,0,m=>{if(k%3===2){seitaEntrarEm(k%2?'dw':0);if(m.seita)Object.assign(m.seita,{cargo:k%5,conf:grade([20,70,95]),fe:60});return;}seitaFundar(Object.keys(SEITA_TIPOS)[k%4],'Teste');Object.assign(m.seita,{fieis:grade([2,300,5000]),online:grade([0,60]),seg:k%4,inim:grade([0,3]),caixa:grade([0,5e5]),devo:60,susp:30});if(k%2)m.seita.rival={n:'Templo Rival',lider:'Profeta Josué',forca:50};}]);
   for(const age of [3,4,5,7,10,62,66,75,80,88,95])candidatos.push([age,null,0,m=>{if(age>=62)m.ret={pension:20000};}]);
   for(const [age,pais,royal,mod] of candidatos){if(Date.now()-T0>limiteMs*4)break;const falta=ids.filter(id=>!opcoes[id]);if(!falta.length)break;
    const snap=base(age,pais,royal,mod),me=JSON.parse(snap).me;S=JSON.parse(snap);
