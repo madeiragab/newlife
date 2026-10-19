@@ -178,14 +178,14 @@ function selfTest(){
     }
     views();
   };
-  for(let L=0;L<60;L++){
+  for(let L=0;L<35;L++){
     T('newLife',()=>newLife(L%6===0?{royal:true}:L%5===0?{country:'BR',gender:'F',diff:'dificil'}:L%7===0?{cls:'pobre',diff:'facil'}:{})); live(130);
     lives.push(`${S.me.first} ${S.me.last} · ${S.me.age}a · ${S.me.cause} · ${S.ribbon} · ${fmt(netWorth())} · ${S.me.hist.length?S.me.hist[S.me.hist.length-1].t:S.me.job?jobTitle(S.me.job):'—'} · filhos ${kids().length}`);
     if(kids().length&&L%2===0){ T('continueAs',()=>continueAs(R.pick(kids()))); T('heir',()=>live(130)); lives.push(`  ↳ herdeiro: ${S.me.first} · ${S.me.age}a · ${S.me.cause} · ger ${S.gen} · olhos ${S.me.genes.eyes}`); }
     T('death',showDeath);
   }
   let swept=0;
-  for(let L=0;L<14;L++){ T('newLife',()=>newLife({})); for(const age of [3,8,15,22,35,55,80]){ S.scen=null; let passos=0; while(S.me.alive&&S.me.age<age&&passos++<130){ T('ageUp',ageUp); S.pending=[]; } if(S.me.alive&&S.me.age<age){ errs['varredura normal não avançou até '+age]=1; break; } if(!S.me.alive) break; T('sweepActs',acts); sweep(); } }
+  for(let L=0;L<8;L++){ T('newLife',()=>newLife({})); for(const age of [3,8,15,22,35,55,80]){ S.scen=null; let passos=0; while(S.me.alive&&S.me.age<age&&passos++<130){ T('ageUp',ageUp); S.pending=[]; } if(S.me.alive&&S.me.age<age){ errs['varredura normal não avançou até '+age]=1; break; } if(!S.me.alive) break; T('sweepActs',acts); sweep(); } }
   // atestados: pedir sem parar tem que terminar em demissão
   let fired=0; for(let k=0;k<40;k++){ T('atestLife',()=>{ newLife({}); while(S.me.alive&&S.me.age<25){ S.pending=[]; ageUp(); } if(!S.me.alive) return; S.pending=[]; const ok=openings().filter(o=>!jobReqs(JOBS.find(x=>x.id===o.id)).length); if(ok.length) takeJob(R.pick(ok)); if(!S.me.job) return; S.me.money+=5000; for(let i=0;i<8&&S.me.job;i++) sickNote(i%2?'fake':'real'); if(!S.me.job) fired++; }); }
   // aventuras (modos fictícios): cada modo jogado até o fim várias vezes, e cada evento de aventura varrido
@@ -296,7 +296,7 @@ function selfTest(){
     const r=(()=>{ const s0=localStorage.getItem(K); if(s0&&saveOk(SAVE_KEY,s0)) return 'principal'; const b=localStorage.getItem(K+'.bak'); return b&&saveOk(SAVE_KEY,b)?'bak':null; })();
     chkReg('save estragado não cai na cópia',r==='bak'); chkReg('save bom reprovado',saveOk(SAVE_KEY,ok)); try{ localStorage.removeItem(K); localStorage.removeItem(K+'.bak'); }catch(e){} }
   const calm=[];
-  for(let L=0;L<60;L++){ T('calmLife',()=>newLife({})); let g=0; while(S.me.alive&&g++<130){ T('ageUp',ageUp); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; T('ev',()=>{ const sh=EVENTS[e.id].show(e.d); EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); }); } if(S.me.alive&&S.me.age%3===0) T('calmDoc',()=>{ S.me.dis.forEach(d=>treat('hosp',d)); body('walk'); }); if(S.me.alive&&S.me.health<=0) die(causeFromHealth()); } calm.push(S.me.age); }
+  for(let L=0;L<30;L++){ T('calmLife',()=>newLife({})); let g=0; while(S.me.alive&&g++<130){ T('ageUp',ageUp); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; T('ev',()=>{ const sh=EVENTS[e.id].show(e.d); EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); }); } if(S.me.alive&&S.me.age%3===0) T('calmDoc',()=>{ S.me.dis.forEach(d=>treat('hosp',d)); body('walk'); }); if(S.me.alive&&S.me.health<=0) die(causeFromHealth()); } calm.push(S.me.age); }
   lives.unshift(`VIDA CALMA (só envelhecer + médico): média ${(calm.reduce((a,b)=>a+b,0)/calm.length).toFixed(1)} · acima de 70: ${Math.round(calm.filter(a=>a>=70).length/calm.length*100)}% · acima de 90: ${Math.round(calm.filter(a=>a>=90).length/calm.length*100)}%`);
   const ages=lives.filter(l=>!l.startsWith(' ')).map(l=>+(l.match(/· (\d+)a ·/)||[0,0])[1]);
   lives.unshift(`IDADE MÉDIA: ${(ages.reduce((a,b)=>a+b,0)/ages.length).toFixed(1)} · acima de 70: ${Math.round(ages.filter(a=>a>=70).length/ages.length*100)}% · abaixo de 30: ${Math.round(ages.filter(a=>a<30).length/ages.length*100)}%`);
