@@ -53,29 +53,27 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Doenças aparecem no rosto**: catapora deixa pintas (e marquinhas para sempre), quimioterapia deixa careca, vitiligo, conjuntivite, catarata, acne…
 
 ### 🏫 Escola e faculdade
-- **Provas com perguntas de verdade** (cerca de 140, do fundamental 1 à faculdade) com uma alternativa certa. Antes da prova: ir, faltar ou fingir doença, e os pais podem te obrigar a ir.
-- Três faltas no ano ou média baixa = **repetir de ano**.
-- **Nota do vestibular** vem do histórico escolar inteiro, desde o 1º ano.
-- Faculdade **pública** (nota de corte) ou **particular** (família paga, bolsa por nota, bolsa de atleta, bolsa de música/arte, financiamento ou dinheiro próprio).
-- **Clubes e times** com posições (reserva → titular → capitão) que contam para a bolsa.
-- **Cursos técnicos** (16, de radiologia a manutenção de aeronaves) com empregos que só pedem o técnico, e **pós-graduação** com especialização, MBA, mestrado, doutorado e residência. Há empregos que exigem pós (cientista de IA, auditor fiscal, astrofísico, dermatologista…), e a pós aumenta o salário: mestrado +10%, doutorado +15%.
-- **Cada faculdade tem empregos próprios**: música vira maestro ou produtor musical, química vira perito criminal, computação vira cientista de dados, e assim por diante. Com diploma o salário é bem maior, e aparecem mais vagas da sua área.
+- **Semana de provas todo ano**, da escola à pós, com perguntas de múltipla escolha. Quem estudou no ano descarta alternativas erradas, e errar pesa pouco.
+- **As perguntas seguem a dificuldade do jogo**: no Fácil aparecem 2 alternativas e perguntas mais simples; no Normal, 3; no Difícil, todas.
+- **Recuperação** quando a média cai e **vestibular** com 5 questões que somam pontos para a faculdade.
+- Minigames da escola: simulado, tabuada, redação, feira de ciências, trabalho em grupo e recreio.
+- Faculdade com seminário, **estágio** (bolsa e vantagem no primeiro emprego da área), iniciação científica e **TCC** com orientador e defesa.
+- Faculdade **pública** (nota de corte) ou **particular** (família paga, bolsas ou financiamento), cursos técnicos e pós-graduação.
+- Quem quer avançar rápido liga **Minigames da rotina** em Configurações: provas, vestibular e entrevistas se resolvem sozinhos pelo nível do personagem.
 
 ### 💼 Trabalho e dinheiro
-- **Mais de 60 carreiras** com plano de carreira (quem sobe para quem), empresas de portes diferentes e promoções por desempenho.
-- Menu do emprego: trabalhar mais, hora extra, corpo mole, puxar o saco do chefe, **atestado** (de verdade ou comprado), aumento e promoção.
-- **Eventos raros de demissão**: falência, corte, fusão, substituição por IA, o sobrinho do dono…
-- **Bicos** e meio período a partir dos 13. Antes dos 18, para comprar algo você **pede aos pais** (a chance depende do relacionamento) ou usa o próprio dinheiro.
-- Gastos anuais, dívidas com juros e **sobrecarga**: fazer coisas demais gera cansaço, depressão, burnout e até a morte.
-- 12 carreiras especiais (ator, músico, atleta, streamer…), política, realeza e empresa própria.
-- Passou na autoescola? Seus pais podem te dar **um carro de presente**: de um popular usado a um superesportivo, conforme o dinheiro da família.
+- **Mais de 130 profissões**, cada uma com um **minigame de situações** e um **desafio de raciocínio** da área (troco, diagnóstico, caça ao erro no código, triagem, receita certa…).
+- **Entrevista de promoção**, **experiência na área** (entra em cargo mais alto ao trocar de emprego), **especializações**, **certificações**, avaliação anual com negociação de aumento e **freelas**.
+- **Advertências e RH**: três dias ruins levam a uma conversa que pode terminar em demissão. Reputação alta atrai propostas de outras empresas.
+- **Carreira de lutador**, da rinha clandestina ao cinturão mundial, em MMA, boxe, muay thai, kickboxing ou jiu-jítsu.
+- **Contas fixas por ano** conforme a economia e a inflação do país: IPTU e manutenção da casa, imposto, revisão e combustível do carro. O carro se desgasta e quebra. Plano de saúde, seguro, doações, festas e fim de semana de luxo.
+- Antes dos 18, a tela de Bens mostra o **dinheiro da família**.
 
 ### ❤️ Relações
-- Barras de **amor** e **amizade** para cada pessoa. Quanto maior a amizade, mais fácil virar amigo de verdade.
-- Quem você conhece nos eventos vira uma pessoa de verdade na sua lista, com nome, rosto e gênero coerentes.
-- Namoro, casamento, filhos, divórcio, amigos, pets (cães e gatos por raça, exóticos e animais de fazenda).
-- Selo **Minha primeira vez**, ganho na hora (a partir dos 18 anos), com o nome da pessoa e a idade.
-- **Fazer amor** com quem você namora ou é casado (a partir dos 18): dá felicidade e, sem proteção, pode vir um bebê.
+- Barras de **amor** e **amizade** para cada pessoa, e **gostos** próprios: acertar o assunto na conversa ou o programa do encontro aproxima muito mais.
+- **DR** quando o relacionamento esfria, **festas com dança** (aniversário infantil, festa da turma e festa adulta) e **saídas para beber** na idade legal de cada país, com a volta para casa: aplicativo, carona, a pé ou dirigindo, com blitz e acidentes.
+- Namoro, casamento, filhos, divórcio, amigos e pets. Gravidez na adolescência a partir dos 16, com alguém da mesma faixa de idade, e consequências na escola e na família.
+- **Brincadeiras de criança** (esconde-esconde, pega-pega, desenho, videogame) e pedidos aos pais.
 
 ### 💞 Namoros e casamentos plurais
 - Em **Amor → Relação com mais pessoas**, ou na ficha de um parceiro adulto, proponha incluir mais uma pessoa.
@@ -85,13 +83,15 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - Relacionamentos consentidos podem virar noivados e casamentos, sem punição automática de traição. Casos secretos continuam separados desses acordos.
 
 ### 🥋 Lutas e brigas
-- **9 artes marciais** (Judô, Jiu-jítsu, Karatê, Muay thai, Boxe, Taekwondo, Capoeira, Kung fu, Krav maga) com faixas, uma por ano, e um **golpe especial** na última.
-- **Briga por turnos**: você escolhe os golpes; alguns podem matar, e às vezes você bate para apagar e mata sem querer.
-- Adversários com força por idade; alguns adultos também sabem lutar.
+- **Luta tática**: cada golpe tem um tipo e o adversário dá sinais do que vai fazer. Fôlego, luta no chão, finalização e adversários que antecipam os seus golpes.
+- **Proficiência em luta**: treino, faixas e profissão somam. Um lutador profissional desarmado vence uma pessoa comum quase sempre.
+- **9 artes marciais** com faixas e um golpe especial na última.
+- **Armas brancas e de fogo** com a lei de cada país (compra fácil, licença com exame ou mercado negro) e abordagens policiais para quem anda armado onde é proibido.
 
 ### 🚔 Crime e prisão
-- Crimes avulsos com minijogos (assalto a casa e ao cofre), **facção** do olheiro ao dono do morro, **assassino de aluguel**.
-- O que você rouba vai para os **Bens**: o item furtado da loja, a TV da casa invadida, o carro roubado, as joias. Vender coisa roubada paga menos e pode dar cadeia.
+- Crimes avulsos com minijogos, **facção** do olheiro ao dono do morro e **assassino de aluguel**.
+- **Serviços ilegais**: contratar um matador, o cartel ou uma quadrilha para um assalto, e comprar diploma falso. Paga-se adiantado, e traição, chantagem e delação fazem parte do pacote.
+- **Drogas** com a lei de cada país (legal, descriminalizada, crime ou crime grave), vício, overdose e reabilitação. **Doping** no esporte.
 - Prisão com rotina, grupo, motim, brigas e **fuga em minijogo de labirinto**.
 
 ### 🚓 Polícia e investigação
@@ -100,16 +100,19 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Investigue crimes** num minijogo de dedução: assassinato na mansão, roubo de joias, envenenamento, sequestro… Interrogue suspeitos, reviste casas, chame a perícia, cheque câmeras e acuse. Acertar dá promoção; errar põe um inocente na cadeia.
 
 ### 🛐 Seita ou grupo religioso
-- **Entre num grupo** e suba de cargo: fiel, obreiro, diácono, pastor, bispo, braço direito do líder… e tente tomar a liderança.
-- **Ou funde o seu**: igreja, seita apocalíptica, culto à natureza ou movimento espiritual, com o nome que quiser. Você começa praticamente sem ninguém e precisa conquistar seguidores.
-- **Gerencie a fé** com cultos, discursos, livros sagrados, festas e milagres encenados. Fé baixa vira revolta, e numa revolta os próprios seguidores podem te matar.
-- Dízimo, templos, TV, **denúncias** e a polícia de olho. Com fiéis suficientes, dá para **dominar o bairro, a cidade, o estado e o país**.
-- Mais de 200 eventos.
+- **Funde o seu grupo começando na deep web**: escolha o fórum, acerte o tom do post, junte seguidores online e marque encontros secretos.
+- Seis estágios (Fórum, Célula, Comunidade, Igreja, Movimento, Império da fé) com **doutrinas**, **sermão ao vivo** em minigame, segurança, **atentados**, rivais e o risco de uma revolta.
+- **Ou entre num grupo** (inclusive um secreto, com iniciação), suba de cargo, proteja o líder num atentado, dispute a sucessão ou conspire para derrubá-lo.
+
+### 🏛️ Política e guerra
+- **Política de cada país**: presidencialismo ou parlamentarismo, cargos com nomes locais e partidos próprios (no Brasil, com alusão aos mais conhecidos).
+- **Campanha** com bandeira, debate na TV, reta final e segundo turno. Senado, coalizão, projetos de lei, orçamento e crises, com efeito real na economia do país.
+- **Escândalos**: propina, acordo com facções, lavagem de dinheiro, operação policial, CPI e impeachment. Escândalos econômicos para governadores e presidentes.
+- **Guerras**: relações entre países, alianças militares, guerra local ou mundial, territórios conquistados e perdidos, capital cercada, exílio, prisão ou morte pelo inimigo. O cidadão comum vive convocação, frente de batalha, bombardeios e racionamento; o militar pode ir à frente ou espionar outro país.
 
 ### ✊ Derrubar o governo
 - Movimento clandestino com apoio do povo, armas, generais subornados e a polícia política no seu encalço.
-- Mais de 200 eventos: a conspiração, a vida de ditador (eleições, imprensa, sanções, atentados, contragolpes), a prisão política e o exílio.
-- **Golpe de Estado**: se der certo, você vira líder supremo do país (e tem que sobreviver aos contragolpes); se der errado, é prisão, exílio ou fuzilamento.
+- **Golpe de Estado**: se der certo, você vira líder supremo do país; se der errado, é prisão, exílio ou fuzilamento.
 
 ### 👻 Paranormal
 - Investigue cemitérios, castelos, florestas na lua cheia e hospitais abandonados, junte provas e lance um documentário (ou vire meme).
@@ -135,8 +138,9 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - Divórcio com filhos menores vai para a justiça: guarda, guarda compartilhada e pensão até os 18 anos.
 
 ### 🩺 Saúde
-- A maioria das doenças aparece primeiro como sintoma ("acordei com bolinhas vermelhas"); só a consulta revela o nome.
-- Posto de saúde, clínica popular, médico particular e hospital: quanto mais barato, mais erra e menos cura. Medicina alternativa quase nunca funciona, mas às vezes acontece um milagre.
+- A maioria das doenças aparece primeiro como sintoma; só a consulta revela o nome. Quanto mais barato o atendimento, mais erra.
+- **Expectativa de vida realista**: o corpo se recupera para uma saúde típica da idade e tratar uma doença grave segura o avanço dela. Quem se cuida vive, em média, uns 76 anos, e as causas de morte são coerentes com a história.
+- Caxumba sem tratamento pode deixar infértil.
 
 ### 🧛 A fera no sangue
 - Vampiros têm barra de sede e lobisomens, de fome. Em 100%, a criatura toma o controle e pode atacar estranhos ou a própria família.
@@ -162,14 +166,17 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
   <img src="docs/img/desistir.png" width="200" alt="Desistir desta vida">
 </p>
 
+### 🌅 Vida adulta e velhice
+- Férias, contas do mês, encontros com os amigos, **hobbies com níveis** até mestre e crise de meia-idade.
+- **Lista de desejos** na velhice, netos (histórias, mesada, receita), memórias que viram livro e baile da terceira idade.
+
 ### 🌍 E mais
-- **Autoescola** com prova de placas (22 placas desenhadas), passaporte (inclusive falsificado) e emigração.
-- **80 doenças**, com tratamentos, doenças crônicas e câncer.
-- **Mais de 4.100 eventos**: mais de 1.400 na vida normal, coerentes com idade, carreira e situação, e mais de 2.300 nos modos fictícios.
-- **73 conquistas**, muitas zoeiras e várias secretas, que valem para todas as vidas e aparecem na hora num popup (Menu → Conquistas).
-- Selos (um por vida, inclusive Ditador, Filho da noite, Profeta, Detetive e Viajante de mundos), cemitério, desafios, dificuldade, herdeiros (continue a vida com um filho).
-- **Sons e música** sintetizados (sem arquivos de áudio), tema claro e escuro, efeito de dano.
-- Segredos para quem zerar o jogo. 😉
+- **15 países** com eventos culturais próprios (Réveillon, Dia dos Mortos, Diwali, Tomatina, Chuseok…), economia, leis e política diferentes.
+- **Copa do Mundo e Olimpíadas** com convocação, jogos e repercussão no mundo inteiro.
+- **Idade coerente**: cada tema tem idade mínima (bebida conforme a lei do país, namoro, trabalho, direção, dinheiro), e bebês só veem eventos de bebê.
+- **Autoescola**, passaporte (inclusive falsificado) e emigração. **Mais de 80 doenças**.
+- **Mais de 5.600 eventos**, conquistas, selos, cemitério, desafios, dificuldade e herdeiros (continue a vida com um filho).
+- **Sons e música** sintetizados, tema claro e escuro.
 
 ## Modos fictícios
 
@@ -300,7 +307,7 @@ Os relatórios incluem 180 projeções financeiras: quatro estratégias em 15 pa
 
 | Comando | O que faz |
 |---|---|
-| `.\test.ps1` | Abre o jogo no Edge sem janela e simula dezenas de vidas inteiras, testando ações, telas, todos os eventos em várias idades, regras da prisão, equilíbrio das brigas e textos com lacunas. |
+| `.\test.ps1` | Abre o jogo no Edge sem janela (cerca de 6 minutos) e simula dezenas de vidas inteiras, testando ações, telas, todos os eventos em várias idades, regras da prisão, equilíbrio das brigas e textos com lacunas. |
 | `.\quality.ps1` | Relatório de qualidade do texto: concordância de gênero, frases repetidas e eventos que nunca aparecem. |
 | `python -I tools/audit_events.py` | Procura eventos cujo texto promete algo que o efeito não faz: nascimento sem bebê, morte sem ninguém morrer, item ganho sem item. |
 | `.\aventura.ps1` | Joga cada modo fictício 40 vezes e mostra a taxa de vitória e por que se perde (saúde ou sanidade), para equilibrar a dificuldade. |
@@ -377,3 +384,8 @@ As versões foram publicadas separadamente: 1.69 corrige ajuda familiar, sucess�
 NPCs precisam concluir cursos para assumir profissões qualificadas. Parceiros e filhos adultos podem propor reformas, viagens, poupança e mudanças de cidade; cada adulto decide por si e os custos são informados. Memórias influenciam confiança por tempo limitado. Aposentadoria, acessibilidade e redes de apoio têm efeitos leves e persistentes.
 
 Testes controlados de quatro estilos usam sementes 17401–17404 para exercitar três sucessões por estilo, além das partidas automatizadas existentes. Não são sessões humanas nem prova de equilíbrio de todas as estratégias.
+
+
+## Novidades recentes · 1.75–2.06
+
+Da 1.75 à 2.06: Copa e Olimpíadas, seitas que nascem na deep web, luta tática e carreira de lutador, armas e drogas com a lei de cada país, profissões com minigames, escola e faculdade com provas de verdade, infância e relacionamentos, vida adulta e velhice, expectativa de vida realista, política de cada país, escândalos, guerras e o submundo. A lista completa de cada versão está em **Menu → Novidades** e nas [releases](https://github.com/madeiragab/newlife/releases).
