@@ -40,7 +40,7 @@ function beltExam(id){
 // ---------- briga por turnos: eu escolho o golpe ----------
 const BASIC_MOVES=[{id:'soco',n:'Soco',d:'direto no rosto',pow:12,acc:.75},{id:'chute',n:'Chute',d:'na perna ou na barriga',pow:15,acc:.65},
   {id:'empurrao',n:'Empurrão',d:'para ganhar espaço',pow:6,acc:.9},{id:'agarrar',n:'Agarrar e derrubar',d:'levar para o chão',pow:11,acc:.68,kill:.01}];
-const myMoves=()=>BASIC_MOVES.concat(Object.keys(STYLES).filter(isMaster).map(id=>Object.assign({id,special:1,style:STYLES[id].n},STYLES[id].move)));
+var myMoves=()=>BASIC_MOVES.concat(Object.keys(STYLES).filter(isMaster).map(id=>Object.assign({id,special:1,style:STYLES[id].n},STYLES[id].move)));
 let FIGHT=null;
 // adv: {p: pessoa} ou {name, power, gender}; ctx: 'pessoa' | 'escola' | 'prisao' | 'rua'
 function startFight(adv,ctx){

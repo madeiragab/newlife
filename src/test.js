@@ -46,6 +46,7 @@ function selfTest(){
   T('Copa do Mundo',copaSelfTest);
   T('Copa e Olimpíadas no mundo',grandesEventosSelfTest);
   T('seita: deep web, sermão, atentados e complôs',seita3SelfTest);
+  T('luta tática, lutador e minigames das profissões',carreiras2SelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);
