@@ -48,6 +48,7 @@ function selfTest(){
   T('seita: deep web, sermão, atentados e complôs',seita3SelfTest);
   T('luta tática, lutador e minigames das profissões',carreiras2SelfTest);
   T('proficiência, armas, drogas e doping',armasDrogasSelfTest);
+  T('desafios, especializações, certificações e entrevistas',carreiras3SelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);
