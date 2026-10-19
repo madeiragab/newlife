@@ -8,7 +8,7 @@ yearHealth=(o=>function(){ const m=S.me, cx=(m.dis||[]).find(d=>d.id==='caxumba'
 function ajustes201SelfTest(){ const s0=S,ns=window.NO_SAVE; window.NO_SAVE=true; const erros=[]; try{ newLife({country:'BR'}); const m=S.me; m.age=12; m.born=S.year-12;
     const v=V.assets(); if(!v.items.some(it=>/Dinheiro da família/.test(it.html||''))) erros.push('bens sem dinheiro da família');
     m.gender='M'; let inf=0; for(let i=0;i<60;i++){ m.c.infertilCaxumba=0; m.fert=70; m.dis=[{id:'caxumba',y:0,ctrl:false}]; yearHealth(); if(m.c.infertilCaxumba) inf++; } if(!inf) erros.push('caxumba nunca deixa infértil');
-    m.c.infertilCaxumba=0; m.fert=70; m.dis=[{id:'caxumba',y:0,ctrl:false,trat:S.year}]; for(let i=0;i<30;i++) yearHealth(); if(m.c.infertilCaxumba) erros.push('caxumba tratada deixou infértil');
+    m.c.infertilCaxumba=0; m.fert=70; for(let i=0;i<30;i++){ m.age=20; m.dis=[{id:'caxumba',y:0,ctrl:false,trat:S.year}]; yearHealth(); } if(m.c.infertilCaxumba) erros.push('caxumba tratada deixou infértil');
   }catch(e){ erros.push(e.message); } finally{ S=s0; window.NO_SAVE=ns; } if(erros.length) throw Error('Ajustes · '+erros.join(' | ')); return {ok:true}; }
 // gravidez na adolescência: a notícia muda a vida inteira
 interact=(o=>function(p,k){ const n0=S.births.length; const r=o.apply(this,arguments); if(S.births.length>n0&&S.me.age<18) queue('gravidez_teen',{pid:p&&p.id}); return r; })(interact);
