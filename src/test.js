@@ -56,6 +56,9 @@ function selfTest(){
   T('eventos coerentes com a idade',idadeCoerenteSelfTest);
   T('minigames automáticos',minigamesAutoSelfTest);
   T('eventos de cada país',paisesSelfTest);
+  T('carreira política',politicaSelfTest);
+  T('escândalos, economia e guerra',politica3SelfTest);
+  T('guerras, alianças e espionagem',guerraSelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);
