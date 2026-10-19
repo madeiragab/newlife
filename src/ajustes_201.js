@@ -10,3 +10,10 @@ function ajustes201SelfTest(){ const s0=S,ns=window.NO_SAVE; window.NO_SAVE=true
     m.gender='M'; let inf=0; for(let i=0;i<60;i++){ m.c.infertilCaxumba=0; m.fert=70; m.dis=[{id:'caxumba',y:0,ctrl:false}]; yearHealth(); if(m.c.infertilCaxumba) inf++; } if(!inf) erros.push('caxumba nunca deixa infértil');
     m.c.infertilCaxumba=0; m.fert=70; m.dis=[{id:'caxumba',y:0,ctrl:false,trat:S.year}]; for(let i=0;i<30;i++) yearHealth(); if(m.c.infertilCaxumba) erros.push('caxumba tratada deixou infértil');
   }catch(e){ erros.push(e.message); } finally{ S=s0; window.NO_SAVE=ns; } if(erros.length) throw Error('Ajustes · '+erros.join(' | ')); return {ok:true}; }
+// gravidez na adolescência: a notícia muda a vida inteira
+interact=(o=>function(p,k){ const n0=S.births.length; const r=o.apply(this,arguments); if(S.births.length>n0&&S.me.age<18) queue('gravidez_teen',{pid:p&&p.id}); return r; })(interact);
+EVENTS.gravidez_teen={when:m=>m.age<18&&!m.prison,show:d=>{ const p=P(d.pid); return {k:'Família',t:'Gravidez na adolescência',x:`${S.me.gender==='F'?'Estou grávida':'Vou ser pai'} aos ${S.me.age} anos${p?', com '+p.first:''}. Ainda estou na escola.`,ch:[['Contar para os meus pais','pais'],['Esconder por enquanto','esconde'],['Assumir junto e planejar o futuro','assume']]}; },
+  pick:k=>{ const m=S.me, c=m.edu.cur; if(c) c.grade=clamp(c.grade-8); st('happy',-6);
+    if(k==='pais'){ const ps=parents(); if(R.chance(.6)){ ps.forEach(p=>p.bond=clamp(p.bond-5)); return 'Choraram, gritaram, e depois me abraçaram. Disseram que vão ajudar.'; } ps.forEach(p=>p.bond=clamp(p.bond-20)); return 'Meus pais ficaram furiosos. A casa virou um silêncio pesado.'; }
+    if(k==='esconde'){ parents().forEach(p=>p.bond=clamp(p.bond-10)); return 'Escondi por meses. Quando descobriram, foi pior.'; }
+    st('happy',4); return 'Decidimos encarar juntos. Vai ser difícil conciliar escola e bebê, mas não estamos sozinhos.'; }};

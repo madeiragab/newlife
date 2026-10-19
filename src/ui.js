@@ -426,7 +426,7 @@ V.person=p=>{
   A('flertar','Flertar',null,canFlirt);
   A('reatar','Tentar voltar',null,rel==='ex');
   if(love){
-    if(a>=18&&p.age>=18) it.push({ic:'❤️‍🔥',l:'Fazer amor',s:'Felicidade · sem proteção pode vir um bebê',on:()=>modal({t:`Com ${p.first}`,x:'Como vai ser?',ch:[{l:'Com proteção',fn:()=>{ const r=interact(p,'amor',true); log(r); MQ.unshift({t:p.first,x:r}); }},{l:'Sem proteção',fn:()=>{ const r=interact(p,'amor',false); log(r); MQ.unshift({t:p.first,x:r}); }},{l:'Hoje não',cls:'alt'}]})});
+    if(a>=16&&p.age>=16&&(a>=18&&p.age>=18||Math.abs(a-p.age)<=3)) it.push({ic:'❤️‍🔥',l:'Fazer amor',s:'Felicidade · sem proteção pode vir um bebê',on:()=>modal({t:`Com ${p.first}`,x:'Como vai ser?',ch:[{l:'Com proteção',fn:()=>{ const r=interact(p,'amor',true); log(r); MQ.unshift({t:p.first,x:r}); }},{l:'Sem proteção',fn:()=>{ const r=interact(p,'amor',false); log(r); MQ.unshift({t:p.first,x:r}); }},{l:'Hoje não',cls:'alt'}]})});
     A('viagem','Viajar juntos',5000,a>=18,fmt(5000));
     if(rel==='namoro'&&a>=16&&polyPodeOficializar(p)) it.push({l:'Pedir em casamento',on:()=>modal({t:'Qual anel?',ch:[[500,'Anel simples'],[5000,'Anel de ouro'],[40000,'Diamante enorme']].map(([c,l])=>({l:`${l} (${fmt(c)})`,fn:()=>{ const r=interact(p,'pedido',[c]); log(r); MQ.unshift({t:p.first,x:r}); }})).concat([{l:'Cancelar',cls:'alt'}])})});
     if(rel==='noivo'&&polyPodeOficializar(p)) it.push({l:'Marcar o casamento',on:()=>modal({t:'Casamento',x:'Que tipo de cerimônia?',ch:[[800,'Só no cartório'],[25000,'Festa para os íntimos'],[150000,'Festão com 500 convidados']].flatMap(([c,l])=>[{l:`${l} (${fmt(c)})`,fn:()=>{ const r=interact(p,'casar',[c,false]); log(r); MQ.unshift({t:'Casamento',x:r}); }}]).concat([{l:'Com pacto antenupcial (protege meu dinheiro)',fn:()=>{ const r=interact(p,'casar',[800,true]); log(r); MQ.unshift({t:'Casamento',x:r}); }},{l:'Cancelar',cls:'alt'}])})});
@@ -435,7 +435,7 @@ V.person=p=>{
   }
   A('insulto','Insultar',null,a>=4); A('discutir','Discutir',null,a>=6);
   if(a>=6&&!['filho','adot','neto'].includes(rel)||a>=6&&p.age>=16) it.push({ic:'👊',l:'Partir pra briga',s:'Eu escolho os golpes',tone:'bad',on:()=>startFight({p},'pessoa')});
-  if(a>=14) it.push({l:'Assassinar',tone:'bad',on:()=>confirmBox('Tem certeza?',`Tentar matar ${fullName(p)}? Isso pode acabar com a minha vida também.`,'Fazer',()=>act(()=>interact(p,'matar'),'Crime'))});
+  if(a>=13) it.push({l:'Assassinar',tone:'bad',on:()=>confirmBox('Tem certeza?',`Tentar matar ${fullName(p)}? Isso pode acabar com a minha vida também.`,'Fazer',()=>act(()=>interact(p,'matar'),'Crime'))});
   return {title:p.first,items:it};
 };
 
