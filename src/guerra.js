@@ -17,7 +17,7 @@ const forcaLado=(G,l)=>G[l].reduce((s,p)=>s+(POTENCIA[p]||20)*(1-(G.perdas[p]||0
 const donoRegiao=(G,p,r)=>(S.terr||[]).find(t=>t.de===p&&t.reg===r);
 function regioesLivres(p){ return (REGIOES[p]||[]).filter(r=>!(S.terr||[]).some(t=>t.de===p&&t.reg===r)); }
 // começa uma guerra: aliados de cada lado entram conforme as relações; com muita gente ou potências dos dois lados, vira mundial
-function guerraIniciar(a,b,origem){ if(guerraAtual()) return guerraAtual(); const G={a:[a],b:[b],lider:{a,b},frente:50,anos:0,mundial:false,perdas:{},origem:origem||'',inicio:S.year};
+function guerraIniciar(a,b,origem){ if(guerraAtual()) return guerraAtual(); if(!a||!b||a===b) return null; const G={a:[a],b:[b],lider:{a,b},frente:50,anos:0,mundial:false,perdas:{},origem:origem||'',inicio:S.year};
   for(const c of COUNTRIES.map(x=>x.id)){ if(c===a||c===b) continue; const ra=relPais(c,a), rb=relPais(c,b);
     if(aliados(c,a)&&!aliados(c,b)) G.a.push(c); else if(aliados(c,b)&&!aliados(c,a)) G.b.push(c);
     else if(ra>=55&&ra-rb>=25&&R.chance(.5)) G.a.push(c); else if(rb>=55&&rb-ra>=25&&R.chance(.5)) G.b.push(c); }
@@ -91,7 +91,7 @@ EVENTS.guerra_ocupacao={when:m=>!m.prison&&(S.terr||[]).some(t=>t.de===m.country
   pick:k=>{ const m=S.me; if(k==='dinheiro'){ m.money-=Math.min(Math.max(0,m.money),1000); m.karma=clamp(m.karma+4); return 'O dinheiro chegou pelas mãos de um contrabandista.'; } if(k==='trazer'){ if(R.chance(.7)){ m.karma=clamp(m.karma+6); return 'A família atravessou a linha de frente numa noite sem lua. Estão comigo.'; } st('happy',-8); return 'Foram barrados na fronteira. Vou tentar de novo.'; } return 'Desliguei o telefone e chorei.'; }};
 // guerras também começam sem o personagem no governo
 NL_GANCHOS_ANO.push(()=>{ const m=S.me; if(!m||!m.alive||S.scen) return; const G=guerraAtual();
-  if(!G){ if(!(m.office&&m.office.id==='pres')&&R.chance(.004)){ const ini=polVizinho(m); if(ini) guerraIniciar(R.chance(.5)?m.country:ini,R.chance(.5)?ini:m.country,'mundo'); } return; }
+  if(!G){ if(!(m.office&&m.office.id==='pres')&&R.chance(.004)){ const ini=polVizinho(m); if(ini&&ini!==m.country){ const ataca=R.chance(.5); guerraIniciar(ataca?m.country:ini,ataca?ini:m.country,'mundo'); } } return; }
   const meu=ladoDe(G,m.country), pres=m.office&&m.office.id==='pres'&&meu;
   if(!pres) guerraAno(null);
   if(guerraAtual()&&meu&&!m.prison){ if(pres) queue('pol_guerra',{}); if(R.chance(.35)) queue('guerra_bombardeio',{}); if(R.chance(.3)) queue('guerra_racionamento',{}); if(m.age>=18&&m.age<=45&&!m.office&&!m.c.alistou) queue('guerra_alistamento',{}); if(m.job&&m.job.spc==='militar') queue('guerra_front',{});

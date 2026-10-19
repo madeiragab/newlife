@@ -63,6 +63,7 @@ function selfTest(){
   T('bens da família e caxumba',ajustes201SelfTest);
   T('gastos, contas e serviços ilegais',gastosSelfTest);
   T('dificuldade das perguntas',quizDificuldadeSelfTest);
+  T('correções 2.07',ajustes207SelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);

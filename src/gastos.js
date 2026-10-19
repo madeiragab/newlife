@@ -1,6 +1,8 @@
 // ===== Para onde vai o dinheiro: contas fixas por ano conforme a economia do país (casa, carro, mecânico, plano de saúde, seguro),
 // gastos legais novos e serviços ilegais (assassino de aluguel, cartel, assalto encomendado, diploma falso), com risco de traição =====
 const IPVA={BR:.03,PT:.01,US:.015,AR:.025,MX:.02,JP:.015,IT:.012,FR:.01,DE:.01,GB:.012,AO:.02,CA:.015,ES:.01,KR:.02,IN:.02};
+// cobra o que dá do saldo; o resto vira dívida com parcela anual
+function gastoCobrar(v,nome){ const m=S.me; v=Math.max(0,Math.round(v)); const pago=Math.min(v,Math.max(0,m.money)); m.money-=pago; const resto=v-pago; if(resto>0){ let l=m.loans.find(q=>q.n===nome); if(!l){ l={n:nome,bal:0,pay:0}; m.loans.push(l); } l.bal+=resto; l.pay=Math.max(l.pay,Math.round(l.bal/4*1.15)); } return resto; }
 function gastosInflacao(){ try{ return 1+Math.max(0,mundo(S.me.country).inflacao||0); }catch(e){ return 1; } }
 function gastosLocal(){ try{ return mercadoCusto(); }catch(e){ return 1; } }
 // estimativa das contas do ano, item por item
@@ -11,7 +13,7 @@ function gastosAno(m){ m=m||S.me; const loc=gastosLocal(), inf=gastosInflacao(),
   return it; }
 yearMoney=(o=>function(){ const m=S.me; const r=o.apply(this,arguments); if(!m.alive||S.scen||m.prison||m.age<18) return r;
   const it=gastosAno(m); if(!it.length) return r; const carros=m.assets.filter(a=>a.k==='carro').length; const total=Math.max(0,it.reduce((s,x)=>s+x[2],0)-carros*900);
-  m.money-=total; m.c.contasAno=total; if(total>0&&R.chance(.4)) log(`Contas fixas do ano: ${fmt(total)} (${it.map(x=>x[1].split(' · ')[0].toLowerCase()).filter((v,i,a)=>a.indexOf(v)===i).join(', ')}).`);
+  const atraso=gastoCobrar(total,'Contas atrasadas'); m.c.contasAno=total; if(atraso>0) log(`Não deu para pagar todas as contas: ${fmt(atraso)} viraram dívida.`,'warn'); if(total>0&&R.chance(.4)) log(`Contas fixas do ano: ${fmt(total)} (${it.map(x=>x[1].split(' · ')[0].toLowerCase()).filter((v,i,a)=>a.indexOf(v)===i).join(', ')}).`);
   for(const c of m.assets.filter(a=>a.k==='carro')){ c.cond=Math.max(0,(c.cond??100)-R.int(3,9)); if(R.chance(.06+(100-c.cond)/300)) queue('carro_quebrou',{id:c.id}); }
   if(m.diplomaFalso&&m.job&&R.chance(.07)) queue('diploma_descoberto',{}); return r; })(yearMoney);
 // plano de saúde paga a maior parte dos tratamentos
@@ -20,9 +22,9 @@ treat=(o=>function(where,dis){ const m=S.me, d0=m.money; const r=o.apply(this,ar
 EVENTS.carro_quebrou={when:m=>!m.prison&&m.age>=18,prep:m=>{ const c=m.assets.find(a=>a.k==='carro'); return c?{id:c.id}:null; },
   show:d=>{ const c=S.me.assets.find(a=>a.id===d.id); const v=c?Math.round(c.value*.04*gastosInflacao()):1000; return {k:'Carro',t:'🔧 O carro quebrou',x:`${c?c.n:'O carro'} começou a fazer um barulho horrível e parou no meio da rua.`,ch:[[`Mecânico de confiança (${fmt(v)}${S.me.seguroCarro?', o seguro cobre':''})`,'confianca'],[`Oficina barata do bairro (${fmt(Math.round(v*.35))})`,'barata'],['Tentar consertar eu mesm'+oa(),'eu']]}; },
   pick:(k,d)=>{ const m=S.me, c=m.assets.find(a=>a.id===d.id); if(!c) return 'Já não tenho esse carro.'; const v=Math.round(c.value*.04*gastosInflacao());
-    if(k==='confianca'){ if(!m.seguroCarro) m.money-=v; c.cond=Math.min(100,(c.cond??60)+35); return m.seguroCarro?'O seguro pagou tudo. O carro voltou como novo.':`Paguei ${fmt(v)}. Serviço impecável.`; }
-    if(k==='barata'){ m.money-=Math.round(v*.35); if(R.chance(.35)){ c.cond=Math.max(0,(c.cond??60)-10); return R.pick(['Cobraram, trocaram uma peça boa por uma usada e o barulho continuou.','Disseram que estava pronto. Quebrou de novo no dia seguinte.']); } c.cond=Math.min(100,(c.cond??60)+20); return 'Barato e resolveu. Dessa vez deu sorte.'; }
-    if(R.chance(.3+m.smarts/300)){ m.money-=150; c.cond=Math.min(100,(c.cond??60)+15); return 'Assisti três vídeos, sujei a roupa inteira e consertei. Orgulho.'; } c.cond=Math.max(0,(c.cond??60)-15); m.money-=Math.round(v*.5); return 'Piorei o problema. Acabei no guincho.'; }};
+    if(k==='confianca'){ if(!m.seguroCarro) gastoCobrar(v,'Conserto do carro'); c.cond=Math.min(100,(c.cond??60)+35); return m.seguroCarro?'O seguro pagou tudo. O carro voltou como novo.':`Paguei ${fmt(v)}. Serviço impecável.`; }
+    if(k==='barata'){ gastoCobrar(v*.35,'Conserto do carro'); if(R.chance(.35)){ c.cond=Math.max(0,(c.cond??60)-10); return R.pick(['Cobraram, trocaram uma peça boa por uma usada e o barulho continuou.','Disseram que estava pronto. Quebrou de novo no dia seguinte.']); } c.cond=Math.min(100,(c.cond??60)+20); return 'Barato e resolveu. Dessa vez deu sorte.'; }
+    if(R.chance(.3+m.smarts/300)){ gastoCobrar(150,'Conserto do carro'); c.cond=Math.min(100,(c.cond??60)+15); return 'Assisti três vídeos, sujei a roupa inteira e consertei. Orgulho.'; } c.cond=Math.max(0,(c.cond??60)-15); gastoCobrar(v*.5,'Conserto do carro'); return 'Piorei o problema. Acabei no guincho.'; }};
 // ---------- gastos legais ----------
 function gastoLegal(k){ const m=S.me, loc=gastosLocal();
   if(k==='plano'){ m.planoSaude=!m.planoSaude; return m.planoSaude?'Contratei um plano de saúde. Agora a maior parte dos tratamentos sai por conta dele.':'Cancelei o plano de saúde.'; }
@@ -34,15 +36,15 @@ function gastoLegal(k){ const m=S.me, loc=gastosLocal();
 // ---------- serviços ilegais ----------
 function ilegalPreco(p){ return Math.round((20000+(p.fame||0)*1500+(p.money>1e6?50000:0))*gastosLocal()); }
 EVENTS.ilegal_assassino={when:m=>!m.prison&&m.age>=18,prep:m=>{ const p=people().find(q=>q.alive&&q.rel!=='pet'); return p?{pid:p.id}:null; },
-  show:d=>{ const p=P(d.pid); return {k:'Submundo',t:'🔪 Assassino de aluguel',x:`Um intermediário num bar escuro diz que resolve "o problema" com ${p.first} por ${fmt(ilegalPreco(p))}, metade adiantada.`,ch:[['Fechar o serviço','fecha'],['Desistir','desiste']]}; },
-  pick:(k,d)=>{ const m=S.me, p=P(d.pid); if(!p) return ''; if(k==='desiste') return 'Fui embora. Nunca mais voltei àquele bar.'; const v=ilegalPreco(p); if(!canPay(v)) return `Não tenho ${fmt(v)}.`; m.money-=v; m.karma=clamp(m.karma-40); m.c.mandante=(m.c.mandante||0)+1; const x=R.f();
+  show:d=>{ const p=P(d.pid); if(!p||!p.alive) return {k:'Submundo',t:'🔪 Assassino de aluguel',x:'A pessoa que eu queria tirar do caminho já não está mais aqui.',ch:[['Esquecer o assunto','desiste'],['Ir embora','desiste']]}; return {k:'Submundo',t:'🔪 Assassino de aluguel',x:`Um intermediário num bar escuro diz que resolve "o problema" com ${p.first} por ${fmt(ilegalPreco(p))}, metade adiantada.`,ch:[['Fechar o serviço','fecha'],['Desistir','desiste']]}; },
+  pick:(k,d)=>{ const m=S.me, p=P(d.pid); if(!p||!p.alive) return 'Não há mais ninguém para o serviço.'; if(k==='desiste') return 'Fui embora. Nunca mais voltei àquele bar.'; const v=ilegalPreco(p); if(!canPay(v)) return `Não tenho ${fmt(v)}.`; m.money-=v; m.karma=clamp(m.karma-40); m.c.mandante=(m.c.mandante||0)+1; const x=R.f();
     if(x<.15) return 'O intermediário sumiu com o dinheiro. Não dá para reclamar na polícia.';
     if(x<.27){ arrest(`mandante de tentativa de homicídio contra ${fullName(p)}`,8,20); return 'O assassino foi preso antes do serviço e entregou o meu nome.'; }
     if(x<.40){ p.rel='inimigo'; p.bond=0; return `O serviço falhou. ${p.first} sobreviveu, e sabe quem mandou.`; }
     p.alive=false; p.cause='assassinad'+(p.gender==='F'?'a':'o')+' por um matador de aluguel'; log(`${fullName(p)} foi assassinad${p.gender==='F'?'a':'o'}.`,'bad'); st('happy',-6);
     if(R.chance(.25)) queue('investigacao',{n:fullName(p)}); if(R.chance(.2)) queue('ilegal_chantagem',{v:Math.round(v*.6)}); return `Dias depois, a notícia: ${p.first} foi encontrad${p.gender==='F'?'a':'o'} mort${p.gender==='F'?'a':'o'}. Ninguém sabe de nada. Por enquanto.`; }};
 EVENTS.ilegal_chantagem={when:m=>!m.prison,prep:()=>({v:Math.round(20000*gastosLocal())}),show:d=>({k:'Submundo',t:'📞 Chantagem',x:`O matador que contratei me ligou. Quer mais ${fmt(d.v)}, senão conta tudo para a polícia.`,ch:[['Pagar','paga'],['Recusar','recusa'],['Mandar resolver o matador também','resolve']]}),
-  pick:(k,d)=>{ const m=S.me; d.v=d.v||20000; if(k==='paga'){ m.money-=Math.min(Math.max(0,m.money),d.v); if(R.chance(.3)) queue('ilegal_chantagem',{v:Math.round(d.v*1.5)}); return 'Paguei. Ele disse que foi a última vez.'; }
+  pick:(k,d)=>{ const m=S.me; d.v=d.v||20000; if(k==='paga'){ if(m.money<d.v){ const tinha=Math.max(0,m.money); m.money-=tinha; if(R.chance(.5)){ arrest('mandante de homicídio',10,25); return `Só tinha ${fmt(tinha)}. Ele achou pouco e cumpriu a ameaça.`; } queue('ilegal_chantagem',{v:d.v-tinha}); return `Só tinha ${fmt(tinha)}. Ele pegou e deu um prazo para o resto: ${fmt(d.v-tinha)}.`; } m.money-=d.v; if(R.chance(.3)) queue('ilegal_chantagem',{v:Math.round(d.v*1.5)}); return 'Paguei. Ele disse que foi a última vez.'; }
     if(k==='recusa'){ if(R.chance(.5)){ arrest('mandante de homicídio',10,25); return 'Ele cumpriu a ameaça.'; } return 'Ele blefou. Pelo menos por enquanto.'; }
     m.karma=clamp(m.karma-20); if(R.chance(.5)) return 'O problema sumiu. Mas agora são dois.'; arrest('mandante de homicídio',12,30); return 'O segundo matador era policial infiltrado.'; }};
 const CARTEL_SERV=[['intimidar','Intimidar uma pessoa que me incomoda',15000],['negocio','Proteção para o meu negócio',30000],['provas','Sumir com provas contra mim',80000],['cobrar','Cobrar um dinheiro que me devem',10000]];

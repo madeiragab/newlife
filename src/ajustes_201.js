@@ -17,3 +17,15 @@ EVENTS.gravidez_teen={when:m=>m.age<18&&!m.prison,show:d=>{ const p=P(d.pid); re
     if(k==='pais'){ const ps=parents(); if(R.chance(.6)){ ps.forEach(p=>p.bond=clamp(p.bond-5)); return 'Choraram, gritaram, e depois me abraçaram. Disseram que vão ajudar.'; } ps.forEach(p=>p.bond=clamp(p.bond-20)); return 'Meus pais ficaram furiosos. A casa virou um silêncio pesado.'; }
     if(k==='esconde'){ parents().forEach(p=>p.bond=clamp(p.bond-10)); return 'Escondi por meses. Quando descobriram, foi pior.'; }
     st('happy',4); return 'Decidimos encarar juntos. Vai ser difícil conciliar escola e bebê, mas não estamos sozinhos.'; }};
+
+function ajustes207SelfTest(){ const s0=S,ns=window.NO_SAVE,nn=window.NO_NEWS; window.NO_SAVE=true; window.NO_NEWS=true; const erros=[]; const ok=(c,x)=>{ if(!c) erros.push(x); };
+  try{ newLife({country:'BR'}); const m=S.me; m.age=40; m.prison=null;
+    S.guerra=null; ok(guerraIniciar('BR','BR','teste')===null&&!S.guerra,'país em guerra contra si mesmo');
+    for(let i=0;i<200;i++){ S.guerra=null; S.year++; const f=NL_GANCHOS_ANO; for(const g of f){ try{ g(); }catch(e){} } if(S.guerra){ ok(S.guerra.lider.a!==S.guerra.lider.b,'guerra espontânea contra si mesmo'); } } S.guerra=null;
+    m.money=100; m.assets.push({id:newId(),k:'casa',n:'Casa',value:900000,cond:80}); const pat=netWorth(); const atraso=gastoCobrar(9000,'Contas atrasadas'); ok(m.money>=0&&atraso>0&&m.loans.some(l=>l.n==='Contas atrasadas'),'conta sem saldo não virou dívida');
+    m.money=1000; const r=EVENTS.ilegal_chantagem.pick('paga',{v:50000}); ok(m.money>=0&&!/Paguei\./.test(r),'chantagem paga sem dinheiro: '+r);
+    const p=mkPerson({rel:'inimigo',age:40,bond:5}); S.people.push(p); p.alive=false; const sh=EVENTS.ilegal_assassino.show({pid:p.id}); ok(/não está mais/.test(sh.x),'alvo morto aceito'); ok(/Não há/.test(EVENTS.ilegal_assassino.pick('fecha',{pid:p.id})),'serviço contra alvo morto');
+    m.office={id:'pref',yrs:1,appr:50}; const w=mundo('BR'), s1=w.saude; EVENTS.pol_orcamento.pick('saude'); const dPref=mundo('BR').saude-s1; m.office={id:'pres',yrs:1,appr:50}; const s2=mundo('BR').saude; EVENTS.pol_orcamento.pick('saude'); const dPres=mundo('BR').saude-s2; ok(dPref<dPres,'prefeito mexe no país como presidente');
+    S.flags.diff='facil'; m.age=16; startSchool('medio'); S.pending=[]; escQuiz('provas'); const d=S.pending.find(e=>e.id==='esc_quiz').d; EVENTS.esc_quiz.show(d); S.flags.diff='dificil'; const n=EVENTS.esc_quiz.show(d).ch.filter(c=>c[1]!=='auto').length; ok(n>2,'dificuldade nova não refez as alternativas');
+  }catch(e){ erros.push('erro: '+e.message); } finally{ S=s0; window.NO_SAVE=ns; window.NO_NEWS=nn; }
+  if(erros.length) throw Error('Ajustes 2.07 · '+erros.join(' | ')); return {ok:true}; }
