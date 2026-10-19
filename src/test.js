@@ -60,6 +60,7 @@ function selfTest(){
   T('escândalos, economia e guerra',politica3SelfTest);
   T('guerras, alianças e espionagem',guerraSelfTest);
   T('política de cada país',politica4SelfTest);
+  T('bens da família e caxumba',ajustes201SelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);
