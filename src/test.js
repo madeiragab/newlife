@@ -51,6 +51,7 @@ function selfTest(){
   T('desafios, especializações, certificações e entrevistas',carreiras3SelfTest);
   T('provas, vestibular, minigames da escola e faculdade',escolaSelfTest);
   T('idade para beber, saídas, festas, brincadeiras e relacionamentos',socialSelfTest);
+  T('vida adulta, velhice, lista de desejos e netos',adultaSelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
   T('continuidade sob mudanças extremas',continuidadeExtremaSelfTest);
