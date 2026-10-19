@@ -45,7 +45,7 @@ let FIGHT=null;
 // adv: {p: pessoa} ou {name, power, gender}; ctx: 'pessoa' | 'escola' | 'prisao' | 'rua'
 function startFight(adv,ctx){
   const m=S.me,p=adv.p;
-  if(p&&p.fight==null){ const a=p.age, base=a<8?8:a<13?18:a<16?30:a<=40?45:a<=55?38:a<=70?26:15;
+  if(p&&p.fight==null){ const a=p.age, base=a<8?6:a<13?14:a<16?22:a<=40?30:a<=55?26:a<=70?18:10;
     p.fight=clamp(Math.round(R.norm(base,14)));
     // alguns adultos treinam luta
     if(a>=16&&a<=55&&R.chance(.16)){ p.style=R.pick(Object.keys(STYLES)); p.fight=clamp(p.fight+R.int(20,35)); } }

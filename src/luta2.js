@@ -10,6 +10,7 @@ const LUTA_MATRIZ={
   defesa:{rapido:[0,.15],forte:[0,.25],agarrar:[0,1],defesa:[0,0],esquiva:[0,0],folego:[0,0]},
   esquiva:{rapido:[0,.8],forte:[1.2,0],agarrar:[0,0],defesa:[0,0],esquiva:[0,0],folego:[.5,0]},
   folego:{rapido:[0,1.2],forte:[0,1.3],agarrar:[0,1.2],defesa:[0,0],esquiva:[0,0],folego:[0,0]}};
+const LUTA_RESPOSTA_NPC={rapido:'forte',forte:'esquiva',agarrar:'forte',defesa:'agarrar',esquiva:'rapido',folego:'forte',tiro:'esquiva'};
 const LUTA_CUSTO={rapido:6,forte:16,agarrar:14,defesa:-7,esquiva:9,folego:-30,finalizar:20};
 const LUTA_SINAL={rapido:'está leve nas pernas, cutucando com a mão da frente',forte:'recua o ombro e carrega o peso na perna de trás',agarrar:'abaixa o quadril e olha para a minha cintura',defesa:'fecha a guarda e espera',esquiva:'balança a cabeça, esperando eu entrar',folego:'está ofegante, com as mãos baixas'};
 const LUTA_REGRAS={rua:{n:'Briga de rua',chao:1,agarra:1,golpes:1},mma:{n:'MMA',chao:1,agarra:1,golpes:1},boxe:{n:'Boxe',chao:0,agarra:0,golpes:1},muay:{n:'Muay thai',chao:0,agarra:0,golpes:1},kick:{n:'Kickboxing',chao:0,agarra:0,golpes:1},jiu:{n:'Jiu-jítsu',chao:1,agarra:1,golpes:0}};
@@ -28,12 +29,12 @@ myMoves=()=>{ const F=FIGHT, R0=LUTA_REGRAS[(F&&F.regra)||'rua'];
 // adversário: tendências por estilo
 function lutaTend(F){ const st=F.ostyle?LUTA_ESTILO_TIPO[F.ostyle]:null, w={rapido:3,forte:3,agarrar:2,defesa:2,esquiva:1.5};
   if(st) w[st]+=3; if(F.otend) Object.assign(w,F.otend); const R0=LUTA_REGRAS[F.regra||'rua']; if(!R0.agarra) w.agarrar=0; if(!R0.golpes){ w.forte=0; w.rapido=.5; w.agarrar+=3; }
-  if(F.oest<25){ w.folego=4; w.defesa+=2; w.forte*=.4; } return w; }
+  if(F.oest<25){ w.folego=1.5; w.defesa+=3; w.forte*=.4; } return w; }
 function lutaIntencao(F){ if(F.chao) return F.chao==='eu'?R.wpick([['defesa',3],['agarrar',2],['esquiva',2],['folego',F.oest<30?3:.5]]):R.wpick([['forte',F.regra==='jiu'?0:3],['agarrar',3],['defesa',1],['folego',F.oest<30?3:.5]]);
   const ant=F.ultimo&&{rapido:'forte',forte:'esquiva',agarrar:'forte',defesa:'agarrar',esquiva:'rapido',folego:'forte'}[F.ultimo];
   if(ant&&F.repete>=1&&R.chance(Math.min(.7,F.ofight/140))&&lutaTend(F)[ant]>0) return ant;
   return R.wpick(Object.entries(lutaTend(F)).filter(e=>e[1]>0)); }
-function lutaLer(F){ const m=S.me, p=clamp(.42+(m.fight-F.ofight)/130+(F.leitura||0)+(F.oest<30?.1:0)-(F.est<20?.15:0),.12,.9);
+function lutaLer(F){ const m=S.me, p=clamp(.42+((F.prof??m.fight)-F.ofight)/130+(F.leitura||0)+(F.oest<30?.1:0)-(F.est<20?.15:0),.12,.9);
   if(R.chance(Math.min(.9,p))){ F.sinal=LUTA_SINAL[F.int]; F.sinalCerto=1; }
   else if(R.chance(.45)){ F.sinal=LUTA_SINAL[R.pick(Object.keys(LUTA_SINAL).filter(k=>k!==F.int))]; F.sinalCerto=0; }
   else { F.sinal=''; F.sinalCerto=0; } }
@@ -59,10 +60,12 @@ function lutaIntervalo(k){ const F=FIGHT; F.intervalo=false; F.est=Math.min(100,
 fightTurn=function(mv){ const F=FIGHT, m=S.me; if(!F||F.done) return;
   if(!mv){ if(R.chance(.45+(m.health-50)/200+(F.est-50)/300)){ F.lines.push('Saí correndo e escapei.'); return fightEnd('fugiu'); } F.lines.push('Tentei fugir, mas fui alcançad'+oa()+'.'); mv={n:'Fuga',pow:0,acc:1,tipo:'folego'}; }
   const tipo0=mv.tipo||'forte'; F.repete=F.ultimo===tipo0?(F.repete||0)+1:0; F.ultimo=tipo0;
-  const tipo=tipo0, oi=F.int, eu=F.est<20?.6:1, ele=F.oest<20?.6:1, dif=(m.fight-F.ofight)*1.4;
+  const tipo=tipo0; let oi=F.int; const eu=F.est<20?.6:1, ele=F.oest<20?.6:1, dif=((F.prof??m.fight)-F.ofight)*1.4;
+  // o adversário também lê: quanto mais ele sabe lutar, mais vezes antecipa o meu golpe
+  if(tipo!=='finalizar'&&!F.chao&&LUTA_RESPOSTA_NPC[tipo]&&R.chance(clamp(.22+(F.ofight-(F.prof??m.fight))/130,.04,.75))&&lutaTend(F)[LUTA_RESPOSTA_NPC[tipo]]>0) oi=LUTA_RESPOSTA_NPC[tipo];
   F.est=clamp(F.est-(LUTA_CUSTO[tipo]||0)); F.oest=clamp(F.oest-(LUTA_CUSTO[oi]||0));
   let dei=0, levei=0, txt='';
-  if(tipo==='finalizar'){ const base=(F.chao==='eu'?.18:.06)+(100-F.op)/220+lutaBonus('agarrar')*.25+dif/300+(oi==='folego'?.15:0)-(oi==='defesa'?.08:0)+(F.regra==='jiu'?.05:0);
+  if(tipo==='finalizar'){ const base=((F.chao==='eu'?.1:.03)+(100-F.op)/300+lutaBonus('agarrar')*.3+dif/300+(oi==='folego'?.12:0)-(oi==='defesa'?.08:0)+(F.regra==='jiu'?.05:0))*clamp((F.prof??m.fight)/50,.3,1.5);
     if(R.chance(clamp(base*eu,.03,.85))){ F.lines.push(`Encaixei a finalização e ${F.name} bateu!`); return lutaFim('venceu','finalização'); }
     F.lines.push('Tentei finalizar, mas ele escapou.'); if(F.chao==='ele'&&R.chance(.5)){ levei=.8; } else if(R.chance(.35)) F.chao=null; }
   else { const mt=(LUTA_MATRIZ[tipo]||LUTA_MATRIZ.forte)[oi]||[0,0]; dei=mt[0]; levei=mt[1];
@@ -76,9 +79,9 @@ fightTurn=function(mv){ const F=FIGHT, m=S.me; if(!F||F.done) return;
   // acerto e dano: a escolha certa pesa mais do que a sorte
   let dano=0, sofri=0;
   if(dei>0){ const acc=clamp((mv.acc||.75)+dif/220+lutaBonus(tipo)*.1,.2,.97); const pega=R.chance(acc);
-    dano=Math.round((mv.pow||12)*dei*(.6+m.fight/200+lutaBonus(tipo)*.2)*(1+F.dmgB+(F.tudo||0))*eu*(pega?1:.3)*(.85+R.f()*.3));
+    dano=Math.round((mv.pow||12)*dei*(.45+(F.prof??m.fight)/110+lutaBonus(tipo)*.2)*(1+F.dmgB+(F.tudo||0))*eu*(pega?1:.3)*(.85+R.f()*.3));
     F.op-=dano; if(F.bout) F.bout.pts[0]+=dano+(txt.startsWith('Derrubei')||txt.startsWith('Raspei')?4:0); }
-  if(levei>0){ const acc=clamp(.75-dif/220,.2,.95), pega=R.chance(acc); sofri=Math.round(14*levei*(.55+F.ofight/120)*ele*(pega?1:.3)*(.85+R.f()*.3)*(F.cri?.8:1));
+  if(levei>0){ const acc=clamp(.75-dif/220,.2,.95), pega=R.chance(acc); sofri=Math.round(15.5*levei*(.45+F.ofight/110)*ele*(pega?1:.3)*(.85+R.f()*.3)*(F.cri?.8:1));
     F.me-=sofri; if(F.bout) F.bout.pts[1]+=sofri; if(sofri>0&&typeof hurtFx==='function') hurtFx(); }
   const nomeOi={rapido:'veio com golpes rápidos',forte:'veio com um golpe pesado',agarrar:'tentou me agarrar',defesa:'se fechou na guarda',esquiva:'tentou esquivar',folego:'parou para respirar'}[oi];
   if(F.ostyle&&!F.revealed&&R.chance(.35)){ F.revealed=1; F.lines.push(`Opa: ${F.name} treina ${STYLES[F.ostyle].n}!`); }
