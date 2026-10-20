@@ -11,9 +11,9 @@ function mgFinish(fn){ mgClose(); let r; try{ r=fn(); }catch(e){ showErr(e); } i
 function mgEscape(){
   const m=S.me, CW=6, CH=8, W=CW*2+1, H=CH*2+1;
   const g=[...Array(H)].map(()=>Array(W).fill(1));
-  const seen=new Set(), st=[[0,CH-1]]; seen.add('0,'+(CH-1)); g[2*(CH-1)+1][1]=0;
-  while(st.length){ const [cx,cy]=st[st.length-1]; const nb=R.shuffle([[1,0],[-1,0],[0,1],[0,-1]]).map(([dx,dy])=>[cx+dx,cy+dy,dx,dy]).filter(([x,y])=>x>=0&&y>=0&&x<CW&&y<CH&&!seen.has(x+','+y));
-    if(!nb.length){ st.pop(); continue; } const [nx,ny,dx,dy]=nb[0]; seen.add(nx+','+ny); g[2*cy+1+dy][2*cx+1+dx]=0; g[2*ny+1][2*nx+1]=0; st.push([nx,ny]); }
+  const seen=new Set(), pilha=[[0,CH-1]]; seen.add('0,'+(CH-1)); g[2*(CH-1)+1][1]=0;
+  while(pilha.length){ const [cx,cy]=pilha[pilha.length-1]; const nb=R.shuffle([[1,0],[-1,0],[0,1],[0,-1]]).map(([dx,dy])=>[cx+dx,cy+dy,dx,dy]).filter(([x,y])=>x>=0&&y>=0&&x<CW&&y<CH&&!seen.has(x+','+y));
+    if(!nb.length){ pilha.pop(); continue; } const [nx,ny,dx,dy]=nb[0]; seen.add(nx+','+ny); g[2*cy+1+dy][2*cx+1+dx]=0; g[2*ny+1][2*nx+1]=0; pilha.push([nx,ny]); }
   for(let i=0;i<14;i++){ const x=R.int(1,W-2),y=R.int(1,H-2); if(g[y][x]===1&&((x%2===0&&y%2===1)||(x%2===1&&y%2===0))) g[y][x]=0; }
   const ex=2*R.int(2,CW-1)+1; g[0][ex]=0;
   const s={px:1,py:H-2,ex,ey:0,over:false,moves:0,msg:'Chegue à porta sem ser visto. Os guardas perseguem quem eles enxergam.'};

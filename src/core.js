@@ -75,7 +75,10 @@ function childOf(a,b,gender){
       style:R.chance(.5)?(R.chance(.5)?ga.style??0:gb.style??0):R.int(0,5), glasses:R.chance((ga.glasses||gb.glasses)?.35:.1), freckles:R.chance((ga.freckles||gb.freckles)?.4:.06), eyeShape:R.chance(.5)?(ga.eyeShape??0):(gb.eyeShape??0)} };
 }
 const fmtH=h=>(h/100).toFixed(2).replace('.',',')+' m';
-const looksLine=x=>x.genes?`Cabelo ${x.genes.hair}, olhos ${x.genes.eyes}, ${fmtH(x.genes.h)}`:'';
+// genes.h é a altura adulta; a altura de hoje segue a curva de crescimento (fração da altura adulta por idade) e encolhe um pouco na velhice
+const CRESC=[.29,.44,.5,.55,.6,.64,.675,.71,.74,.77,.8,.83,.86,.9,.935,.96,.98,.99];
+const altura=x=>{ const h=x.genes.h, a=Math.max(0,x.age??18); if(a<CRESC.length) return Math.round(h*CRESC[Math.floor(a)]); return a>65?h-Math.min(5,Math.round((a-65)*.15)):h; };
+const looksLine=x=>x.genes?`Cabelo ${x.genes.hair}, olhos ${x.genes.eyes}, ${fmtH(altura(x))}`:'';
 
 // ---------- pessoas ----------
 const newId=()=>S.nextId++;

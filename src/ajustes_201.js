@@ -29,3 +29,16 @@ function ajustes207SelfTest(){ const s0=S,ns=window.NO_SAVE,nn=window.NO_NEWS; w
     S.flags.diff='facil'; m.age=16; startSchool('medio'); S.pending=[]; escQuiz('provas'); const d=S.pending.find(e=>e.id==='esc_quiz').d; EVENTS.esc_quiz.show(d); S.flags.diff='dificil'; const n=EVENTS.esc_quiz.show(d).ch.filter(c=>c[1]!=='auto').length; ok(n>2,'dificuldade nova não refez as alternativas');
   }catch(e){ erros.push('erro: '+e.message); } finally{ S=s0; window.NO_SAVE=ns; window.NO_NEWS=nn; }
   if(erros.length) throw Error('Ajustes 2.07 · '+erros.join(' | ')); return {ok:true}; }
+
+// 2.08: a fuga da prisão chegava ao fim sem conseguir mexer nos atributos (a pilha do labirinto se chamava st) e a altura não seguia a idade
+function ajustes208SelfTest(){ const s0=S,ns=window.NO_SAVE,nn=window.NO_NEWS,se=showErr,md=modal; window.NO_SAVE=true; window.NO_NEWS=true; const erros=[]; const ok=(c,x)=>{ if(!c) erros.push(x); };
+  try{ newLife({country:'BR'}); const m=S.me;
+    m.genes.h=195; m.age=6; ok(altura(m)<140&&altura(m)>120,'criança de 6 anos com '+altura(m)+' cm'); m.age=0; ok(altura(m)<65,'bebê com '+altura(m)+' cm'); m.age=30; ok(altura(m)===195,'adulto fora da altura genética');
+    let alt=0; for(let a=0;a<=30;a++){ m.age=a; ok(altura(m)>=alt,'encolheu aos '+a); alt=altura(m); } ok(/1,95 m/.test(looksLine(m)),'ficha sem a altura adulta');
+    for(let i=0;i<6;i++){ m.age=30; m.alive=true; m.prison={left:5,total:5,behav:50,juv:false}; let falha=null; showErr=e=>{ falha=e; }; modal=()=>{}; mgEscape();
+      for(let p=0;p<300&&!$('#mgOk');p++){ const cells=[...$('#game').querySelectorAll('.maze i')], W=13, H=cells.length/W, idx=cells.findIndex(c=>c.textContent==='🏃'), door=cells.findIndex(c=>c.classList.contains('x')); const prev={[idx]:-1}, q=[idx];
+        while(q.length){ const c=q.shift(); if(c===door) break; for(const d of [-W,W,-1,1]){ const n=c+d; if(n<0||n>=cells.length||(d===1&&n%W===0)||(d===-1&&c%W===0)||n in prev||cells[n].classList.contains('w')) continue; prev[n]=c; q.push(n); } }
+        let c=door; while(prev[c]!==idx&&prev[c]!==undefined&&prev[c]!==-1) c=prev[c]; const dd=c-idx; MG.key(dd===-W?'u':dd===W?'d':dd===-1?'l':'r'); }
+      ok($('#mgOk'),'fuga não terminou'); if($('#mgOk')) $('#mgOk').onclick(); ok(!falha,'fuga terminou com erro: '+(falha&&falha.message)); }
+  }catch(e){ erros.push('erro: '+e.message); } finally{ showErr=se; modal=md; mgClose(); S=s0; window.NO_SAVE=ns; window.NO_NEWS=nn; }
+  if(erros.length) throw Error('Ajustes 2.08 · '+erros.join(' | ')); return {ok:true}; }

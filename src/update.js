@@ -3,6 +3,7 @@
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'2.08',d:'20/10/2026',t:"Correções",itens:["A fuga da prisão não trava mais no final: fugir ou ser pego volta a contar direito.","A altura acompanha a idade: crianças crescem ano a ano até a altura adulta herdada dos pais, e a ficha mostra a altura adulta prevista."]},
  {v:'2.07',d:'19/10/2026',t:"Correções",itens:["Guerras espontâneas sempre entre países diferentes (um país não declara mais guerra contra si mesmo).","Contas do ano e mecânico sem saldo viram dívida registrada, com parcela, em vez de dinheiro negativo.","Chantagem do matador só é paga com dinheiro de verdade: sem o valor inteiro, ele cumpre a ameaça ou dá prazo para o resto.","Decisões de prefeito e governador mexem pouco na economia nacional; só o chefe de governo tem efeito pleno.","O assassino de aluguel confere se o alvo ainda está vivo.","Trocar a dificuldade no meio da partida refaz as alternativas das perguntas."]},
  {v:'2.06',d:'19/10/2026',t:"Perguntas na medida",itens:["As perguntas de provas, vestibular, entrevistas e desafios seguem a dificuldade do jogo: no Fácil aparecem só 2 alternativas e as perguntas vêm de um nível mais simples; no Normal, 3 alternativas e metade das perguntas de faculdade vira de ensino médio; no Difícil, como antes."]},
  {v:'2.05',d:'19/10/2026',t:"Correção",itens:["Corrigido um erro na chantagem do matador de aluguel que podia deixar o dinheiro inválido."]},
