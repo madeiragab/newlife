@@ -130,5 +130,24 @@ do
 	check(r.salMult == 1, "baixar o salário na investigação")
 end
 
+-- anexar escolhendo o país
+do
+	local g = adulto(10)
+	local m = g.S.me
+	m.country = "BR"
+	m.office = { dit = 1, yrs = 0, appr = 50 }
+	g:queue("golpe_decreto", {})
+	g:choose(1)
+	local r = Politica.regime(m)
+	check(Politica.chanceAnexar(g, r, "PT") > Politica.chanceAnexar(g, r, "US"), "Portugal é mais fácil que os EUA")
+	local semBomba = Politica.chanceAnexar(g, r, "FR")
+	r.nuclear = 1
+	check(Politica.chanceAnexar(g, r, "FR") > semBomba + 0.3, "a bomba ajuda contra potência nuclear")
+	local v = View.build(g, { prefs = {}, grave = {} }).views.anexar
+	check(v and #v.items == 16, "tela com os 14 países")
+	semMarcador(run(g, "reg_anexar", "PT"), "anexar")
+	check(Actions.run(g, "reg_anexar", "BR") == nil, "não anexa o próprio país")
+end
+
 if bad > 0 then process.exit(1) end
 print("Política ok.")

@@ -466,34 +466,62 @@ function RUN.reg_nuclear(game)
 	game:log("☢️ Anunciei o primeiro teste nuclear do país.", "big")
 	return "Um clarão no deserto. O mundo inteiro passou a me levar a sério, e a me temer."
 end
-function RUN.reg_anexar(game)
+-- anexar território (ajustes_212.js): cada país tem força militar; o programa nuclear pesa
+Politica.FORCA = { US = 95, IN = 80, GB = 72, FR = 72, KR = 68, DE = 66, JP = 62, IT = 58, BR = 56, ES = 52, CA = 50, MX = 45, AR = 40, PT = 32, AO = 30 }
+local NUCLEAR_PAIS = { US = true, IN = true, GB = true, FR = true }
+local function forcaDe(id: string): number
+	return Politica.FORCA[id] or 45
+end
+function Politica.minhaForca(game, r): number
+	return forcaDe(game.S.me.country) + Util.round((r.leal - 50) / 2) + (r.nuclear and 20 or 0) + (r.tipo == "militar" and 10 or 0) + (r.anexou or 0) * 3
+end
+function Politica.chanceAnexar(game, r, id: string): number
+	local p = 0.5 + (Politica.minhaForca(game, r) - forcaDe(id)) / 100
+	if NUCLEAR_PAIS[id] and not r.nuclear then
+		p -= 0.25
+	end
+	return math.clamp(p, 0.05, 0.9)
+end
+function Politica.riscoGuerra(game, r, id: string): number
+	if NUCLEAR_PAIS[id] and not r.nuclear then
+		return 0.45
+	end
+	return math.clamp(0.15 + (forcaDe(id) - Politica.minhaForca(game, r)) / 200, 0.08, 0.35)
+end
+function RUN.reg_anexar(game, id)
 	local m = game.S.me
 	local o, r = m.office, regime(m)
-	local vizinhos = {}
-	for _, c in game.COUNTRIES or {} do
-		if c.id ~= m.country then
-			table.insert(vizinhos, c.n)
-		end
+	local alvo = id ~= m.country and game.countryOf(id)
+	if not alvo or alvo.id ~= id then
+		return nil
 	end
-	local alvo = R.pick(vizinhos) or "o país vizinho"
+	if used(game, "anexar") > 1 then
+		return "O exército ainda está se recuperando da última campanha. Só no ano que vem."
+	end
+	local p = Politica.chanceAnexar(game, r, id)
 	r.pres += 25
 	regFix(r)
-	if R.chance(0.25 + r.leal / 300) then
+	if R.chance(p) then
 		r.anexou = (r.anexou or 0) + 1
+		r.anexados = r.anexados or {}
+		table.insert(r.anexados, alvo.n)
 		o.appr = clamp(o.appr + 12)
 		m.fame = clamp((m.fame or 0) + 12)
-		game:log("🗺️ Anexei uma província " .. doPais(alvo) .. ".", "big")
-		return string.format("Os tanques cruzaram a fronteira de madrugada. A província é nossa, e %s jurou vingança.", alvo)
+		r.leal += 5
+		regFix(r)
+		game:log("🗺️ Anexei uma província " .. doPais(alvo.n) .. ".", "big")
+		return string.format("Os tanques cruzaram a fronteira de madrugada. Em %d dias, a província era nossa. %s jurou vingança.", R.int(3, 40), alvo.n)
 	end
-	if R.chance(0.3) then
+	if R.chance(Politica.riscoGuerra(game, r, id)) then
+		local nuclear = NUCLEAR_PAIS[id] and not r.nuclear
 		sairDoPoder(game)
-		game:die("na guerra que começou para anexar território")
-		return "A invasão virou guerra. O palácio foi atacado pelo ar."
+		game:die("na guerra contra " .. alvo.n)
+		return nuclear and (alvo.n .. " respondeu com tudo o que tinha. O palácio não existe mais.") or ("A invasão virou guerra. " .. alvo.n .. " chegou até a capital.")
 	end
 	o.appr = clamp(o.appr - 15)
 	r.leal -= 15
 	regFix(r)
-	return string.format("A invasão fracassou. %s expulsou nossas tropas e o exército me culpa.", alvo)
+	return string.format("A invasão fracassou. %s expulsou nossas tropas e o exército me culpa.", alvo.n)
 end
 function RUN.reg_salario(game, x)
 	local r = regime(game.S.me)
@@ -549,7 +577,11 @@ function Politica.list(game, add)
 		if not r.nuclear then
 			add("reg_nuclear", "Programa nuclear", "Regime")
 		end
-		add("reg_anexar", "Anexar território", "Regime")
+		for _, c in game.COUNTRIES do
+			if c.id ~= m.country then
+				add("reg_anexar", "Anexar " .. c.n, "Regime", c.id)
+			end
+		end
 		for _, x in Politica.SAL_MULTS do
 			add("reg_salario", "Salário", "Regime", x)
 		end
@@ -1245,7 +1277,7 @@ function Politica.views(game, V, actRow, allowed)
 	if not r.nuclear then
 		A("reg_nuclear", "☢️", "Programa nuclear", fmt(5000000) .. " · o mundo passa a temer", "O mundo inteiro vai reagir. As sanções vão pesar.")
 	end
-	A("reg_anexar", "🗺️", "Anexar território vizinho", "Glória ou guerra", "Pode virar guerra e acabar com o regime.")
+	table.insert(ri, { ic = "🗺️", l = "Anexar território", s = "Escolher o país · minha força " .. Politica.minhaForca(game, r), push = "anexar" })
 	table.insert(ri, { sec = "Dinheiro e poder" })
 	table.insert(ri, { ic = "💵", l = "Definir meu salário", s = fmt(Politica.SAL_PRES * salMult(r)) .. "/ano · risco de investigação " .. pct(Politica.risco(r)), push = "salario" })
 	A("reg_saquear", "💰", "Saquear o tesouro nacional", "Dinheiro · aprovação e lealdade caem", "O dinheiro é do país. Se descobrirem, a revolta vem mais rápido.")
@@ -1268,6 +1300,31 @@ function Politica.views(game, V, actRow, allowed)
 		table.insert(si, actRow(allowed, "reg_salario", x, { ic = salMult(r) == x and "✅" or "💵", l = fmt(Politica.SAL_PRES * x) .. "/ano", s = x == 1 and "Igual ao presidente" or x == 2 and "O dobro" or (x .. "x o salário de presidente") }))
 	end
 	V.salario = { title = "Meu salário", items = si }
+
+	local ai = { { card = {
+		{ p = "Escolha o alvo. A chance depende da força militar dos dois países, da lealdade dos militares, do programa nuclear e das anexações anteriores. Se perder, pode virar guerra." },
+		{ "Minha força militar", tostring(Politica.minhaForca(game, r)) }, { "Programa nuclear", r.nuclear and "☢️ Tenho" or "Não tenho" },
+		r.anexados and { "Já anexei", table.concat(r.anexados, ", ") } or nil,
+	} }, { sec = "Países" } }
+	local alvos = {}
+	for _, c in game.COUNTRIES do
+		if c.id ~= m.country then
+			table.insert(alvos, c)
+		end
+	end
+	table.sort(alvos, function(a, b)
+		return Politica.chanceAnexar(game, r, a.id) > Politica.chanceAnexar(game, r, b.id)
+	end)
+	for _, c in alvos do
+		local p, risco = pct(Politica.chanceAnexar(game, r, c.id)), pct(Politica.riscoGuerra(game, r, c.id))
+		local pn = Politica.chanceAnexar(game, r, c.id)
+		table.insert(ai, actRow(allowed, "reg_anexar", c.id, {
+			ic = NUCLEAR_PAIS[c.id] and "☢️" or "🗺️", l = c.n, r = p, tone = pn >= 0.6 and "good" or pn < 0.3 and "bad" or nil,
+			s = "Força " .. forcaDe(c.id) .. (NUCLEAR_PAIS[c.id] and " · potência nuclear" or "") .. " · se perder, " .. risco .. " de virar guerra",
+			confirm = { t = "Invadir " .. c.n .. "?", x = "Chance de vencer: " .. p .. ". Se perder, " .. risco .. " de chance de a guerra acabar comigo.", yes = "Invadir" },
+		}))
+	end
+	V.anexar = { title = "Anexar território", items = ai }
 
 	local hi = { { card = { { p = "Quem herda o poder quando eu me for?" } } } }
 	for _, k in game:people("filho", "adot") do
