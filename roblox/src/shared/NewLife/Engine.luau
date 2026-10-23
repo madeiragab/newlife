@@ -20,6 +20,7 @@ local Countries = dep("Data/Countries")
 local Names = dep("Data/Names")
 local Text = dep("Data/Text")
 local Looks = dep("Looks")
+local Politica = dep("Politica")
 
 local R, clamp, fmt, g = Util.R, Util.clamp, Util.fmt, Util.g
 
@@ -35,6 +36,7 @@ local function countryOf(id: string)
 	return COUNTRY_BY_ID[id] or Countries[1]
 end
 Engine.countryOf = countryOf
+Engine.COUNTRIES = Countries
 
 local TALENTS = { "acting", "musical", "athletic", "art", "dance", "writing", "comedy" }
 
@@ -804,6 +806,7 @@ function Engine:yearMoney()
 			m.c.avisoDivida = nil
 		end
 	end
+	Politica.year(self)
 end
 
 -- ---------- morte ----------
@@ -847,6 +850,7 @@ function Engine:die(cause: string)
 	m.cause = cause
 	self.S.pending = {}
 	self:log(string.format("Morri %s, aos %d anos.", cause, m.age), "big")
+	Politica.onDie(self)
 end
 
 ---------------------------------------------------------------------------
@@ -1028,6 +1032,12 @@ function Engine:currentEvent()
 	if not q then
 		return nil
 	end
+	local pe = Politica.EVENTS[q.id]
+	if pe then
+		self:use()
+		local title, text, choices = pe.show(self, q.d)
+		return { k = pe.k, title = title, text = text, choices = choices }
+	end
 	local e = EVENTS[q.id]
 	if not e then
 		table.remove(self.S.pending, 1)
@@ -1047,6 +1057,14 @@ function Engine:choose(i: number): string?
 	local q = self.S.pending[1]
 	if not q then
 		return nil
+	end
+	local pe = Politica.EVENTS[q.id]
+	if pe then
+		local title = pe.show(self, q.d)
+		table.remove(self.S.pending, 1)
+		local result = pe.pick(self, i, q.d) or ""
+		self:log(title .. ": " .. result)
+		return result
 	end
 	local e = EVENTS[q.id]
 	table.remove(self.S.pending, 1)

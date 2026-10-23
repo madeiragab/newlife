@@ -8,12 +8,13 @@ A versão Roblox usa o mesmo jogo de `src/`: um conversor lê os eventos do jogo
 - Passar de ano com atributos, escola, faculdade, família envelhecendo, mortes e heranças.
 - Os eventos da vida comum de `src/`, com as escolhas, chances e efeitos do formato compacto (`pack`).
 - Atividades: estudar, ler, academia, meditar, fazer amizades, passar tempo com alguém, namorar, noivar, casar, divórcio, sair de casa, adotar, empregos simples e aposentadoria.
+- Política por fora das urnas (`Politica.luau`, igual a `src/golpe.js` e `src/ajustes_209/210/210b.js`): movimento clandestino, a noite do golpe em três decisões, o primeiro decreto com cinco caminhos (ditadura militar, monarquia, revolução popular, teocracia e transição), as ações do regime, refundar o país, revoltas, contragolpes, atentados, eleição livre e herdeiro. Como ainda não há prisão no Roblox, quem perde vai para o exílio ou sai por anistia.
 - Save automático no DataStore e lista das últimas vidas.
 - Interface igual à da web: tema, telas em lista, pop-ups dos eventos, tela inicial e lápide. No celular fica em pé como na web; no PC usa a largura toda (atributos à esquerda, diário no meio e a tela aberta à direita).
 - Rostos idênticos aos da web: `FaceSvg.luau` monta o mesmo SVG de `src/faces.js` e `Svg.luau` desenha pixel a pixel num EditableImage. Bandeiras e ícones usam o mesmo desenhista.
 - Sons iguais aos da web: `tools/sons.cjs` roda o sintetizador de `src/sound.js` fora do navegador e grava `audio/efeitos.ogg` e `audio/musica.ogg`; `tools/enviar-sons.cjs` envia os dois ao Roblox e grava os IDs em `Sons.luau`.
 
-Os modos fictícios, as carreiras de verdade, a política, as empresas, a prisão, as doenças e os minigames ainda não chegaram. O conversor mostra em `roblox/conversao.txt` quantos eventos ficaram de fora e por quê.
+Os modos fictícios, as carreiras de verdade, as eleições comuns, as empresas, a prisão, as doenças e os minigames ainda não chegaram. O conversor mostra em `roblox/conversao.txt` quantos eventos ficaram de fora e por quê.
 
 ## O que fica de fora só no Roblox
 
