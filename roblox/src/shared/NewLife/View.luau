@@ -305,6 +305,12 @@ local function views(game, meta)
 				{ ic = "🎵", l = "Música", r = prefs.music == false and "Desligada" or "Ligada", op = "music" },
 				{ ic = "🔊", l = "Efeitos sonoros", r = prefs.sfx == false and "Desligados" or "Ligados", op = "sfx" },
 				{ l = "Tema", r = prefs.theme == "dark" and "Escuro" or "Claro", op = "theme" },
+				{ sec = "Extras" },
+				meta and meta.passes and meta.passes.deus and { ic = "⚡", l = "Modo Deus", s = "Mude atributos e talentos", push = "god" }
+					or { ic = "⚡", l = "Modo Deus", s = "Mude atributos e talentos quando quiser", r = "Comprar", op = "buy", arg = "deus" },
+				meta and meta.passes and meta.passes.tempo and { ic = "⏳", l = "Máquina do tempo", s = #(game.snaps or {}) > 0 and ("Voltar até " .. #game.snaps .. " ano(s)") or "Nenhum ano salvo ainda", push = "time" }
+					or { ic = "⏳", l = "Máquina do tempo", s = "Volte até 5 anos e refaça suas escolhas", r = "Comprar", op = "buy", arg = "tempo" },
+				{ ic = "💖", l = "Apoie o jogo", s = meta and meta.passes and meta.passes.doacao and "Obrigado pelo apoio!" or "Ajude o NewLife a crescer", op = "buy", arg = "doacao" },
 				{ l = "Como jogar", op = "help" },
 			},
 		}
@@ -316,6 +322,37 @@ local function views(game, meta)
 			gi = { { card = { { p = "Ninguém por aqui ainda." } } } }
 		end
 		V.grave = { title = "Cemitério", items = gi }
+		-- modo deus: cada atributo com botões -10 -1 +1 +10
+		local god = { { card = { { p = "Mude o que quiser. Vale para esta vida." } } } }
+		local function line(key, label, v)
+			table.insert(god, { card = { { bar = label, v = v } }, btns = { { l = "-10", key = key, d = -10 }, { l = "-1", key = key, d = -1 }, { l = "+1", key = key, d = 1 }, { l = "+10", key = key, d = 10 } } })
+		end
+		table.insert(god, { sec = "Atributos" })
+		line("happy", "Felicidade", m.happy)
+		line("health", "Saúde", m.health)
+		line("smarts", "Inteligência", m.smarts)
+		line("looks", "Aparência", m.looks)
+		line("karma", "Carma", m.karma)
+		line("fame", "Fama", m.fame or 0)
+		line("will", "Força de vontade", m.will or 50)
+		line("fight", "Luta", m.fight or 0)
+		table.insert(god, { sec = "Talentos" })
+		for _, t in { { "acting", "Atuação" }, { "musical", "Música" }, { "athletic", "Esporte" }, { "art", "Artes" }, { "dance", "Dança" }, { "writing", "Escrita" }, { "comedy", "Humor" } } do
+			line("tal." .. t[1], t[2], m.talent[t[1]] or 0)
+		end
+		table.insert(god, { sec = "Dinheiro" })
+		table.insert(god, { card = { { "Dinheiro", fmt(m.money) } }, btns = { { l = "-$10 mil", key = "money", d = -10 }, { l = "+$1 mil", key = "money", d = 1 }, { l = "+$10 mil", key = "money", d = 10 }, { l = "+$100 mil", key = "money", d = 100 } } })
+		V.god = { title = "Modo Deus", items = god }
+		-- máquina do tempo
+		local ti = { { card = { { p = "Volte para um ano anterior e viva tudo de novo a partir dali." } } } }
+		for i = #(game.snaps or {}), 1, -1 do
+			local sn = game.snaps[i]
+			table.insert(ti, { ic = "⏳", l = string.format("Voltar para os %d anos", sn.age), s = tostring(sn.year), op = "time", arg = i, confirm = { t = "Voltar no tempo?", x = string.format("A vida volta para os %d anos. O que aconteceu depois disso some.", sn.age), yes = "Voltar" } })
+		end
+		if #ti == 1 then
+			table.insert(ti, { card = { { p = "Envelheça um ano para a máquina guardar o ponto de volta." } } })
+		end
+		V.time = { title = "Máquina do tempo", items = ti }
 	end
 	return V
 end

@@ -48,6 +48,7 @@ jobs:
         run: |
           lune run tests/sintaxe.luau
           lune run tests/sons.luau
+          lune run tests/extras.luau
           lune run tests/vidas.luau 300
       - name: Montar o lugar
         working-directory: roblox

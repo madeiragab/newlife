@@ -2,7 +2,7 @@
 // Uso: node roblox/tools/sons.cjs
 // O jogo do navegador sintetiza tudo na hora com Web Audio (src/sound.js). O Roblox só toca arquivos,
 // então este script roda o MESMO código de src/sound.js num "Web Audio" mínimo feito aqui e grava:
-//   roblox/audio/efeitos.ogg  todos os efeitos em sequência (o jogo toca cada trecho pelo PlaybackRegion)
+//   roblox/audio/efeitos.ogg/.mp3  todos os efeitos em sequência (o jogo toca cada trecho pelo PlaybackRegion)
 //   roblox/audio/musica.ogg   a música ambiente num loop sem emenda
 // e atualiza os trechos em roblox/src/shared/NewLife/Sons.luau (os IDs do Roblox ficam como estão).
 // Precisa do ffmpeg para converter para .ogg.
@@ -169,8 +169,10 @@ function wav(samples, file, gain) {
   fs.writeFileSync(file, b);
   return g;
 }
+// grava .ogg e .mp3 (o envio pelo Creator Hub só aceitou o .mp3)
 function ogg(wavFile, oggFile) {
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', wavFile, '-c:a', 'libvorbis', '-q:a', '5', oggFile]);
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', wavFile, '-c:a', 'libmp3lame', '-q:a', '3', oggFile.replace(/\.ogg$/, '.mp3')]);
   fs.unlinkSync(wavFile);
 }
 
@@ -202,6 +204,8 @@ return {
 		efeitos = ${ids.efeitos},
 		musica = ${ids.musica},
 	},
+	-- o MP3 enviado ao Roblox começa com um silêncio do codificador: os trechos andam esse tanto
+	atraso = 0.026,
 	-- efeito = { início, duração } em segundos dentro de efeitos.ogg
 	efeitos = {
 ${lines}

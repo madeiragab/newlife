@@ -505,12 +505,58 @@ local function deathP(age: number, health: number): number
 end
 Engine.deathP = deathP
 
+-- máquina do tempo (SNAPS em src/core.js): guarda como a vida estava antes de cada ano, até 5 anos
+local SNAP_MAX = 5
+function Engine:snap()
+	self.snaps = self.snaps or {}
+	table.insert(self.snaps, { age = self.S.me.age, year = self.S.year, s = Util.deepCopy(self.S) })
+	while #self.snaps > SNAP_MAX do
+		table.remove(self.snaps, 1)
+	end
+end
+
+function Engine:timeTravel(i: number): boolean
+	local sn = self.snaps and self.snaps[i]
+	if not sn then
+		return false
+	end
+	self.S = Util.deepCopy(sn.s)
+	for k = #self.snaps, i, -1 do
+		table.remove(self.snaps, k)
+	end
+	self:use()
+	self:cnt("timeTravel")
+	self:log(string.format("Voltei no tempo para os meus %d anos.", self.S.me.age), "warn")
+	return true
+end
+
+-- modo deus (godSet em src/ui.js): mexe num atributo, talento ou no dinheiro
+local GOD_KEYS = { happy = true, health = true, smarts = true, looks = true, karma = true, fame = true, will = true, fight = true }
+function Engine:godSet(key: string, d: number): boolean
+	local m = self.S.me
+	if type(d) ~= "number" or math.abs(d) > 100 then
+		return false
+	end
+	if GOD_KEYS[key] then
+		m[key] = clamp((m[key] or 0) + d)
+	elseif string.sub(key, 1, 4) == "tal." and m.talent[string.sub(key, 5)] ~= nil then
+		local t = string.sub(key, 5)
+		m.talent[t] = clamp(m.talent[t] + d)
+	elseif key == "money" then
+		m.money += d * 1000
+	else
+		return false
+	end
+	return true
+end
+
 function Engine:ageUp()
 	self:use()
 	local S, m = self.S, self.S.me
 	if not m.alive or #S.pending > 0 then
 		return
 	end
+	self:snap()
 	m.age += 1
 	S.year += 1
 	m.yr = {}
