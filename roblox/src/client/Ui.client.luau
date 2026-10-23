@@ -81,7 +81,6 @@ local W, H, SCALE, WIDE, TOP = 390, 844, 1, false, 0
 local state = nil
 local screen = "splash" -- splash | home | form | game | death
 local stack = {} -- telas abertas (folha no celular, painel da direita no PC)
-local rightRoot = "relations"
 local modalQueue = {}
 local modalOpen = false
 local formState = { gender = "", country = "", diff = "normal", first = "", last = "" }
@@ -108,6 +107,7 @@ local function clear(f: Instance)
 	end
 end
 
+local themeSwitch
 local function faceOf(face, size, front)
 	return Images.face(face, size, nil, front)
 end
@@ -383,12 +383,19 @@ local function bottomSheet()
 		stack = {}
 		render()
 	end)
+	-- celular: sobe do rodapé (.sheet); PC: quadro no meio da tela, na frente do jogo
 	local sh = new("TextButton", {
-		Text = "", AutoButtonColor = false, AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, 0), Size = UDim2.new(0, math.min(560, W), 0.88, 0),
-		BackgroundColor3 = C.bg, BorderSizePixel = 0, Parent = ov,
+		Text = "", AutoButtonColor = false, BackgroundColor3 = C.bg, BorderSizePixel = 0, ClipsDescendants = true, Parent = ov,
+		AnchorPoint = WIDE and Vector2.new(0.5, 0.5) or Vector2.new(0.5, 1),
+		Position = WIDE and UDim2.fromScale(0.5, 0.5) or UDim2.new(0.5, 0, 1, 0),
+		Size = WIDE and UDim2.new(0, math.min(720, W - 64), 0.86, 0) or UDim2.new(1, 0, 0.88, 0),
 	}, { Kit.corner(24) })
-	new("Frame", { BackgroundColor3 = C.bg, BorderSizePixel = 0, Position = UDim2.new(0, 0, 1, -24), Size = UDim2.new(1, 0, 0, 24), Parent = sh })
-	new("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 8), Size = UDim2.fromOffset(42, 5), BackgroundColor3 = C.line, BorderSizePixel = 0, Parent = sh }, { Kit.corner(UDim.new(1, 0)) })
+	if not WIDE then
+		new("Frame", { BackgroundColor3 = C.bg, BorderSizePixel = 0, Position = UDim2.new(0, 0, 1, -24), Size = UDim2.new(1, 0, 0, 24), Parent = sh })
+	end
+	if not WIDE then
+		new("Frame", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, 8), Size = UDim2.fromOffset(42, 5), BackgroundColor3 = C.line, BorderSizePixel = 0, Parent = sh }, { Kit.corner(UDim.new(1, 0)) })
+	end
 	local inner = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(0, 13), Size = UDim2.new(1, 0, 1, -13), Parent = sh })
 	sheetHead(inner, v.title, #stack > 1, function()
 		table.remove(stack)
@@ -418,12 +425,7 @@ local function header(parent: Instance, w: number, padX: number)
 	Kit.stripe(5, { Position = UDim2.new(0, 0, 1, -5), Parent = hdr })
 	local row = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(padX, TOP + 12), Size = UDim2.new(1, -padX * 2, 0, 50), Parent = hdr }, { Kit.hlist(12) })
 	local menu = iconBtn('<path d="M4 7h16M4 12h16M4 17h16"/>', true, function()
-		if WIDE then
-			rightRoot = "menu"
-			stack = {}
-		else
-			stack = { "menu" }
-		end
+		stack = { "menu" }
 		render()
 	end)
 	menu.LayoutOrder = 1
@@ -433,12 +435,7 @@ local function header(parent: Instance, w: number, padX: number)
 	})
 	faceOf(me.face, 46, true).Parent = av
 	Kit.press(av, function()
-		if WIDE then
-			rightRoot = "relations"
-			stack = { "me" }
-		else
-			stack = { "relations", "me" }
-		end
+		stack = { "relations", "me" }
 		render()
 	end)
 	local who = new("Frame", { LayoutOrder = 3, BackgroundTransparency = 1, Size = UDim2.new(0, 0, 0, 46), Parent = row }, { Kit.grow() })
@@ -517,9 +514,7 @@ local function ageUp()
 	if not state or not state.me or not state.me.alive or state.event or modalOpen then
 		return
 	end
-	if not WIDE then
-		stack = {}
-	end
+	stack = {}
 	jumpDiary = true
 	call({ op = "age" })
 end
@@ -578,11 +573,13 @@ end
 local function statsPanel(parent: Instance, y: number)
 	local me = state.me
 	local C = Kit.C
-	local panel = new("Frame", { Name = "Atributos", BackgroundColor3 = C.surface, BorderSizePixel = 0, Position = UDim2.fromOffset(0, y), Size = UDim2.new(1, 0, 0, 84), Parent = parent }, { Kit.corner(18) })
+	-- no PC os quatro atributos ficam numa linha só
+	local cols = WIDE and 4 or 2
+	local panel = new("Frame", { Name = "Atributos", BackgroundColor3 = C.surface, BorderSizePixel = 0, Position = UDim2.fromOffset(0, y), Size = UDim2.new(1, 0, 0, WIDE and 80 or 84), Parent = parent }, { Kit.corner(18) })
 	new("Frame", { BackgroundColor3 = C.surface, BorderSizePixel = 0, Position = UDim2.new(0, 0, 1, -18), Size = UDim2.new(1, 0, 0, 18), Parent = panel })
 	Kit.stripe(3, { Position = UDim2.fromOffset(18, 0), Size = UDim2.new(1, -36, 0, 3), BackgroundTransparency = 0.1, Parent = panel })
 	local grid = new("Frame", { BackgroundTransparency = 1, Position = UDim2.fromOffset(18, 14), Size = UDim2.new(1, -36, 1, -22), Parent = panel }, {
-		new("UIGridLayout", { CellSize = UDim2.new(0.5, -10, 0, 24), CellPadding = UDim2.fromOffset(20, 4), SortOrder = Enum.SortOrder.LayoutOrder }),
+		new("UIGridLayout", { CellSize = UDim2.new(1 / cols, -20 * (cols - 1) / cols, 0, 24), CellPadding = UDim2.fromOffset(20, 4), SortOrder = Enum.SortOrder.LayoutOrder }),
 	})
 	for i, s in STAT_ROWS do
 		statRow(s[1], s[2], me.stats[s[3]] or 0, grid, i)
@@ -591,80 +588,22 @@ local function statsPanel(parent: Instance, y: number)
 	return panel
 end
 
-local function gameMobile()
+-- tela do jogo, igual à web; no PC ocupa a largura toda
+local function gameMain()
 	local C = Kit.C
-	local appW = math.min(560, W)
+	local appW = W
 	local app = new("Frame", { Name = "App", BackgroundColor3 = C.bg, BorderSizePixel = 0, Position = UDim2.fromOffset((W - appW) / 2, 0), Size = UDim2.fromOffset(appW, H), Parent = stage })
-	local _, hh = header(app, appW, 16)
-	local navH, statsH = 66, 84
-	diary(app, UDim2.fromOffset(0, hh), UDim2.new(1, 0, 1, -hh - navH - statsH + 6))
+	local _, hh = header(app, appW, WIDE and 32 or 16)
+	local navH, statsH = 66, WIDE and 80 or 84
+	local d = diary(app, UDim2.fromOffset(0, hh), UDim2.new(1, 0, 1, -hh - navH - statsH + 6))
+	if WIDE then
+		local pd = d:FindFirstChildOfClass("UIPadding")
+		pd.PaddingLeft, pd.PaddingRight = UDim.new(0, 32), UDim.new(0, 32)
+	end
 	statsPanel(app, H - navH - statsH)
 	navBar(app, H - navH)
 	if #stack > 0 then
 		bottomSheet()
-	end
-end
-
--- PC: atributos e navegação à esquerda, diário no meio, tela aberta fixa à direita
-local function gameWide()
-	local C = Kit.C
-	local _, hh = header(stage, W, 28)
-	local leftW, rightW = 320, 430
-	local bodyH = H - hh
-	-- a coluna rola em telas baixas
-	local left = new("ScrollingFrame", {
-		Name = "Esquerda", BackgroundTransparency = 1, BorderSizePixel = 0, Position = UDim2.fromOffset(20, hh), Size = UDim2.fromOffset(leftW, bodyH), CanvasSize = UDim2.new(),
-		AutomaticCanvasSize = Enum.AutomaticSize.Y, ScrollBarThickness = 0, Parent = stage,
-	}, { Kit.vlist(14, Enum.HorizontalAlignment.Center), Kit.pad(18, 0, 18, 0) })
-	local statsCard = new("Frame", { LayoutOrder = 1, BackgroundColor3 = C.surface, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, ClipsDescendants = true, Parent = left }, { Kit.corner(18), Kit.pad(16, 18, 14, 18), Kit.vlist(8) })
-	text("Atributos", { LayoutOrder = 0, FontFace = Kit.F.display, TextSize = 16, Parent = statsCard })
-	for i, s in STAT_ROWS do
-		statRow(s[1], s[2], state.me.stats[s[3]] or 0, statsCard, i)
-	end
-	Kit.stripe(3, { LayoutOrder = -1, Parent = statsCard })
-	local ageWrap = new("Frame", { LayoutOrder = 2, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 122), Parent = left })
-	local cake = cakeButton(76, 6)
-	cake.AnchorPoint = Vector2.new(0.5, 0)
-	cake.Position = UDim2.new(0.5, 0, 0, 6)
-	cake.Parent = ageWrap
-	for _, d in cake:GetDescendants() do
-		if d.Name == "Disc" then
-			d.ZIndex = 3
-		end
-	end
-	text("Envelhecer", { FontFace = Kit.F.heavy, TextSize = 14, TextXAlignment = Enum.TextXAlignment.Center, Position = UDim2.new(0, 0, 0, 100), Size = UDim2.new(1, 0, 0, 18), AutomaticSize = Enum.AutomaticSize.None, Parent = ageWrap })
-	local navList = new("Frame", { LayoutOrder = 3, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Parent = left }, { Kit.vlist(8) })
-	for order, n in { NAV[1], NAV[2], NAV[4], NAV[5], { "menu", "Menu", MENU_ICON } } do
-		local on = rightRoot == n[1]
-		local accent = C.dark and C.link or C.brand
-		local b = new("TextButton", { LayoutOrder = order, Text = "", AutoButtonColor = false, BackgroundColor3 = on and C.surface or C.bg, BorderSizePixel = 0, Size = UDim2.new(1, 0, 0, 50), Parent = navList }, {
-			Kit.corner(14), Kit.pad(0, 16), Kit.hlist(14),
-		})
-		if on then
-			Kit.stroke(accent, 2, 0.6).Parent = b
-		end
-		Images.icon(n[3], 24, on and accent or C.muted, b).LayoutOrder = 1
-		text(n[2], { LayoutOrder = 2, FontFace = Kit.F.heavy, TextSize = 15, TextColor3 = on and C.ink or C.muted, Size = UDim2.new(0, 200, 1, 0), AutomaticSize = Enum.AutomaticSize.None, TextYAlignment = Enum.TextYAlignment.Center, Parent = b })
-		Kit.press(b, function()
-			rightRoot = n[1]
-			stack = {}
-			render()
-		end)
-	end
-	local midX = 20 + leftW + 20
-	local midW = W - midX - rightW - 40
-	diary(stage, UDim2.fromOffset(midX, hh), UDim2.fromOffset(midW, bodyH), 720)
-	local key = #stack > 0 and stack[#stack] or rightRoot
-	local v = state.views and state.views[key]
-	local panel = new("Frame", { Name = "Direita", BackgroundColor3 = C.bg, BorderSizePixel = 0, Position = UDim2.fromOffset(W - rightW - 20, hh + 18), Size = UDim2.fromOffset(rightW, bodyH - 36), ClipsDescendants = true, Parent = stage }, {
-		Kit.corner(20), Kit.stroke(C.line),
-	})
-	if v then
-		sheetHead(panel, v.title, #stack > 0, function()
-			table.remove(stack)
-			render()
-		end, nil)
-		viewBody(panel, key, 58)
 	end
 end
 
@@ -688,16 +627,41 @@ local function heroFaces()
 	return sampleFaces
 end
 
--- tela cheia rolável com coluna central (.full / .full-in)
+-- tela cheia rolável (.full / .full-in), ocupando a largura toda
 local function fullScreen(topPad: number)
 	local C = Kit.C
-	local cw = math.min(520, W)
+	local cw = W
+	local side = WIDE and 48 or 16
 	local sc = new("ScrollingFrame", {
 		Name = "Inicio", BackgroundColor3 = C.bg, BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), CanvasSize = UDim2.new(), AutomaticCanvasSize = Enum.AutomaticSize.Y,
 		ScrollBarThickness = 4, Parent = stage,
 	}, { Kit.vlist(0, Enum.HorizontalAlignment.Center) })
-	local col = new("Frame", { LayoutOrder = 1, BackgroundTransparency = 1, Size = UDim2.fromOffset(cw, 0), AutomaticSize = Enum.AutomaticSize.Y, Parent = sc }, { Kit.vlist(14, Enum.HorizontalAlignment.Center), Kit.pad(topPad, 16, 40, 16) })
+	local col = new("Frame", { LayoutOrder = 1, BackgroundTransparency = 1, Size = UDim2.fromOffset(cw, 0), AutomaticSize = Enum.AutomaticSize.Y, Parent = sc }, { Kit.vlist(14, Enum.HorizontalAlignment.Center), Kit.pad(topPad, side, 40, side) })
 	return sc, col, cw
+end
+
+-- seletor de tema (claro/escuro): duas metades, a escolhida fica destacada
+themeSwitch = function(parent: Instance, pos: UDim2, anchor: Vector2)
+	local dark = prefs.theme == "dark"
+	local sw = new("Frame", { AnchorPoint = anchor, Position = pos, Size = UDim2.fromOffset(176, 38), BackgroundColor3 = Color3.new(0, 0, 0), BackgroundTransparency = 0.78, ZIndex = 6, Parent = parent }, {
+		Kit.corner(UDim.new(1, 0)), Kit.pad(4), Kit.hlist(4),
+	})
+	for i, opt in { { "light", "☀️ Claro" }, { "dark", "🌙 Escuro" } } do
+		local on = (opt[1] == "dark") == dark
+		local b = new("TextButton", {
+			LayoutOrder = i, Text = opt[2], FontFace = Kit.F.heavy, TextSize = 13, AutoButtonColor = false, Size = UDim2.new(0.5, -2, 1, 0), ZIndex = 7,
+			BackgroundColor3 = Color3.new(1, 1, 1), BackgroundTransparency = on and 0 or 1, TextColor3 = on and Color3.fromHex("#22305E") or Color3.new(1, 1, 1), Parent = sw,
+		}, { Kit.corner(UDim.new(1, 0)) })
+		Kit.press(b, function()
+			if not on then
+				prefs.theme = opt[1]
+				Kit.setTheme(opt[1])
+				render()
+				call({ op = "prefs", theme = opt[1] })
+			end
+		end)
+	end
+	return sw
 end
 
 local function heroBlock(parent: Instance, w: number)
@@ -724,6 +688,7 @@ local function heroBlock(parent: Instance, w: number)
 		Text = 'New<font color="#FFD23F">Life</font>', FontFace = Kit.F.display, TextSize = 54, TextColor3 = Color3.new(1, 1, 1), Parent = f,
 	})
 	text("Cada vida, uma nova história.", { AnchorPoint = Vector2.new(0.5, 0), Position = UDim2.new(0.5, 0, 0, TOP + 164), TextSize = 15, TextColor3 = Color3.new(1, 1, 1), TextTransparency = 0.12, TextXAlignment = Enum.TextXAlignment.Center, Parent = f })
+	themeSwitch(f, UDim2.new(1, WIDE and -48 or -16, 0, TOP + 14), Vector2.new(1, 0))
 	return f
 end
 
@@ -759,7 +724,13 @@ local function homeScreen()
 	local intro = new("Frame", { LayoutOrder = 2, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Parent = col }, { Kit.vlist(6), Kit.pad(18, 4, 4, 4) })
 	text("Sua próxima história começa aqui", { FontFace = Kit.F.display, TextSize = 22, LayoutOrder = 1, Parent = intro })
 	text("Comece do zero ou volte para a vida que você salvou.", { TextSize = 14, TextColor3 = C.muted, LayoutOrder = 2, Parent = intro })
-	local acts = new("Frame", { LayoutOrder = 3, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Parent = col }, { Kit.vlist(12), Kit.pad(14, 0, 0, 0) })
+	local acts = new("Frame", { LayoutOrder = 3, BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 0), AutomaticSize = Enum.AutomaticSize.Y, Parent = col }, { Kit.pad(14, 0, 0, 0) })
+	if WIDE then
+		-- no PC as três opções ficam lado a lado, ocupando a largura
+		new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 16), HorizontalFlex = Enum.UIFlexAlignment.Fill, SortOrder = Enum.SortOrder.LayoutOrder, Parent = acts })
+	else
+		Kit.vlist(12).Parent = acts
+	end
 	homeAction(acts, 1, "🌱", "Nova vida", "Escolha seu personagem ou deixe a sorte decidir", true, false, function()
 		screen = "form"
 		render()
@@ -786,6 +757,13 @@ local function homeScreen()
 		stack = { "news" }
 		render()
 	end)
+	if WIDE then
+		for _, b in acts:GetChildren() do
+			if b:IsA("TextButton") then
+				b.Size = UDim2.new(0, 0, 0, 104)
+			end
+		end
+	end
 	text("NewLife · v" .. ((state and state.version) or ""), { LayoutOrder = 9, TextSize = 12, TextColor3 = C.muted, TextXAlignment = Enum.TextXAlignment.Center, Parent = col })
 	if stack[1] == "news" then
 		bottomSheet()
@@ -946,10 +924,8 @@ function render()
 		end
 		if screen == "death" then
 			deathScreen()
-		elseif WIDE then
-			gameWide()
 		else
-			gameMobile()
+			gameMain()
 		end
 	end
 	if keep then
