@@ -81,6 +81,17 @@ local function regFix(r)
 	return fix(r, { "medo", "leal", "pres" })
 end
 
+-- salário de quem deu o golpe (ajustes_211.js): começa no dobro do de presidente e vai até 20x;
+-- quanto maior o salário e os saques, maior a chance de uma investigação internacional
+Politica.SAL_PRES = 500000
+Politica.SAL_MULTS = { 1, 2, 5, 10, 20 }
+local function salMult(r): number
+	return r.salMult or 2
+end
+function Politica.risco(r): number
+	return math.min(0.6, (salMult(r) - 1) * 0.03 + (r.saques or 0) * 0.04)
+end
+
 -- título no topo da tela (View.occupation)
 function Politica.titulo(game): string?
 	local m = game.S.me
@@ -276,6 +287,7 @@ local function regAcao(game, k: string): string
 		o.appr = clamp(o.appr - R.int(4, 10))
 		r.leal -= R.int(3, 8)
 		m.karma = clamp(m.karma - 10)
+		r.saques = (r.saques or 0) + 1
 		regFix(r)
 		return "Transferi " .. fmt(cofre) .. " do tesouro nacional para uma conta na Suíça."
 	elseif k == "generais" then
@@ -483,6 +495,14 @@ function RUN.reg_anexar(game)
 	regFix(r)
 	return string.format("A invasão fracassou. %s expulsou nossas tropas e o exército me culpa.", alvo)
 end
+function RUN.reg_salario(game, x)
+	local r = regime(game.S.me)
+	if not table.find(Politica.SAL_MULTS, x) then
+		return nil
+	end
+	r.salMult = x
+	return "Defini meu salário em " .. fmt(Politica.SAL_PRES * x) .. " por ano."
+end
 function RUN.reg_herdeiro(game, id)
 	local m = game.S.me
 	local r = regime(m)
@@ -497,7 +517,7 @@ end
 for id, t in {
 	rev_fundar = "Revolução", rev_panfleto = "Panfletos", rev_protesto = "Protesto", rev_hacker = "TV estatal", rev_equipar = "Equipamento",
 	rev_general = "General", rev_sumir = "Revolução", rev_abandonar = "Revolução", reg_exilio = "Exílio", ref_nome = "Novo nome",
-	reg_nuclear = "Programa nuclear", reg_anexar = "Anexação", reg_herdeiro = "Sucessão",
+	reg_nuclear = "Programa nuclear", reg_anexar = "Anexação", reg_herdeiro = "Sucessão", reg_salario = "Meu salário",
 } do
 	Politica.TITLE[id] = t
 end
@@ -530,6 +550,9 @@ function Politica.list(game, add)
 			add("reg_nuclear", "Programa nuclear", "Regime")
 		end
 		add("reg_anexar", "Anexar território", "Regime")
+		for _, x in Politica.SAL_MULTS do
+			add("reg_salario", "Salário", "Regime", x)
+		end
 		for _, k in game:people("filho", "adot") do
 			if k.alive ~= false then
 				add("reg_herdeiro", "Herdeiro: " .. k.first, "Regime", k.id)
@@ -911,6 +934,65 @@ EV.regime_eleicao = {
 	end,
 }
 
+EV.regime_investigacao = {
+	k = "Política",
+	show = function(game)
+		local r = regime(game.S.me) or {}
+		local f = {}
+		if salMult(r) > 2 then
+			table.insert(f, "que eu me pago " .. fmt(Politica.SAL_PRES * salMult(r)) .. " por ano")
+		end
+		if (r.saques or 0) > 0 then
+			table.insert(f, string.format("%d saque%s do tesouro", r.saques, r.saques > 1 and "s" or ""))
+		end
+		return "📰 Investigação internacional", "Jornalistas estrangeiros e um tribunal internacional estão investigando as minhas contas." .. (#f > 0 and (" Descobriram " .. table.concat(f, " e ") .. ".") or ""),
+			{ "Baixar o meu salário para o de presidente", "Subornar os investigadores (" .. fmt(2000000) .. ")", "Expulsar os jornalistas do país" }
+	end,
+	pick = function(game, i)
+		local m = game.S.me
+		local o, r = m.office, regime(m)
+		if not r then
+			return ""
+		end
+		local function congela(): string
+			local v = Util.round(math.max(0, m.money) * R.int(20, 40) / 100)
+			m.money -= v
+			r.pres += 15
+			o.appr = clamp(o.appr - 10)
+			regFix(r)
+			game:log("Um tribunal internacional congelou " .. fmt(v) .. " das minhas contas.", "bad")
+			return fmt(v)
+		end
+		if i == 1 then
+			r.salMult = 1
+			r.saques = 0
+			o.appr = clamp(o.appr + 5)
+			r.pres -= 5
+			regFix(r)
+			return "Cortei o meu salário em rede nacional. A investigação perdeu força."
+		elseif i == 2 then
+			local c = 2000000
+			if m.money < c then
+				return "Não tinha dinheiro para o suborno. A investigação saiu e congelaram " .. congela() .. "."
+			end
+			m.money -= c
+			m.karma = clamp(m.karma - 8)
+			if R.chance(0.6) then
+				r.saques = math.max(0, (r.saques or 0) - 1)
+				return "Os investigadores arquivaram o caso. Ninguém sabe por quê."
+			end
+			return "Um investigador gravou a oferta de suborno. Virou manchete, e congelaram " .. congela() .. "."
+		end
+		r.medo += 5
+		r.pres += 10
+		regFix(r)
+		if R.chance(0.5) then
+			return "Expulsei os jornalistas, mas o relatório saiu mesmo assim. Congelaram " .. congela() .. "."
+		end
+		return "Expulsei os jornalistas e fechei as fronteiras para a imprensa. Por enquanto, ninguém provou nada."
+	end,
+}
+
 EV.reg_constituicao = {
 	k = "Política",
 	show = function()
@@ -990,8 +1072,11 @@ function Politica.year(game)
 		return
 	end
 	o.yrs += 1
-	m.money += 250000
 	local r = regime(m)
+	m.money += Util.round(Politica.SAL_PRES * (r and salMult(r) or 1) * game:diff().money)
+	if r and R.chance(Politica.risco(r)) then
+		game:queue("regime_investigacao", {})
+	end
 	if not r then
 		-- eleito na transição: um mandato de presidente comum, até perder a aprovação
 		o.appr = clamp(o.appr + R.int(-6, 4))
@@ -1162,6 +1247,7 @@ function Politica.views(game, V, actRow, allowed)
 	end
 	A("reg_anexar", "🗺️", "Anexar território vizinho", "Glória ou guerra", "Pode virar guerra e acabar com o regime.")
 	table.insert(ri, { sec = "Dinheiro e poder" })
+	table.insert(ri, { ic = "💵", l = "Definir meu salário", s = fmt(Politica.SAL_PRES * salMult(r)) .. "/ano · risco de investigação " .. pct(Politica.risco(r)), push = "salario" })
 	A("reg_saquear", "💰", "Saquear o tesouro nacional", "Dinheiro · aprovação e lealdade caem", "O dinheiro é do país. Se descobrirem, a revolta vem mais rápido.")
 	A("reg_generais", "🎁", "Pagar os generais", "Lealdade dos militares")
 	A("reg_nacionalizar", "🏭", "Nacionalizar empresas estrangeiras", "Aprovação · sanções")
@@ -1176,6 +1262,12 @@ function Politica.views(game, V, actRow, allowed)
 		table.insert(ni, actRow(allowed, "ref_nome", i, { ic = "🏷️", l = n }))
 	end
 	V.pais_nome = { title = "Novo nome do país", items = ni }
+
+	local si = { { card = { { p = "O salário de presidente é " .. fmt(Politica.SAL_PRES) .. " por ano. Quem tomou o poder decide o próprio. Quanto maior, maior a chance de investigarem as minhas contas." }, { "Chance de investigação hoje", pct(Politica.risco(r)) .. " ao ano" } } } }
+	for _, x in Politica.SAL_MULTS do
+		table.insert(si, actRow(allowed, "reg_salario", x, { ic = salMult(r) == x and "✅" or "💵", l = fmt(Politica.SAL_PRES * x) .. "/ano", s = x == 1 and "Igual ao presidente" or x == 2 and "O dobro" or (x .. "x o salário de presidente") }))
+	end
+	V.salario = { title = "Meu salário", items = si }
 
 	local hi = { { card = { { p = "Quem herda o poder quando eu me for?" } } } }
 	for _, k in game:people("filho", "adot") do

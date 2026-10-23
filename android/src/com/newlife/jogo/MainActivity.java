@@ -154,7 +154,7 @@ public class MainActivity extends Activity {
                             });
                         }
                     });
-                } catch (Exception e) { runOnUiThread(new Runnable(){public void run(){web.evaluateJavascript("window.UPD&&UPD.close('Atualização não instalada. Continuando com a versão atual.')",null);}}); }
+                } catch (Exception e) { runOnUiThread(new Runnable(){public void run(){web.evaluateJavascript("typeof UPD!=='undefined'&&UPD&&UPD.close('Atualização não instalada. Continuando com a versão atual.')",null);}}); }
             }
         }).start();
     }

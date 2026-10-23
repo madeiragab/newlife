@@ -108,5 +108,27 @@ do
 	check(View.build(g, { prefs = {}, grave = {} }).views.rev ~= nil, "tela depois do exílio")
 end
 
+-- salário do golpe: dobro por padrão, e salário alto chama investigação
+do
+	local g = adulto(9)
+	local m = g.S.me
+	m.office = { dit = 1, yrs = 0, appr = 50 }
+	g:queue("golpe_decreto", {})
+	g:choose(1)
+	local r = Politica.regime(m)
+	check(Politica.risco(r) > 0 and Politica.risco(r) < 0.05, "risco com o dobro do salário")
+	run(g, "reg_salario", 20)
+	check(r.salMult == 20 and Politica.risco(r) >= 0.5, "salário de 20x aumenta o risco")
+	check(View.build(g, { prefs = {}, grave = {} }).views.salario ~= nil, "tela do salário")
+	local antes = m.money
+	g:ageUp()
+	check(m.money - antes > 5000000 or not m.alive or m.office == nil or #g.S.pending > 0, "recebe o salário de 20x")
+	g:queue("regime_investigacao", {})
+	while g.S.pending[1] and g.S.pending[1].id ~= "regime_investigacao" do table.remove(g.S.pending, 1) end
+	semMarcador(g:currentEvent().text, "investigação")
+	g:choose(1)
+	check(r.salMult == 1, "baixar o salário na investigação")
+end
+
 if bad > 0 then process.exit(1) end
 print("Política ok.")

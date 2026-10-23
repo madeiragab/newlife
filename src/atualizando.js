@@ -6,6 +6,8 @@ const NL_SITE='https://madeiragab.github.io/newlife/';
 const nlIsApp=()=>!!window.DESKTOP||/^file:\/\/\/android_asset/.test(location.href);
 const UPD_DICAS=['Dica: no paranormal, a mordida de vampiro é para sempre.','Dica: a fé dos seguidores cai todo ano. Faça cultos, discursos e livros.','Dica: no herói, ninguém pode saber sua identidade. Nem a sua mãe.','Dica: em Menu → Novidades você vê tudo o que mudou.','Dica: colegas de equipe podem virar amigos, namorados ou inimigos.','Dica: no apocalipse zumbi, barulho atrai hordas.','Dica: no isekai, morrer é morrer de verdade.','Dica: passar um tempo com todos aproxima a família inteira de uma vez.'];
 let UPD=null;
+// os apps fecham a tela com window.UPD.close(...) quando a instalação falha; let não vira propriedade de window
+try{ Object.defineProperty(window,'UPD',{get:()=>UPD,configurable:true}); }catch(e){}
 function updOverlay(rv){ if(UPD) return UPD; const C=2*Math.PI*52;
   const el=document.createElement('div'); el.id='nlUpd';
   el.innerHTML=`<style>
@@ -64,8 +66,11 @@ async function nlAppUpdateCheck(){ if(!nlIsApp()||/teste|aventura|demo|qualidade
     for(;;){ const {done,value}=await rd.read(); if(done) break; got+=value.length; if(!u.native) u.set(Math.min(.97,got/total)); }
     if(!u.native) u.set(1);
   }catch(e){ if(!u.native){ u.close('Não deu para baixar a atualização agora. Ela entra na próxima vez que você abrir o app com internet.'); return; } }
-  // se o app não recarregar em 25 s, a versão nova entra na próxima abertura
-  setTimeout(()=>{ if(UPD) UPD.close('A atualização ainda não foi confirmada pelo aplicativo. Continue jogando; ele tentará novamente na próxima abertura.'); },25000); }
+  // se o app não recarregar, a versão nova entra na próxima abertura. Enquanto o app ainda manda o progresso
+  // (download lento ou instalando), espera até 2 minutos em vez de 25 s.
+  const t0=Date.now(), espera=()=>setTimeout(()=>{ if(!UPD) return; if(UPD.native&&Date.now()-t0<120000) return espera();
+    UPD.close('A versão nova já foi baixada. Feche e abra o app de novo para usar.'); },25000);
+  espera(); }
 window.addEventListener('load',()=>setTimeout(()=>{ nlAppUpdateCheck().catch(()=>{}); },700));
 // demonstração para conferir o visual (#demo-atualizando)
 if(/demo-atualizando/.test(location.hash)) window.addEventListener('load',()=>setTimeout(()=>{ const u=updOverlay(NLV()||'2610141200'); let p=0; const t=setInterval(()=>{ p+=.07; u.set(Math.min(.62,p)); if(p>=.62) clearInterval(t); },120); },900));

@@ -151,7 +151,7 @@ def check_update(window, game_file, current):
         window.load_url(page_url(game_file))
     except Exception:
         try:
-            window.evaluate_js("window.UPD&&UPD.close('Atualização não instalada. Continuando com a versão atual.')")
+            window.evaluate_js("typeof UPD!=='undefined'&&UPD&&UPD.close('Atualização não instalada. Continuando com a versão atual.')")
         except Exception:
             pass
 
