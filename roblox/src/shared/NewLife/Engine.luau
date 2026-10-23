@@ -822,9 +822,6 @@ function Engine:cause(roll: boolean): string
 		end
 		return R.pick({ "num acidente de carro", "de um aneurisma", "afogad" .. o2 .. " no mar", "num acidente doméstico", "de uma infecção grave", "numa queda de escada", "de uma reação alérgica grave" })
 	end
-	if m.add.alcool > 70 then
-		return "de complicações do alcoolismo"
-	end
 	if m.age > 70 then
 		return R.pick({ "de causas naturais", "dormindo, em paz", "de insuficiência cardíaca", "de pneumonia", "de um AVC" })
 	end
@@ -1092,6 +1089,9 @@ function Engine:import(S)
 	S.pending = S.pending or {}
 	S.me.ev = S.me.ev or {}
 	S.me.evN = S.me.evN or {}
+	-- bebida saiu da versão Roblox: zera o vício de saves antigos
+	S.me.add = S.me.add or {}
+	S.me.add.alcool = 0
 	self:use()
 	return true
 end

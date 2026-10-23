@@ -18,7 +18,7 @@ Os modos fictícios, as carreiras de verdade, as eleições comuns, as empresas,
 
 ## O que fica de fora só no Roblox
 
-As regras do Roblox proíbem conteúdo sexual, drogas, tabaco, apostas, suicídio e assassinato. A lista fica em [`tools/cortes.cjs`](tools/cortes.cjs): qualquer evento cujo título, texto ou escolha tenha uma dessas palavras (ou use um efeito proibido, como `kill`) não entra na versão Roblox. A gravidez também não existe lá: filhos chegam só por adoção. O jogo do site e dos apps continua igual.
+As regras do Roblox proíbem conteúdo sexual, drogas, tabaco, apostas, suicídio e assassinato. Bebida alcoólica também fica de fora, para a classificação não subir por álcool. A lista fica em [`tools/cortes.cjs`](tools/cortes.cjs): qualquer evento cujo título, texto ou escolha tenha uma dessas palavras (ou use um efeito proibido, como `kill`) não entra na versão Roblox. A gravidez também não existe lá: filhos chegam só por adoção. O jogo do site e dos apps continua igual.
 
 ## Estrutura
 
