@@ -38,3 +38,12 @@ tools/cut_*.py
 *.idsig
 
 test-results/
+
+# Versão Roblox: dados gerados pelo conversor e arquivos do Studio
+roblox/src/shared/NewLife/Data/
+roblox/conversao.txt
+roblox/tools/node_modules/
+*.rbxl
+*.rbxlx
+*.rbxl.lock
+*.rbxlx.lock

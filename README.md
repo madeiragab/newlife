@@ -295,6 +295,8 @@ Tudo é feito por scripts PowerShell no Windows.
 
 Rode `make-exe.ps1` antes do `make-apk.ps1`, porque ele gera o ícone usado pelo APK.
 
+A versão **Roblox** fica em [`roblox/`](roblox/README.md). Ela é gerada a partir do mesmo `src/` e publicada sozinha pelo GitHub Actions a cada push na `main`.
+
 ## Testes automáticos
 
 [![Testes](https://github.com/madeiragab/newlife/actions/workflows/testes.yml/badge.svg)](https://github.com/madeiragab/newlife/actions/workflows/testes.yml)
