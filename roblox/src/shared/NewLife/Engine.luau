@@ -19,6 +19,7 @@ local Dsl = dep("Dsl")
 local Countries = dep("Data/Countries")
 local Names = dep("Data/Names")
 local Text = dep("Data/Text")
+local Looks = dep("Looks")
 
 local R, clamp, fmt, g = Util.R, Util.clamp, Util.fmt, Util.g
 
@@ -206,14 +207,81 @@ function Engine:netWorth(): number
 	return s
 end
 
+-- ---------- sons (porta de soundForLine em src/sound.js) ----------
+-- O motor só anota qual som cabe; quem toca é o cliente (Ui.client.luau), com os áudios de Sons.luau.
+local SOUND_PRIORITY = { death = 5, siren = 4, promo = 3, bells = 3, baby = 3, cash = 2, bad = 1, good = 1 }
+local function has(s: string, list: { string }): boolean
+	for _, p in list do
+		if string.find(s, p, 1, true) then
+			return true
+		end
+	end
+	return false
+end
+local function soundForLine(t: string, tone: string?): string?
+	local l = string.lower(t)
+	if string.find(l, "%f[%a]pres[oa]%f[%A]") or has(l, { "algemad", "polícia pegou", "polícia me pegou", "polícia prendeu", "polícia me prendeu", "polícia chegou" }) then
+		return "siren"
+	end
+	if string.sub(t, 1, 6) == "Morri " then
+		return "death"
+	end
+	if has(l, { "promovid", "subi na", "subi para", "subi de", "virei capitão", "virei titular", "virei líder", "virei braço", "passei no exame de", "faixa preta", "agora sou" }) then
+		return "promo"
+	end
+	if has(l, { "casei", "casamento foi", "aliança" }) then
+		return "bells"
+	end
+	if has(l, { "nasceu", "é pai", "é mãe", "sou pai", "sou mãe", "adotei" }) then
+		return "baby"
+	end
+	if tone ~= "bad" and has(l, { "ganhei $", "herança", "recebi $", "prêmio de $", "na conta" }) then
+		return "cash"
+	end
+	if tone == "good" or tone == "bad" then
+		return tone
+	end
+	return nil
+end
+Engine.soundForLine = soundForLine
+
+-- o que tocar desde a última vez que a tela foi atualizada (não vai para o save)
+function Engine:takeFx(): { string }
+	local fx = self.fx or {}
+	self.fx = {}
+	local out = {}
+	if fx.line then
+		table.insert(out, fx.line)
+	end
+	if fx.birthday then
+		table.insert(out, "birthday")
+	end
+	if fx.hurt then
+		table.insert(out, "hurt")
+	end
+	return out
+end
+
 function Engine:log(t: string, tone: string?)
 	local y = self.S.log[#self.S.log]
 	table.insert(y.lines, tone and { t = t, c = tone } or { t = t })
+	local s = soundForLine(t, tone)
+	if s then
+		self.fx = self.fx or {}
+		local cur = self.fx.line
+		if not cur or SOUND_PRIORITY[s] > SOUND_PRIORITY[cur] then
+			self.fx.line = s
+		end
+	end
 end
 
 function Engine:st(k: string, d: number)
 	local m = self.S.me
 	m[k] = clamp((m[k] or 0) + d)
+	if k == "health" and d <= -3 then
+		self.fx = self.fx or {}
+		self.fx.hurt = true
+	end
 end
 
 function Engine:cnt(key: string, n: number?): number
@@ -293,6 +361,9 @@ function Engine:mkPerson(o)
 		bond = o.bond or R.int(40, 80), health = o.health or R.int(50, 100), money = o.money or 0,
 		looks = clamp(R.norm(55, 20)), smarts = clamp(R.norm(55, 20)), job = o.job,
 	}
+	-- rosto: herda dos pais quando eles são conhecidos (o.from), senão segue o país
+	p.genes = o.from and Looks.childGenes(o.from[1], o.from[2], gender, cid) or Looks.randGenes(gender, cid)
+	Looks.ensure(p)
 	return p
 end
 
@@ -336,7 +407,7 @@ function Engine:newLife(o)
 	local c = o.country and countryOf(o.country) or R.pick(pool)
 	self.S = {
 		v = Engine.VERSION, nextId = 1, year = o.year or (2000 + R.int(0, 26)), people = {}, log = {}, pending = {},
-		me = nil, gen = o.gen or 1, flags = { diff = "normal" },
+		me = nil, gen = o.gen or 1, flags = { diff = o.diff or "normal" },
 	}
 	self:use()
 	local S = self.S
@@ -380,8 +451,10 @@ function Engine:newLife(o)
 	local bio = dad or self:mkPerson({ rel = "tmp", gender = "M", age = dAge })
 	m.looks = mix(mom.looks, bio.looks, 12)
 	m.smarts = mix(mom.smarts, bio.smarts, 12)
+	m.genes = Looks.childGenes(mom, bio, gender, c.id)
+	Looks.ensure(m)
 	for _ = 1, R.wpick({ { 0, 30 }, { 1, 38 }, { 2, 20 }, { 3, 9 }, { 4, 3 } }) do
-		table.insert(S.people, self:uniqFirst(self:mkPerson({ rel = "irmao", age = R.int(1, math.max(1, mAge - 19)), last = last, bond = R.int(40, 90) })))
+		table.insert(S.people, self:uniqFirst(self:mkPerson({ rel = "irmao", age = R.int(1, math.max(1, mAge - 19)), last = last, bond = R.int(40, 90), from = { mom, bio } })))
 	end
 	for i = 1, R.int(0, 4) do
 		local a = mAge + R.int(18, 34)
@@ -416,6 +489,13 @@ end
 ---------------------------------------------------------------------------
 -- envelhecer
 ---------------------------------------------------------------------------
+-- dificuldade (DIFF em src/core.js): chance de morrer e quanto o trabalho paga
+local DIFF = { facil = { d = 0.6, money = 1.3, n = "Fácil" }, normal = { d = 1, money = 1, n = "Normal" }, dificil = { d = 1.7, money = 0.75, n = "Difícil" } }
+Engine.DIFF = DIFF
+function Engine:diff()
+	return DIFF[self.S.flags.diff or "normal"] or DIFF.normal
+end
+
 local function deathP(age: number, health: number): number
 	if age < 1 then
 		return 0.002
@@ -445,9 +525,11 @@ function Engine:ageUp()
 	if m.health <= 0 then
 		return self:die(self:cause(false))
 	end
-	if R.chance(deathP(m.age, m.health)) then
+	if R.chance(deathP(m.age, m.health) * self:diff().d) then
 		return self:die(self:cause(true))
 	end
+	self.fx = self.fx or {}
+	self.fx.birthday = true
 	self:yearEvents()
 end
 
@@ -550,7 +632,7 @@ function Engine:yearPeople()
 	if m.age <= 13 then
 		local mom = self:people("mae")[1]
 		if mom and mom.age <= 43 and R.chance(0.07) then
-			local s = self:uniqFirst(self:mkPerson({ rel = "irmao", age = 0, last = m.last, bond = R.int(50, 80) }))
+			local s = self:uniqFirst(self:mkPerson({ rel = "irmao", age = 0, last = m.last, bond = R.int(50, 80), from = { mom, self:people("pai")[1] or mom } }))
 			table.insert(S.people, s)
 			self:log(s.gender == "F" and "Nasceu minha irmã " .. s.first .. "!" or "Nasceu meu irmão " .. s.first .. "!", "good")
 		end
@@ -656,7 +738,7 @@ function Engine:yearMoney()
 	local t = m.trabalho
 	if t then
 		t.yrs += 1
-		local pay = Util.round(t.salary * (1 + 0.03 * math.min(t.yrs, 15)))
+		local pay = Util.round(t.salary * (1 + 0.03 * math.min(t.yrs, 15)) * self:diff().money)
 		m.money += pay
 		if m.age >= 65 and R.chance(0.5) then
 			m.aposentado = { pay = Util.round(pay * 0.6) }
@@ -698,6 +780,19 @@ function Engine:cause(roll: boolean): string
 		return R.pick({ "de causas naturais", "dormindo, em paz", "de insuficiência cardíaca", "de pneumonia", "de um AVC" })
 	end
 	return R.pick({ "de um infarto fulminante", "de um AVC", "de uma infecção grave", "de insuficiência cardíaca" })
+end
+
+-- "Desistir desta vida" no menu
+function Engine:giveUp()
+	local m = self.S.me
+	if not m.alive then
+		return
+	end
+	m.c.gaveUp = 1
+	self:log("Decidi que a minha história termina aqui.", "big")
+	m.alive = false
+	m.cause = "ao encerrar a própria história"
+	self.S.pending = {}
 end
 
 function Engine:die(cause: string)

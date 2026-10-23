@@ -6,6 +6,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DataStoreService = game:GetService("DataStoreService")
 local RunService = game:GetService("RunService")
+local TextService = game:GetService("TextService")
 
 local NewLife = ReplicatedStorage:WaitForChild("NewLife")
 local Engine = require(NewLife:WaitForChild("Engine"))
@@ -91,16 +92,46 @@ local function remember(s)
 	end
 end
 
+local function prefs(s)
+	s.meta.prefs = s.meta.prefs or {}
+	local p = s.meta.prefs
+	return { music = p.music ~= false, sfx = p.sfx ~= false, theme = p.theme == "dark" and "dark" or "light" }
+end
+
 local function view(s)
-	return View.build(s.game, { lives = s.meta.lives, grave = s.meta.grave, saving = store ~= nil })
+	local v = View.build(s.game, { lives = s.meta.lives, grave = s.meta.grave, saving = store ~= nil, prefs = prefs(s) })
+	v.msg = s.msg
+	s.msg = nil
+	return v
 end
 
 local OPS = {}
 function OPS.state(_s) end
-function OPS.new(s, req)
+-- nome digitado na vida personalizada: só letras, e tem que passar pelo filtro de texto do Roblox
+local function cleanName(player: Player, v): string?
+	if type(v) ~= "string" then
+		return nil
+	end
+	v = string.gsub(string.gsub(v, "^%s+", ""), "%s+$", "")
+	local n = utf8.len(v)
+	if v == "" or not n or n > 20 or not string.match(v, "^[%a\128-\255' %-]+$") then
+		return nil
+	end
+	local ok, res = pcall(function()
+		local f = TextService:FilterStringAsync(v, player.UserId, Enum.TextFilterContext.PrivateChat)
+		return f:GetNonChatStringForUserAsync(player.UserId)
+	end)
+	if not ok or res ~= v then
+		return nil
+	end
+	return v
+end
+
+function OPS.new(s, req, player)
 	local gender = req.gender == "M" and "M" or req.gender == "F" and "F" or nil
 	local country = type(req.country) == "string" and Engine.countryOf(req.country).id == req.country and req.country or nil
-	s.game:newLife({ gender = gender, country = country })
+	local diff = (req.diff == "facil" or req.diff == "dificil") and req.diff or "normal"
+	s.game:newLife({ gender = gender, country = country, diff = diff, first = cleanName(player, req.first), last = cleanName(player, req.last) })
 	s.meta.lives += 1
 end
 function OPS.age(s)
@@ -112,9 +143,35 @@ function OPS.choose(s, req)
 		s.game:choose(math.floor(req.i))
 	end
 end
+-- liga e desliga a música e os efeitos (fica no save)
+function OPS.prefs(s, req)
+	prefs(s)
+	if type(req.music) == "boolean" then
+		s.meta.prefs.music = req.music
+	end
+	if type(req.sfx) == "boolean" then
+		s.meta.prefs.sfx = req.sfx
+	end
+	if req.theme == "dark" or req.theme == "light" then
+		s.meta.prefs.theme = req.theme
+	end
+end
+function OPS.giveup(s)
+	s.game:giveUp()
+	remember(s)
+end
+-- títulos dos pop-ups depois de uma atividade (como act(fn, título) em src/ui.js)
+local ACT_TITLE = {
+	estudar = "Estudos", ler = "Biblioteca", academia = "Academia", meditar = "Meditação", amigos = "Amizades", tempo = "Relações",
+	namorar = "Amor", noivar = "Pedido de noivado", casar = "Casamento", terminar = "Fim do namoro", divorciar = "Divórcio",
+	sair_casa = "Mudança", adotar = "Adoção", faculdade = "Vestibular", emprego = "Entrevista de emprego", demissao = "Demissão",
+}
 function OPS.act(s, req)
 	if type(req.id) == "string" then
-		Actions.run(s.game, req.id, req.arg)
+		local msg = Actions.run(s.game, req.id, req.arg)
+		if msg then
+			s.msg = { t = ACT_TITLE[req.id] or "", x = msg }
+		end
 	end
 end
 
@@ -139,7 +196,7 @@ remote.OnServerInvoke = function(player: Player, req)
 	if s.calls > 15 then
 		return view(s)
 	end
-	local ok, err = pcall(OPS[req.op], s, req)
+	local ok, err = pcall(OPS[req.op], s, req, player)
 	if not ok then
 		warn("[NewLife] erro em " .. req.op .. " de " .. player.Name, err)
 	end

@@ -3,18 +3,31 @@
   "tree": {
     "$className": "DataModel",
     "ReplicatedStorage": {
-      "NewLife": { "$path": "src/shared/NewLife" }
+      "NewLife": {
+        "$path": "src/shared/NewLife"
+      }
     },
     "ServerScriptService": {
-      "NewLifeServer": { "$path": "src/server" }
+      "NewLifeServer": {
+        "$path": "src/server"
+      }
     },
     "StarterPlayer": {
       "StarterPlayerScripts": {
-        "NewLifeClient": { "$path": "src/client" }
+        "NewLifeClient": {
+          "$path": "src/client"
+        }
       }
     },
     "Players": {
-      "$properties": { "CharacterAutoLoads": false }
+      "$properties": {
+        "CharacterAutoLoads": false
+      }
+    },
+    "StarterGui": {
+      "$properties": {
+        "ScreenOrientation": "Portrait"
+      }
     }
   }
 }

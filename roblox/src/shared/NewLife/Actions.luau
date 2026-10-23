@@ -44,6 +44,27 @@ local function hasDeg(m, req: string?): boolean
 	return false
 end
 
+local COURSE_NAME = { adm = "Administração", dir = "Direito", med = "Medicina", eng = "Engenharia", cc = "Ciência da Computação", psi = "Psicologia",
+	enf = "Enfermagem", ped = "Pedagogia", arq = "Arquitetura", jor = "Jornalismo", art = "Artes", ef = "Educação Física" }
+
+-- requisito do emprego em texto ("Ensino médio", "Faculdade de Direito"…)
+function Actions.reqLabel(req: string?): string
+	if not req then
+		return "Sem exigência de formação"
+	end
+	if req == "medio" then
+		return "Ensino médio"
+	end
+	local names = {}
+	for _, id in Util.split(string.match(req, "^uni:(.*)$") or "", ",") do
+		table.insert(names, COURSE_NAME[id] or id)
+	end
+	if #names <= 1 then
+		return "Faculdade de " .. (names[1] or "")
+	end
+	return "Faculdade de " .. table.concat(names, ", ", 1, #names - 1) .. " ou " .. names[#names]
+end
+
 local function used(game, key: string): number
 	local yr = game.S.me.yr
 	yr[key] = (yr[key] or 0) + 1

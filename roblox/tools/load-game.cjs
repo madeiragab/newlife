@@ -35,7 +35,9 @@ function loadGame() {
   vm.createContext(ctx);
   const errors = [];
   for (const f of buildOrder()) {
-    const code = fs.readFileSync(path.join(SRC, f), 'utf8');
+    let code = fs.readFileSync(path.join(SRC, f), 'utf8');
+    // o conversor dos rostos troca isHex por uma versão que aceita cores simbólicas (rostos.cjs)
+    if (f === 'faces.js') code = code.replace('const isHex=', 'var isHex=');
     ctx.__file = f;
     try { vm.runInContext(code, ctx, { filename: f }); }
     catch (e) { errors.push(`${f}: ${e.message}`); }
