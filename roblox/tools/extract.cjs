@@ -262,6 +262,9 @@ function main() {
   const changelog = g.run('CHANGELOG').slice(0, 40).map(c => ({ v: c.v, d: c.d, t: c.t, itens: c.itens.filter(x => !textoProibido(x)) })).filter(c => c.itens.length);
   fs.writeFileSync(path.join(OUT, 'Icons.luau'), HEAD + 'return ' + lval({ flags: g.run('FLAG_ART'), kick: g.run('KICK_EMOJI'), changelog }) + '\n');
 
+  // dicionário de inglês das telas (src/i18n.js)
+  fs.writeFileSync(path.join(OUT, 'I18nEN.luau'), HEAD + 'return ' + lval(g.run('EN')) + '\n');
+
   // versão do jogo (a mesma do CHANGELOG em src/update.js) para mostrar na tela
   const ver = g.run('CHANGELOG[0].v');
   fs.writeFileSync(path.join(OUT, 'Version.luau'), HEAD + 'return ' + lval({ v: ver, built: process.env.NL_BUILD || new Date().toISOString().slice(0, 16).replace('T', ' ') }) + '\n');

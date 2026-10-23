@@ -317,6 +317,7 @@ local function views(game, meta)
 				{ ic = "🎵", l = "Música", r = prefs.music == false and "Desligada" or "Ligada", op = "music" },
 				{ ic = "🔊", l = "Efeitos sonoros", r = prefs.sfx == false and "Desligados" or "Ligados", op = "sfx" },
 				{ l = "Tema", r = prefs.theme == "dark" and "Escuro" or "Claro", op = "theme" },
+				{ ic = "🌐", l = "Idioma", r = prefs.lang == "en" and "English" or prefs.lang == "pt" and "Português" or "Automático", op = "lang" },
 				{ sec = "Extras" },
 				meta and meta.passes and meta.passes.deus and { ic = "⚡", l = "Modo Deus", s = "Mude atributos e talentos", push = "god" }
 					or { ic = "⚡", l = "Modo Deus", s = "Mude atributos e talentos quando quiser", r = "Comprar", op = "buy", arg = "deus" },
