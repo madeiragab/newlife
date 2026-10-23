@@ -66,6 +66,8 @@ function coberturaEventosSelfTest(limiteMs=60000){
   const candidatos=[];
   for(const age of [16,25,35,50,68])for(const j of JOBS)candidatos.push([age,null,0,m=>{m.job=null;takeJob({id:j.id,co:'Teste',size:'média',mul:1});m.job.lvl=R.int(0,2);m.job.perf=60;m.job.yrs=4;}]);
   for(const age of [25,40])for(const k of Object.keys(SPECIAL))candidatos.push([age,null,0,m=>{m.job={spc:k,lvl:1,perf:60,yrs:4};}]);
+  // ator com cada especialização (eventos próprios de ação, terror, dublagem, ficção científica e novela)
+  for(const e of (typeof ESPEC_ATOR!=='undefined'?ESPEC_ATOR:[]))candidatos.push([30,null,0,m=>{m.job={spc:'ator',lvl:1,perf:60,yrs:4,esp:e};}]);
   for(const c of COUNTRIES)for(const age of [12,25,45,70])candidatos.push([age,c.id,0,m=>{if(age>=18){m.job=null;takeJob({id:JOBS.find(j=>!j.pt&&!j.spc&&!jobReqs(j).length).id,co:'Teste',size:'média',mul:1});}}]);
   for(const c of COURSES)for(const yr of [0,2,4])candidatos.push([21,null,0,m=>{m.edu.cur={type:'uni',id:c.id,n:c.n,len:5,yr,grade:70,pub:yr===2,cost:0};}]);
   for(const t of TECHS)candidatos.push([19,null,0,m=>{m.edu.cur={type:'tec',id:t.id,n:t.n,len:t.yrs||2,yr:(t.yrs||2)-1,grade:70,cost:0};}]);
