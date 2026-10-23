@@ -22,7 +22,7 @@ jobs:
   roblox:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,10 +69,23 @@ jobs:
             echo "::notice::Publicação no Roblox desligada: configure o secret ROBLOX_API_KEY e as variáveis ROBLOX_UNIVERSE_ID e ROBLOX_PLACE_ID (veja roblox/README.md)."
             exit 0
           fi
-          code=$(curl -sS -o resposta.json -w '%{http_code}' -X POST \
-            "https://apis.roblox.com/universes/v1/${UNIVERSE_ID}/places/${PLACE_ID}/versions?versionType=Published" \
-            -H "x-api-key: ${ROBLOX_API_KEY}" -H 'Content-Type: application/octet-stream' \
-            --data-binary @newlife.rbxl)
-          cat resposta.json; echo
+          # 409 ("servidor ocupado", comum com o lugar aberto no Studio), 429 e 5xx passam com o tempo:
+          # tenta de novo até 6 vezes, com 1 minuto entre as tentativas
+          for tentativa in 1 2 3 4 5 6; do
+            code=$(curl -sS -o resposta.json -w '%{http_code}' -X POST \
+              "https://apis.roblox.com/universes/v1/${UNIVERSE_ID}/places/${PLACE_ID}/versions?versionType=Published" \
+              -H "x-api-key: ${ROBLOX_API_KEY}" -H 'Content-Type: application/octet-stream' \
+              --data-binary @newlife.rbxl) || true
+            cat resposta.json 2>/dev/null; echo
+            case "$code" in
+              200) break ;;
+              409|429|5*|000)
+                if [ "$tentativa" -lt 6 ]; then
+                  echo "::warning::Roblox ocupado (HTTP $code), tentativa $tentativa de 6. Feche o lugar no Studio se estiver aberto. Nova tentativa em 1 minuto."
+                  sleep 60
+                fi ;;
+              *) break ;;
+            esac
+          done
           if [ "$code" != "200" ]; then echo "::error::O Roblox recusou a publicação (HTTP $code)."; exit 1; fi
           echo "::notice::Publicado no Roblox: versão $(sed -n 's/.*"versionNumber":\([0-9]*\).*/\1/p' resposta.json)"
