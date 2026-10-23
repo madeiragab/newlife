@@ -259,7 +259,7 @@ local function pump()
 	end
 end
 
-local HELP = "Toque no bolo para envelhecer um ano. Cada ano traz eventos aleatórios e escolhas.\n\nCarreira: escola, faculdade e empregos.\nBens: dinheiro e moradia.\nRelações: família, amigos e amores.\nAtividades: academia, biblioteca, amizades, namoro e adoção."
+local HELP = "Toque no bolo para envelhecer um ano. Cada ano traz eventos aleatórios e escolhas.\n\nCarreira: escola, faculdade, empregos e política (derrubar o governo e governar o país).\nBens: dinheiro e moradia.\nRelações: família, amigos e amores.\nAtividades: academia, biblioteca, amizades, namoro e adoção."
 
 ---------------------------------------------------------------------------
 -- telas em lista (V.* da web): cada item vira seção, cartão ou linha

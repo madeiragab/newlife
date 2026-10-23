@@ -3,6 +3,7 @@
 -- Engine.luau cuida do ano; aqui ficam só as ações. list() diz o que aparece na tela, run() executa.
 
 local Util = require(script and script.Parent:WaitForChild("Util") or "./Util")
+local Politica = require(script and script.Parent:WaitForChild("Politica") or "./Politica")
 local R, clamp, fmt, g = Util.R, Util.clamp, Util.fmt, Util.g
 
 local Actions = {}
@@ -131,7 +132,7 @@ function Actions.list(game)
 		end
 		if m.trabalho then
 			add("demissao", "Pedir demissão (" .. string.lower(m.trabalho.t) .. ")", "Trabalho")
-		elseif a < 70 then
+		elseif a < 70 and not m.office then
 			for _, j in JOBS do
 				if hasDeg(m, j.req) then
 					add("emprego", "Trabalhar como " .. string.lower(g(j.t, m.gender)) .. " (" .. fmt(j.salary) .. "/ano)", "Trabalho", j.id)
@@ -139,6 +140,7 @@ function Actions.list(game)
 			end
 		end
 	end
+	Politica.list(game, add)
 	return out
 end
 
@@ -352,7 +354,7 @@ function RUN.demissao(game)
 end
 
 function Actions.run(game, id: string, arg): string?
-	local f = RUN[id]
+	local f = RUN[id] or Politica.RUN[id]
 	local m = game.S.me
 	if not f or not m.alive or #game.S.pending > 0 then
 		return nil
