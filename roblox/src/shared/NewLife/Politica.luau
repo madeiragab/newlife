@@ -1,10 +1,11 @@
 -- ===== Política: movimento clandestino, golpe de Estado e o país depois do golpe =====
 -- Porta de src/golpe.js (movimento), src/ajustes_209.js (a noite do golpe), src/ajustes_210.js (regime) e
--- src/ajustes_210b.js (caminhos, refundar o país e sucessão). No Roblox ainda não há prisão nem continuar
--- como herdeiro: quem perde vai para o exílio ou sai por anistia, e a sucessão fica registrada no diário.
+-- src/ajustes_210b.js (caminhos, refundar o país e sucessão). Ainda não dá para continuar como herdeiro:
+-- a sucessão fica no diário. Quem é preso vai para Prisao.luau.
 -- Os textos evitam as palavras de tools/cortes.cjs.
 
 local Util = require(script and script.Parent:WaitForChild("Util") or "./Util")
+local Prisao = require(script and script.Parent:WaitForChild("Prisao") or "./Prisao")
 local R, clamp, fmt = Util.R, Util.clamp, Util.fmt
 
 local Politica = {}
@@ -628,11 +629,8 @@ local function golpeFim(game, bonus: number, relato): string
 			m.c.exilio = 1
 			return narrado .. "\n\nO golpe fracassou. Fugi pela fronteira de madrugada, com o que deu para carregar."
 		end
-		m.money = Util.round(math.max(0, m.money) * 0.5)
-		game:st("happy", -30)
-		game:st("health", -10)
-		m.c.detido = (m.c.detido or 0) + 1
-		return narrado .. "\n\nO golpe fracassou. Passei meses numa cela até uma anistia geral me soltar."
+		Prisao.prender(game, "tentativa de golpe de Estado", 10, 30)
+		return narrado .. "\n\nO golpe fracassou. Os quartéis não se moveram. A polícia me achou no porão."
 	end
 	local pais, mov, antes = paisNome(game), r.n, m.money
 	m.trabalho = nil
@@ -809,10 +807,8 @@ EV.rev_policia = {
 			return "Escapei pelos telhados. Perdemos alguns companheiros."
 		end
 		m.rev = nil
-		m.money = Util.round(math.max(0, m.money) * 0.6)
-		game:st("happy", -20)
-		m.c.detido = (m.c.detido or 0) + 1
-		return "Não deu. Fui levad" .. oa(m) .. " encapuzad" .. oa(m) .. " e só saí meses depois, sem o movimento."
+		Prisao.prender(game, "conspiração contra o Estado", 5, 20)
+		return "Não deu. Fui levad" .. oa(m) .. " encapuzad" .. oa(m) .. "."
 	end,
 }
 
@@ -847,9 +843,8 @@ EV.rev_contragolpe = {
 			game:die("num contragolpe militar")
 			return "O palácio caiu."
 		end
-		m.money = Util.round(math.max(0, m.money) * 0.2)
-		m.c.exilio = 1
-		return "O palácio caiu. Me deixaram partir para o exílio só com a roupa do corpo."
+		Prisao.prender(game, "crimes contra o Estado", 15, 40)
+		return "O palácio caiu. Fui pres" .. oa(m) .. "."
 	end,
 }
 
@@ -888,9 +883,8 @@ EV.regime_revolta = {
 			game:die("quando a multidão invadiu o palácio")
 			return "Os soldados baixaram as armas. A multidão invadiu o palácio."
 		end
-		m.money = Util.round(math.max(0, m.money) * 0.1)
-		game:st("happy", -30)
-		return "Os soldados baixaram as armas. Um tribunal internacional confiscou quase tudo o que eu tinha."
+		Prisao.prender(game, "crimes contra a humanidade", 25, 50)
+		return "Os soldados baixaram as armas e me entregaram ao tribunal."
 	end,
 }
 

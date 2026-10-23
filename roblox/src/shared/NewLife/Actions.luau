@@ -5,6 +5,7 @@
 local Util = require(script and script.Parent:WaitForChild("Util") or "./Util")
 local Politica = require(script and script.Parent:WaitForChild("Politica") or "./Politica")
 local Crime = require(script and script.Parent:WaitForChild("Crime") or "./Crime")
+local Prisao = require(script and script.Parent:WaitForChild("Prisao") or "./Prisao")
 local R, clamp, fmt, g = Util.R, Util.clamp, Util.fmt, Util.g
 
 local Actions = {}
@@ -81,6 +82,10 @@ function Actions.list(game)
 		table.insert(out, { id = id, label = label, group = group, arg = arg })
 	end
 	if not m.alive or #S.pending > 0 then
+		return out
+	end
+	if m.prison then
+		Prisao.list(game, add)
 		return out
 	end
 	local a = m.age
@@ -356,7 +361,7 @@ function RUN.demissao(game)
 end
 
 function Actions.run(game, id: string, arg): string?
-	local f = RUN[id] or Politica.RUN[id] or Crime.RUN[id]
+	local f = RUN[id] or Politica.RUN[id] or Crime.RUN[id] or Prisao.RUN[id]
 	local m = game.S.me
 	if not f or not m.alive or #game.S.pending > 0 then
 		return nil
