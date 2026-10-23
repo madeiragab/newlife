@@ -9,7 +9,9 @@ A versão Roblox usa o mesmo jogo de `src/`: um conversor lê os eventos do jogo
 - Os eventos da vida comum de `src/`, com as escolhas, chances e efeitos do formato compacto (`pack`).
 - Atividades: estudar, ler, academia, meditar, fazer amizades, passar tempo com alguém, namorar, noivar, casar, divórcio, sair de casa, adotar, empregos simples e aposentadoria.
 - Save automático no DataStore e lista das últimas vidas.
-- Interface própria, que funciona no celular e no PC.
+- Interface igual à da web: tema, telas em lista, pop-ups dos eventos, tela inicial e lápide. No celular fica em pé como na web; no PC usa a largura toda (atributos à esquerda, diário no meio e a tela aberta à direita).
+- Rostos idênticos aos da web: `FaceSvg.luau` monta o mesmo SVG de `src/faces.js` e `Svg.luau` desenha pixel a pixel num EditableImage. Bandeiras e ícones usam o mesmo desenhista.
+- Sons iguais aos da web: `tools/sons.cjs` roda o sintetizador de `src/sound.js` fora do navegador e grava `audio/efeitos.ogg` e `audio/musica.ogg`; `tools/enviar-sons.cjs` envia os dois ao Roblox e grava os IDs em `Sons.luau`.
 
 Os modos fictícios, as carreiras de verdade, a política, as empresas, a prisão, as doenças e os minigames ainda não chegaram. O conversor mostra em `roblox/conversao.txt` quantos eventos ficaram de fora e por quê.
 
@@ -48,6 +50,10 @@ cd roblox && rojo build -o newlife.rbxl
 Abra o `newlife.rbxl` no Roblox Studio e aperte Play. Para editar com o Studio aberto, use `rojo serve` com o plugin do Rojo.
 
 No Studio, o save só funciona com **Game Settings → Security → Enable Studio Access to API Services** ligado. Sem isso o jogo roda normal, só não salva.
+
+Os rostos precisam de **Game Settings → Security → Allow Mesh & Image APIs** (Permitir APIs de malha e imagem) ligado, e o dono da experiência precisa ter a idade e o documento verificados no Roblox. Sem isso, os rostos aparecem como círculos coloridos.
+
+Para editar com o Studio aberto e ver as mudanças na hora, use `rojo serve` e o plugin do Rojo (`rojo plugin install`). Para testar o layout de celular no Studio, rode na barra de comandos `workspace:SetAttribute("NewLifeCelular", true)`.
 
 ## Publicação automática (fazer uma vez)
 

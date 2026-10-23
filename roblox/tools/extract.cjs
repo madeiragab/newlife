@@ -7,6 +7,7 @@ const fs = require('fs'), path = require('path');
 const acorn = require('acorn');
 const { loadGame } = require('./load-game.cjs');
 const { textoProibido, efeitoProibido } = require('./cortes.cjs');
+const { extractFaces } = require('./rostos.cjs');
 
 const OUT = path.join(__dirname, '..', 'src', 'shared', 'NewLife', 'Data');
 const REPORT = path.join(__dirname, '..', 'conversao.txt');
@@ -253,6 +254,13 @@ function main() {
   for (const k in FILL) fill[k] = limpa(FILL[k]);
   const fluff = { kid: limpa(g.run('FLUFF_KID')), teen: limpa(g.run('FLUFF_TEEN')), adult: limpa(g.run('FLUFF_ADULT')), old: limpa(g.run('FLUFF_OLD')) };
   fs.writeFileSync(path.join(OUT, 'Text.luau'), HEAD + 'return ' + lval({ fill, fluff, trips: limpa(g.run('TRIPS')) }) + '\n');
+
+  // rostos: peças de src/faces.js com cores simbólicas
+  extractFaces(g, lval, OUT, HEAD);
+
+  // bandeiras (icons.js), emoji de cada tipo de evento e novidades (sem o que é cortado no Roblox)
+  const changelog = g.run('CHANGELOG').slice(0, 40).map(c => ({ v: c.v, d: c.d, t: c.t, itens: c.itens.filter(x => !textoProibido(x)) })).filter(c => c.itens.length);
+  fs.writeFileSync(path.join(OUT, 'Icons.luau'), HEAD + 'return ' + lval({ flags: g.run('FLAG_ART'), kick: g.run('KICK_EMOJI'), changelog }) + '\n');
 
   // versão do jogo (a mesma do CHANGELOG em src/update.js) para mostrar na tela
   const ver = g.run('CHANGELOG[0].v');
