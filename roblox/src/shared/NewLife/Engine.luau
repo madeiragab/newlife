@@ -21,6 +21,7 @@ local Names = dep("Data/Names")
 local Text = dep("Data/Text")
 local Looks = dep("Looks")
 local Politica = dep("Politica")
+local Crime = dep("Crime")
 
 local R, clamp, fmt, g = Util.R, Util.clamp, Util.fmt, Util.g
 
@@ -807,6 +808,7 @@ function Engine:yearMoney()
 		end
 	end
 	Politica.year(self)
+	Crime.year(self)
 end
 
 -- ---------- morte ----------
@@ -1029,7 +1031,7 @@ function Engine:currentEvent()
 	if not q then
 		return nil
 	end
-	local pe = Politica.EVENTS[q.id]
+	local pe = Politica.EVENTS[q.id] or Crime.EVENTS[q.id]
 	if pe then
 		self:use()
 		local title, text, choices = pe.show(self, q.d)
@@ -1055,7 +1057,7 @@ function Engine:choose(i: number): string?
 	if not q then
 		return nil
 	end
-	local pe = Politica.EVENTS[q.id]
+	local pe = Politica.EVENTS[q.id] or Crime.EVENTS[q.id]
 	if pe then
 		local title = pe.show(self, q.d)
 		table.remove(self.S.pending, 1)

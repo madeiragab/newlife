@@ -202,7 +202,7 @@ function OPS.act(s, req)
 	if type(req.id) == "string" then
 		local msg = Actions.run(s.game, req.id, req.arg)
 		if msg then
-			s.msg = { t = ACT_TITLE[req.id] or Politica.TITLE[req.id] or (string.match(req.id, "^reg_") or string.match(req.id, "^cam_")) and "Regime" or "", x = msg }
+			s.msg = { t = ACT_TITLE[req.id] or Politica.TITLE[req.id] or (req.id == "assassinar" and "Crime") or (string.match(req.id, "^reg_") or string.match(req.id, "^cam_")) and "Regime" or "", x = msg }
 		end
 	end
 end

@@ -149,5 +149,22 @@ do
 	check(Actions.run(g, "reg_anexar", "BR") == nil, "não anexa o próprio país")
 end
 
+-- assassinato leve: uma vez por ano, com julgamento possível
+for seed = 20, 40 do
+	local g = adulto(seed)
+	local m = g.S.me
+	local alvo = g:people("mae", "pai", "irmao")[1]
+	if alvo then
+		semMarcador(run(g, "assassinar", alvo.id), "assassinar")
+		check(Actions.run(g, "assassinar", alvo.id) == nil, "só uma vez por ano")
+		eventos(g, (seed % 3) + 1)
+		for _ = 1, 3 do
+			if not m.alive then break end
+			g:ageUp()
+			eventos(g, (seed % 3) + 1)
+		end
+	end
+end
+
 if bad > 0 then process.exit(1) end
 print("Política ok.")

@@ -243,6 +243,10 @@ local function views(game, meta)
 				elseif p.rel == "conjuge" then
 					table.insert(pi, actRow(allowed, "divorciar", p.id, { l = "Pedir o divórcio", tone = "bad", confirm = { t = "Divórcio?", x = "Vou pedir o divórcio de " .. p.first .. ". Metade do dinheiro vai na partilha.", yes = "Pedir o divórcio" } }))
 				end
+				if age >= 18 and p.rel ~= "colega" then
+					table.insert(pi, actRow(allowed, "assassinar", p.id, { ic = "🗡️", l = "Assassinar", s = "Uma vez por ano · a polícia pode investigar", tone = "bad",
+						confirm = { t = "Tem certeza?", x = "Tentar acabar com a vida de " .. p.first .. "? Não tem volta, e a polícia pode descobrir.", yes = "Fazer" } }))
+				end
 				V["person:" .. p.id] = { title = p.first, items = pi }
 			end
 		end
