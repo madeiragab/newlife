@@ -1,0 +1,12 @@
+{
+  "name": "newlife-roblox-tools",
+  "private": true,
+  "description": "Conversor dos dados do NewLife (src/) para a versão Roblox",
+  "type": "commonjs",
+  "scripts": {
+    "extract": "node extract.cjs"
+  },
+  "dependencies": {
+    "acorn": "8.12.1"
+  }
+}

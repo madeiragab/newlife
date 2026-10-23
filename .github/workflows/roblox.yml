@@ -1,0 +1,78 @@
+name: Roblox
+# Converte o jogo de src/ para Luau, simula vidas no Lune, monta o lugar com o Rojo
+# e publica no Roblox pelo Open Cloud. Publica só depois que os testes do jogo passam na main,
+# do mesmo jeito que o site; em pull requests só testa.
+on:
+  workflow_run:
+    workflows: [Testes]
+    types: [completed]
+    branches: [main]
+  pull_request:
+    paths: ['src/**', 'roblox/**', '.github/workflows/roblox.yml']
+  workflow_dispatch:
+concurrency:
+  group: newlife-roblox-${{ github.event.workflow_run.head_branch || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+env:
+  ROJO_VERSION: 7.4.4
+  LUNE_VERSION: 0.8.9
+jobs:
+  roblox:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Instalar Rojo e Lune
+        run: |
+          mkdir -p "$HOME/bin"
+          curl -sSfL -o rojo.zip "https://github.com/rojo-rbx/rojo/releases/download/v${ROJO_VERSION}/rojo-${ROJO_VERSION}-linux-x86_64.zip"
+          curl -sSfL -o lune.zip "https://github.com/lune-org/lune/releases/download/v${LUNE_VERSION}/lune-${LUNE_VERSION}-linux-x86_64.zip"
+          unzip -oq rojo.zip -d "$HOME/bin" && unzip -oq lune.zip -d "$HOME/bin"
+          chmod +x "$HOME/bin/rojo" "$HOME/bin/lune"
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+      - name: Converter o jogo para Luau (com os cortes do Roblox)
+        working-directory: roblox/tools
+        run: |
+          npm ci --silent || npm install --silent
+          node extract.cjs
+      - name: Conferir a sintaxe e simular vidas
+        working-directory: roblox
+        run: |
+          lune run tests/sintaxe.luau
+          lune run tests/vidas.luau 300
+      - name: Montar o lugar
+        working-directory: roblox
+        run: rojo build -o newlife.rbxl
+      - uses: actions/upload-artifact@v4
+        with:
+          name: newlife-roblox
+          path: |
+            roblox/newlife.rbxl
+            roblox/conversao.txt
+      - name: Publicar no Roblox
+        if: github.event_name != 'pull_request'
+        working-directory: roblox
+        env:
+          ROBLOX_API_KEY: ${{ secrets.ROBLOX_API_KEY }}
+          UNIVERSE_ID: ${{ vars.ROBLOX_UNIVERSE_ID }}
+          PLACE_ID: ${{ vars.ROBLOX_PLACE_ID }}
+        run: |
+          if [ -z "$ROBLOX_API_KEY" ] || [ -z "$UNIVERSE_ID" ] || [ -z "$PLACE_ID" ]; then
+            echo "::notice::Publicação no Roblox desligada: configure o secret ROBLOX_API_KEY e as variáveis ROBLOX_UNIVERSE_ID e ROBLOX_PLACE_ID (veja roblox/README.md)."
+            exit 0
+          fi
+          code=$(curl -sS -o resposta.json -w '%{http_code}' -X POST \
+            "https://apis.roblox.com/universes/v1/${UNIVERSE_ID}/places/${PLACE_ID}/versions?versionType=Published" \
+            -H "x-api-key: ${ROBLOX_API_KEY}" -H 'Content-Type: application/octet-stream' \
+            --data-binary @newlife.rbxl)
+          cat resposta.json; echo
+          if [ "$code" != "200" ]; then echo "::error::O Roblox recusou a publicação (HTTP $code)."; exit 1; fi
+          echo "::notice::Publicado no Roblox: versão $(sed -n 's/.*"versionNumber":\([0-9]*\).*/\1/p' resposta.json)"
