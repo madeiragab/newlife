@@ -22,6 +22,7 @@ local Text = dep("Data/Text")
 local Looks = dep("Looks")
 local Politica = dep("Politica")
 local Crime = dep("Crime")
+local Prisao = dep("Prisao")
 
 local R, clamp, fmt, g = Util.R, Util.clamp, Util.fmt, Util.g
 
@@ -797,7 +798,7 @@ function Engine:yearMoney()
 	elseif m.aposentado then
 		m.money += m.aposentado.pay
 	end
-	if m.age >= 18 and S.flags.movedOut then
+	if m.age >= 18 and S.flags.movedOut and not m.prison then
 		local cost = 9000 + (#G.partners() > 0 and 3000 or 0) + #G.kids() * 4000
 		m.money -= cost
 		if m.money < 0 and not m.c.avisoDivida then
@@ -809,6 +810,7 @@ function Engine:yearMoney()
 	end
 	Politica.year(self)
 	Crime.year(self)
+	Prisao.year(self)
 end
 
 -- ---------- morte ----------
@@ -998,6 +1000,10 @@ function Engine:yearEvents()
 			self:log(self:fill(line))
 		end
 	end
+	-- na cadeia, os eventos do ano são os da prisão (Prisao.year)
+	if m.prison then
+		return
+	end
 	local elig = {}
 	for _, e in EVENT_LIST do
 		if (e.w or 1) > 0 and self:eligible(e) then
@@ -1031,7 +1037,7 @@ function Engine:currentEvent()
 	if not q then
 		return nil
 	end
-	local pe = Politica.EVENTS[q.id] or Crime.EVENTS[q.id]
+	local pe = Politica.EVENTS[q.id] or Crime.EVENTS[q.id] or Prisao.EVENTS[q.id]
 	if pe then
 		self:use()
 		local title, text, choices = pe.show(self, q.d)
@@ -1057,7 +1063,7 @@ function Engine:choose(i: number): string?
 	if not q then
 		return nil
 	end
-	local pe = Politica.EVENTS[q.id] or Crime.EVENTS[q.id]
+	local pe = Politica.EVENTS[q.id] or Crime.EVENTS[q.id] or Prisao.EVENTS[q.id]
 	if pe then
 		local title = pe.show(self, q.d)
 		table.remove(self.S.pending, 1)

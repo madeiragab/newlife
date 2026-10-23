@@ -1,9 +1,10 @@
 -- ===== Crime: assassinato no nível de Murder Mystery (sem arma, método ou detalhe) =====
 -- A web (src/systems.js, src/ajustes_209.js) tem o minijogo de esconder o corpo; aqui fica só a decisão
 -- e as consequências: a pessoa pode escapar e virar inimiga, a polícia pode investigar no mesmo ano ou
--- reabrir o caso depois, e o julgamento termina em advogado, confissão ou fuga (o Roblox ainda não tem prisão).
+-- reabrir o caso depois, e o julgamento termina em absolvição, prisão (Prisao.luau) ou fuga.
 
 local Util = require(script and script.Parent:WaitForChild("Util") or "./Util")
+local Prisao = require(script and script.Parent:WaitForChild("Prisao") or "./Prisao")
 local R, clamp, fmt = Util.R, Util.clamp, Util.fmt
 
 local Crime = {}
@@ -92,29 +93,30 @@ Crime.EVENTS.crime_julgamento = {
 	end,
 	pick = function(game, i, d)
 		local m = game.S.me
-		local function condena(parte: number): string
-			local v = Util.round(math.max(0, m.money) * parte)
+		local function condena(min: number, max: number): string
+			local v = Util.round(math.max(0, m.money) * 0.2)
 			m.money -= v
 			m.fame = clamp((m.fame or 0) + 10)
-			game:st("happy", -30)
 			m.c.condenado = (m.c.condenado or 0) + 1
-			return v > 0 and (" Perdi " .. fmt(v) .. " em indenização à família.") or ""
+			local n = d.tentativa and Prisao.prender(game, "tentativa de assassinato", math.max(1, min - 4), math.max(2, max - 8))
+				or Prisao.prender(game, "assassinato", min, max)
+			return string.format(" A pena: %d anos de prisão.%s", n, v > 0 and (" E " .. fmt(v) .. " de indenização à família.") or "")
 		end
 		if i == 1 then
 			if m.money < 80000 then
-				return "Não tinha dinheiro para um bom advogado. O defensor público fez o que pôde, e fui condenad" .. oa(m) .. "." .. condena(0.6)
+				return "Não tinha dinheiro para um bom advogado. O defensor público fez o que pôde, e fui condenad" .. oa(m) .. "." .. condena(10, 25)
 			end
 			m.money -= 80000
 			if R.chance(d.tentativa and 0.6 or 0.45) then
 				return "O advogado desmontou as provas uma por uma. Fui absolvid" .. oa(m) .. ", mas a cidade inteira me olha torto."
 			end
-			return "Nem o melhor advogado deu jeito. Fui condenad" .. oa(m) .. "." .. condena(0.5)
+			return "Nem o melhor advogado deu jeito. Fui condenad" .. oa(m) .. "." .. condena(8, 20)
 		elseif i == 2 then
 			m.karma = clamp(m.karma + 10)
-			return "Confessei tudo e pedi perdão à família. A pena foi menor do que podia." .. condena(0.35)
+			return "Confessei tudo e pedi perdão à família. A pena foi menor do que podia." .. condena(5, 12)
 		end
 		m.money = Util.round(math.max(0, m.money) * 0.4)
-		m.c.foragido = 1
+		m.c.foragido = { crime = d.tentativa and "tentativa de assassinato" or "assassinato", anos = R.int(8, 15) }
 		game:st("happy", -15)
 		return "Atravessei a fronteira de madrugada com o que coube numa mochila. Agora vivo com um nome falso."
 	end,

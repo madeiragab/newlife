@@ -17,6 +17,7 @@ end
 local Util = dep("Util")
 local Actions = dep("Actions")
 local Politica = dep("Politica")
+local Prisao = dep("Prisao")
 local Looks = dep("Looks")
 local Version = dep("Data/Version")
 local Icons = dep("Data/Icons")
@@ -46,7 +47,11 @@ end
 function View.occupation(game): string
 	local m = game.S.me
 	local tit = Politica.titulo(game)
-	if tit then
+	if m.prison and m.alive then
+		return m.gender == "F" and "Detenta" or "Detento"
+	elseif m.c.foragido and m.alive then
+		return "Foragid" .. oa(m)
+	elseif tit then
 		return tit
 	elseif m.office and m.alive then
 		return m.gender == "F" and "Presidenta" or "Presidente"
@@ -362,6 +367,7 @@ local function views(game, meta)
 		V.time = { title = "Máquina do tempo", items = ti }
 	end
 	Politica.views(game, V, actRow, allowed)
+	Prisao.views(game, V, actRow, allowed)
 	return V
 end
 

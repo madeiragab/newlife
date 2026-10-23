@@ -25,6 +25,7 @@ local NewLife = ReplicatedStorage:WaitForChild("NewLife")
 local Engine = require(NewLife:WaitForChild("Engine"))
 local Actions = require(NewLife:WaitForChild("Actions"))
 local Politica = require(NewLife:WaitForChild("Politica"))
+local Prisao = require(NewLife:WaitForChild("Prisao"))
 local View = require(NewLife:WaitForChild("View"))
 
 local remote = Instance.new("RemoteFunction")
@@ -202,7 +203,7 @@ function OPS.act(s, req)
 	if type(req.id) == "string" then
 		local msg = Actions.run(s.game, req.id, req.arg)
 		if msg then
-			s.msg = { t = ACT_TITLE[req.id] or Politica.TITLE[req.id] or (req.id == "assassinar" and "Crime") or (string.match(req.id, "^reg_") or string.match(req.id, "^cam_")) and "Regime" or "", x = msg }
+			s.msg = { t = ACT_TITLE[req.id] or Politica.TITLE[req.id] or Prisao.TITLE[req.id] or (req.id == "assassinar" and "Crime") or (string.match(req.id, "^reg_") or string.match(req.id, "^cam_")) and "Regime" or "", x = msg }
 		end
 	end
 end

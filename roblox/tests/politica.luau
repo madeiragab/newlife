@@ -5,6 +5,7 @@ local Engine = require("../src/shared/NewLife/Engine")
 local Actions = require("../src/shared/NewLife/Actions")
 local View = require("../src/shared/NewLife/View")
 local Politica = require("../src/shared/NewLife/Politica")
+local R = require("../src/shared/NewLife/Util").R
 
 local bad = 0
 local function check(c, msg) if not c then bad += 1 print("  " .. msg) end end
@@ -163,6 +164,31 @@ for seed = 20, 40 do
 			g:ageUp()
 			eventos(g, (seed % 3) + 1)
 		end
+	end
+end
+
+-- prisão: condenação, ano na cadeia, atividades, fuga e soltura
+do
+	local Prisao = require("../src/shared/NewLife/Prisao")
+	for seed = 50, 70 do
+		local g = adulto(seed)
+		local m = g.S.me
+		Prisao.prender(g, "assassinato", 3, 6)
+		check(m.prison and View.occupation(g):sub(1, 5) == "Deten", "preso vira detento")
+		local v = View.build(g, { prefs = {}, grave = {} })
+		check(v.views.career.items[1].sec == "Prisão", "Carreira mostra a prisão")
+		for _ = 1, 12 do
+			if not m.alive or not m.prison then break end
+			for _, a in Actions.list(g) do
+				check(a.group == "Prisão", "só ações da prisão: " .. a.id)
+			end
+			local a = R.pick(Actions.list(g))
+			if a then run(g, a.id, a.arg) end
+			eventos(g, (seed % 2) + 1)
+			g:ageUp()
+			eventos(g, (seed % 3) + 1)
+		end
+		check(not m.alive or not m.prison or m.prison.anos > 0, "a pena acaba")
 	end
 end
 
