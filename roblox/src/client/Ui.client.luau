@@ -12,12 +12,14 @@ local GuiService = game:GetService("GuiService")
 local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
 local MarketplaceService = game:GetService("MarketplaceService")
+local LocalizationService = game:GetService("LocalizationService")
 
 local player = Players.LocalPlayer
 local remote = ReplicatedStorage:WaitForChild("NewLifeRemote")
 local NewLife = ReplicatedStorage:WaitForChild("NewLife")
 local Sons = require(NewLife:WaitForChild("Sons"))
 local Looks = require(NewLife:WaitForChild("Looks"))
+local I18n = require(NewLife:WaitForChild("I18n"))
 local Kit = require(script.Parent:WaitForChild("Kit"))
 local Images = require(script.Parent:WaitForChild("Images"))
 
@@ -75,6 +77,54 @@ end
 -- palco: tudo em "px de CSS" dentro de um UIScale
 ---------------------------------------------------------------------------
 local gui = new("ScreenGui", { Name = "NewLife", ResetOnSpawn = false, IgnoreGuiInset = true, ScreenInsets = Enum.ScreenInsets.None, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, Parent = player:WaitForChild("PlayerGui") })
+
+-- idioma (src/i18n.js): escolhido no Menu ou, sem escolha, o do Roblox do jogador
+local lang = "pt"
+local function autoLang(): string
+	local ok, id = pcall(function()
+		return LocalizationService.RobloxLocaleId
+	end)
+	return (ok and type(id) == "string" and string.sub(string.lower(id), 1, 2) ~= "pt") and "en" or "pt"
+end
+local trocando = false
+local function traduz(o)
+	if not (o:IsA("TextLabel") or o:IsA("TextButton") or o:IsA("TextBox")) or o:IsA("TextBox") then
+		return
+	end
+	local orig = o:GetAttribute("pt")
+	if orig == nil or (o.Text ~= I18n.tr(orig, "en") and o.Text ~= orig) then
+		orig = o.Text
+		o:SetAttribute("pt", orig)
+	end
+	local v = I18n.tr(orig, lang)
+	if o.Text ~= v then
+		trocando = true
+		o.Text = v
+		trocando = false
+	end
+end
+local function vigia(o)
+	if o:IsA("TextLabel") or o:IsA("TextButton") then
+		traduz(o)
+		o:GetPropertyChangedSignal("Text"):Connect(function()
+			if not trocando then
+				traduz(o)
+			end
+		end)
+	end
+end
+gui.DescendantAdded:Connect(vigia)
+local function setLang(l: string)
+	if l == lang then
+		return
+	end
+	lang = l
+	for _, o in gui:GetDescendants() do
+		if o:IsA("TextLabel") or o:IsA("TextButton") then
+			traduz(o)
+		end
+	end
+end
 local bgFrame = new("Frame", { Name = "Fundo", BorderSizePixel = 0, Size = UDim2.fromScale(1, 1), Parent = gui })
 local stage = new("Frame", { Name = "Palco", BackgroundTransparency = 1, Parent = gui })
 
@@ -154,6 +204,7 @@ local function call(req)
 	end
 	if res.meta and res.meta.prefs then
 		prefs = res.meta.prefs
+		setLang(prefs.lang or autoLang())
 		Kit.setTheme(prefs.theme)
 		applyMusic()
 	end
@@ -284,6 +335,12 @@ local function onItem(it)
 			call({ op = "prefs", music = not prefs.music })
 		elseif it.op == "sfx" then
 			call({ op = "prefs", sfx = not prefs.sfx })
+		elseif it.op == "lang" then
+			modal({ t = "🌐 Idioma / Language", ch = {
+				{ l = "Português", fn = function() call({ op = "prefs", lang = "pt" }) end },
+				{ l = "English", fn = function() call({ op = "prefs", lang = "en" }) end },
+				{ l = "Cancelar", cls = "alt" },
+			} })
 		elseif it.op == "theme" then
 			call({ op = "prefs", theme = prefs.theme == "dark" and "light" or "dark" })
 		elseif it.op == "buy" then
@@ -1017,6 +1074,7 @@ if ok and type(res) == "table" then
 	state = res
 	if res.meta and res.meta.prefs then
 		prefs = res.meta.prefs
+		setLang(prefs.lang or autoLang())
 		Kit.setTheme(prefs.theme)
 		applyMusic()
 	end

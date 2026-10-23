@@ -113,7 +113,7 @@ end
 local function prefs(s)
 	s.meta.prefs = s.meta.prefs or {}
 	local p = s.meta.prefs
-	return { music = p.music ~= false, sfx = p.sfx ~= false, theme = p.theme == "dark" and "dark" or "light" }
+	return { music = p.music ~= false, sfx = p.sfx ~= false, theme = p.theme == "dark" and "dark" or "light", lang = p.lang }
 end
 
 local function view(s)
@@ -172,6 +172,9 @@ function OPS.prefs(s, req)
 	end
 	if req.theme == "dark" or req.theme == "light" then
 		s.meta.prefs.theme = req.theme
+	end
+	if req.lang == "pt" or req.lang == "en" then
+		s.meta.prefs.lang = req.lang
 	end
 end
 -- confere de novo os passes (depois de uma compra)
