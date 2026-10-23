@@ -1,6 +1,6 @@
 // ===== Conteúdo que fica de fora só na versão Roblox =====
 // As regras do Roblox proíbem conteúdo sexual (ainda mais com menores), drogas ilícitas, tabaco,
-// apostas, suicídio e assassinato detalhado. O jogo do site e dos apps continua igual:
+// apostas, suicídio e violência detalhada. O jogo do site e dos apps continua igual:
 // estes cortes valem apenas para o que o conversor manda para roblox/.
 // Um evento sai inteiro se o título, o texto ou qualquer escolha bater numa destas expressões
 // (sem diferenciar maiúsculas nem acentos) ou se usar um dos efeitos proibidos.
@@ -18,10 +18,8 @@ const PALAVRAS = [
   'erotic', 'excitad', 'tesao', 'foi alem', 'ir alem', 'noite juntos', 'dormimos juntos', 'dormir juntos',
   'pegacao', 'cama com', 'lingerie', 'calcinha', 'cueca', 'seios', 'assedi', 'abuso', 'estupr',
   'traicao', 'trair', 'traiu', 'trai ', 'caso extraconjugal', 'pular a cerca', 'casamento aberto', 'swing', 'beijo de lingua',
-  // assassinato, armas e violência pesada
-  'assassin', 'matar', 'matei', 'mataram', 'matou', 'matador', 'homicid', 'envenen', 'estrangul', 'esfaque', 'degol',
-  'decapit', 'cadaver', 'sumir com o corpo', 'tortur', 'atirar', 'atirei', 'atirou', 'tiroteio', 'revolver',
-  'pistola', 'fuzil', 'arma de fogo', 'sequestr', 'linchar', 'massacre', 'bomba', 'terroris', 'facada',
+  // violência pesada (arma, tiro, assalto e "matar" ficam: violência moderada, como nos jogos de prisão e de tiro)
+  'esfaque', 'degol', 'decapit', 'cadaver', 'sumir com o corpo', 'tortur', 'linchar', 'massacre', 'terroris', 'facada', 'estrangul',
   // suicídio e automutilação
   'suicid', 'se matar', 'automutil', 'pulsos', 'tirar a propria vida',
   // bebida alcoólica (fica de fora para a classificação não subir por álcool)
