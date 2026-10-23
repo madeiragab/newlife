@@ -11,6 +11,7 @@ local StarterGui = game:GetService("StarterGui")
 local GuiService = game:GetService("GuiService")
 local SoundService = game:GetService("SoundService")
 local TweenService = game:GetService("TweenService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
 local player = Players.LocalPlayer
 local remote = ReplicatedStorage:WaitForChild("NewLifeRemote")
@@ -35,7 +36,7 @@ local prefs = { music = true, sfx = true, theme = "light" }
 local fxSounds, music = {}, nil
 if Sons.ids.efeitos ~= 0 then
 	for name, r in Sons.efeitos do
-		fxSounds[name] = new("Sound", { Name = "fx_" .. name, SoundId = "rbxassetid://" .. Sons.ids.efeitos, PlaybackRegionsEnabled = true, PlaybackRegion = NumberRange.new(r[1], r[1] + r[2]), Volume = 0.6, Parent = SoundService })
+		fxSounds[name] = new("Sound", { Name = "fx_" .. name, SoundId = "rbxassetid://" .. Sons.ids.efeitos, PlaybackRegionsEnabled = true, PlaybackRegion = NumberRange.new(r[1] + (Sons.atraso or 0), r[1] + r[2] + (Sons.atraso or 0)), Volume = 0.6, Parent = SoundService })
 	end
 end
 if Sons.ids.musica ~= 0 then
@@ -285,6 +286,14 @@ local function onItem(it)
 			call({ op = "prefs", sfx = not prefs.sfx })
 		elseif it.op == "theme" then
 			call({ op = "prefs", theme = prefs.theme == "dark" and "light" or "dark" })
+		elseif it.op == "buy" then
+			local id = state.meta and state.meta.passIds and state.meta.passIds[it.arg]
+			if id then
+				MarketplaceService:PromptGamePassPurchase(player, id)
+			end
+		elseif it.op == "time" then
+			stack = {}
+			call({ op = "time", i = it.arg })
 		elseif it.op == "help" then
 			modal({ t = "Como jogar", x = HELP })
 		end
@@ -323,6 +332,23 @@ local function buildItems(parent: Instance, items)
 				else
 					table.insert(kids, Kit.kv(row[1], row[2], k == #rows))
 				end
+			end
+			if it.btns then
+				-- linha de botões (modo deus: -10 -1 +1 +10)
+				local row = new("Frame", { BackgroundTransparency = 1, Size = UDim2.new(1, 0, 0, 40) }, {
+					new("UIListLayout", { FillDirection = Enum.FillDirection.Horizontal, Padding = UDim.new(0, 6), HorizontalFlex = Enum.UIFlexAlignment.Fill, SortOrder = Enum.SortOrder.LayoutOrder }),
+				})
+				for bi, bt in it.btns do
+					local b = Kit.button(bt.l, "alt", function()
+						call({ op = "god", key = bt.key, d = bt.d })
+					end, { LayoutOrder = bi, AutomaticSize = Enum.AutomaticSize.None, Size = UDim2.new(0, 0, 1, 0), TextSize = 14 })
+					local lb = b:FindFirstChild("Label")
+					lb:FindFirstChildOfClass("UIPadding"):Destroy()
+					lb.AutomaticSize = Enum.AutomaticSize.None
+					lb.Size = UDim2.fromScale(1, 1)
+					b.Parent = row
+				end
+				table.insert(kids, row)
 			end
 			inst = Kit.card(kids)
 		else
@@ -956,6 +982,15 @@ function render()
 		pump()
 	end
 end
+
+-- depois de comprar um passe, o servidor confere de novo e o Menu atualiza
+MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(plr, _id, bought)
+	if plr == player and bought then
+		task.wait(1)
+		call({ op = "passes" })
+		modal({ t = "Obrigado! 💖", x = "Sua compra deu certo. Aproveite!" })
+	end
+end)
 
 local function watchCamera(cam)
 	if cam then

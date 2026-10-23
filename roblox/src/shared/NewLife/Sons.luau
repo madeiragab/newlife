@@ -3,9 +3,11 @@
 -- Os IDs são os áudios enviados ao Roblox (roblox/tools/enviar-sons.cjs). 0 = ainda não enviado: o jogo fica mudo.
 return {
 	ids = {
-		efeitos = 0,
-		musica = 0,
+		efeitos = 101052003904820,
+		musica = 137342508828445,
 	},
+	-- o MP3 enviado ao Roblox começa com um silêncio do codificador: os trechos andam esse tanto
+	atraso = 0.026,
 	-- efeito = { início, duração } em segundos dentro de efeitos.ogg
 	efeitos = {
 		click = { 0.4, 0.085 },

@@ -7,6 +7,19 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local DataStoreService = game:GetService("DataStoreService")
 local RunService = game:GetService("RunService")
 local TextService = game:GetService("TextService")
+local MarketplaceService = game:GetService("MarketplaceService")
+
+-- gamepasses (Creator Hub → Monetização → Passes)
+local PASSES = { deus = 2053240650, tempo = 2053552675, doacao = 2054200680 }
+local function owns(player: Player, key: string): boolean
+	local ok, res = pcall(function()
+		return MarketplaceService:UserOwnsGamePassAsync(player.UserId, PASSES[key])
+	end)
+	return ok and res == true
+end
+local function checkPasses(player: Player)
+	return { deus = owns(player, "deus"), tempo = owns(player, "tempo"), doacao = owns(player, "doacao") }
+end
 
 local NewLife = ReplicatedStorage:WaitForChild("NewLife")
 local Engine = require(NewLife:WaitForChild("Engine"))
@@ -39,6 +52,9 @@ end
 local function load(player: Player)
 	local s = { game = Engine.new(), meta = { lives = 0, grave = {} }, dirty = false, loaded = false, last = 0, calls = 0 }
 	sessions[player] = s
+	task.spawn(function()
+		s.passes = checkPasses(player)
+	end)
 	if store then
 		for attempt = 1, 3 do
 			local ok, data = pcall(function()
@@ -99,7 +115,7 @@ local function prefs(s)
 end
 
 local function view(s)
-	local v = View.build(s.game, { lives = s.meta.lives, grave = s.meta.grave, saving = store ~= nil, prefs = prefs(s) })
+	local v = View.build(s.game, { lives = s.meta.lives, grave = s.meta.grave, saving = store ~= nil, prefs = prefs(s), passes = s.passes or {}, passIds = PASSES })
 	v.msg = s.msg
 	s.msg = nil
 	return v
@@ -154,6 +170,21 @@ function OPS.prefs(s, req)
 	end
 	if req.theme == "dark" or req.theme == "light" then
 		s.meta.prefs.theme = req.theme
+	end
+end
+-- confere de novo os passes (depois de uma compra)
+function OPS.passes(s, _req, player)
+	s.passes = checkPasses(player)
+end
+function OPS.god(s, req)
+	if s.passes and s.passes.deus and type(req.key) == "string" and type(req.d) == "number" then
+		s.game:use()
+		s.game:godSet(req.key, math.floor(req.d))
+	end
+end
+function OPS.time(s, req)
+	if s.passes and s.passes.tempo and type(req.i) == "number" then
+		s.game:timeTravel(math.floor(req.i))
 	end
 end
 function OPS.giveup(s)
