@@ -24,6 +24,10 @@ const PALAVRAS = [
   'pistola', 'fuzil', 'arma de fogo', 'sequestr', 'linchar', 'massacre', 'bomba', 'terroris', 'facada',
   // suicídio e automutilação
   'suicid', 'se matar', 'automutil', 'pulsos', 'tirar a propria vida',
+  // bebida alcoólica (fica de fora para a classificação não subir por álcool)
+  'alcool', 'alcoolatra', 'alcoolismo', 'alcoolic', 'bebida', 'beber', 'bebi ', 'bebeu', 'bebendo', 'bebado', 'bebada', 'embriag',
+  'cerveja', 'chopp', 'chope', 'vinho', 'whisky', 'uisque', 'vodka', 'cachaca', 'caipirinha', 'tequila', 'champanhe', 'espumante',
+  ' bar ', ' bares ', 'drink', 'ressaca', 'porre', 'boteco', 'barzinho', 'happy hour', 'brinde', 'brindar', 'saideira', 'open bar', 'destilado',
   // apostas
   'cassino', 'aposta', 'apostar', 'apostei', 'roleta', 'caca-niquel', 'caça-níquel', 'bingo', 'loteria', 'jogo do bicho',
   // xingamentos
@@ -32,7 +36,7 @@ const PALAVRAS = [
 
 // efeitos do formato dos eventos que puxam conteúdo proibido
 const EFEITOS = [
-  /^kill$/, /^add\.cigarro/, /^add\.jogo/, /^armas[+-]/, /^dis:(hiv|sifilis|gonorreia|herpes|hpv|clamidia|ist)/,
+  /^kill$/, /^add\.cigarro/, /^add\.alcool/, /^add\.jogo/, /^armas[+-]/, /^dis:(hiv|sifilis|gonorreia|herpes|hpv|clamidia|ist)/,
 ];
 
 const tira = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();

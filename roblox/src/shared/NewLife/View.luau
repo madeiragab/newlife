@@ -248,9 +248,6 @@ local function views(game, meta)
 		end
 		local ge = m.genes or {}
 		local others = { { bar = "Carma", v = m.karma }, { bar = "Fama", v = m.fame or 0 } }
-		if (m.add.alcool or 0) > 0 then
-			table.insert(others, { bar = "Vício em álcool", v = m.add.alcool })
-		end
 		V.me = {
 			title = "Eu",
 			items = {
