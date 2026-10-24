@@ -65,6 +65,7 @@ function selfTest(){
   T('dificuldade das perguntas',quizDificuldadeSelfTest);
   T('correções 2.07',ajustes207SelfTest);
   T('seita e império mundiais',dominioSelfTest);
+  T('ataque nuclear',nuclearSelfTest);
   T('correções 2.08',ajustes208SelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);

@@ -367,6 +367,52 @@ V.career=(o=>function(){ const res=o.apply(this,arguments), m=S.me; if(!res||!re
   res.items.splice(i>=0?i+2:res.items.length,0,item); return res; })(V.career);
 if(typeof CONQ!=='undefined') CONQ.push({id:'fe_mundial',ic:'🛐',n:'Uma só fé',d:'Levar a sua seita a dominar todos os países.',ok:m=>!!m.c.feMundial},{id:'rei_mundo',ic:'🌍',n:'Rei do mundo',d:'Governar o planeta inteiro.',ok:m=>!!m.c.reiMundo});
 
+// ---------- ataque nuclear: escolher o país e lidar com a resposta ----------
+const nkProtetor=id=>COUNTRIES.map(c=>c.id).find(q=>q!==id&&q!==S.me.country&&paisNuclear(q)&&(aliados(q,id)||relPais(q,id)>=70));
+function nkChanceResposta(id){ if(paisNuclear(id)) return .8; return nkProtetor(id)?.35:0; }
+const nkAprov=v=>{ const m=S.me; if(m.office) m.office.appr=clamp(m.office.appr+v); if(m.royal&&m.royal.reign) m.royal.pop=clamp(m.royal.pop+v); };
+function impNuclearUsar(id){ const m=S.me, c=COUNTRIES.find(x=>x.id===id); if(!chefeEstado()||!impNuclear()) return 'Não tenho armas nucleares.'; if(!c||id===m.country) return '';
+  if(use('imp_nuke')>1) return 'Já tomei essa decisão este ano.';
+  const I=imp(), G=guerraAtual(), meuL=G&&ladoDe(G,m.country), alvoL=G&&ladoDe(G,id);
+  m.c.usouBomba=1; m.karma=clamp(m.karma-60); m.fame=100; I.extra=(I.extra||0)+50;
+  for(const x of COUNTRIES) if(x.id!==m.country) relMudar(m.country,x.id,x.id===id?-100:-40);
+  const w=mundo(id); w.crescimento=(w.crescimento||0)-.1; w.estabilidade=Math.max(0,(w.estabilidade||.7)-.3);
+  log(`☢️ Usei uma arma nuclear contra ${c.n}.`,'big'); if(typeof noticia==='function') noticia(`${nomePais(m.country)} usa arma nuclear contra ${c.n}`,'O mundo inteiro condenou o ataque.','mundo','nuke:'+id+S.year,id,99);
+  let t;
+  if(meuL&&alvoL&&meuL!==alvoL){ guerraFim(meuL); t=`${c.n} se rendeu. A guerra acabou, e o mundo nunca mais vai me olhar do mesmo jeito.`; }
+  else { I.p[id]=Math.max(I.p[id]||0,3); t=`${c.n} se rendeu e aceitou um governo indicado por mim. O mundo inteiro condenou o ataque.`; }
+  const de=paisNuclear(id)?id:nkProtetor(id);
+  if(de&&R.chance(nkChanceResposta(id))) queue('nk_resposta',{de});
+  else if(EVENTS.imp_sancoes){ const d=EVENTS.imp_sancoes.prep(); if(d) queue('imp_sancoes',d); }
+  return t; }
+EVENTS.nk_resposta={prep:()=>chefeEstado()?{de:'US'}:null,
+  show:d=>({k:'Guerra',t:'☢️ A resposta',x:`${nomePais(d.de||'US')} respondeu com armas nucleares contra ${nomePais(S.me.country)}. Os generais esperam a minha ordem.`,
+    ch:[['Responder com tudo o que temos','tudo'],['Pedir cessar-fogo imediato','cessar'],['Ir para o bunker e esperar','bunker']]}),
+  pick:(k,d)=>{ const m=S.me, w=mundo(m.country), I=imp(), de=d.de||'US'; w.crescimento=(w.crescimento||0)-.12; w.estabilidade=Math.max(0,(w.estabilidade||.7)-.3); nkAprov(-20);
+    if(k==='tudo'){ if(R.chance(.5)){ die(`na guerra nuclear contra ${nomePais(de)}`); return 'A troca não parou mais. Não sobrou governo para contar a história.'; }
+      I.p[de]=Math.max(I.p[de]||0,1); m.health=clamp(m.health-R.int(10,30)); return `${nomePais(de)} pediu trégua primeiro. Os dois países saíram em ruínas.`; }
+    if(k==='cessar'){ if(R.chance(.65)){ for(const id of Object.keys(I.p)) I.p[id]=Math.min(I.p[id],2); return 'O cessar-fogo foi aceito, com uma condição: abrir mão de todos os países que eu controlava.'; }
+      m.health=clamp(m.health-R.int(10,30)); return 'Ninguém atendeu o telefone. Os ataques continuaram por mais dois dias.'; }
+    if(R.chance(.8)){ m.health=clamp(m.health-R.int(5,20)); return 'Passei semanas no bunker. Quando saí, o país era outro.'; }
+    die(`na guerra nuclear contra ${nomePais(de)}`); return 'O bunker não aguentou.'; }};
+V.nkAlvos=()=>{ const m=S.me; if(!chefeEstado()||!impNuclear()) return {title:'Ataque nuclear',items:[]};
+  const it=[{html:'<div class="card"><p>Escolha o país. Se ele tiver armas nucleares, ou um aliado que tenha, pode vir uma resposta. O mundo inteiro vai reagir com sanções e coalizões.</p></div>'},{sec:'Países'}];
+  for(const c of COUNTRIES.filter(x=>x.id!==m.country)){ const r=Math.round(nkChanceResposta(c.id)*100);
+    it.push({ic:paisNuclear(c.id)?'☢️':'🎯',l:c.n,s:r?`Chance de resposta nuclear: ${r}%`:'Sem resposta nuclear esperada',tone:r>=50?'bad':'',on:()=>confirmBox(`Atacar ${c.n}?`,`Não tem volta. ${r?`Chance de resposta nuclear: ${r}%.`:'O mundo inteiro vai reagir.'}`,'Atacar',()=>act(()=>impNuclearUsar(c.id),'Ataque nuclear'))}); }
+  return {title:'Ataque nuclear',items:it}; };
+V.imperio=(o=>function(){ const r=o.apply(this,arguments); if(!chefeEstado()||!impNuclear()||!r||!r.items) return r;
+  const i=r.items.findIndex(x=>x&&x.sec==='Países'); r.items.splice(i>=0?i:r.items.length,0,{ic:'☢️',l:'Ataque nuclear',s:'Escolher o país · pode haver resposta',tone:'bad',on:()=>UI.push(V.nkAlvos)}); return r; })(V.imperio);
+if(typeof CONQ!=='undefined') CONQ.push({id:'usou_bomba',ic:'☢️',n:'Sem volta',d:'Usar uma arma nuclear.',ok:m=>!!m.c.usouBomba});
+function nuclearSelfTest(){ const s0=S,ns=window.NO_SAVE,nn=window.NO_NEWS,snaps=SNAPS,meta=JSON.stringify(META); window.NO_SAVE=true; window.NO_NEWS=true; const erros=[], ok=(c,x)=>{ if(!c) erros.push(x); }, BAD=/\{\w+\}|undefined|NaN|\[object/;
+  try{ for(const pais of ['US','BR']){ for(const alvo of ['FR','AO','MX']){ newLife({country:pais}); const m=S.me; m.age=50; m.prison=null; m.office={id:'pres',yrs:1,appr:70,dit:pais==='BR'?1:0}; if(pais==='BR') regime().nuclear=1; S.guerra=null; S.pending=[];
+      if(alvo==='MX') guerraIniciar(pais,'MX','teste');
+      ok(impNuclear(),'sem arma nuclear '+pais); ok(V.imperio().items.some(x=>x.l==='Ataque nuclear'),'tela sem ataque nuclear '+pais); V.nkAlvos().items.forEach(x=>ok(!BAD.test(String(x.l||'')+String(x.s||'')),'tela alvos: '+x.s));
+      const r=impNuclearUsar(alvo); ok(!BAD.test(r)&&m.c.usouBomba,'ataque: '+r); if(alvo==='MX') ok(!guerraAtual(),'a guerra não acabou'); else ok(impNv(alvo)>=3,'país não se rendeu');
+      const base=JSON.stringify(S); for(const k of ['tudo','cessar','bunker']){ S=JSON.parse(base); const sh=EVENTS.nk_resposta.show({de:'FR'}); ok(!BAD.test(sh.x),'resposta: '+sh.x); const t=EVENTS.nk_resposta.pick(k,{de:'FR'}); ok(!BAD.test(String(t)),'resposta '+k+': '+t); } } }
+    newLife({country:'BR'}); S.me.age=50; S.me.office={id:'pres',yrs:1,appr:70}; ok(!V.imperio().items.some(x=>x.l==='Ataque nuclear'),'ataque nuclear sem ter bomba');
+  }catch(e){ erros.push('erro: '+e.message); } finally{ S=s0; window.NO_SAVE=ns; window.NO_NEWS=nn; SNAPS=snaps; Object.assign(META,JSON.parse(meta)); }
+  if(erros.length) throw Error('Nuclear 2.15 · '+erros.slice(0,8).join(' | ')); return {ok:true}; }
+
 // ---------- autoteste ----------
 function dominioSelfTest(){ const s0=S,ns=window.NO_SAVE,nn=window.NO_NEWS,snaps=SNAPS,meta=JSON.stringify(META); window.NO_SAVE=true; window.NO_NEWS=true; const erros=[]; const ok=(c,x)=>{ if(!c) erros.push(x); };
   const BAD=/\{\w+\}|undefined|NaN|\[object/;
