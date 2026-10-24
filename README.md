@@ -103,16 +103,23 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Funde o seu grupo começando na deep web**: escolha o fórum, acerte o tom do post, junte seguidores online e marque encontros secretos.
 - Seis estágios (Fórum, Célula, Comunidade, Igreja, Movimento, Império da fé) com **doutrinas**, **sermão ao vivo** em minigame, segurança, **atentados**, rivais e o risco de uma revolta.
 - **Ou entre num grupo** (inclusive um secreto, com iniciação), suba de cargo, proteja o líder num atentado, dispute a sucessão ou conspire para derrubá-lo.
+- **Sucessão escolhida na fundação**: hereditária (o filho com quem você continua a vida herda o grupo), escolhida por você ou por um conselho de anciãos.
+- **Hereges** com **debate ao vivo** em minigame e risco de **cisma**, que cria uma seita rival com parte dos fiéis. **Caça ao traidor** com três suspeitos e uma pista de cada. **Guerra santa** contra a seita rival.
+- **Fé no mundo**: do estágio Movimento em diante, abra missões país por país (cada cultura pede uma abordagem), construa catedrais e tome governos por eleição, golpe, revolução ou acordo. O mundo reage com sanções, banimentos e cruzadas, e quem conquista os 15 países vira **Rei do Mundo**.
 
 ### 🏛️ Política e guerra
 - **Política de cada país**: presidencialismo ou parlamentarismo, cargos com nomes locais e partidos próprios (no Brasil, com alusão aos mais conhecidos).
 - **Campanha** com bandeira, debate na TV, reta final e segundo turno. Senado, coalizão, projetos de lei, orçamento e crises, com efeito real na economia do país.
 - **Escândalos**: propina, acordo com facções, lavagem de dinheiro, operação policial, CPI e impeachment. Escândalos econômicos para governadores e presidentes.
 - **Guerras**: relações entre países, alianças militares, guerra local ou mundial, territórios conquistados e perdidos, capital cercada, exílio, prisão ou morte pelo inimigo. O cidadão comum vive convocação, frente de batalha, bombardeios e racionamento; o militar pode ir à frente ou espionar outro país.
+- **Domínio mundial** para presidente, ditador ou monarca: influência, governo fantoche, plebiscito e invasão em cada país, com títulos de Potência regional a **Rei do Mundo**. Proclame um **império hereditário** (o filho herda trono e império) ou uma federação.
+- **Coalizões**: quanto mais poder, mais países se unem contra você, com sanções, ultimato, ameaça nuclear e guerra de coalizão. Os países dominados se revoltam, e o governo do mundo tem as próprias crises.
 
 ### ✊ Derrubar o governo
 - Movimento clandestino com apoio do povo, armas, generais subornados e a polícia política no seu encalço.
-- **Golpe de Estado**: se der certo, você vira líder supremo do país; se der errado, é prisão, exílio ou fuzilamento.
+- **Golpe de Estado** em etapas (primeiro alvo, o que fazer com o presidente, os quartéis): se der certo, você vira líder supremo; se der errado, é prisão, exílio ou fuzilamento.
+- **Depois do golpe**, escolha que país construir (ditadura militar, monarquia hereditária, revolução, teocracia ou transição democrática), com medo, lealdade dos militares, pressão internacional, salário próprio e investigações.
+- **Anexe territórios** escolhendo o país: cada um tem força militar, e o programa nuclear pesa na conta.
 
 ### 👻 Paranormal
 - Investigue cemitérios, castelos, florestas na lua cheia e hospitais abandonados, junte provas e lance um documentário (ou vire meme).
@@ -177,6 +184,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Autoescola**, passaporte (inclusive falsificado) e emigração. **Mais de 80 doenças**.
 - **Mais de 5.600 eventos**, conquistas, selos, cemitério, desafios, dificuldade e herdeiros (continue a vida com um filho).
 - **Sons e música** sintetizados, tema claro e escuro.
+- **Português ou inglês** (Menu → Idioma). Em inglês, telas e botões já estão traduzidos; os eventos ainda estão sendo traduzidos.
 
 ## Modos fictícios
 
@@ -334,6 +342,7 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   seita.js        seita ou grupo religioso (e os ganchos de eventos da vida normal)
   policia.js      concurso da polícia e investigação de crimes
   golpe.js        movimento clandestino e golpe de Estado
+  dominio.js      seita e império mundiais: sucessão, hereges, traidores, guerra santa, coalizões e Rei do Mundo
   paranormal.js   fantasmas, vampiros e lobisomens
   desistir.js     reações de quem fica ao desistir da vida
   seita2.js       seita: cargos, fé dos seguidores, revolta, denúncias e domínio
@@ -388,6 +397,6 @@ NPCs precisam concluir cursos para assumir profissões qualificadas. Parceiros e
 Testes controlados de quatro estilos usam sementes 17401–17404 para exercitar três sucessões por estilo, além das partidas automatizadas existentes. Não são sessões humanas nem prova de equilíbrio de todas as estratégias.
 
 
-## Novidades recentes · 1.75–2.06
+## Novidades recentes · 1.75–2.14
 
-Da 1.75 à 2.06: Copa e Olimpíadas, seitas que nascem na deep web, luta tática e carreira de lutador, armas e drogas com a lei de cada país, profissões com minigames, escola e faculdade com provas de verdade, infância e relacionamentos, vida adulta e velhice, expectativa de vida realista, política de cada país, escândalos, guerras e o submundo. A lista completa de cada versão está em **Menu → Novidades** e nas [releases](https://github.com/madeiragab/newlife/releases).
+Da 1.75 à 2.14: Copa e Olimpíadas, seitas que nascem na deep web, luta tática e carreira de lutador, armas e drogas com a lei de cada país, profissões com minigames, escola e faculdade com provas de verdade, infância e relacionamentos, vida adulta e velhice, expectativa de vida realista, política de cada país, escândalos, guerras e o submundo, golpe de Estado em etapas e o regime depois dele, inglês e, na 2.14, seita e império que dominam o mundo, com sucessão hereditária, hereges, traidores e coalizões contra quem cresce demais. A lista completa de cada versão está em **Menu → Novidades** e nas [releases](https://github.com/madeiragab/newlife/releases).
