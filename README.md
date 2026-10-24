@@ -53,10 +53,11 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Doenças aparecem no rosto**: catapora deixa pintas (e marquinhas para sempre), quimioterapia deixa careca, vitiligo, conjuntivite, catarata, acne…
 
 ### 🏫 Escola e faculdade
-- **Semana de provas todo ano**, da escola à pós, com perguntas de múltipla escolha. Quem estudou no ano descarta alternativas erradas, e errar pesa pouco.
+- **Poucas provas, com hora marcada**: uma ou duas no curso inteiro. No fundamental, a prova do 5º ano e a final; no médio, o simulado do ENEM e a final; na faculdade, a do meio do curso e o exame final (só para quem não passou direto); no técnico e na pós, uma prova final.
+- De vez em quando cai uma **prova surpresa** curta. As perguntas são de múltipla escolha: quem estudou no ano descarta alternativas erradas, e errar pesa pouco.
 - **As perguntas seguem a dificuldade do jogo**: no Fácil aparecem 2 alternativas e perguntas mais simples; no Normal, 3; no Difícil, todas.
 - **Recuperação** quando a média cai e **vestibular** com 5 questões que somam pontos para a faculdade.
-- Minigames da escola: simulado, tabuada, redação, feira de ciências, trabalho em grupo e recreio.
+- Minigames da escola (opcionais): simulado, tabuada, redação, feira de ciências, trabalho em grupo e recreio.
 - Faculdade com seminário, **estágio** (bolsa e vantagem no primeiro emprego da área), iniciação científica e **TCC** com orientador e defesa.
 - Faculdade **pública** (nota de corte) ou **particular** (família paga, bolsas ou financiamento), cursos técnicos e pós-graduação.
 - Quem quer avançar rápido liga **Minigames da rotina** em Configurações: provas, vestibular e entrevistas se resolvem sozinhos pelo nível do personagem.
@@ -112,6 +113,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Campanha** com bandeira, debate na TV, reta final e segundo turno. Senado, coalizão, projetos de lei, orçamento e crises, com efeito real na economia do país.
 - **Escândalos**: propina, acordo com facções, lavagem de dinheiro, operação policial, CPI e impeachment. Escândalos econômicos para governadores e presidentes.
 - **Guerras**: relações entre países, alianças militares, guerra local ou mundial, territórios conquistados e perdidos, capital cercada, exílio, prisão ou morte pelo inimigo. O cidadão comum vive convocação, frente de batalha, bombardeios e racionamento; o militar pode ir à frente ou espionar outro país.
+- **Ataque nuclear** para quem tem a bomba: escolha o país, ele se rende, e pode vir a resposta nuclear. O mundo inteiro reage com sanções e coalizões.
 - **Domínio mundial** para presidente, ditador ou monarca: influência, governo fantoche, plebiscito e invasão em cada país, com títulos de Potência regional a **Rei do Mundo**. Proclame um **império hereditário** (o filho herda trono e império) ou uma federação.
 - **Coalizões**: quanto mais poder, mais países se unem contra você, com sanções, ultimato, ameaça nuclear e guerra de coalizão. Os países dominados se revoltam, e o governo do mundo tem as próprias crises.
 
@@ -151,7 +153,10 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 
 ### 🧛 A fera no sangue
 - Vampiros têm barra de sede e lobisomens, de fome. Em 100%, a criatura toma o controle e pode atacar estranhos ou a própria família.
-- A maldição passa para os filhos, e a criatura briga diferente (mordida, garras, uivo).
+- A maldição passa para os filhos, e a criatura briga diferente (mordida, garras, uivo, transformação completa ou hipnose que faz o adversário desistir).
+- **Vida de criatura** (em Atividades): barra de **exposição**, controle da fera ou poder da hipnose, **alcateia ou clã** com iniciação e cargos (de Ômega a Alfa, de Neófito a Príncipe da noite), disputa de território entre vampiros e lobisomens e o **clube de luta das criaturas da noite**, do Porão do açougue ao Campeonato das Trevas.
+- **Os poderes entram em tudo**: hipnotizar o guarda e sair da cela, virar lobo e destruir a cela, hipnotizar o juiz ou fugir da delegacia, hipnotizar a polícia, o chefe, estranhos ricos e as pessoas das Relações, contar o segredo para alguém.
+- Quem é visto usando os poderes vira vídeo viral, e com exposição alta os **caçadores** vêm atrás: fugir de cidade, lutar, pedir proteção ao bando ou hipnotizar o líder.
 
 ### 👥 Membros das equipes
 - Clube ou time da escola, colegas de trabalho, banda, elenco, pelotão, equipe de heróis e o grupo religioso têm **gente de verdade**: veja quem está na equipe, converse e faça amizade.
@@ -342,7 +347,9 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   seita.js        seita ou grupo religioso (e os ganchos de eventos da vida normal)
   policia.js      concurso da polícia e investigação de crimes
   golpe.js        movimento clandestino e golpe de Estado
-  dominio.js      seita e império mundiais: sucessão, hereges, traidores, guerra santa, coalizões e Rei do Mundo
+  dominio.js      seita e império mundiais: sucessão, hereges, traidores, guerra santa, coalizões, ataque nuclear e Rei do Mundo
+  provas.js       provas de cada nível (uma ou duas por curso) e prova surpresa
+  criaturas.js    vida de vampiro e lobisomem: exposição, alcateia e clã, hipnose, fugas, clube de luta e caçadores
   paranormal.js   fantasmas, vampiros e lobisomens
   desistir.js     reações de quem fica ao desistir da vida
   seita2.js       seita: cargos, fé dos seguidores, revolta, denúncias e domínio
@@ -397,6 +404,6 @@ NPCs precisam concluir cursos para assumir profissões qualificadas. Parceiros e
 Testes controlados de quatro estilos usam sementes 17401–17404 para exercitar três sucessões por estilo, além das partidas automatizadas existentes. Não são sessões humanas nem prova de equilíbrio de todas as estratégias.
 
 
-## Novidades recentes · 1.75–2.14
+## Novidades recentes · 1.75–2.17
 
-Da 1.75 à 2.14: Copa e Olimpíadas, seitas que nascem na deep web, luta tática e carreira de lutador, armas e drogas com a lei de cada país, profissões com minigames, escola e faculdade com provas de verdade, infância e relacionamentos, vida adulta e velhice, expectativa de vida realista, política de cada país, escândalos, guerras e o submundo, golpe de Estado em etapas e o regime depois dele, inglês e, na 2.14, seita e império que dominam o mundo, com sucessão hereditária, hereges, traidores e coalizões contra quem cresce demais. A lista completa de cada versão está em **Menu → Novidades** e nas [releases](https://github.com/madeiragab/newlife/releases).
+Da 1.75 à 2.17: Copa e Olimpíadas, seitas que nascem na deep web, luta tática e carreira de lutador, armas e drogas com a lei de cada país, profissões com minigames, escola e faculdade com provas de verdade, infância e relacionamentos, vida adulta e velhice, expectativa de vida realista, política de cada país, escândalos, guerras e o submundo, golpe de Estado em etapas e o regime depois dele, inglês e, na 2.14, seita e império que dominam o mundo, com sucessão hereditária, hereges, traidores e coalizões contra quem cresce demais, na 2.15 o ataque nuclear, na 2.16 a vida de criatura que interage com tudo e, na 2.17, menos provas: uma ou duas por nível, com prova surpresa às vezes. A lista completa de cada versão está em **Menu → Novidades** e nas [releases](https://github.com/madeiragab/newlife/releases).
