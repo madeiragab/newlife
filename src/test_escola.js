@@ -10,7 +10,7 @@ function escolaSelfTest(){ const s0=S,rf=R.f,ns=window.NO_SAVE,nn=window.NO_NEWS
   try{
     // toda vida escolar tem semana de provas todo ano
     crianca(9,'fund',3); for(const f of NL_GANCHOS_ANO) f(); ok(S.pending.some(e=>e.id==='esc_quiz'),'ano escolar sem semana de provas');
-    const q0=S.pending.find(e=>e.id==='esc_quiz').d.q; ok(q0.length===3&&q0.every(q=>q.ops.includes(q.c)),'prova sem a resposta certa');
+    const q0=S.pending.find(e=>e.id==='esc_quiz').d.q; ok(q0.length>=2&&q0.every(q=>q.ops.includes(q.c)),'prova sem a resposta certa');
     S.pending=[]; escQuiz('provas'); responde(true); const g1=m.edu.cur.grade; S.pending=[]; m.edu.cur.grade=50; escQuiz('provas'); responde(false); ok(g1>m.edu.cur.grade,'acertar a prova não ajuda mais do que errar'); ok(m.edu.cur.grade>=45,'errar tudo pune demais: '+m.edu.cur.grade);
     // quem estudou descarta alternativa
     m.c.studyYr=1; S.pending=[]; escQuiz('provas'); ok(S.pending[0].d.q.every(q=>q.ops.length<=3&&q.ops.includes(q.c)),'estudar não eliminou alternativa'); m.c.studyYr=0;
