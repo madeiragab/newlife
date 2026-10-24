@@ -1,4 +1,4 @@
-// ===== Vida escolar e faculdade: semana de provas todo ano, recuperação, vestibular, redação, minigames fáceis,
+// ===== Vida escolar e faculdade: poucas provas por nível (provas.js), recuperação, vestibular, redação, minigames fáceis,
 // TCC, estágio e iniciação científica. Tudo de múltipla escolha, com ajuda para quem estudou: o jogo é para ser leve.
 const escCur=m=>m.edu&&m.edu.cur;
 const escEscola=c=>!!c&&(c.type==='fund'||c.type==='medio');

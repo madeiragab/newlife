@@ -1,4 +1,4 @@
-// Testes: semana de provas todo ano, recuperação, vestibular, redação, minigames da escola e da faculdade
+// Testes: poucas provas por nível (provas.js), recuperação, vestibular, redação, minigames da escola e da faculdade
 function escolaSelfTest(){ const s0=S,rf=R.f,ns=window.NO_SAVE,nn=window.NO_NEWS,meta=JSON.stringify(META),snaps=SNAPS,erros=[],info={};window.NO_SAVE=true;window.NO_NEWS=true;
   const ok=(c,t)=>{ if(!c) erros.push(t); }, BAD=/\{\w+\}|undefined|NaN|\[object|\bnull\b/;
   let x=7070; R.f=()=>{ x=(Math.imul(x,1664525)+1013904223)>>>0; return x/4294967296; };
@@ -8,8 +8,8 @@ function escolaSelfTest(){ const s0=S,rf=R.f,ns=window.NO_SAVE,nn=window.NO_NEWS
   const crianca=(idade,tipo,yr)=>{ newLife({country:'BR'}); m=S.me; m.age=idade; m.born=S.year-idade; m.prison=null; S.pending=[]; startSchool(tipo); m.edu.cur.yr=yr||0; m.edu.cur.grade=50; return m; };
   const responde=(acertar)=>{ let d=S.pending.find(e=>e.id==='esc_quiz').d; S.pending=[]; for(let i=0;i<d.q.length;i++){ const q=d.q[d.r]; EVENTS.esc_quiz.pick(String(acertar?q.ops.indexOf(q.c):q.ops.findIndex(o=>o!==q.c)),d); if(i<d.q.length-1){ d=S.pending.find(e=>e.id==='esc_quiz').d; S.pending=[]; } } };
   try{
-    // toda vida escolar tem semana de provas todo ano
-    crianca(9,'fund',3); for(const f of NL_GANCHOS_ANO) f(); ok(S.pending.some(e=>e.id==='esc_quiz'),'ano escolar sem semana de provas');
+    // as provas têm alternativas com a resposta certa
+    crianca(9,'fund',3); S.pending=[]; escQuiz('provas'); ok(S.pending.some(e=>e.id==='esc_quiz'),'simulado sem prova');
     const q0=S.pending.find(e=>e.id==='esc_quiz').d.q; ok(q0.length>=2&&q0.every(q=>q.ops.includes(q.c)),'prova sem a resposta certa');
     S.pending=[]; escQuiz('provas'); responde(true); const g1=m.edu.cur.grade; S.pending=[]; m.edu.cur.grade=50; escQuiz('provas'); responde(false); ok(g1>m.edu.cur.grade,'acertar a prova não ajuda mais do que errar'); ok(m.edu.cur.grade>=45,'errar tudo pune demais: '+m.edu.cur.grade);
     // quem estudou descarta alternativa
