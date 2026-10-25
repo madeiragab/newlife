@@ -185,9 +185,11 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 ### 🌍 E mais
 - **15 países** com eventos culturais próprios (Réveillon, Dia dos Mortos, Diwali, Tomatina, Chuseok…), economia, leis e política diferentes.
 - **Copa do Mundo e Olimpíadas** com convocação, jogos e repercussão no mundo inteiro.
-- **Idade coerente**: cada tema tem idade mínima (bebida conforme a lei do país, namoro, trabalho, direção, dinheiro), e bebês só veem eventos de bebê.
-- **Autoescola**, passaporte (inclusive falsificado) e emigração. **Mais de 80 doenças**.
+- **Idade coerente**: cada tema tem idade mínima (bebida conforme a lei do país, namoro, trabalho, direção, dinheiro; casa, apostas, casamento, empresa e arma só com 18; paranormal a partir dos 16), e bebês só veem eventos de bebê. Cargos políticos com as idades do Brasil (vereador aos 18, deputado e prefeito aos 21).
+- **Os sistemas conversam entre si**: mais de 40 ligações que só aparecem quando os dois lados existem na sua vida. A empresa lava dinheiro da facção ou da seita e banca campanhas; a facção elege vereador e compra policial; o policial investiga a própria família ou a própria seita; o herói esbarra na seita, na guerra e na Lei de Registro; vampiros e lobisomens enfrentam o expediente de dia, o exame antidoping e a política; celebridades se candidatam; a coroa sofre golpe e casa com outra realeza; generais conspiram e a guerra fecha escolas.
+- **Autoescola** com a idade de cada país (16 nos EUA e no Canadá, 17 no Reino Unido e na Argentina, 18 no resto), passaporte (inclusive falsificado) e emigração. **Mais de 80 doenças**.
 - **Mais de 5.600 eventos**, conquistas, selos, cemitério, desafios, dificuldade e herdeiros (continue a vida com um filho).
+- **Ritmo calmo**: cada ano mostra de 1 a 3 eventos (raramente 4 ou 5). O que é obrigatório sempre aparece; o resto espera o ano seguinte.
 - **Sons e música** sintetizados, tema claro e escuro.
 - **Português ou inglês** (Menu → Idioma). Em inglês, telas e botões já estão traduzidos; os eventos ainda estão sendo traduzidos.
 
@@ -350,6 +352,9 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   dominio.js      seita e império mundiais: sucessão, hereges, traidores, guerra santa, coalizões, ataque nuclear e Rei do Mundo
   provas.js       provas de cada nível (uma ou duas por curso) e prova surpresa
   criaturas.js    vida de vampiro e lobisomem: exposição, alcateia e clã, hipnose, fugas, clube de luta e caçadores
+  conexoes.js     ligações entre sistemas (empresa, facção, polícia, herói, criaturas, fama, realeza, militar, guerra)
+  idade2.js       idade mínima de casa, apostas, casamento, empresa, arma, paranormal, carteira por país e criaturas
+  ritmo.js        de 1 a 3 eventos por ano no botão Envelhecer, com fila para o ano seguinte
   paranormal.js   fantasmas, vampiros e lobisomens
   desistir.js     reações de quem fica ao desistir da vida
   seita2.js       seita: cargos, fé dos seguidores, revolta, denúncias e domínio
@@ -404,6 +409,6 @@ NPCs precisam concluir cursos para assumir profissões qualificadas. Parceiros e
 Testes controlados de quatro estilos usam sementes 17401–17404 para exercitar três sucessões por estilo, além das partidas automatizadas existentes. Não são sessões humanas nem prova de equilíbrio de todas as estratégias.
 
 
-## Novidades recentes · 1.75–2.17
+## Novidades recentes · 1.75–2.19
 
-Da 1.75 à 2.17: Copa e Olimpíadas, seitas que nascem na deep web, luta tática e carreira de lutador, armas e drogas com a lei de cada país, profissões com minigames, escola e faculdade com provas de verdade, infância e relacionamentos, vida adulta e velhice, expectativa de vida realista, política de cada país, escândalos, guerras e o submundo, golpe de Estado em etapas e o regime depois dele, inglês e, na 2.14, seita e império que dominam o mundo, com sucessão hereditária, hereges, traidores e coalizões contra quem cresce demais, na 2.15 o ataque nuclear, na 2.16 a vida de criatura que interage com tudo e, na 2.17, menos provas: uma ou duas por nível, com prova surpresa às vezes. A lista completa de cada versão está em **Menu → Novidades** e nas [releases](https://github.com/madeiragab/newlife/releases).
+Da 1.75 à 2.19: Copa e Olimpíadas, seitas que nascem na deep web, luta tática e carreira de lutador, armas e drogas com a lei de cada país, profissões com minigames, escola e faculdade com provas de verdade, infância e relacionamentos, vida adulta e velhice, expectativa de vida realista, política de cada país, escândalos, guerras e o submundo, golpe de Estado em etapas e o regime depois dele, inglês e, na 2.14, seita e império que dominam o mundo, com sucessão hereditária, hereges, traidores e coalizões contra quem cresce demais, na 2.15 o ataque nuclear, na 2.16 a vida de criatura que interage com tudo na 2.17 menos provas (uma ou duas por nível, com prova surpresa às vezes), na 2.18 os sistemas conversando entre si e a revisão de idade e, na 2.19, de 1 a 3 eventos por ano. A lista completa de cada versão está em **Menu → Novidades** e nas [releases](https://github.com/madeiragab/newlife/releases).

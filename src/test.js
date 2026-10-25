@@ -70,6 +70,7 @@ function selfTest(){
   T('vida de criatura',criaturasSelfTest);
   T('sistemas conversando',conexoesSelfTest);
   T('idade certa',idade2SelfTest);
+  T('ritmo dos eventos',ritmoSelfTest);
   T('correções 2.08',ajustes208SelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);
