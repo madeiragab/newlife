@@ -69,7 +69,7 @@ emigrate=(orig=>function(c){
 
 // ---------- facção: do olheiro ao dono do morro ----------
 Object.assign(SPECIAL.crime,{n:'Facção',l:['Olheiro|Olheira','Aviãozinho','Vapor','Soldado','Gerente da boca','Frente da quebrada','Braço direito','Dono do morro|Dona do morro'],
-  sal:[6000,12000,25000,45000,90000,180000,400000,1200000],fame:[0,0,0,1,3,6,12,25],min:14,act:'Fazer um corre para a facção'});
+  sal:[6000,12000,25000,45000,90000,180000,400000,1200000],fame:[0,0,0,1,3,6,12,25],min:16,act:'Fazer um corre para a facção'});
 const RANK_ACTS=[
   {k:'olho',min:0,ic:'👀',l:'Ficar de olho no movimento',s:'Avisar quando a polícia subir · pouco risco'},
   {k:'trafico',min:1,ic:'💊',l:'Vender na boca (tráfico)',s:'Dinheiro rápido · a polícia fica de olho'},

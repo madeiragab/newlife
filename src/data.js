@@ -196,9 +196,9 @@ const CHALLENGES=[
 ];
 
 const OFFICES = [
- {id:'ver',n:'Vereador|Vereadora',age:21,cost:20000,sal:90000,base:.32},
- {id:'dep',n:'Deputado|Deputada',age:25,cost:150000,sal:180000,base:.24,req:'ver'},
- {id:'pref',n:'Prefeito|Prefeita',age:25,cost:300000,sal:200000,base:.2,req:'ver'},
+ {id:'ver',n:'Vereador|Vereadora',age:18,cost:20000,sal:90000,base:.32},
+ {id:'dep',n:'Deputado|Deputada',age:21,cost:150000,sal:180000,base:.24,req:'ver'},
+ {id:'pref',n:'Prefeito|Prefeita',age:21,cost:300000,sal:200000,base:.2,req:'ver'},
  {id:'gov',n:'Governador|Governadora',age:30,cost:2000000,sal:350000,base:.15,req:'pref,dep'},
  {id:'pres',n:'Presidente',age:35,cost:15000000,sal:500000,base:.1,req:'gov'},
 ];
