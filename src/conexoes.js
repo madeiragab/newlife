@@ -7,8 +7,9 @@ const CX={};
 const cxLabel=(c,m,d)=>typeof c[0]==='function'?c[0](m,d):c[0];
 function cx(o){ CX[o.id]=o; const ev={
     prep:()=>{ const m=S.me; try{ if(!o.when(m)) return null; return o.prep?o.prep(m):{}; }catch(e){ return null; } },
-    show:d=>{ const m=S.me; d=d||{}; return {k:o.k,t:o.t,x:typeof o.x==='function'?o.x(m,d):o.x,ch:o.ch.filter(c=>!c[3]||c[3](m,d)).map(c=>[cxLabel(c,m,d),c[1]])}; },
-    pick:(k,d)=>{ const c=o.ch.find(x=>x[1]===k); if(!c) return ''; return c[2](S.me,d||{})||''; }};
+    show:d=>{ const m=S.me; d=d||{}; let x; try{ x=typeof o.x==='function'?o.x(m,d):o.x; }catch(e){ x='A situação mudou desde a última vez.'; }
+      return {k:o.k,t:o.t,x,ch:o.ch.filter(c=>!c[3]||c[3](m,d)).map(c=>{ let l; try{ l=cxLabel(c,m,d); }catch(e){ l='Seguir em frente'; } return [l,c[1]]; })}; },
+    pick:(k,d)=>{ const m=S.me; let ok=false; try{ ok=!!o.when(m); }catch(e){} if(!ok) return 'A situação já não é a mesma. Deixei para lá.'; const c=o.ch.find(x=>x[1]===k); if(!c) return ''; return c[2](m,d||{})||''; }};
   if(o.scen){ Object.assign(ev,{scen:o.scen,w:o.w||1.2,cd:o.cd||40,when:m=>{ try{ return !!o.when(m); }catch(e){ return false; } }}); EVENTS['cxh_'+o.id]=ev; }
   else EVENTS['cx_'+o.id]=ev; }
 const cxPessoa=(m,rels)=>R.pick(people(...rels).filter(p=>p.alive&&p.age>=16)||[]);
@@ -328,6 +329,8 @@ cx({id:'guerra_escola',k:'Escola',t:'🏫 A escola na guerra',p:.6,cd:2,when:m=>
     ['Assistir às aulas online','online',m=>{ st('happy',-3); return 'Aula pelo celular, com a internet caindo a cada sirene.'; }]]});
 
 // ---------- o ano ----------
+// se a situação mudou entre a fila e a tela (a empresa fechou, saiu da facção…), a ligação some
+evValid=(o=>function(e){ const ok=o.apply(this,arguments); if(!ok||!e||!/^cxh?_/.test(e.id)) return ok; const c=CX[String(e.id).replace(/^cxh?_/,'')]; if(!c) return ok; try{ return !!c.when(S.me); }catch(err){ return false; } })(evValid);
 NL_GANCHOS_ANO.push(()=>{ const m=S.me; if(!m||!m.alive||m.prison||S.scen) return; m.c.cx=m.c.cx||{}; let n=0;
   for(const id of R.shuffle(Object.keys(CX))){ const o=CX[id]; if(o.scen||n>=2) continue; if(m.c.cx[id]!=null&&S.year-m.c.cx[id]<(o.cd||5)) continue;
     let ok=false; try{ ok=!!o.when(m); }catch(e){} if(!ok||!R.chance(o.p||.25)) continue; const d=EVENTS['cx_'+id].prep(); if(d==null) continue; m.c.cx[id]=S.year; queue('cx_'+id,d); n++; } });
@@ -339,6 +342,10 @@ function conexoesSelfTest(){ const s0=S,ns=window.NO_SAVE,nn=window.NO_NEWS,meta
       const ev=EVENTS[(o.scen?'cxh_':'cx_')+id], d=ev.prep(); ok(d!=null,id+': prep vazio'); if(d==null) continue;
       const base=JSON.stringify(S), sh=ev.show(d); ok(sh&&sh.ch.length>=2&&!BAD.test(sh.t+sh.x),id+' show: '+(sh&&sh.x)); ok(!(m.age<18&&sh.ch.length<2),id+': escolhas');
       for(const [l,k] of sh.ch){ ok(!BAD.test(l),id+' opção: '+l); S=JSON.parse(base); let r; try{ r=ev.pick(k,JSON.parse(JSON.stringify(d))); }catch(e){ erros.push(id+'/'+k+': '+e.message); } ok(!BAD.test(String(r)),id+'/'+k+': '+r); } S=JSON.parse(base); }
+    // ligação que ficou na fila depois que a situação mudou: não quebra e some
+    for(const [id,o] of Object.entries(CX)){ if(o.scen) continue; newLife({country:'BR'}); let m=S.me; m.age=30; m.money=1e6; S.guerra=null; try{ o.setup(m); }catch(e){ continue; } m=S.me; const ev=EVENTS['cx_'+id], d=ev.prep(); if(d==null) continue;
+      m.biz=null; m.job=null; m.seita=null; m.office=null; m.criatura=null; m.royal=null; S.guerra=null; m.c.exHeroi=0; m.para=null; m.cri=null;
+      try{ const sh=ev.show(d); ok(sh&&!BAD.test(sh.x),id+': tela depois da mudança: '+(sh&&sh.x)); ok(!evValid({id:'cx_'+id,d}),id+': continua válida depois da mudança'); ev.pick(sh.ch[0][1],d); }catch(e){ erros.push(id+' depois da mudança: '+e.message); } }
     // o gancho do ano não passa de duas ligações por ano
     newLife({country:'BR'}); const m=S.me; m.age=35; m.prison=null; m.money=1e6; novoBiz(m,'Teste','Construtora',900000); m.job={spc:'crime',lvl:4,perf:60,yrs:3,co:'Facção'}; seitaFundar('igreja','Teste'); m.seita.fieis=900;
     for(let i=0;i<10;i++){ S.pending=[]; S.year++; for(const f of NL_GANCHOS_ANO){ try{ f(); }catch(e){} } ok(S.pending.filter(e=>String(e.id).startsWith('cx_')).length<=2,'mais de duas ligações num ano'); }
