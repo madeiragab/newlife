@@ -22,7 +22,7 @@ const EVENTS={
  dinheiro_chao:{w:2,when:m=>m.age>=6&&free(m),prep:()=>({v:amt(5,R.chance(.1)?2000:200)}),
   show:d=>({k:'Sorte',t:'Dinheiro no chão',x:`Achei ${fmt(d.v)} na calçada.`,ch:[['Guardar no bolso','g'],['Procurar o dono','e']]}),
   pick:(k,d)=>{ if(k==='g'){ S.me.money+=d.v; S.me.karma=clamp(S.me.karma-1); return `Fiquei com ${fmt(d.v)}.`; } S.me.karma=clamp(S.me.karma+4); if(R.chance(.3)){ S.me.money+=Math.round(d.v/2); return `Achei o dono, que me deu ${fmt(d.v/2)} de recompensa.`; } return 'Não achei o dono, então deixei com o guarda da esquina.'; }},
- pais_brigam:{w:2,when:m=>m.age>=4&&m.age<=16&&people('mae').length&&people('pai').length&&!S.flags.divorced,prep:()=>({}),
+ pais_brigam:{w:2,when:m=>m.age>=4&&m.age<=16&&paisJuntos(),prep:()=>({}),
   show:()=>({k:'Família',t:'Gritos na sala',x:'Meus pais estão brigando feio por causa de dinheiro.',ch:[['Ir lá pedir pra pararem','p'],['Colocar fone e fingir dormir','f'],['Chorar alto','c']]}),
   pick:k=>{ if(k==='p'){ parents().forEach(p=>p.bond=clamp(p.bond+3)); return R.chance(.6)?'Eles pararam e me abraçaram.':'Me mandaram voltar pro quarto.'; } if(k==='c'){ return 'Eles pararam na hora.'; } st('happy',-3); return 'Dormi ouvindo a briga pelo fone.'; }},
  feira:{w:2,when:m=>m.age>=8&&m.age<=17&&inSchool(m),prep:()=>({}),

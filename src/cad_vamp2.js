@@ -1,6 +1,6 @@
 // ===== Histórias em cadeia: a vida de vampiro (2) =====
 chain('vamp_banco_sangue',{k:'Vampiro',min:18,max:200,when:VAMP,gap:[1,1]},{
- a:['A vaga perfeita','O banco de sangue do hospital está contratando para o turno da noite.',['Me candidatar|>b|Fui contratad{o} na hora: ninguém quer o turno da noite.','Achar arriscado demais|h+0|Muita tentação junta.']],
+ a:['A vaga perfeita','O banco de sangue do hospital está contratando para o turno da noite.',['Me candidatar|emprego:seg >b|Fui contratad{o} na hora como segurança: ninguém quer o turno da noite.','Achar arriscado demais|h+0|Muita tentação junta.']],
  b:['A geladeira','Centenas de bolsas de sangue, a poucos metros de mim, toda noite.',['Pegar só as vencidas|fome-40 k+2 >c|Ninguém vai sentir falta do que ia para o lixo.','Pegar as boas|fome-60 k-8 >d|Sangue fresco. Perigoso.','Não tocar em nada|?will h+6 >c|Força de vontade de aço.|fome+20 >d|A sede venceu na terceira semana.']],
  c:['O colega','Um colega reparou que eu nunca como no refeitório e nunca vejo o sol.',['Fazer amizade com ele|>e|Ele também trabalha só de noite. E também nunca come.','Evitar o colega|>d|Melhor não chamar atenção.']],
  d:['A auditoria','O hospital abriu uma auditoria: estão faltando bolsas de sangue.',['Culpar um erro no sistema|?sm >f|A auditoria concluiu que foi falha de registro.|fire >f|Me demitiram por justa causa.','Pedir demissão antes|fire >f|Saí antes que me pegassem.']],

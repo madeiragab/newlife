@@ -71,6 +71,8 @@ function selfTest(){
   T('sistemas conversando',conexoesSelfTest);
   T('idade certa',idade2SelfTest);
   T('ritmo dos eventos',ritmoSelfTest);
+  T('família coerente',familia2SelfTest);
+  T('eventos cumprem o que dizem',coerenciaSelfTest);
   T('correções 2.08',ajustes208SelfTest);
   T('turma da faculdade',turmaSelfTest);
   T('eventos da empresa no caixa',empresasEventosSelfTest);

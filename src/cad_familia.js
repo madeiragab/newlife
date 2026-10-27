@@ -37,13 +37,13 @@ chain('mudanca_familia',{k:'Família',min:10,max:16,gap:[1,1],when:m=>parents().
  c:['A despedida','Meus amigos fizeram uma despedida surpresa.',['Prometer manter contato|h+4 >b|Choramos todos juntos.','Ficar com raiva dos meus pais|h-6 >b|Fiquei uma semana sem falar com eles.']],
  d:['Adaptação','Seis meses depois, a cidade nova já parece casa.',['Agradecer aos meus pais|h+6|Eles estavam certos, no fim.','Sentir saudade das duas cidades|h+3|Agora tenho dois lugares no coração.']],
 });
-chain('divorcio_pais_adulto',{k:'Família',min:25,max:60,gap:[1,1],when:m=>parents().length>=2&&parents().every(p=>p.age>=50)},{
+chain('divorcio_pais_adulto',{k:'Família',min:25,max:60,gap:[1,1],when:m=>paisJuntos()&&parents().every(p=>p.age>=50)},{
  a:['A notícia','Meus pais, depois de trinta anos, vão se divorciar.',['Apoiar a decisão|paisseparam k+4 >b|Eles merecem ser felizes, mesmo separados.','Tentar convencer a ficarem juntos|paisseparam >c|Organizei um jantar só para os dois.','Ficar do lado de um deles|paisseparam h-6 >d|A família rachou.']],
  b:['Vida nova','Minha mãe começou a viajar e meu pai a fazer aula de dança.',['Achar ótimo|h+6|Pais felizes, família tranquila.','Estranhar|h+2|Vai levar um tempo.']],
  c:['O jantar','O jantar romântico que organizei para os dois foi constrangedor.',['Aceitar a separação|k+3 >b|Não dá para forçar.','Insistir mais um pouco|h-4 >b|Não adiantou.']],
  d:['A divisão','Ter que escolher onde passar o Natal virou um pesadelo.',['Passar a manhã com um e a noite com outro|k+3 h+2|Duas ceias, dois perus.','Fazer uma ceia para todos juntos|?k h+10|Conseguimos reunir todo mundo.|h-6|Não deu certo. Briga na sobremesa.']],
 });
-chain('irmao_novo',{k:'Família',min:5,max:13,npc:1,age:[-30,-30],gap:[1,1],when:m=>parents().length>=2&&people('mae').some(p=>p.age<43)},{
+chain('irmao_novo',{k:'Família',min:5,max:13,npc:1,age:[-30,-30],gap:[1,1],when:m=>paisJuntos()&&people('mae').some(p=>p.age<43)},{
  a:['A novidade','Meus pais contaram que a família vai crescer: vem um bebê aí.',['Ficar feliz|h+6 >b|Vou ensinar tudo que eu sei.','Ficar com ciúmes|h-4 >c|E se gostarem mais do bebê?']],
  b:['O nascimento','{p} chegou. É pequen{o2} e chora o tempo todo.',['Ajudar a cuidar|vira:irmao k+5 h+5 >d|Aprendi a trocar fralda.','Pedir atenção|vira:irmao h-2 >c|Ninguém mais olha para mim.']],
  c:['Ciúmes','Fiz birra na frente das visitas.',['Conversar com meus pais|h+4 >d|Eles me levaram para tomar sorvete, só nós.','Continuar emburrad{o}|h-4 >d|Durou uma semana.']],

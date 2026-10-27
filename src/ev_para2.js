@@ -36,7 +36,7 @@ pack({k:'Maldição',w:1.4,cd:9,min:14,when:CW('vampiro')},[
   ['Vizinho curioso','O vizinho acha estranho você só sair à noite e nunca receber visitas.',['Convidar para jantar|?50 h+4|Ele saiu convencido de que sou só esquisito.|h-6|Ele viu o caixão.','Mudar de casa|$-5000 h+2|Mais uma mudança.']],
   ['Sangue raro','Você sente o cheiro de um sangue raro e irresistível num hospital.',['Resistir|h-6 k+4|Foi a coisa mais difícil que já fiz.','Ceder|k-12 h+8|Uma bolsa só. Ninguém vai sentir falta.']],
   ['Envelhecer por amor','Seu par envelhece e você não.',['Contar a verdade|?50 bond+10|Meu par aceitou envelhecer ao meu lado, mesmo assim.|bond-10|Ele achou que era desculpa.','Fingir rugas com maquiagem|h-2|Teatro diário.'],{who:'partner'}],
-  ['Duelo de vampiros','Um vampiro mais velho desafia você por território.',['Aceitar|?fight fight+5 h+4|Venci. Agora a cidade é minha.|paramorte:vampiro|Ele era mais forte.','Ceder|h-6|Mudei de cidade.']],
+  ['Duelo de vampiros','Um vampiro mais velho desafia você por território.',['Aceitar|?fight fight+5 h+4|Venci. Agora a cidade é minha.|paramorte:vampiro|Ele era mais forte.','Ceder|h-6 mudarcidade|Mudei de cidade.']],
 ]);
 pack({k:'Maldição',w:1.4,cd:9,min:14,when:CW('lobisomem')},[
   ['Força no trabalho','Você carrega sozinho uma geladeira que três pessoas não conseguiam levantar.',['Disfarçar|h+2|"Academia".','Ganhar dinheiro com isso|$+3000|Fiz bico de mudança. Rápido como ninguém.']],

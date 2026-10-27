@@ -75,7 +75,7 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
     else if(mm=t.match(/^carro:([\wÀ-ú]+):(\d+)$/)){ const n=mm[1].replace(/_/g,' '); m.assets.push({id:newId(),k:'carro',n,value:+mm[2],cond:100,buy:0,country:m.country,city:m.city}); }
     else if(t==='trancar'){ if(m.edu.cur&&!['fund','medio'].includes(m.edu.cur.type)){ m.edu.trancado=m.edu.cur; m.edu.cur=null; out.push('Tranquei a matrícula.'); } }
     else if(t==='retomar'){ if(m.edu.trancado&&!m.edu.cur){ m.edu.cur=m.edu.trancado; delete m.edu.trancado; out.push('Destranquei a matrícula e voltei às aulas.'); } }
-    else if(t==='paisseparam'){ if(parents().length>=2) S.flags.divorced=1; }
+    else if(t==='paisseparam'){ if(parents().length>=2) paisSeparar(); }
     else if(t==='morre'){ const pp=d.pid&&P(d.pid); if(pp&&pp.alive&&pp!==m){ pp.alive=false; pp.cause=pp.cause||'de causas naturais'; d.morto=1; } }
     else if(mm=t.match(/^mem:(\w+)(?::(\w+))?$/)){ const pp=d.pid&&P(d.pid); if(pp&&typeof relMemoria==='function') relMemoria(pp,mm[1],mm[2]); }
     else if(mm=t.match(/^fome([+-]\d+)$/)){ if(m.criatura) m.fomeP=clamp((m.fomeP||0)+ +mm[1]); }

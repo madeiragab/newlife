@@ -92,11 +92,11 @@ chain('acampamento',{k:'Infância',min:8,max:13,npc:1,gap:[1,3]},{
  d:['O verão seguinte','Voltamos ao acampamento juntos. Agora somos veteranos.',['Virar monitor{a} júnior|k+4 sm+2 >e@4-6|Cuidei dos pequenos como cuidaram de mim.','Aprontar todas|h+8 >e@4-6|Fizemos uma guerra de travesseiros histórica.']],
  e:['De volta ao acampamento','Adult{o}, recebi um convite: o acampamento procura monitores voluntários para o verão.',['Aceitar com {p}|h+10 k+6|Voltamos juntos, agora do outro lado das barracas.','Não ter mais tempo|h-2|A vida adulta engoliu os verões.']],
 });
-chain('briga_pais',{k:'Família',min:7,max:14,who:'parent',when:m=>parents().length>=2,gap:[1,2]},{
+chain('briga_pais',{k:'Família',min:7,max:14,who:'parent',when:m=>paisJuntos(),gap:[1,2]},{
  a:['Gritos na cozinha','Ouvi meus pais brigando feio depois que achavam que eu estava dormindo.',['Fingir que não ouvi|h-4 >b|No café da manhã, ninguém falou nada.','Perguntar o que está acontecendo|>c|Eles se olharam, sem saber o que dizer.']],
  b:['O silêncio','A casa ficou silenciosa. Meus pais quase não se falam.',['Tentar animar todo mundo|k+3 h-2 >d|Fiz um jantar com miojo e velas. Eles riram pela primeira vez em semanas.','Me fechar no quarto|h-6 >d|Fone de ouvido no volume máximo.']],
  c:['A conversa','Eles explicaram que estão passando por um momento difícil, mas que me amam.',['Acreditar|h+2 >d|Abracei os dois de uma vez.','Perguntar se vão se separar|h-4 >d|Ninguém respondeu direito.']],
- d:['A decisão','Meus pais tomaram uma decisão sobre o casamento deles.',['Ouvir com calma|?50 h+8 bond+5 >e@2|Eles vão fazer terapia de casal e tentar de novo.|h-12 >f@1|Vão se separar. Vou morar com os dois, cada semana em uma casa.','Explodir de raiva|h-8 bond-8 >f@1|Disse coisas que não devia.']],
+ d:['A decisão','Meus pais tomaram uma decisão sobre o casamento deles.',['Ouvir com calma|?50 h+8 bond+5 >e@2|Eles vão fazer terapia de casal e tentar de novo.|h-12 paisseparam guarda:ambos >f@1|Vão se separar. Vou morar com os dois, cada semana em uma casa.','Explodir de raiva|h-8 bond-8 paisseparam guarda:ambos >f@1|Disse coisas que não devia.']],
  e:['Terapia de casal','Meus pais voltaram a rir juntos na cozinha.',['Agradecer a eles|h+8 bond+6|Às vezes, as famílias se consertam.','Fingir que não percebi|h+5|Mas percebi. E fiquei feliz.']],
  f:['Duas casas','A vida em duas casas tem duas escovas de dente, duas camas e o dobro de presentes de aniversário.',['Aproveitar o lado bom|h+5|Duas casas, dois quartos, dois natais.','Sentir falta de como era|h-6 bond+3|Nunca mais vai ser como antes. Mas ainda é família.']],
 });

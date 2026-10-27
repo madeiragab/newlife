@@ -46,10 +46,10 @@ chain('testemunha',{k:'Crime',min:16,max:80,gap:[1,1]},{
 });
 chain('heranca_tio',{k:'Família',min:22,max:75,v:[50000,300000],gap:[1,1]},{
  a:['O advogado','Um advogado me ligou: um tio-avô que eu mal conhecia me deixou uma herança.',['Ir ao escritório|>b|Achei que era golpe até ver o papel timbrado.','Achar que é golpe e desligar|>c@1|Ele ligou de novo.']],
- b:['O testamento','O testamento me deixa uma casa no interior, cheia de coisas antigas.',['Visitar a casa|>d|A casa tem cheiro de passado.','Vender sem ver|$+v h+8|Dinheiro na conta.']],
+ b:['O testamento','O testamento me deixa uma casa no interior, cheia de coisas antigas.',['Visitar a casa|herdarcasa >d|A casa tem cheiro de passado.','Vender sem ver|$+v h+8|Dinheiro na conta.']],
  c:['A insistência','O advogado mandou uma carta registrada com o testamento.',['Ler a carta|>b|Era verdade.','Rasgar|h+0|Nunca saberei.']],
- d:['O baú','No sótão, um baú com cartas, fotos e um diário do meu tio-avô.',['Ler o diário|h+6 sm+2 >e|Ele foi um aventureiro. Ninguém da família sabia.','Doar tudo para um museu|$+v k+5 f+2|Vendi a casa e doei o baú. O museu da cidade montou uma exposição.']],
- e:['A revelação','O diário fala de uma coleção de moedas raras escondida na casa.',['Procurar|$+v ?50 $+v2 h+15|Encontrei atrás da parede da lareira! Depois vendi a casa.|h-2|Nada. Vendi a casa com o segredo dentro.','Deixar a lenda em paz|$+v h+4|Vendi a casa para uma família que prometeu cuidar dela. Algumas coisas devem continuar mistério.']],
+ d:['O baú','No sótão, um baú com cartas, fotos e um diário do meu tio-avô.',['Ler o diário|h+6 sm+2 >e|Ele foi um aventureiro. Ninguém da família sabia.','Doar tudo para um museu|vender:Casa_do_interior k+5 f+2|Vendi a casa e doei o baú. O museu da cidade montou uma exposição.']],
+ e:['A revelação','O diário fala de uma coleção de moedas raras escondida na casa.',['Procurar|vender:Casa_do_interior ?50 $+v2 h+15|Encontrei atrás da parede da lareira! Depois vendi a casa.|h-2|Nada. Vendi a casa com o segredo dentro.','Deixar a lenda em paz|vender:Casa_do_interior h+4|Vendi a casa para uma família que prometeu cuidar dela. Algumas coisas devem continuar mistério.']],
 });
 chain('imovel',{k:'Dinheiro',min:25,max:70,v:[40000,120000],gap:[1,2]},{
  a:['A casa em leilão','Um amigo corretor disse que uma casa vai a leilão pela metade do preço.',['Dar um lance|?45 imovel:Casa_do_leilão >b|Arrematei!|h-3|Alguém deu um lance maior.','Não arriscar|h+0|Leilão me dá medo.']],

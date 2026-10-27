@@ -19,7 +19,7 @@ yearPeople=(o=>function(){const r=o.apply(this,arguments);npcIniciativa();return
 V.person=(o=>function(p){const r=o(p);if(r&&p.npcProjeto)r.items.push({l:'Projeto pessoal',s:p.npcProjeto});return r;})(V.person);
 
 // A trajetória pertence à pessoa, preservando emprego, país e família no save.
-const NPC_PROXIMOS=['amigo','ex_amigo','mae','pai','irmao','filho','adot','neto','avo','namoro','noivo','conjuge','ex'];
+const NPC_PROXIMOS=['amigo','ex_amigo','mae','pai','padrasto','irmao','filho','adot','neto','avo','namoro','noivo','conjuge','ex'];
 function npcAcompanhado(p){return !S.scen&&p.rel!=='pet'&&(NPC_PROXIMOS.includes(p.rel)||!!p.vida);}
 function npcVida(p){if(!p.country||!COUNTRIES.some(c=>c.id===p.country))p.country=S.me.country;if(!p.vida){p.vida={historico:[],filhos:[],inicio:S.year,aposentado:p.age>=70};if(['mae','pai'].includes(p.rel)&&!S.flags.divorced){const q=people(p.rel==='mae'?'pai':'mae')[0];if(q)p.vida.par=q.id;}}const v=p.vida;v.historico||=[];v.filhos||=[];if(!v.parentesV){v.parentesV=1;v.filhos=Array.from(new Set(v.filhos.concat(S.people.filter(k=>k.parentIds?.includes(p.id)||k.parentId===p.id).map(k=>k.id),S.me.parentIds?.includes(p.id)?[S.me.id]:[])));}return v;}
 function npcMarco(p,tipo,texto,extra={}){const v=npcVida(p),h={ano:S.year,tipo,texto,...extra};v.historico.push(h);v.historico=v.historico.slice(-24);if(typeof npcCarreiraRegistrar==='function')npcCarreiraRegistrar(p,h);if(!S._npcResumo)S._npcResumo=[];S._npcResumo.push({pid:p.id,...h});return h;}

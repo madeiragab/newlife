@@ -352,7 +352,7 @@ V.invest=()=>{ const m=S.me; const row=(k,l,s)=>[{html:`<div class="card">${kv(l
 // ---------- relações ----------
 function personRow(p){ return {face:faceSVG(p,42),l:fullName(p),s:`${relLabel(p)} · ${p.age} ${p.age===1?'ano':'anos'}`,bars:relBars(p),on:()=>UI.push(()=>V.person(p))}; }
 V.relations=()=>{
-  const groups=[['Família',['mae','pai','irmao','avo']],['Amor',['namoro','noivo','conjuge']],['Filhos e netos',['filho','adot','neto']],['Amigos',['amigo']],['Desafetos',['inimigo']],['Bichos',['pet']],['Ex',['ex']]];
+  const groups=[['Família',['mae','pai','padrasto','irmao','avo']],['Amor',['namoro','noivo','conjuge']],['Filhos e netos',['filho','adot','neto']],['Amigos',['amigo']],['Desafetos',['inimigo']],['Bichos',['pet']],['Ex',['ex']]];
   const it=[{face:faceSVG(S.me,42),l:'Eu: '+S.me.first+' '+S.me.last,s:'Visual, genética, talentos e vícios',on:()=>UI.push(V.me)}];
   for(const [t,rels] of groups){ const ps=people(...rels); if(ps.length){ it.push({sec:t}); ps.forEach(p=>it.push(personRow(p))); } }
   const dead=S.people.filter(p=>!p.alive&&['mae','pai','irmao','avo','filho','conjuge','adot'].includes(p.rel));

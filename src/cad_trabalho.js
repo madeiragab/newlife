@@ -19,8 +19,8 @@ chain('fraude_empresa',{k:'Trabalho',min:22,max:65,when:TRAB,v:[20000,80000],gap
 });
 chain('headhunter',{k:'Carreira',min:23,max:60,when:TRAB,gap:[1,1]},{
  a:['A proposta','Uma recrutadora me ligou: uma concorrente quer me contratar ganhando 30% a mais.',['Aceitar a entrevista|>b|Marquei no horário do almoço, escondid{o}.','Recusar de cara|k+2|Estou feliz onde estou.']],
- b:['A oferta','A concorrente fez a oferta por escrito.',['Usar para pedir aumento onde estou|?perf raise+20 h+8|Meu chefe cobriu a oferta.|perf-6 >c|Meu chefe ficou ofendido.','Aceitar a oferta|raise+30 h+8 >d|Pedi demissão e mudei de empresa.']],
- c:['Clima ruim','Depois que meu chefe soube da proposta, me tratam como traidor{a}.',['Ir para a concorrente|raise+30 >d|Ainda dava tempo.','Ficar e recuperar a confiança|perf+8 k+3|Trabalhei dobrado por meses.']],
+ b:['A oferta','A concorrente fez a oferta por escrito.',['Usar para pedir aumento onde estou|?perf raise+20 h+8|Meu chefe cobriu a oferta.|perf-6 >c|Meu chefe ficou ofendido.','Aceitar a oferta|raise+30 trocaempresa h+8 >d|Pedi demissão e mudei de empresa.']],
+ c:['Clima ruim','Depois que meu chefe soube da proposta, me tratam como traidor{a}.',['Ir para a concorrente|raise+30 trocaempresa >d|Ainda dava tempo.','Ficar e recuperar a confiança|perf+8 k+3|Trabalhei dobrado por meses.']],
  d:['Empresa nova','A empresa nova paga melhor, mas cobra o dobro.',['Mostrar serviço|perf+10 >e@1|Primeiro a chegar, último a sair.','Ir no meu ritmo|h+4 >e@1|Ganhar mais não significa viver para o trabalho.']],
  e:['Valeu a pena?','Um ano depois da troca, faço o balanço.',['Valeu|?perf promo h+8|Fui promovid{o} no primeiro ano.|h+4|Ganho mais e aprendi muito.','Sinto falta da antiga|h-4|Às vezes o dinheiro não compensa.']],
 });

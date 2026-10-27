@@ -99,6 +99,7 @@ function coberturaEventosSelfTest(limiteMs=60000){
   for(let k=0;k<48;k++)candidatos.push([R.pick([25,40]),null,0,m=>{if(k%3===2){seitaEntrarEm(k%2?'dw':0);if(m.seita)Object.assign(m.seita,{cargo:k%5,conf:grade([20,70,95]),fe:60});return;}seitaFundar(Object.keys(SEITA_TIPOS)[k%4],'Teste');Object.assign(m.seita,{fieis:grade([2,300,5000]),online:grade([0,60]),seg:k%4,inim:grade([0,3]),caixa:grade([0,5e5]),devo:60,susp:30});if(k%2)m.seita.rival={n:'Templo Rival',lider:'Profeta Josué',forca:50};}]);
   for(const k of [0,1,2,3])candidatos.push([30,null,0,m=>{m.armas=[{id:k%2?'pistola':'faca',legal:!!(k&2),pais:m.country}];m.armaUso=m.armas[0].id;m.drogas={cocaina:k*25+20,maconha:60};}]);
   for(const lvl of [0,5,7])candidatos.push([26,null,0,m=>{m.job={spc:'lutador',lvl,perf:60,yrs:3,mod:lvl===5?'boxe':'mma'};}]);
+  for(const age of [8,12])candidatos.push([age,null,0,m=>{const mae=people('mae')[0];if(!mae||!people('pai').length)return;S.flags.divorced=1;S.flags.guarda='mae';const q=mkPerson({rel:'padrasto',gender:'M',age:mae.age});q.padDe=mae.id;S.people.push(q);npcVida(mae).par=q.id;}]);
   for(const age of [3,4,5,7,10,62,66,75,80,88,95])candidatos.push([age,null,0,m=>{if(age>=62)m.ret={pension:20000};}]);
   for(const [age,pais,royal,mod] of candidatos){if(Date.now()-T0>limiteMs*4)break;const falta=ids.filter(id=>!opcoes[id]);if(!falta.length)break;
    const snap=base(age,pais,royal,mod),me=JSON.parse(snap).me;S=JSON.parse(snap);

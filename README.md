@@ -189,6 +189,7 @@ Cada ano é um sorteio: o diário conta o que aconteceu e você decide o que faz
 - **Os sistemas conversam entre si**: mais de 40 ligações que só aparecem quando os dois lados existem na sua vida. A empresa lava dinheiro da facção ou da seita e banca campanhas; a facção elege vereador e compra policial; o policial investiga a própria família ou a própria seita; o herói esbarra na seita, na guerra e na Lei de Registro; vampiros e lobisomens enfrentam o expediente de dia, o exame antidoping e a política; celebridades se candidatam; a coroa sofre golpe e casa com outra realeza; generais conspiram e a guerra fecha escolas.
 - **Autoescola** com a idade de cada país (16 nos EUA e no Canadá, 17 no Reino Unido e na Argentina, 18 no resto), passaporte (inclusive falsificado) e emigração. **Mais de 80 doenças**.
 - **Mais de 5.600 eventos**, conquistas, selos, cemitério, desafios, dificuldade e herdeiros (continue a vida com um filho).
+- **Família coerente**: pais separados não brigam na cozinha nem têm bebê juntos; a guarda é decidida e madrasta, padrasto e meio-irmãos aparecem nas Relações.
 - **Ritmo calmo**: cada ano mostra de 1 a 3 eventos (raramente 4 ou 5). O que é obrigatório sempre aparece; o resto espera o ano seguinte.
 - **Sons e música** sintetizados, tema claro e escuro.
 - **Português ou inglês** (Menu → Idioma). Em inglês, telas e botões já estão traduzidos; os eventos ainda estão sendo traduzidos.
@@ -355,6 +356,7 @@ src/            código do jogo (HTML/CSS/JS puro, sem dependências)
   conexoes.js     ligações entre sistemas (empresa, facção, polícia, herói, criaturas, fama, realeza, militar, guerra)
   idade2.js       idade mínima de casa, apostas, casamento, empresa, arma, paranormal, carteira por país e criaturas
   ritmo.js        de 1 a 3 eventos por ano no botão Envelhecer, com fila para o ano seguinte
+  familia2.js     pais juntos ou separados, guarda, madrasta, padrasto, meio-irmãos e efeitos reais dos textos de evento
   paranormal.js   fantasmas, vampiros e lobisomens
   desistir.js     reações de quem fica ao desistir da vida
   seita2.js       seita: cargos, fé dos seguidores, revolta, denúncias e domínio
@@ -409,6 +411,6 @@ NPCs precisam concluir cursos para assumir profissões qualificadas. Parceiros e
 Testes controlados de quatro estilos usam sementes 17401–17404 para exercitar três sucessões por estilo, além das partidas automatizadas existentes. Não são sessões humanas nem prova de equilíbrio de todas as estratégias.
 
 
-## Novidades recentes · 1.75–2.19
+## Novidades recentes · 1.75–2.20
 
-Da 1.75 à 2.19: Copa e Olimpíadas, seitas que nascem na deep web, luta tática e carreira de lutador, armas e drogas com a lei de cada país, profissões com minigames, escola e faculdade com provas de verdade, infância e relacionamentos, vida adulta e velhice, expectativa de vida realista, política de cada país, escândalos, guerras e o submundo, golpe de Estado em etapas e o regime depois dele, inglês e, na 2.14, seita e império que dominam o mundo, com sucessão hereditária, hereges, traidores e coalizões contra quem cresce demais, na 2.15 o ataque nuclear, na 2.16 a vida de criatura que interage com tudo na 2.17 menos provas (uma ou duas por nível, com prova surpresa às vezes), na 2.18 os sistemas conversando entre si e a revisão de idade e, na 2.19, de 1 a 3 eventos por ano. A lista completa de cada versão está em **Menu → Novidades** e nas [releases](https://github.com/madeiragab/newlife/releases).
+Da 1.75 à 2.20: Copa e Olimpíadas, seitas que nascem na deep web, luta tática e carreira de lutador, armas e drogas com a lei de cada país, profissões com minigames, escola e faculdade com provas de verdade, infância e relacionamentos, vida adulta e velhice, expectativa de vida realista, política de cada país, escândalos, guerras e o submundo, golpe de Estado em etapas e o regime depois dele, inglês e, na 2.14, seita e império que dominam o mundo, com sucessão hereditária, hereges, traidores e coalizões contra quem cresce demais, na 2.15 o ataque nuclear, na 2.16 a vida de criatura que interage com tudo na 2.17 menos provas (uma ou duas por nível, com prova surpresa às vezes), na 2.18 os sistemas conversando entre si e a revisão de idade na 2.19 de 1 a 3 eventos por ano e, na 2.20, a família coerente: separação de verdade, guarda, madrasta, padrasto e meio-irmãos. A lista completa de cada versão está em **Menu → Novidades** e nas [releases](https://github.com/madeiragab/newlife/releases).
