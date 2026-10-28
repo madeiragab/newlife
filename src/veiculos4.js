@@ -501,9 +501,14 @@ function v4Preco(r,pais,idade){ pais=pais||S.me.country; let k=1; try{ k=Math.ma
   const imp=v4Local(r,pais)?1:v4Vende(r,pais)?(pais==='BR'||pais==='AR'||pais==='IN'?1.35:1.12):1.7;
   const dep=r.classico?1:idade<=0?1:Math.max(.16,.82*Math.pow(.9,idade-1));
   return Math.max(1000,Math.round(r.preco*k*imp*dep/100)*100); }
-function v4Oferta(r,usado){ const m=S.me, pais=m.country, rel=v4Relogio(), idade=r.classico?rel-r.ano:Math.max(0,rel-r.ano);
-  const v=Math.round(v4Preco(r,pais,idade)*(r.classico?(.8+R.f()*.5):(.94+R.f()*.12))/100)*100;
-  return {v4:r.id,model:r.id,n:v4Nome(r)+(idade===0&&!r.classico?' 0 km':''),t:r.cat,cat:r.cat,cor:R.pick(Object.keys(VEIC4_COR)),v,cond:r.classico?R.int(55,95):idade===0?100:Math.max(35,100-idade*4-R.int(0,12)),classic:r.classico,ic:null,imp:!v4Vende(r,pais),manut:v4Manut(r,pais)}; }
+// cores como nas ruas: branco, prata, preto e cinza são a maioria; esportivo e compacto puxam mais cor
+const V4_PESO={branco:24,prata:18,preto:18,cinza:12,'cinza-grafite':8,vermelho:6,azul:5,'azul-marinho':3,verde:1,'verde-musgo':1,amarelo:1,vinho:1,laranja:1,bege:1,marrom:1};
+function v4Rng(seed){ let a=seed>>>0||1; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^t>>>15,t|1); t^=t+Math.imul(t^t>>>7,t|61); return ((t^t>>>14)>>>0)/4294967296; }; }
+function v4Cor(r,f){ const p=Object.assign({},V4_PESO); if(r.cat==='Esportivos'){ p.vermelho=22; p.amarelo=8; p.laranja=6; p.azul=10; } if(/hatchP|mini/.test(r.forma)){ p.vermelho+=6; p.azul+=4; p.verde+=3; } if(r.classico){ p.bege=8; p.vinho=6; p.verde=6; p.marrom=6; }
+  const tot=Object.values(p).reduce((a,b)=>a+b,0); let x=f()*tot; for(const [k,w] of Object.entries(p)){ if((x-=w)<0) return k; } return 'branco'; }
+function v4Oferta(r,usado){ const m=S.me, f=v4Rng(hashS(r.id+'|'+S.year+'|'+(m.id||m.first||''))), pais=m.country, rel=v4Relogio(), idade=r.classico?rel-r.ano:Math.max(0,rel-r.ano);
+  const v=Math.round(v4Preco(r,pais,idade)*(r.classico?(.8+f()*.5):(.94+f()*.12))/100)*100;
+  return {v4:r.id,model:r.id,n:v4Nome(r)+(idade===0&&!r.classico?' 0 km':''),t:r.cat,cat:r.cat,cor:v4Cor(r,f),v,cond:r.classico?55+Math.floor(f()*41):idade===0?100:Math.max(35,100-idade*4-Math.floor(f()*13)),classic:r.classico,ic:null,imp:!v4Vende(r,pais),manut:v4Manut(r,pais)}; }
 function v4Disponiveis(pais){ const rel=v4Relogio(); return VEICULOS4.filter(r=>r.ano<=rel&&(r.classico||rel-r.ano<=15)&&v4Vende(r,pais)); }
 function v4Estoque(){ const m=S.me; if(!m.yr.cars4){ const pais=m.country, d=v4Disponiveis(pais), fora=VEICULOS4.filter(r=>r.ano<=v4Relogio()&&!v4Vende(r,pais)&&!r.classico);
     m.yr.cars4=R.shuffle(d).slice(0,14).concat(R.chance(.5)&&fora.length?[R.pick(fora)]:[]).map(r=>v4Oferta(r)).sort((a,b)=>a.v-b.v); } return m.yr.cars4; }
@@ -513,10 +518,13 @@ function v4Comprar(o,fin){ const m=S.me; if(m.age<18) return 'Preciso ter 18 ano
   m.assets.push({id:newId(),k:'carro',n:o.n,value:o.v,cond:o.cond,buy:o.v,classic:o.classic,cor:o.cor,model:o.v4,v4:o.v4,manut:o.manut}); st('happy',8);
   if(m.yr.cars4) m.yr.cars4=m.yr.cars4.filter(x=>x!==o);
   return `Comprei um ${o.n} ${o.cor}${fin?' financiado em 5 anos':''}.${o.imp?' Veio importado: as peças vão sair caras.':''}`; }
+function v4Pinta(k){ const o=window.V4_OF; if(!o) return; o.cor=k; const el=document.getElementById('v4Fig'); if(el) el.innerHTML=car4SVG(o.v4,k,220); document.querySelectorAll('.v4cores button').forEach(b=>b.style.borderColor=b.title===k?'#2A2238':'rgba(0,0,0,.15)'); const n=document.getElementById('v4CorNome'); if(n) n.textContent='Cor: '+k; }
 function v4Ficha(o){ const r=VEIC4[o.v4], m=S.me, pais=m.country;
-  const x=[`${r.marca} · ${r.modelo} · ${r.versao} · ${r.ano}`,`Categoria: ${r.cat}`,`Cor: ${o.cor}`,`Conservação: ${o.cond}%`,`Preço: ${fmt(o.v)}`,
+  const x=[`${r.marca} · ${r.modelo} · ${r.versao} · ${r.ano}`,`Categoria: ${r.cat}`,...(o.cond===100&&!o.classic?[]:[`Cor: ${o.cor}`]),`Conservação: ${o.cond}%`,`Preço: ${fmt(o.v)}`,
     v4Local(r,pais)?'Fabricado aqui: peças baratas.':o.imp?'Não é vendido oficialmente aqui: importação independente.':'Importado: manutenção mais cara.',r.forma==='ev'||r.forma==='evsuv'||r.cat==='Elétricos'?'Elétrico: quase não gasta com combustível.':''].filter(Boolean).join('\n');
-  modal({top:`<div class="mkcar">${car4SVG(r,o.cor,240)}</div>`,t:o.n,x,ch:[{l:`Comprar à vista (${fmt(o.v)})`,fn:()=>MQ.unshift({t:'Concessionária',x:v4Comprar(o,false)})},{l:'Financiar (20% de entrada)',fn:()=>MQ.unshift({t:'Concessionária',x:v4Comprar(o,true)})},{l:'Voltar',cls:'alt'}]}); }
+  window.V4_OF=o; const zero=o.cond===100&&!o.classic;
+  const cores=zero?`<div class="v4cores" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin:2px 0 4px">${Object.entries(VEIC4_COR).map(([k,h])=>`<button title="${k}" onclick="v4Pinta('${k}')" style="width:22px;height:22px;border-radius:50%;border:2px solid ${k===o.cor?'#2A2238':'rgba(0,0,0,.15)'};background:${h};padding:0"></button>`).join('')}</div>`:'';
+  modal({top:`<div class="mkcar" style="padding-bottom:22px"><div id="v4Fig">${car4SVG(r,o.cor,220)}</div>${cores}${zero?`<div id="v4CorNome" style="font:600 12px sans-serif;color:#333;text-align:center">Cor: ${o.cor}</div>`:''}</div>`,t:o.n,x,ch:[{l:`Comprar à vista (${fmt(o.v)})`,fn:()=>MQ.unshift({t:'Concessionária',x:v4Comprar(o,false)})},{l:'Financiar (20% de entrada)',fn:()=>MQ.unshift({t:'Concessionária',x:v4Comprar(o,true)})},{l:'Voltar',cls:'alt'}]}); }
 const v4Item=o=>({ic:car4SVG(o.v4,o.cor),l:o.n,s:`${o.cor} · conservação ${o.cond}%${o.classic?' · clássico':''}${o.imp?' · importação':''}`,r:fmt(o.v),on:()=>v4Ficha(o)});
 // mais vendidos de cada país (modelos do catálogo)
 const VEIC4_TOP={BR:'Strada,Polo,Onix,HB20,Tracker,T-Cross,Argo,Creta,Corolla Cross,Mobi,Hilux,Kicks',AR:'Hilux,Ranger,Cronos,208,Amarok,Yaris,Sandero,Toro,Polo,2008,Tracker,Corolla Cross',
