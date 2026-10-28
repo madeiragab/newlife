@@ -111,7 +111,7 @@ render=(orig=>function(){
   try{ if(!S||!S.me) return r; const m=S.me;
    v3Palco(); v3Dinheiro(m);
    const lg=$('#log'), secs=lg.querySelectorAll('.yr');
-   secs.forEach((s,i)=>{ const y=S.scen?null:S.log[i]; if(y){ s.dataset.age=y.age; s.querySelectorAll('p').forEach(p=>{ if(p.classList.contains('choice')) return; const t=p.textContent; if(/morreu|faleceu|morte/i.test(t)) p.classList.add('luto'); else if(/nasceu|nascimento/i.test(t)) p.classList.add('nasce'); }); } });
+   secs.forEach((s,i)=>{ if(s.dataset.v3) return; s.dataset.v3=1; const y=S.scen?null:S.log[i]; if(y){ s.dataset.age=y.age; s.querySelectorAll('p').forEach(p=>{ if(p.classList.contains('choice')) return; const t=p.textContent; if(/morreu|faleceu|morte/i.test(t)) p.classList.add('luto'); else if(/nasceu|nascimento/i.test(t)) p.classList.add('nasce'); }); } });
    const n=S.scen?(S.scen.log||[]).length:S.log.length, ult=secs[secs.length-1];
    if(ult&&V3_ANT.nLog!=null&&n>V3_ANT.nLog&&!V3_REDUZ()) ult.classList.add('novo');
    if(ult&&V3_ANT.nLog===n&&V3_ANT.nLin!=null){ const ps=ult.querySelectorAll('p'); for(let i=V3_ANT.nLin;i<ps.length;i++) ps[i].classList.add('linNova'); }
@@ -174,8 +174,10 @@ V.person=(o=>p=>{ const r=o(p); try{ if(r&&r.items&&r.items[0]&&r.items[0].html&
 V.me=(o=>function(){ const r=o.apply(this,arguments); try{ const m=S.me; if(r&&r.items&&r.items[0]&&r.items[0].html) r.items[0].html=r.items[0].html.replace(/<img class="face face3"[^>]*>/,`<span class="eu3">${figuraSVG(m,{cls:'fig3 grande',lobo:v3Lobo(m)})}</span>`); }catch(e){} return r; })(V.me);
 
 // ---------- tela inicial: um elenco de corpo inteiro ----------
-startHero=function(){ const gente=[{a:3,g:'M'},{a:16,g:'F'},{a:30,g:'M'},{a:26,g:'F'},{a:44,g:'M'},{a:72,g:'F'}].map((x,i)=>({id:i*7+3,gender:x.g,age:x.a,bond:90,genes:randGenes(x.g)}));
-  return `<div class="st-hero h3"><div class="h3-cena">${cenaSVG('cidade')}</div><div class="h3-gente">${gente.map((p,i)=>`<span style="--i:${i}">${bustoSVG(p,{cls:'fig3',expr:'sorriso'})}</span>`).join('')}</div><div class="logo">New<em>Life</em></div><p class="tag">Cada vida, uma nova história.</p></div>`; };
+startHero=function(){ const gente=[{a:8,g:'F'},{a:24,g:'M'},{a:34,g:'F'},{a:17,g:'M'},{a:68,g:'F'}].map((x,i)=>({id:i*11+5,gender:x.g,age:x.a,bond:90,genes:randGenes(x.g)}));
+  const bolhas=[0,1,2,3,4,5,6,7,8].map(i=>`<i style="--i:${i}"></i>`).join('');
+  return `<div class="hero3"><div class="hero3-bolhas" aria-hidden="true">${bolhas}</div><div class="hero3-marca"><svg viewBox="0 0 100 100" aria-hidden="true">${marca3SVG()}</svg></div><div class="logo">New<em>Life</em></div><p class="tag">Cada vida, uma nova história.</p><div class="hero3-gente">${gente.map((p,i)=>`<span style="--i:${i}">${faceSVG(p,64)}</span>`).join('')}</div></div>`; };
+showStart=(o=>function(t){ const r=o.apply(this,arguments); try{ const c=document.querySelector('#stCont .home-icon'); if(c&&S&&S.me) c.innerHTML=faceSVG(S.me,46); }catch(e){} return r; })(showStart);
 
 // ---------- montagem da tela ----------
 (function(){

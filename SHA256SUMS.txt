@@ -1,0 +1,2 @@
+edd2d33ee89c0aaa5f5d82ba9e54e730d8f5fc1ae8304cb0df7a883c0c107537 *NewLife.exe
+bb765e612c6b902096ddb6a912caef19002e145fbfc6edcd32a1b3686d34871e *NewLife.apk
