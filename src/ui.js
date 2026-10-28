@@ -561,6 +561,7 @@ V.menu=()=>({title:'Menu',items:[
   {ic:'🏳️',l:'Desistir desta vida',s:'Encerra a vida atual agora',tone:'bad',on:()=>{ if(!S||!S.me.alive) return msg('Desistir','Essa vida já terminou.'); UI.close(); giveUpFlow(); }},
   {ic:'🏡',l:'Tela inicial',s:'Continuar, criar uma vida ou ver novidades',on:()=>showStart()},
   ...(godUnlocked()?[{l:'Modo Deus',s:'Editar atributos, talentos e genética',on:()=>S.me.alive?UI.push(V.god):msg('Modo Deus','Só funciona com o personagem vivo.')},
+  {l:'Criar aparência',s:'Pele, olhos, cabelo, sardas, biotipo e altura. Passa para os filhos',on:()=>pv3CriarAparencia()},
   {l:'Máquina do tempo',s:SNAPS.length?`Voltar até ${SNAPS.length} ano(s)`:'Nenhum ano salvo ainda',on:()=>UI.push(V.time)}]:[]),
   ...(S.me&&S.me.alive&&S.me.age>=18&&!S.scen&&!S.me.prison?[{ic:'🌀',l:'Modos fictícios',s:'Zumbis, ilha deserta, isekai, superpoderes, Marte',on:()=>UI.push(V.scenPick)}]:[]),
   {l:'Desafios',s:`${Object.keys(META.ch||{}).length} de ${CHALLENGES.length} concluídos`,on:()=>UI.push(V.challenges)},
