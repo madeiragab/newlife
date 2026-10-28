@@ -290,3 +290,11 @@ img.face.bustinho{border-radius:12px}
 }
 .btn:not(:disabled):active,.row:not(.dis):active,.pv3-item:active{transform:scale(.97)}
 @media (prefers-reduced-motion:reduce){.btn,.row,.tile,.pv3-item,.fam3{transition:none!important;transform:none!important}}
+/* 3.3: bichos de corpo inteiro */
+.bicho-tile{display:inline-grid;place-items:center;overflow:visible}
+.bicho-tile svg{display:block;margin:-6px -8px}
+.bicho-hero{align-items:center}
+.bicho-grande{display:block;flex:0 0 auto;border-radius:18px;background:hsl(var(--h,150) 50% 92%);padding:6px}
+.bicho-grande svg{display:block;max-width:44vw;height:auto}
+@media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .bicho-grande{background:#2A3036} }
+:root[data-theme="dark"] .bicho-grande{background:#2A3036}

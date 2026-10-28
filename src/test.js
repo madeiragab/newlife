@@ -75,6 +75,7 @@ function selfTest(){
   T('poder coerente',poderSelfTest);
   T('genética',geneticaSelfTest);
   T('sons e trilhas',sons200SelfTest);
+  T('bichos desenhados',bichosSelfTest);
   T('família coerente',familia2SelfTest);
   T('eventos cumprem o que dizem',coerenciaSelfTest);
   T('correções 2.08',ajustes208SelfTest);
