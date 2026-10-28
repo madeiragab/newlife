@@ -25,7 +25,7 @@ function carreiras3SelfTest(){ const s0=S,rf=R.f,ns=window.NO_SAVE,nn=window.NO_
     vida('prog'); m.job.perf=95; m.job.lvlYrs=2; S.pending=[]; const lv=m.job.lvl; careerYear(m.job,JOBS.find(q=>q.id==='prog')); ok(m.job.lvl===lv&&S.pending.some(e=>e.id==='car_entrevista'),'promoção não passou pela entrevista'); todas('car_entrevista',{});
     ok(/promovid/.test(carEntrevistaFim(6)),'entrevista perfeita não promoveu'); ok(m.job.lvl===lv+1,'nível não subiu');
     vida('prog'); todas('car_avaliacao',{}); m.job.esp=null; m.job.yrs=4; m.job.lvl=1;
-    vida('prog'); m.job.yrs=4; m.job.lvl=1; let viu=0; for(let i=0;i<20;i++){ S.pending=[]; m.yr={}; yearWork(); if(S.pending.some(e=>e.id==='car_espec')) viu++; if(!m.job) break; } ok(viu>0,'especialização nunca é oferecida');
+    vida('prog'); m.job.yrs=4; m.job.lvl=1; let viu=0; for(let i=0;i<20;i++){ S.pending=[]; m.yr={}; yearWork(); if(S.pending.some(e=>e.id==='car_espec')) viu++; if(!m.job){ takeJob({id:'prog',co:'Teste',size:'média',mul:1}); m.job.yrs=4; m.job.lvl=1; } } ok(viu>0,'especialização nunca é oferecida');
     info.ok=true;
   }catch(e){ erros.push('erro: '+e.message+' '+(e.stack||'').split('\n')[1]); }
   finally{ S=s0; R.f=rf; window.NO_SAVE=ns; window.NO_NEWS=nn; META=JSON.parse(meta); SNAPS=snaps; }
