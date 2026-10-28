@@ -40,6 +40,7 @@
 
 <p align="center">
   <img src="docs/img/itens.png" width="620" alt="Mais de 400 itens desenhados">
+  <img src="docs/img/armas.png" width="620" alt="80 armas desenhadas">
 </p>
 
 ---

@@ -78,6 +78,7 @@ function selfTest(){
   T('bichos desenhados',bichosSelfTest);
   T('pré-carregamento',preload4SelfTest);
   T('itens desenhados',itens4SelfTest);
+  T('armas desenhadas',armas4SelfTest);
   T('abrigo e eventos de bichos',()=>{ pets4SelfTest(); const n=Object.values(EVENTS).filter(e=>/who b_/.test(e.cond||'')).length; if(n<300) throw Error('poucos eventos de bichos: '+n); return {ok:true}; });
   T('família coerente',familia2SelfTest);
   T('eventos cumprem o que dizem',coerenciaSelfTest);
