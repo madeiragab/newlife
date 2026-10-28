@@ -304,15 +304,15 @@ const VEIC4_ORIGEM={Volkswagen:'DE',Fiat:'IT',Chevrolet:'US',Ford:'US',Renault:'
 const VEIC4_EUROPA=['DE','FR','IT','ES','PT','GB','SE'];
 // formas: comprimento, capô, para-brisa, teto, vidro traseiro, alturas (teto, cintura, bico, porta-malas, soleira), roda, portas
 const VEIC4_FORMA={
- hatch:{L:94,hood:26,ws:14,bk:8,yR:21,yB:33,yN:37,yD:30,yS:47,wr:8.2,doors:4,deck:3},
- hatchP:{L:86,hood:22,ws:13,bk:7,yR:21,yB:33,yN:37,yD:30,yS:47,wr:7.8,doors:4,deck:3},
+ hatch:{L:94,hood:26,ws:14,bk:8,yR:21,yB:33,yN:37,yD:30,yS:47,wr:8.2,doors:4,deck:3,cp:6},
+ hatchP:{L:86,hood:22,ws:13,bk:7,yR:21,yB:33,yN:37,yD:30,yS:47,wr:7.8,doors:4,deck:3,cp:5},
  sedan:{L:108,hood:29,ws:15,bk:13,yR:21,yB:33,yN:37,yD:32,yS:47,wr:8.4,doors:4,deck:19},
  sedanP:{L:102,hood:27,ws:14,bk:12,yR:21,yB:33,yN:37,yD:32,yS:47,wr:8,doors:4,deck:17},
  fast:{L:108,hood:28,ws:16,bk:22,yR:21,yB:33,yN:37,yD:33,yS:47,wr:8.4,doors:4,deck:7},
- suv:{L:104,hood:26,ws:13,bk:6,yR:16,yB:31,yN:34,yD:27,yS:44,wr:9.4,doors:4,deck:3},
- suvP:{L:96,hood:25,ws:13,bk:8,yR:18,yB:32,yN:35,yD:29,yS:45,wr:8.8,doors:4,deck:3},
- evsuv:{L:100,hood:25,ws:15,bk:20,yR:18,yB:32,yN:36,yD:31,yS:45,wr:9,doors:4,deck:4},
- box:{L:92,hood:22,ws:7,bk:1,yR:15,yB:30,yN:31,yD:17,yS:43,wr:9.8,doors:4,deck:1},
+ suv:{L:104,hood:26,ws:13,bk:6,yR:16,yB:31,yN:34,yD:27,yS:44,wr:9.4,doors:4,deck:3,cp:4},
+ suvP:{L:96,hood:25,ws:13,bk:8,yR:18,yB:32,yN:35,yD:29,yS:45,wr:8.8,doors:4,deck:3,cp:5},
+ evsuv:{L:100,hood:25,ws:15,bk:20,yR:18,yB:32,yN:36,yD:31,yS:45,wr:9,doors:4,deck:4,cp:4},
+ box:{L:92,hood:22,ws:7,bk:1,yR:15,yB:30,yN:31,yD:17,yS:43,wr:9.8,doors:4,deck:1,cp:2},
  pick:{L:116,hood:30,ws:12,bk:2,yR:17,yB:31,yN:33,yD:31,yS:44,wr:9.6,doors:4,bed:1,deck:36},
  pickP:{L:104,hood:26,ws:13,bk:3,yR:20,yB:33,yN:36,yD:33,yS:47,wr:8.4,doors:2,bed:1,deck:32},
  van:{L:110,hood:12,ws:10,bk:1,yR:10,yB:27,yN:30,yD:12,yS:45,wr:8.6,doors:2,van:1,deck:1},
@@ -324,7 +324,7 @@ const VEIC4_FORMA={
  ev:{L:106,hood:24,ws:21,bk:22,yR:21,yB:34,yN:39,yD:33,yS:47,wr:8.6,doors:4,deck:10},
  limo:{L:118,hood:32,ws:15,bk:14,yR:20,yB:33,yN:36,yD:32,yS:47,wr:8.8,doors:4,deck:21},
  antigo:{L:110,hood:36,ws:10,bk:10,yR:21,yB:34,yN:35,yD:33,yS:46,wr:8,doors:4,chrome:1,deck:22},
- mini:{L:80,hood:16,ws:12,bk:4,yR:20,yB:33,yN:36,yD:29,yS:46,wr:7.6,doors:2,deck:2},
+ mini:{L:80,hood:16,ws:12,bk:4,yR:20,yB:33,yN:36,yD:29,yS:46,wr:7.6,doors:2,deck:2,cp:3},
  fusca:{L:90,yR:17,yS:46,wr:8,doors:2,round:1},
  kombi:{L:96,yR:11,yS:45,wr:8.2,doors:2},
  cyber:{L:118,yR:15,yS:43,wr:9.8,doors:4}
@@ -348,25 +348,71 @@ const VEICULOS4=[], VEIC4={};
 const v4Nome=r=>`${r.marca} ${r.modelo} ${r.versao===r.modelo?'':r.versao+' '}${r.ano}`.replace(/\s+/g,' ').trim();
 
 // ---------- desenho: perfil com degradê na lataria, vidros com reflexo, rodas com aro e sombra ----------
+// 40 mais vendidos com as medidas reais (1 m = 23,3 unidades): comprimento, altura, entre-eixos, balanço e rodas,
+// e os traços de cada um: faróis, lanternas, subida da janela, coluna escura, frisos e calotas
+const V4_MOD={
+'Volkswagen Gol':{L:91,yR:21,yB:33,yN:36.5,yD:30,yS:47.5,hood:22,ws:15,bk:11.0,deck:2,wb:.635,of:.18,wr:7.4,head:'big',tail:'vert',rim:'calota',lin:[3,2]},
+'Chevrolet Onix':{L:97,yR:21,yB:32.5,yN:37,yD:30.5,yS:47.5,hood:24,ws:17,bk:14.0,deck:2,wb:.61,of:.19,wr:7.6,head:'slim',tail:'wrap',kick:3,q3:4,lin:[4,1.5],rsp:1},
+'Hyundai HB20':{L:92,yR:21,yB:32.5,yN:37,yD:30,yS:47.5,hood:23,ws:17,bk:13.0,deck:2,wb:.64,of:.17,wr:7.5,head:'swept',tail:'wrap',kick:2.5,lin:[4.5,1],lin2:1,rsp:1},
+'Volkswagen Polo':{L:95,yR:21,yB:33,yN:36.5,yD:30,yS:47.5,hood:23,ws:16,bk:12.0,deck:2,wb:.63,of:.18,wr:7.6,head:'slim',tail:'wrap',lin:[3,3],rsp:1},
+'Fiat Mobi':{L:83,yR:20.3,yB:33,yN:36,yD:29,yS:47,hood:19,ws:13,bk:10.0,deck:1.5,wb:.645,of:.17,wr:7.2,head:'big',tail:'vert',rim:'calota',rsp:1},
+'Fiat Argo':{L:93,yR:20.5,yB:32.5,yN:36.5,yD:30,yS:47,hood:23,ws:16,bk:13.0,deck:2,wb:.63,of:.18,wr:7.6,head:'swept',tail:'wrap',kick:2,rsp:1,lin2:1},
+'Renault Kwid':{L:86,yR:20.5,yB:32,yN:35.5,yD:29.5,yS:45.5,hood:20,ws:14,bk:11.0,deck:2,wb:.66,of:.16,wr:7.4,head:'split',tail:'vert',rim:'calota',rack:1,plast:1},
+'Fiat Uno':{L:88,yR:19.5,yB:33,yN:35.5,yD:22,yS:47,hood:19,ws:11,bk:2,deck:1,wb:.635,of:.17,wr:7.2,head:'big',tail:'vert',rim:'calota'},
+'Fiat Palio':{L:89,yR:21.5,yB:33.5,yN:37,yD:30,yS:47.5,hood:22,ws:14,bk:12.0,deck:2,wb:.62,of:.18,wr:7.2,tail:'vert',rim:'calota'},
+'Chevrolet Celta':{L:87,yR:22,yB:33.5,yN:37,yD:30,yS:47.5,hood:21,ws:14,bk:12.0,deck:2,wb:.65,of:.16,wr:7,head:'big',tail:'vert',rim:'calota'},
+'Ford Ka':{L:91,yR:19.5,yB:33,yN:36.5,yD:30,yS:47,hood:22,ws:16,bk:12.0,deck:2,wb:.64,of:.17,wr:7.4,head:'swept',tail:'vert'},
+'Ford Fiesta':{L:93,yR:20.5,yB:32,yN:37,yD:30,yS:47.5,hood:23,ws:17,bk:13.0,deck:2,wb:.63,of:.18,wr:7.6,head:'swept',tail:'vert',kick:3,lin:[5,.5]},
+'Renault Sandero':{L:95,yR:19.5,yB:32.5,yN:36,yD:29.5,yS:47,hood:23,ws:15,bk:11.0,deck:2,wb:.64,of:.17,wr:7.6,head:'big',tail:'vert',kick:1.5},
+'Peugeot 208':{L:95,yR:21.2,yB:32.5,yN:37,yD:30.5,yS:47.5,hood:25,ws:17,bk:14.0,deck:2,wb:.625,of:.18,wr:7.8,head:'split',tail:'bar',lin2:1},
+'Volkswagen Golf':{L:99,yR:21,yB:33,yN:36.5,yD:30,yS:47.5,hood:25,ws:16,bk:10.0,deck:2,wb:.62,of:.19,wr:7.8,head:'slim',tail:'wrap',lin:[3,3]},
+'Toyota Corolla':{L:108,yR:21,yB:32.5,yN:37,yD:31.5,yS:47.5,hood:28,ws:19,bk:15,deck:10,wb:.585,of:.2,wr:8,head:'slim',tail:'wrap',cj:1,lin:[4,2],q3:5},
+'Honda Civic':{L:108,yR:21.6,yB:33,yN:38,yD:32.5,yS:47.5,hood:29,ws:20,bk:22,deck:5,wb:.58,of:.2,wr:8,head:'slim',tail:'bar',lin:[5,1],q3:6,cj:1},
+'Chevrolet Onix Plus':{L:104,yR:21,yB:32.5,yN:37,yD:31.5,yS:47.5,hood:24,ws:17,bk:15,deck:9,wb:.58,of:.18,wr:7.6,head:'slim',tail:'wrap',kick:2,q3:5,lin:[4,1.5]},
+'Volkswagen Virtus':{L:104,yR:21,yB:33,yN:36.5,yD:31.5,yS:47.5,hood:24,ws:17,bk:15,deck:10,wb:.59,of:.18,wr:7.6,head:'slim',tail:'wrap',lin:[3,3],q3:5,cj:1},
+'Hyundai HB20S':{L:101,yR:21,yB:32.5,yN:37,yD:31.5,yS:47.5,hood:23,ws:17,bk:15,deck:9,wb:.585,of:.17,wr:7.5,head:'swept',tail:'bar',kick:2.5,lin:[4.5,1]},
+'Fiat Cronos':{L:101,yR:20,yB:32.5,yN:36.5,yD:31,yS:47,hood:23,ws:16,bk:13,deck:11,wb:.575,of:.18,wr:7.6,head:'swept',tail:'wrap',kick:2,q3:4},
+'Nissan Versa':{L:105,yR:21,yB:32.5,yN:37,yD:31.5,yS:47.5,hood:25,ws:18,bk:15,deck:10,wb:.58,of:.19,wr:7.6,head:'swept',tail:'wrap',blk:1,kick:2,lin:[4,2]},
+'Volkswagen Jetta':{L:110,yR:21,yB:32.5,yN:37,yD:31.5,yS:47.5,hood:29,ws:19,bk:16,deck:11,wb:.575,of:.2,wr:8,head:'slim',tail:'wrap',cj:1,q3:5,lin:[3,3]},
+'Volkswagen T-Cross':{L:98,yR:18.5,yB:31.5,yN:35,yD:28,yS:45.5,hood:23,ws:15,bk:5,deck:2,wb:.63,of:.18,wr:8,head:'slim',tail:'bar',plast:1,q3:5,lin:[3,3]},
+'Volkswagen Nivus':{L:100,yR:20.3,yB:32,yN:35.5,yD:30.5,yS:45.5,hood:24,ws:17,bk:18,deck:3,wb:.6,of:.18,wr:8,head:'slim',tail:'bar',plast:1,blk:1},
+'Chevrolet Tracker':{L:100,yR:17.5,yB:31.5,yN:35,yD:28.5,yS:45,hood:24,ws:16,bk:7,deck:2,wb:.6,of:.19,wr:8,head:'split',tail:'wrap',plast:1,blk:1,kick:2},
+'Hyundai Creta':{L:101,yR:17.5,yB:31,yN:35,yD:28.5,yS:45,hood:24,ws:15,bk:7,deck:2,wb:.6,of:.19,wr:8.2,head:'split',tail:'wrap',plast:1,blk:1,kick:2.5,rack:1},
+'Jeep Renegade':{L:99,yR:15.6,yB:31,yN:33.5,yD:17,yS:45,hood:22,ws:10,bk:2,deck:1,wb:.605,of:.18,wr:8.2,round:1,tail:'x',plast:1,doors:4,spare:0},
+'Jeep Compass':{L:102,yR:17,yB:31,yN:35,yD:28,yS:45,hood:25,ws:16,bk:7,deck:2,wb:.6,of:.19,wr:8.4,head:'slim',tail:'wrap',plast:1,blk:1,kick:2,cj:1},
+'Nissan Kicks':{L:100,yR:18,yB:31.5,yN:35.5,yD:29,yS:45.5,hood:24,ws:16,bk:7,deck:2,wb:.61,of:.18,wr:8,head:'swept',tail:'wrap',plast:1,blk:1,kick:3},
+'Honda HR-V':{L:100,yR:17.8,yB:31,yN:35.5,yD:29.5,yS:45.5,hood:24,ws:17,bk:12,deck:2,wb:.61,of:.18,wr:8,head:'slim',tail:'wrap',plast:1,kick:3.5,lin:[5,0]},
+'Toyota Corolla Cross':{L:104,yR:17.3,yB:31,yN:35,yD:28.5,yS:45,hood:25,ws:17,bk:9,deck:2,wb:.59,of:.19,wr:8.4,head:'slim',tail:'wrap',plast:1,cj:1,kick:2,rack:1},
+'Renault Duster':{L:102,yR:16.2,yB:30.5,yN:34,yD:27.5,yS:44.5,hood:24,ws:14,bk:6,deck:2,wb:.61,of:.18,wr:8.3,head:'big',tail:'vert',plast:1,rack:1},
+'Ford EcoSport':{L:99,yR:16,yB:31,yN:34.5,yD:27,yS:44.5,hood:22,ws:14,bk:3,deck:1,wb:.595,of:.18,wr:8,head:'swept',tail:'vert',plast:1,spare:1,rack:1,kick:2},
+'Fiat Strada':{L:104,yR:17.8,yB:31.5,yN:34.5,yD:31.5,yS:45,hood:25,ws:15,bk:2,deck:32,wb:.61,of:.17,wr:8,head:'split',tail:'vert',plast:1,santo:1,doors:4},
+'Fiat Toro':{L:115,yR:14.5,yB:30.5,yN:32.5,yD:30.5,yS:44,hood:29,ws:15,bk:2,deck:34,wb:.61,of:.19,wr:8.6,head:'split',tail:'vert',plast:1,doors:4},
+'Toyota Hilux':{L:122,yR:13,yB:29.5,yN:31.5,yD:29.5,yS:43,hood:30,ws:13,bk:2,deck:40,wb:.58,of:.17,wr:9,head:'slim',tail:'vert',plast:1,flare:1,doors:4},
+'Chevrolet S10':{L:122,yR:13.3,yB:29.5,yN:31.5,yD:29.5,yS:43.5,hood:31,ws:13,bk:2,deck:40,wb:.58,of:.17,wr:9,head:'slim',tail:'vert',santo:1,doors:4},
+'Ford Ranger':{L:122,yR:12.5,yB:29,yN:31,yD:29,yS:43,hood:32,ws:12,bk:2,deck:40,wb:.61,of:.16,wr:9.2,head:'big',tail:'vert',plast:1,flare:1,doors:4},
+'Volkswagen Saveiro':{L:104,yR:20,yB:32.5,yN:36,yD:32.5,yS:46.5,hood:23,ws:15,bk:2,roof:14,deck:50,wb:.61,of:.17,wr:7.6,head:'slim',tail:'vert',doors:2,santo:1}
+};
 let V4_UID=0;
 function v4Perfil(P){ const f=P.xF, t=P.xT, ws0=f-P.hood, ws1=ws0-P.ws, re=ws1-P.roof, bk1=re-P.bk;
   const ar=P.wr+1.6, wf=P.wfX, wb=P.wbX;
   return `M${f-3} ${P.yS}Q${f+1} ${P.yS} ${f+1} ${P.yS-4}L${f+1} ${P.yN+3}Q${f+1} ${P.yN} ${f-3} ${P.yN-.6}`+
     `Q${(f+ws0)/2} ${P.yB-1.8} ${ws0} ${P.yB-.6}L${ws1+2.4} ${P.yR+1}Q${ws1} ${P.yR} ${ws1-3} ${P.yR}`+
-    `Q${(ws1+re)/2} ${P.yR-.8} ${re+2} ${P.yR}Q${re} ${P.yR+.3} ${re-.6} ${P.yR+1.6}L${bk1+.6} ${P.yD-.8}Q${bk1} ${P.yD} ${bk1-1.4} ${P.yD}`+
+    `Q${(ws1+re)/2} ${P.yR-1.6} ${re+2} ${P.yR}Q${re} ${P.yR+.3} ${re-.6} ${P.yR+1.6}L${bk1+.6} ${P.yD-.8}Q${bk1} ${P.yD} ${bk1-1.4} ${P.yD}`+
     `L${t+2.4} ${P.yD+.4}Q${t} ${P.yD+.8} ${t} ${P.yD+3.4}L${t} ${P.yS-3}Q${t} ${P.yS} ${t+3} ${P.yS}`+
     `L${wb-ar} ${P.yS}A${ar} ${ar} 0 0 1 ${wb+ar} ${P.yS}L${wf-ar} ${P.yS}A${ar} ${ar} 0 0 1 ${wf+ar} ${P.yS}Z`; }
 function v4Vidro(P){ const ws0=P.xF-P.hood, ws1=ws0-P.ws, re=ws1-P.roof, bk1=re-P.bk, yb=P.yB-1.2, yt=P.yR+1.9;
   const xa=ws0-1.6-(P.ws)*(1-(yb-P.yR)/(P.yB-P.yR)), xA=ws0-2.2;
-  const yq=Math.min(yb,P.yD-1), xd=re-.8-(P.bk)*Math.min(1,(yq-P.yR)/Math.max(1,P.yD-P.yR));
-  return {d:`M${xA} ${yb}L${ws1+1.2} ${yt}H${re+.6}L${xd} ${yq}${yq<yb?`V${yb}`:''}Z`,xA,x1:ws1+1.2,x2:re+.6,xd,yb,yt}; }
+  const yq=Math.min(yb,P.yD-1); let xd=re-.8-(P.bk)*Math.min(1,(yq-P.yR)/Math.max(1,P.yD-P.yR));
+  const cp=P.cp||0, x2=re+.6+cp; xd+=cp*1.3; const xk=xd+(xA-xd)*.28;
+  return {d:P.kick?`M${xA} ${yb}L${ws1+1.2} ${yt}H${x2}L${xd} ${Math.min(yq,yb)-P.kick}L${xk} ${yb}Z`:`M${xA} ${yb}L${ws1+1.2} ${yt}H${x2}L${xd} ${yq}${yq<yb?`V${yb}`:''}Z`,xA,x1:ws1+1.2,x2,xd,yb,yt}; }
 function car4SVG(r,cor,w=56){ r=typeof r==='string'?VEIC4[r]:r; if(!r) return '';
-  const F=VEIC4_FORMA[r.forma]||VEIC4_FORMA.hatch, P=Object.assign({},F,r.o||{}), uid='v4'+(++V4_UID);
+  const F=VEIC4_FORMA[r.forma]||VEIC4_FORMA.hatch, P=Object.assign({},F,r.o||{},(!r.classico&&V4_MOD[r.marca+' '+r.modelo])||{}), uid='v4'+(++V4_UID);
   const c=VEIC4_COR[cor]||(/^#/.test(cor||'')?cor:VEIC4_COR[Object.keys(VEIC4_COR)[hashS(r.id)%8]]);
   if(P.box&&r.forma!=='box'){ P.ws=Math.min(P.ws,10); if(/hatch/.test(r.forma)){ P.bk=2; P.yD=P.yR+7; P.deck=1; } }
   if(P.roof==null) P.roof=Math.max(8,P.L-P.hood-P.ws-P.bk-P.deck); P.xF=64+P.L/2; P.xT=64-P.L/2; const yG=55, wc=yG-P.wr;
   P.wfX=P.xF-Math.max(P.wr+5,P.L*.17); P.wbX=P.xT+Math.max(P.wr+5,P.L*(P.bed||P.van?.2:.18));
   if(r.forma==='super'||r.forma==='p911'){ P.wfX=P.xF-P.L*.16; P.wbX=P.xT+P.L*.19; }
+  if(P.wb){ P.wfX=P.xF-P.L*P.of; P.wbX=P.wfX-P.L*P.wb; } if(P.blk&&!P.top) P.top='#1F2329';
   const esc=bxD(c,.45), cl=bxL(c,.35), vid='#26323F', cromo=P.chrome||r.classico;
   let corpo='', det='';
   if(r.forma==='fusca'){ const f=P.xF,t=P.xT; corpo=`M${f-2} ${P.yS}Q${f+2} ${P.yS} ${f+1} ${P.yS-6}Q${f} ${P.yS-14} ${f-14} ${P.yS-17}Q${f-24} ${P.yR-1} ${64} ${P.yR}Q${t+18} ${P.yR} ${t+6} ${P.yS-16}Q${t-1} ${P.yS-8} ${t+1} ${P.yS}`+
@@ -387,7 +433,10 @@ function car4SVG(r,cor,w=56){ r=typeof r==='string'?VEIC4[r]:r; if(!r) return ''
     if(P.open){ det+=`<path d="M${g.xA} ${g.yb}L${g.x1+1} ${P.yR+1}" stroke="#2A2F36" stroke-width="1.4"/><path d="M${g.x1-1} ${P.yB-.8}Q${(g.x1+re)/2} ${P.yB-4.5} ${re-2} ${P.yB-.8}" fill="#2A2F36"/>`; }
     else { det+=`<path d="${g.d}" fill="url(#${uid}_v)" stroke="#1A2129" stroke-width=".7" stroke-linejoin="round"/>`;
       const bx=P.doors===4?(g.x1+g.x2)/2+2:g.x2+((g.xd-g.x2)>6?6:2);
-      if(P.doors>=2&&!P.van){ det+=`<path d="M${bx} ${g.yt}V${g.yb}" stroke="${c}" stroke-width="${P.doors===4?2:1.6}"/>`; if(P.doors===2&&g.xd<g.x2-8) det+=`<path d="M${g.x2-6} ${g.yt}L${g.x2-8} ${g.yb}" stroke="${c}" stroke-width="1.6"/>`; }
+      const pc=P.blk?'#1F2329':c; if(P.blk) det+=`<path d="M${g.x2+.4} ${g.yt-.4}L${g.xd+.2} ${g.yb-(P.kick||0)}L${g.xd-4} ${g.yb}L${g.x2-3.5} ${g.yt-.4}Z" fill="#1F2329"/>`;
+      if(P.q3) det+=`<path d="M${g.x2+P.q3} ${g.yt}L${g.x2+P.q3+1.2} ${g.yb}" stroke="${pc}" stroke-width="1.8"/>`;
+      if(P.cj) det+=`<path d="M${g.xA} ${g.yb+.7}L${g.xd+2} ${g.yb+.7}" stroke="#E3E7EC" stroke-width=".8"/>`;
+      if(P.doors>=2&&!P.van){ det+=`<path d="M${bx} ${g.yt}V${g.yb}" stroke="${pc}" stroke-width="${P.doors===4?2:1.6}"/>`; if(P.doors===2&&g.xd<g.x2-8) det+=`<path d="M${g.x2-6} ${g.yt}L${g.x2-8} ${g.yb}" stroke="${c}" stroke-width="1.6"/>`; }
       if(P.van) det+=`<path d="M${g.x1-12} ${g.yt}V${g.yb}M${g.x1-36} ${g.yt}V${g.yb}" stroke="${c}" stroke-width="2"/>`;
       det+=`<path d="M${g.x1+3} ${g.yt+1}L${g.x1+7} ${g.yt+1}L${g.xA-6} ${g.yb-1}H${g.xA-9}Z" fill="#fff" opacity=".18" stroke="none"/>`; }
     if(P.top&&!P.open) det+=`<path d="M${ws0-P.ws-2} ${P.yR+.2}Q${(ws0-P.ws+re)/2} ${P.yR-1} ${re+1.4} ${P.yR+.2}L${re+1} ${P.yR+1.5}H${ws0-P.ws-1}Z" fill="${P.top}" stroke="none"/>`;
@@ -395,11 +444,20 @@ function car4SVG(r,cor,w=56){ r=typeof r==='string'?VEIC4[r]:r; if(!r) return ''
     const d0=ws0-1, dm=P.doors===4?(g.x1+g.x2)/2+2:null, d2=P.bed?re-P.bk-1:Math.max(P.wbX+P.wr+3,(P.doors===4?dm-(d0-dm)*.95:d0-P.ws-P.roof*.75));
     if(!P.van&&P.doors){ det+=`<path d="M${d0} ${P.yB-.4}V${P.yS-1.4}${dm?`M${dm} ${P.yB}V${P.yS-1}`:''}M${d2} ${P.yB}Q${d2+1} ${(P.yB+P.yS)/2} ${d2} ${P.yS-1}" stroke="${esc}" stroke-width=".7" fill="none" opacity=".75"/>`;
       det+=`<rect x="${(dm||d2)+2}" y="${P.yB+2.2}" width="4" height="1.3" rx=".6" fill="${cl}" stroke="${esc}" stroke-width=".4"/>`; if(dm) det+=`<rect x="${d2+2}" y="${P.yB+2.2}" width="4" height="1.3" rx=".6" fill="${cl}" stroke="${esc}" stroke-width=".4"/>`; }
-    det+=`<path d="M${P.xT+3} ${P.yB+4}Q64 ${P.yB+2.6} ${P.xF-4} ${P.yB+3.6}" stroke="${cl}" stroke-width=".8" fill="none" opacity=".8"/>`;
+    det+=(P.lin?`<path d="M${P.xT+3} ${P.yB+P.lin[1]}L${P.xF-5} ${P.yB+P.lin[0]}"`:`<path d="M${P.xT+3} ${P.yB+4}Q64 ${P.yB+2.6} ${P.xF-4} ${P.yB+3.6}"`)+` stroke="${cl}" stroke-width=".8" fill="none" opacity=".8"/>`;
     det+=`<path d="M${d0-1.4} ${P.yB-1.2}l3 -2.6h2.2v2.6z" fill="${c}" stroke="${esc}" stroke-width=".5"/>`;
     // faróis e lanternas
-    det+=P.round?`<circle cx="${P.xF-3}" cy="${P.yN+1.6}" r="2" fill="#FFF4C8" stroke="${esc}" stroke-width=".6"/>`:`<path d="M${P.xF+.6} ${P.yN+.6}L${P.xF-7} ${P.yN-.1}Q${P.xF-6} ${P.yN+2} ${P.xF-1} ${P.yN+2.4}Z" fill="#FFF4C8" stroke="${esc}" stroke-width=".5"/>`;
-    det+=`<path d="M${P.xT-.3} ${P.yD+2}h3.2v${P.bed||P.forma==='box'?5:2.6}h-3.2z" fill="#D33A2C" stroke="#7A1C16" stroke-width=".4"/>`;
+    if(P.lin2) det+=`<path d="M${P.wbX+P.wr+3} ${P.yS-4.6}Q64 ${P.yS-6.4} ${P.wfX-P.wr-3} ${P.yS-5.6}" stroke="${esc}" stroke-width=".6" fill="none" opacity=".55"/>`;
+    const fx=P.xF, fy=P.yN, hs='fill="#FFF4C8" stroke="'+esc+'" stroke-width=".5"';
+    det+=P.round?`<circle cx="${fx-3}" cy="${fy+1.6}" r="2" ${hs}/>`:P.head==='slim'?`<path d="M${fx+.6} ${fy+.3}L${fx-11} ${fy-.9}Q${fx-10} ${fy+.9} ${fx-1} ${fy+1.5}Z" ${hs}/>`:
+      P.head==='big'?`<path d="M${fx+.8} ${fy-.3}L${fx-6.5} ${fy-.9}L${fx-6} ${fy+3}L${fx+.8} ${fy+3.2}Z" ${hs}/>`:P.head==='swept'?`<path d="M${fx+.6} ${fy+1}L${fx-13} ${fy-1.7}Q${fx-10} ${fy+1} ${fx-2} ${fy+2.8}Z" ${hs}/>`:
+      P.head==='split'?`<path d="M${fx+.6} ${fy-.2}L${fx-10} ${fy-1.2}L${fx-9.6} ${fy-.3}L${fx} ${fy+.6}Z" fill="#F4FBFF" stroke="${esc}" stroke-width=".4"/><path d="M${fx+1} ${fy+3.2}h-5v2.4h5z" ${hs}/>`:`<path d="M${fx+.6} ${fy+.6}L${fx-7} ${fy-.1}Q${fx-6} ${fy+2} ${fx-1} ${fy+2.4}Z" ${hs}/>`;
+    const tx=P.xT, ty=P.yD, ts='fill="#D33A2C" stroke="#7A1C16" stroke-width=".4"';
+    det+=P.tail==='vert'?`<path d="M${tx-.3} ${ty+.8}h3.4l-.4 ${P.bed?8:7}h-3z" ${ts}/>`:P.tail==='wrap'?`<path d="M${tx-.3} ${ty+1.4}h8.5l-1.4 2.6h-7.1z" ${ts}/>`:
+      P.tail==='bar'?`<path d="M${tx-.3} ${ty+1.6}h6.5v1.4h-6.5z" ${ts}/><path d="M${tx-.3} ${ty+1.6}v4h2.2v-4" ${ts}/>`:P.tail==='x'?`<rect x="${tx-.3}" y="${ty+1.5}" width="4" height="6" rx=".6" ${ts}/><path d="M${tx+.2} ${ty+2}l3 5M${tx+3.2} ${ty+2}l-3 5" stroke="#3A0F0B" stroke-width=".6"/>`:
+      `<path d="M${tx-.3} ${ty+2}h3.2v${P.bed||P.forma==='box'?5:2.6}h-3.2z" ${ts}/>`;
+    if(P.rsp) det+=`<path d="M${re+1.6} ${P.yR-.2}L${re-5} ${P.yR+1.6}L${re-4.6} ${P.yR+2.6}L${re+1} ${P.yR+1.4}Z" fill="${c}" stroke="${esc}" stroke-width=".5"/>`;
+    if(P.santo) det+=`<path d="M${bk1-2} ${P.yD}V${P.yR+5.5}Q${bk1-2} ${P.yR+4} ${bk1-4} ${P.yR+4}H${bk1-12}" stroke="#2A2D33" stroke-width="1.4" fill="none"/>`;
     if(P.bed) det+=`<path d="M${bk1-.6} ${P.yD+.4}V${P.yS-2}M${bk1-1} ${P.yD+1.6}H${P.xT+1.5}" stroke="${esc}" stroke-width=".8" fill="none"/>`;
     if(P.spoiler) det+=`<path d="M${P.xT+1} ${P.yD-.4}l-1 -3.4h11l1 3.4" fill="#1F2329" stroke="#111" stroke-width=".5"/>`;
     if(P.scoop) det+=`<path d="M${ws0+6} ${P.yB-1.4}h7l1.6 -1.6h-6z" fill="#1F2329"/>`;
@@ -407,8 +465,8 @@ function car4SVG(r,cor,w=56){ r=typeof r==='string'?VEIC4[r]:r; if(!r) return ''
     if(P.stripe) det+=`<path d="M${P.xT+2} ${P.yB+5.6}H${P.xF-3}" stroke="#F2F3F5" stroke-width="1.6" opacity=".9"/>`;
     if(P.intake) det+=`<path d="M${P.wbX+P.wr+3} ${P.yB+2}q6 1 9 7h-8z" fill="#1F2329" opacity=".85"/>`;
   }
-  const plast=!r.classico&&r.cat!=='Luxo e executivos'&&['suv','suvP','box','pick','evsuv'].includes(r.forma)||/Outsider|Trekking|Stepway|Way|Cross|Track|Storm|Freestyle/.test(r.versao);
-  if(plast){ for(const x of [P.wbX,P.wfX]) det+=`<path d="M${x-P.wr-3} ${P.yS+.4}A${P.wr+3} ${P.wr+3.2} 0 0 1 ${x+P.wr+3} ${P.yS+.4}" fill="none" stroke="#2A2D33" stroke-width="${r.forma==='box'?3.2:2.4}"/>`; det+=`<path d="M${P.wbX+P.wr+3} ${P.yS-1.2}H${P.wfX-P.wr-3}" stroke="#2A2D33" stroke-width="2.6"/>`; }
+  const plast=P.plast||!r.classico&&r.cat!=='Luxo e executivos'&&['suv','suvP','box','pick','evsuv'].includes(r.forma)||/Outsider|Trekking|Stepway|Way|Cross|Track|Storm|Freestyle/.test(r.versao);
+  if(plast){ for(const x of [P.wbX,P.wfX]) det+=`<path d="M${x-P.wr-3} ${P.yS+.4}A${P.wr+3} ${P.wr+3.2} 0 0 1 ${x+P.wr+3} ${P.yS+.4}" fill="none" stroke="#2A2D33" stroke-width="${r.forma==='box'||P.flare?3.2:2.4}"/>`; det+=`<path d="M${P.wbX+P.wr+3} ${P.yS-1.2}H${P.wfX-P.wr-3}" stroke="#2A2D33" stroke-width="2.6"/>`; }
   if(r.forma==='fusca'){ for(const x of [P.wbX,P.wfX]) det+=`<path d="M${x-P.wr-4} ${P.yS}Q${x-P.wr-3} ${P.yS-P.wr*1.9} ${x} ${P.yS-P.wr*2}Q${x+P.wr+3} ${P.yS-P.wr*1.9} ${x+P.wr+4} ${P.yS}Z" fill="url(#${uid}_c)" stroke="${esc}" stroke-width=".8"/>`; det+=`<path d="M${P.wbX+P.wr+4} ${P.yS-1}H${P.wfX-P.wr-4}" stroke="#2A2D33" stroke-width="2"/>`; }
   if(r.modelo==='Defender') det+=`<path d="M${P.xF-P.hood-P.ws-6} ${P.yR+.6}h4M${P.xF-P.hood-P.ws-14} ${P.yR+.6}h4" stroke="#5E7389" stroke-width="1.2"/>`;
   if(/^(Tesla|Lucid|Porsche|Kia|Hyundai)$/.test(r.marca)&&r.cat==='Elétricos') det+=`<path d="M${P.xT} ${P.yD+2.2}h5" stroke="#D33A2C" stroke-width="1.2"/>`;
@@ -416,12 +474,14 @@ function car4SVG(r,cor,w=56){ r=typeof r==='string'?VEIC4[r]:r; if(!r) return ''
   const aro=r.cat==='Esportivos'||r.cat==='Luxo e executivos'||r.cat==='Elétricos'?5:cromo?0:(P.bed||r.forma==='box'?6:5);
   const caixa=x=>`<path d="M${x-P.wr-1.6} ${P.yS}A${P.wr+1.6} ${P.wr+1.6} 0 0 1 ${x+P.wr+1.6} ${P.yS}Z" fill="#121417"/>`;
   const roda=x=>{ let s=`<circle cx="${x}" cy="${wc}" r="${P.wr}" fill="#1B1E23"/><circle cx="${x}" cy="${wc}" r="${P.wr*.66}" fill="url(#${uid}_a)" stroke="#5B616A" stroke-width=".5"/>`;
-    if(cromo) s+=`<circle cx="${x}" cy="${wc}" r="${P.wr*.8}" fill="none" stroke="#EDEFF2" stroke-width="1.1"/><circle cx="${x}" cy="${wc}" r="${P.wr*.34}" fill="#EDEFF2" stroke="#9AA1AB" stroke-width=".5"/>`;
+    if(P.rim==='calota'&&!cromo){ s+=`<circle cx="${x}" cy="${wc}" r="${P.wr*.7}" fill="#C9CED5" stroke="#8A919B" stroke-width=".5"/><circle cx="${x}" cy="${wc}" r="${P.wr*.5}" fill="none" stroke="#9AA1AB" stroke-width=".5"/>`;
+      for(let i=0;i<8;i++){ const a=i/8*Math.PI*2; s+=`<circle cx="${x+Math.cos(a)*P.wr*.6}" cy="${wc+Math.sin(a)*P.wr*.6}" r="${P.wr*.07}" fill="#4A4F57"/>`; } s+=`<circle cx="${x}" cy="${wc}" r="${P.wr*.16}" fill="#E8EBEF" stroke="#8A919B" stroke-width=".4"/>`; }
+    else if(cromo) s+=`<circle cx="${x}" cy="${wc}" r="${P.wr*.8}" fill="none" stroke="#EDEFF2" stroke-width="1.1"/><circle cx="${x}" cy="${wc}" r="${P.wr*.34}" fill="#EDEFF2" stroke="#9AA1AB" stroke-width=".5"/>`;
     else { for(let i=0;i<aro;i++){ const a=i/aro*Math.PI*2+.3; s+=`<path d="M${x+Math.cos(a)*P.wr*.18} ${wc+Math.sin(a)*P.wr*.18}L${x+Math.cos(a)*P.wr*.62} ${wc+Math.sin(a)*P.wr*.62}" stroke="#7E858F" stroke-width="${P.wr*.17}" stroke-linecap="round"/>`; }
       if(r.cat==='Esportivos') s+=`<path d="M${x-P.wr*.5} ${wc-P.wr*.3}a${P.wr*.58} ${P.wr*.58} 0 0 1 ${P.wr*.4} -${P.wr*.28}" stroke="#D33A2C" stroke-width="1.6" fill="none"/>`;
       s+=`<circle cx="${x}" cy="${wc}" r="${P.wr*.17}" fill="#C9CED5" stroke="#6B717B" stroke-width=".4"/>`; }
     return s+`<path d="M${x-P.wr*.7} ${wc-P.wr*.55}a${P.wr*.9} ${P.wr*.9} 0 0 1 ${P.wr*.9} -${P.wr*.35}" stroke="#fff" stroke-width=".7" opacity=".22" fill="none"/>`; };
-  const pneuStep=r.forma==='box'&&P.spare?`<circle cx="${P.xT-2.6}" cy="${(P.yR+P.yS)/2+2}" r="${P.wr*.72}" fill="#1B1E23"/><circle cx="${P.xT-2.6}" cy="${(P.yR+P.yS)/2+2}" r="${P.wr*.38}" fill="${c}"/>`:'';
+  const pneuStep=P.spare?`<circle cx="${P.xT-2.6}" cy="${(P.yR+P.yS)/2+2}" r="${P.wr*.72}" fill="#1B1E23"/><circle cx="${P.xT-2.6}" cy="${(P.yR+P.yS)/2+2}" r="${P.wr*.38}" fill="${c}"/>`:'';
   const defs=`<defs><linearGradient id="${uid}_c" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${bxL(c,.38)}"/><stop offset=".42" stop-color="${c}"/><stop offset=".7" stop-color="${bxD(c,.12)}"/><stop offset="1" stop-color="${bxD(c,.38)}"/></linearGradient>`+
     `<linearGradient id="${uid}_v" x1="0" y1="0" x2=".4" y2="1"><stop offset="0" stop-color="#5E7389"/><stop offset=".5" stop-color="${vid}"/><stop offset="1" stop-color="#151C24"/></linearGradient>`+
     `<radialGradient id="${uid}_a" cx=".38" cy=".35" r=".7"><stop offset="0" stop-color="#F1F3F6"/><stop offset=".6" stop-color="#AEB4BD"/><stop offset="1" stop-color="#6E747D"/></radialGradient>`+
