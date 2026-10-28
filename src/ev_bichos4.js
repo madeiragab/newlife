@@ -5,7 +5,7 @@ Object.assign(WHO,{b_cao:bxDe('Cachorro'),b_gato:bxDe('Gato'),b_coelho:bxDe('Coe
  b_avep:bxDe('Calopsita','Periquito'),b_papagaio:bxDe('Papagaio','Arara'),b_coruja:bxDe('Coruja'),b_pavao:bxDe('Pavão'),b_flamingo:bxDe('Flamingo'),b_pinguim:bxDe('Pinguim'),b_galinha:bxDe('Galinha'),b_pato:bxDe('Pato'),
  b_peixe:bxDe('Peixe-beta','Peixe-palhaço'),b_polvo:bxDe('Polvo'),b_tartaruga:bxDe('Tartaruga'),b_lagarto:bxDe('Iguana','Camaleão'),b_jacare:bxDe('Jacaré'),b_cobra:bxDe('Cobra'),b_aracn:bxDe('Tarântula','Escorpião'),
  b_macaco:bxDe('Macaco-prego','Macaco'),b_capivara:bxDe('Capivara'),b_raposa:bxDe('Raposa'),b_lobo:bxDe('Lobo'),b_felino:bxDe('Tigre','Leão'),b_lhama:bxDe('Lhama'),b_cavalo:bxDe('Cavalo'),b_porco:bxDe('Porco'),b_cabra:bxDe('Cabra')});
-const bxPack=(who,list,w=.45)=>pack({k:'Bicho',who,w,cd:14},list);
+const bxPack=(who,list,w=.45)=>pack({k:'Bicho',who,w,cd:14},list.map(e=>e[2].length>1?e:[e[0],e[1],e[2].concat(['Deixar para lá|h+0|Segui com o meu dia.'])].concat(e.slice(3))));
 
 bxPack('b_cao',[
  ['Bolinha perdida','{p} jogou a bolinha embaixo do sofá e está chorando na frente dele.',['Deitar no chão e pegar|bond+5 h+2|{p} quase me derrubou de alegria.','Comprar outra bolinha|$-30 bond+2|{p} ganhou uma bolinha nova e esqueceu a antiga.','Ignorar|bond-3|{p} passou a noite olhando para o sofá.']],
