@@ -177,7 +177,7 @@ function selfTest(){
   // varredura: cada evento possível em várias idades, uma escolha de cada vez, sem alterar a vida
   const sweep=()=>{ const snap=JSON.stringify(S);
     for(const id of Object.keys(EVENTS)){ const ev=EVENTS[id]; if(!ev.show) continue;
-      T('varre:'+id,()=>{ if(!ev.when||!ev.when(S.me)) return; if(!!ev.jail!==!!S.me.prison) return; const d=ev.prep?ev.prep(S.me):{}; if(d==null) return; const sh=ev.show(d); if(!sh||!sh.ch) return; if(sh.ch.length<2){ const k='só 1 escolha: '+id+' ('+sh.t+')'; errs[k]=1; } if(d.n&&d.nG){ const f=faceSVG(strangerFace(d),40); if(!f.includes('<svg')) throw new Error('rosto vazio'); } const c=R.pick(sh.ch); chk(id,[sh.t,sh.x,c[0]]); const r=ev.pick(c[1],d); chk(id,[r]); swept++; });
+      T('varre:'+id,()=>{ if(!ev.when||!ev.when(S.me)) return; if(!!ev.jail!==!!S.me.prison) return; const d=ev.prep?ev.prep(S.me):{}; if(d==null) return; const sh=ev.show(d); if(!sh||!sh.ch) return; if(sh.ch.length<2){ const k='só 1 escolha: '+id+' ('+sh.t+')'; errs[k]=1; } if(d.n&&d.nG){ const f=faceSVG(strangerFace(d),40); if(!/<svg|<img class="face/.test(f)) throw new Error('rosto vazio'); } const c=R.pick(sh.ch); chk(id,[sh.t,sh.x,c[0]]); const r=ev.pick(c[1],d); chk(id,[r]); swept++; });
       S=JSON.parse(snap); } };
   const live=(maxYears)=>{ let guard=0;
     while(S.me.alive&&guard++<maxYears){
@@ -249,7 +249,7 @@ function selfTest(){
     if(n<5) errs['polícia: quase ninguém passa no concurso ('+n+')']=1; if(n&&ok/n<.5) errs['polícia: dedução não funciona ('+ok+'/'+n+')']=1; });
   T('golpe',()=>{ let win=0; for(let k=0;k<20;k++){ newLife({}); const m=S.me; m.age=35; m.alive=true; m.prison=null; m.money=1e6; revStart('Teste'); for(let y=0;y<3&&m.rev;y++){ ['panfleto','protesto','armas','general','hacker'].forEach(a=>{ if(m.rev&&m.alive) revAcao(a); }); m.yr={}; } if(m.rev&&m.alive){ V.rev().items.map(rowHtml).join(''); revGolpe(); if(m.office&&m.office.dit){ win++; if(!/Líder/.test(occupation())) errs['golpe: ocupação errada']=1; } } } if(!win) errs['golpe: nunca dá certo']=1; });
   T('paranormal',()=>{ let vamp=0,lobo=0,mortos=0; for(let k=0;k<40;k++){ newLife({}); const m=S.me; m.age=25; m.alive=true; m.prison=null; for(let i=0;i<20&&m.alive;i++){ m.yr={}; paraVisita(R.pick(PARA_LUGARES)[0]); } if(!m.alive) mortos++; if(m.criatura==='vampiro') vamp++; if(m.criatura==='lobisomem') lobo++;
-      if(m.alive&&m.criatura){ const f=faceSVG(m,60); if(!f.includes('<svg')) errs['criatura sem rosto']=1; for(let y=0;y<3&&m.alive;y++){ S.pending=[]; ageUp(); S.pending.slice().forEach(e=>{ const ev=EVENTS[e.id]; if(!evValid(e)) return; const sh=ev.show(e.d); ev.pick(R.pick(sh.ch)[1],e.d); }); S.pending=[]; } } }
+      if(m.alive&&m.criatura){ const f=faceSVG(m,60); if(!/<svg|<img class="face/.test(f)) errs['criatura sem rosto']=1; for(let y=0;y<3&&m.alive;y++){ S.pending=[]; ageUp(); S.pending.slice().forEach(e=>{ const ev=EVENTS[e.id]; if(!evValid(e)) return; const sh=ev.show(e.d); ev.pick(R.pick(sh.ch)[1],e.d); }); S.pending=[]; } } }
     if(!vamp||!lobo) errs['paranormal: ninguém virou criatura ('+vamp+'/'+lobo+')']=1; if(!mortos) errs['paranormal: ninguém morre']=1; });
   T('desistir',()=>{ for(let k=0;k<10;k++){ newLife({}); const m=S.me; m.age=R.int(5,80); S.people.filter(p=>p.alive).forEach(p=>{ const t=giveUpReaction(p); if(!t||/undefined|\{/.test(t)) errs['desistir: reação ruim '+p.rel]=1; }); } });
   // romance nos modos: namoro, parto de verdade e volta para a vida real com o par e o filho
