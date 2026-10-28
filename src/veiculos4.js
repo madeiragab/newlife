@@ -518,9 +518,20 @@ function v4Ficha(o){ const r=VEIC4[o.v4], m=S.me, pais=m.country;
     v4Local(r,pais)?'Fabricado aqui: peças baratas.':o.imp?'Não é vendido oficialmente aqui: importação independente.':'Importado: manutenção mais cara.',r.forma==='ev'||r.forma==='evsuv'||r.cat==='Elétricos'?'Elétrico: quase não gasta com combustível.':''].filter(Boolean).join('\n');
   modal({top:`<div class="mkcar">${car4SVG(r,o.cor,240)}</div>`,t:o.n,x,ch:[{l:`Comprar à vista (${fmt(o.v)})`,fn:()=>MQ.unshift({t:'Concessionária',x:v4Comprar(o,false)})},{l:'Financiar (20% de entrada)',fn:()=>MQ.unshift({t:'Concessionária',x:v4Comprar(o,true)})},{l:'Voltar',cls:'alt'}]}); }
 const v4Item=o=>({ic:car4SVG(o.v4,o.cor),l:o.n,s:`${o.cor} · conservação ${o.cond}%${o.classic?' · clássico':''}${o.imp?' · importação':''}`,r:fmt(o.v),on:()=>v4Ficha(o)});
+// mais vendidos de cada país (modelos do catálogo)
+const VEIC4_TOP={BR:'Strada,Polo,Onix,HB20,Tracker,T-Cross,Argo,Creta,Corolla Cross,Mobi,Hilux,Kicks',AR:'Hilux,Ranger,Cronos,208,Amarok,Yaris,Sandero,Toro,Polo,2008,Tracker,Corolla Cross',
+MX:'Versa,March,Sentra,Kicks,Frontier,Jetta,Corolla,RAV4,Tracker,Hilux,Onix,Creta',US:'F-150,Silverado,1500,RAV4,CR-V,Camry,Model Y,Equinox,Tacoma,Corolla,Civic,Explorer',
+CA:'F-150,RAV4,CR-V,Silverado,1500,Civic,Corolla,Tacoma,Model Y,Equinox,Tucson,Sportage',PT:'Clio,208,Sandero,Captur,2008,Corsa,Yaris,T-Cross,Polo,Golf,Classe A,Série 1',
+ES:'Sandero,Corolla,Arona,Ibiza,Clio,Captur,Tucson,2008,Sportage,T-Cross,Leon,Corsa',FR:'Clio,208,Sandero,2008,Captur,Yaris,3008,Model Y,Corsa,C3,Polo,Zoe',
+IT:'Sandero,500,Clio,Captur,T-Cross,Yaris,Corsa,Duster,208,Renegade,Compass,500e',DE:'Golf,Tiguan,Model Y,Polo,Corsa,ID.3,Classe A,Série 3,Fabia,Kodiaq,Classe C,ID.4',
+GB:'Sportage,Golf,Model Y,Fiesta,Focus,Polo,Tucson,Classe A,Série 1,Yaris,Defender,Range Rover Evoque',JP:'Yaris,Corolla,Fit,RAV4,Corolla Cross,Jimny,Swift,Land Cruiser,Civic,Camry,Leaf,GR86',
+KR:'Sonata,Elantra,Sorento,Sportage,Tucson,Santa Fe,K5,Seltos,Ioniq 5,EV6,Picanto,Grand i10',IN:'Swift,Alto,Dzire,Brezza,Nexon,Creta,Scorpio-N,Thar,Kwid,Seltos,Grand i10,Tigor',
+AO:'Hilux,Land Cruiser,Pajero,L200 Triton,Amarok,Polo,RAV4,Corolla,Frontier,Ranger,Tucson,Sportage'};
+function v4Top(pais){ const d=v4Disponiveis(pais).filter(r=>!r.classico); return (VEIC4_TOP[pais]||'').split(',').map(m=>d.filter(r=>r.modelo===m).sort((a,b)=>b.ano-a.ano||a.preco-b.preco)[0]).filter(Boolean); }
 V.cars=(o=>function(){ if(!S||!S.me) return o.apply(this,arguments); const pais=S.me.country, d=v4Disponiveis(pais);
-  const it=[{html:`<div class="card"><p>${d.length} carros reais à venda no meu país. Estoque renovado todo ano; carros de fora saem mais caros e têm peças caras.</p></div>`},{sec:'Estoque do ano'}];
-  v4Estoque().forEach(x=>it.push(v4Item(x))); it.push({sec:'Catálogo por categoria'});
+  const it=[{html:`<div class="card"><p>${d.length} carros reais à venda no meu país. Estoque renovado todo ano; carros de fora saem mais caros e têm peças caras.</p></div>`}];
+  const top=v4Top(pais); if(top.length){ const pn=(COUNTRIES.find(c=>c.id===pais)||{n:pais}).n; it.push({sec:`Mais vendidos · ${pn}`}); top.forEach((r,i)=>{ const x=v4Oferta(r); x.n=`${i+1}º · ${x.n}`; it.push(v4Item(x)); }); }
+  it.push({sec:'Estoque do ano'}); v4Estoque().forEach(x=>it.push(v4Item(x))); it.push({sec:'Catálogo por categoria'});
   Object.keys(VEIC4_META).forEach(cat=>{ const cs=d.filter(r=>r.cat===cat); if(!cs.length) return; const marcas=[...new Set(cs.map(r=>r.marca))].sort();
     it.push({ic:car4SVG(cs[0],'vermelho'),l:cat,s:`${cs.length} carros · ${marcas.length} marcas`,on:()=>UI.push(()=>({title:cat,items:marcas.map(b=>{ const bs=cs.filter(r=>r.marca===b);
       return {ic:car4SVG(bs[0],'prata'),l:b,s:`${bs.length} versões`,on:()=>UI.push(()=>({title:`${b} · ${cat}`,items:bs.slice().sort((a,b2)=>a.modelo.localeCompare(b2.modelo)||b2.ano-a.ano).map(r=>{ const of=v4Oferta(r); return v4Item(of); })}))}; })}))}); });
@@ -536,4 +547,5 @@ function veiculos4SelfTest(){ const erros=[], ok=(c,t)=>{ if(!c) erros.push(t); 
   ok(new Set(VEICULOS4.map(r=>r.id)).size===VEICULOS4.length,'id repetido');
   VEICULOS4.slice(0,800).forEach(r=>{ if(!r.marca||!r.modelo||!r.versao||!r.ano) erros.push(`registro incompleto ${r.id}`); if(!VEIC4_FORMA[r.forma]) erros.push(`forma ${r.forma}`); });
   ok(/<path/.test(car4SVG(VEICULOS4[0],'azul')),'desenho vazio');
+  for(const pais of Object.keys(VEIC4_TOP)) VEIC4_TOP[pais].split(',').forEach(m=>{ if(!VEICULOS4.some(r=>r.modelo===m&&!r.classico&&v4Vende(r,pais))) erros.push(`mais vendido ${m} não está à venda em ${pais}`); });
   return erros; }
