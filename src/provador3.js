@@ -142,7 +142,7 @@ function pv3Draw(){ const w=document.getElementById('provador3'); if(!w||!PV3) r
    <div class="pv3-meio">
     <aside class="pv3-cats">${cats.map(c=>`<button data-cat="${esc(c.id)}" class="${c.id===PV3.cat?'on':''}" ${c.dis?`disabled title="A partir dos ${c.min} anos"`:''}>${esc(c.l)}${c.dis?` <small>${c.min}+</small>`:''}</button>`).join('')}</aside>
     <section class="pv3-palco">${PV3_CENA}
-     ${busto?`<div class="pv3-retrato"><img src="${v3Img(v3Ficha(pes,look,{recorte:'retrato'}),'')}" alt=""></div>`:figuraSVG(pes,{cls:'pv3-fig',over:look,bg:''})}
+     ${figuraSVG(pes,{cls:'pv3-fig',over:look,bg:''})}${busto?`<div class="pv3-retrato" aria-hidden="true"><img src="${v3Img(v3Ficha(pes,look,{recorte:'retrato'}),'')}" alt=""></div>`:''}
      ${conta.l.length?`<button class="pv3-desfaz" data-a="desfaz">↩ Desfazer tudo</button>`:''}</section>
     <section class="pv3-opcoes"><h3>${esc(cat?cat.l:'')} <small>${itens.length}</small></h3>
      ${PV3.aba==='roupas'?`<button class="pv3-sexo" data-a="sexo">${PV3.sexo==='F'?'Ver roupas masculinas':'Ver roupas femininas'}</button>`:''}
