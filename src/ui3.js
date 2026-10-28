@@ -100,8 +100,9 @@ function v3Palco(){
   if(V3_ANT.figKey!==html){ const fig=$('#fig'); const trocou=V3_ANT.figKey!=null; fig.innerHTML=html; V3_ANT.figKey=html; if(trocou&&!V3_REDUZ()){ fig.classList.remove('troca'); fig.offsetWidth; fig.classList.add('troca'); } }
   $('#fig').classList.toggle('feliz',m.happy>=70); $('#fig').classList.toggle('triste',m.happy<30); $('#fig').classList.toggle('doente',m.health<30);
   const fam=v3Familia(m), fb=$('#familia3');
-  const fk=fam.map(p=>p.id+':'+p.age+':'+(p.bond|0)).join(',');
-  if(fb.dataset.k!==fk){ fb.dataset.k=fk; fb.innerHTML=fam.map(p=>`<button class="fam3" data-p="${p.id}" title="${esc(p.first+' · '+relLabel(p))}">${faceSVG(p,34)}</button>`).join(''); }
+  // a chave é o próprio HTML: o retrato vem do cache de imagens, então roupa, cabelo ou acessório novo mudam o src
+  const fh=fam.map(p=>`<button class="fam3" data-p="${p.id}" title="${esc(p.first+' · '+relLabel(p))}">${faceSVG(p,34)}</button>`).join('');
+  if(fb.dataset.k!==fh){ fb.dataset.k=fh; fb.innerHTML=fh; }
   v3Aneis();
 }
 
@@ -140,7 +141,9 @@ pump=function(){
     const cf=!who&&!sf&&e.d.cid&&typeof crewFace==='function'?crewFace(e.d.cid):null;
     quem=who||sf;
     o={k:sh.k,t:sh.t,x:sh.x,quem,top:cf,ch:sh.ch.map(([l,key])=>({l,fn:()=>{
-      S.pending.shift(); let res; try{ res=ev.pick(key,e.d); }catch(err){ showErr(err); }
+      // a escolha só sai da fila depois de dar certo; se der erro, o cartão volta (na segunda falha, desiste)
+      let res; try{ res=ev.pick(key,e.d); }catch(err){ showErr(err); e.falhas=(e.falhas||0)+1; if(e.falhas<2) return; }
+      const i=S.pending.indexOf(e); if(i>=0) S.pending.splice(i,1); else S.pending.shift(); delete e.falhas;
       log(sh.t.replace(/[!?.…]+$/,'')+' → '+l+(res?'. '+res:'.'),'choice'); if(res) MQ.unshift({k:sh.k,t:sh.t,x:res,res:true});
     }}))};
   }
