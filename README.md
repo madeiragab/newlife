@@ -411,6 +411,14 @@ NPCs precisam concluir cursos para assumir profissões qualificadas. Parceiros e
 Testes controlados de quatro estilos usam sementes 17401–17404 para exercitar três sucessões por estilo, além das partidas automatizadas existentes. Não são sessões humanas nem prova de equilíbrio de todas as estratégias.
 
 
+## 3.0 · Visual novo
+
+- **Personagens redesenhados** (`corpo3.js`): corpo inteiro com proporção de cada idade e 4 tipos de corpo. Na tela principal aparece o retrato do busto pra cima; o corpo inteiro aparece ao tocar no retrato (menu **Eu**).
+- **Catálogo** (`catalogo3.js`): 60 cortes, qualquer cor de cabelo (com degradê), 200 looks por gênero em 18 estilos, 226 acessórios e uniforme de cada profissão.
+- **Tela principal** (`ui3.js`, `style3.css`): cenário que muda com a vida, anéis de atributos animados, números que voam, diário em linha do tempo, eventos em cartões coloridos por tema, aniversário com confete, vibração no celular e três colunas no PC.
+- **Salão e guarda-roupa** (`estilo3.js`) e ligação das pessoas do jogo ao desenho (`visual3.js`).
+- **Criaturas:** vampiro pálido com olhos vermelhos e presas; lobisomem com olhos âmbar e transformação completa.
+
 ## Novidades recentes · 1.75–2.20
 
 Da 1.75 à 2.20: Copa e Olimpíadas, seitas que nascem na deep web, luta tática e carreira de lutador, armas e drogas com a lei de cada país, profissões com minigames, escola e faculdade com provas de verdade, infância e relacionamentos, vida adulta e velhice, expectativa de vida realista, política de cada país, escândalos, guerras e o submundo, golpe de Estado em etapas e o regime depois dele, inglês e, na 2.14, seita e império que dominam o mundo, com sucessão hereditária, hereges, traidores e coalizões contra quem cresce demais, na 2.15 o ataque nuclear, na 2.16 a vida de criatura que interage com tudo na 2.17 menos provas (uma ou duas por nível, com prova surpresa às vezes), na 2.18 os sistemas conversando entre si e a revisão de idade na 2.19 de 1 a 3 eventos por ano e, na 2.20, a família coerente: separação de verdade, guarda, madrasta, padrasto e meio-irmãos. A lista completa de cada versão está em **Menu → Novidades** e nas [releases](https://github.com/madeiragab/newlife/releases).
