@@ -440,7 +440,57 @@ const V4_MOD={
 'Kia K5':{L:114,yR:21.3,yB:33,yN:37.5,yD:32,yS:47.5,hood:30,ws:22,bk:26,deck:6,wb:.58,of:.19,wr:8.2,head:'slim',tail:'bar',q3:7,cj:1},
 'Jeep Commander':{L:111,yR:15.9,yB:30.5,yN:34,yD:27,yS:44.5,hood:27,ws:16,bk:6,deck:2,wb:.585,of:.19,wr:8.6,head:'slim',tail:'wrap',plast:1,blk:1,cj:1,rack:1},
 'Jeep Grand Cherokee':{L:114,yR:13,yB:30,yN:33,yD:26.5,yS:44,hood:30,ws:15,bk:6,deck:2,wb:.6,of:.18,wr:9,head:'slim',tail:'wrap',cj:1,rack:1,blk:1},
-'Jeep Wrangler':{L:97,yR:12.1,yB:30,yN:31,yD:15,yS:43,hood:22,ws:5,bk:1,deck:1,wb:.585,of:.15,wr:10,round:1,tail:'vert',plast:1,flare:1,spare:1,doors:2}
+'Jeep Wrangler':{L:97,yR:12.1,yB:30,yN:31,yD:15,yS:43,hood:22,ws:5,bk:1,deck:1,wb:.585,of:.15,wr:10,round:1,tail:'vert',plast:1,flare:1,spare:1,doors:2},
+'Volkswagen Tiguan':{L:110,yR:16.1,yB:31,yN:34.5,yD:27.5,yS:44.5,hood:27,ws:15,bk:6,deck:2,wb:.595,of:.19,wr:8.6,head:'slim',tail:'wrap',cj:1,rack:1,plast:1},
+'Volkswagen Taos':{L:104,yR:17,yB:31,yN:34.5,yD:28,yS:44.5,hood:26,ws:16,bk:6,deck:2,wb:.605,of:.19,wr:8.4,head:'slim',tail:'bar',plast:1,cj:1},
+'Volkswagen Touareg':{L:114,yR:15.4,yB:30.5,yN:34,yD:27.5,yS:44.5,hood:30,ws:16,bk:7,deck:2,wb:.595,of:.19,wr:9,head:'slim',tail:'bar',cj:1},
+'Chevrolet Equinox':{L:108,yR:16.3,yB:31,yN:34.5,yD:28,yS:44.5,hood:27,ws:16,bk:7,deck:2,wb:.585,of:.2,wr:8.6,head:'split',tail:'wrap',plast:1,kick:2,cj:1},
+'Chevrolet Tahoe':{L:124,yR:10,yB:28.5,yN:31,yD:23,yS:42.5,hood:31,ws:14,bk:3,deck:1,wb:.575,of:.17,wr:9.8,head:'split',tail:'vert',rack:1,cj:1},
+'Chevrolet Trailblazer':{L:114,yR:12,yB:29.5,yN:32.5,yD:25,yS:43,hood:29,ws:14,bk:5,deck:2,wb:.585,of:.17,wr:9.4,head:'slim',tail:'vert',rack:1,plast:1,kick:2},
+'Hyundai Tucson':{L:105,yR:16.6,yB:31,yN:34.5,yD:28,yS:44.5,hood:26,ws:16,bk:8,deck:2,wb:.595,of:.19,wr:8.6,head:'split',tail:'bar',plast:1,kick:3,cj:1},
+'Hyundai Santa Fe':{L:111,yR:15.9,yB:30.5,yN:34,yD:27.5,yS:44.5,hood:28,ws:15,bk:7,deck:2,wb:.585,of:.19,wr:8.8,head:'split',tail:'wrap',plast:1,rack:1,cj:1},
+'Kia Sportage':{L:108,yR:16.3,yB:31,yN:34.5,yD:28,yS:44.5,hood:27,ws:17,bk:10,deck:2,wb:.59,of:.19,wr:8.6,head:'split',tail:'bar',plast:1,blk:1,kick:2},
+'Kia Sorento':{L:112,yR:15.4,yB:30.5,yN:34,yD:27,yS:44.5,hood:28,ws:15,bk:6,deck:2,wb:.585,of:.19,wr:8.8,head:'slim',tail:'vert',plast:1,rack:1,cj:1},
+'Kia Seltos':{L:101,yR:17.3,yB:31,yN:34.5,yD:28,yS:44.5,hood:25,ws:16,bk:7,deck:2,wb:.6,of:.19,wr:8.2,head:'split',tail:'bar',plast:1,blk:1,rack:1},
+'Toyota RAV4':{L:107,yR:15.6,yB:31,yN:34,yD:27.5,yS:44.5,hood:26,ws:15,bk:7,deck:2,wb:.585,of:.19,wr:8.6,head:'slim',tail:'wrap',plast:1,flare:1,kick:2},
+'Toyota SW4':{L:112,yR:12.1,yB:29.5,yN:32.5,yD:25,yS:43,hood:29,ws:14,bk:5,deck:2,wb:.57,of:.18,wr:9.4,head:'slim',tail:'vert',rack:1,cj:1},
+'Toyota Land Cruiser':{L:116,yR:10,yB:28.5,yN:31,yD:23,yS:42.5,hood:30,ws:11,bk:3,deck:1,wb:.57,of:.18,wr:9.8,head:'slim',tail:'vert',rack:1,cj:1},
+'Honda CR-V':{L:109,yR:15.6,yB:31,yN:34,yD:27.5,yS:44.5,hood:27,ws:16,bk:8,deck:2,wb:.575,of:.2,wr:8.6,head:'slim',tail:'vert',plast:1,cj:1},
+'Renault Captur':{L:99,yR:18.2,yB:31.5,yN:35,yD:28.5,yS:45,hood:25,ws:16,bk:8,deck:2,wb:.625,of:.18,wr:8.2,head:'split',tail:'wrap',plast:1,kick:2},
+'Fiat Pulse':{L:96,yR:18.2,yB:31.5,yN:35,yD:29,yS:45,hood:24,ws:16,bk:9,deck:2,wb:.615,of:.18,wr:8,head:'split',tail:'bar',plast:1,blk:1},
+'Fiat Fastback':{L:103,yR:18.9,yB:31.5,yN:35,yD:30,yS:45,hood:25,ws:17,bk:20,deck:4,wb:.57,of:.18,wr:8.2,head:'split',tail:'bar',plast:1,blk:1},
+'Peugeot 2008':{L:100,yR:18.9,yB:31.5,yN:35.5,yD:29,yS:45,hood:26,ws:17,bk:10,deck:2,wb:.605,of:.18,wr:8.2,head:'split',tail:'vert',plast:1,blk:1,kick:2},
+'Peugeot 3008':{L:104,yR:17.3,yB:31,yN:34.5,yD:28,yS:44.5,hood:27,ws:16,bk:8,deck:2,wb:.6,of:.19,wr:8.6,head:'split',tail:'vert',plast:1,blk:1,cj:1},
+'Citroën C4 Cactus':{L:97,yR:20.5,yB:32,yN:35.5,yD:29.5,yS:45.5,hood:24,ws:16,bk:9,deck:2,wb:.625,of:.18,wr:7.8,head:'split',tail:'wrap',plast:1,lin2:1},
+'Ford Bronco':{L:112,yR:12,yB:30,yN:31,yD:15,yS:42.5,hood:25,ws:6,bk:1,deck:1,wb:.615,of:.15,wr:10,round:1,tail:'vert',plast:1,flare:1,spare:1,doors:4},
+'Ford Explorer':{L:118,yR:13.5,yB:30,yN:33,yD:26,yS:43.5,hood:30,ws:16,bk:6,deck:2,wb:.6,of:.17,wr:9.2,head:'slim',tail:'vert',rack:1,cj:1,blk:1},
+'Mitsubishi Pajero':{L:114,yR:10.7,yB:29,yN:32,yD:20,yS:42.5,hood:27,ws:12,bk:3,deck:1,wb:.57,of:.17,wr:9.6,head:'big',tail:'vert',spare:1,plast:1,flare:1},
+'Mitsubishi Outlander':{L:110,yR:14.5,yB:30.5,yN:33.5,yD:27,yS:44,hood:28,ws:16,bk:7,deck:2,wb:.575,of:.19,wr:9,head:'split',tail:'vert',plast:1,cj:1,blk:1},
+'Mitsubishi ASX':{L:100,yR:17,yB:31.5,yN:35,yD:28.5,yS:44.5,hood:25,ws:16,bk:8,deck:2,wb:.62,of:.18,wr:8.2,head:'slim',tail:'wrap',plast:1},
+'Suzuki Jimny':{L:81,yR:15,yB:30,yN:31.5,yD:17,yS:43,hood:18,ws:6,bk:1,deck:1,wb:.645,of:.14,wr:9,round:1,tail:'vert',plast:1,flare:1,spare:1,doors:2},
+'Suzuki Vitara':{L:97,yR:17.5,yB:31.5,yN:35,yD:28,yS:44.5,hood:25,ws:15,bk:6,deck:2,wb:.6,of:.18,wr:8.2,head:'slim',tail:'wrap',plast:1},
+'Land Rover Defender':{L:116,yR:9.1,yB:29,yN:31,yD:15,yS:43,hood:24,ws:8,bk:1,deck:1,wb:.6,of:.16,wr:9.8,head:'big',tail:'vert',spare:1,rack:1,doors:4},
+'Land Rover Discovery Sport':{L:107,yR:15,yB:30.5,yN:34,yD:27,yS:44.5,hood:27,ws:15,bk:5,deck:2,wb:.595,of:.18,wr:8.8,head:'slim',tail:'wrap',kick:3,blk:1,plast:1},
+'Land Rover Range Rover Evoque':{L:102,yR:16.6,yB:31,yN:34.5,yD:28.5,yS:44.5,hood:27,ws:16,bk:12,deck:2,wb:.61,of:.18,wr:9,head:'slim',tail:'bar',kick:3,blk:1},
+'Mahindra Scorpio-N':{L:108,yR:11.7,yB:29.5,yN:32.5,yD:24,yS:43,hood:27,ws:13,bk:4,deck:2,wb:.59,of:.17,wr:9.2,head:'big',tail:'vert',rack:1,plast:1,flare:1},
+'Mahindra Thar':{L:93,yR:12.1,yB:30,yN:31.5,yD:16,yS:43,hood:22,ws:6,bk:1,deck:1,wb:.615,of:.14,wr:9.6,round:1,tail:'vert',plast:1,flare:1,spare:1,doors:2},
+'Tata Nexon':{L:93,yR:17.3,yB:31.5,yN:35,yD:28.5,yS:45,hood:23,ws:16,bk:9,deck:2,wb:.625,of:.17,wr:8,head:'split',tail:'bar',plast:1,top:'#F2F3F5',kick:2},
+'Maruti Suzuki Brezza':{L:93,yR:15.7,yB:31,yN:34.5,yD:27.5,yS:44.5,hood:23,ws:14,bk:5,deck:2,wb:.625,of:.17,wr:8,head:'split',tail:'wrap',plast:1,rack:1,blk:1},
+'Caoa Chery Tiggo 5x':{L:101,yR:16.3,yB:31,yN:34.5,yD:28,yS:44.5,hood:25,ws:16,bk:8,deck:2,wb:.61,of:.18,wr:8.4,head:'slim',tail:'wrap',plast:1,blk:1},
+'Caoa Chery Tiggo 7':{L:105,yR:15.4,yB:31,yN:34.5,yD:28,yS:44.5,hood:26,ws:16,bk:7,deck:2,wb:.59,of:.19,wr:8.6,head:'split',tail:'bar',plast:1,cj:1},
+'Caoa Chery Tiggo 8':{L:110,yR:14.2,yB:30.5,yN:34,yD:27.5,yS:44,hood:27,ws:16,bk:6,deck:2,wb:.575,of:.19,wr:8.8,head:'split',tail:'bar',plast:1,cj:1,rack:1},
+'BYD Song Plus':{L:111,yR:16.1,yB:31,yN:34.5,yD:28,yS:44.5,hood:28,ws:17,bk:8,deck:2,wb:.585,of:.19,wr:8.8,head:'slim',tail:'bar',cj:1,blk:1},
+'GWM Haval H6':{L:109,yR:14.7,yB:30.5,yN:34,yD:27.5,yS:44,hood:27,ws:16,bk:7,deck:2,wb:.59,of:.19,wr:8.8,head:'slim',tail:'bar',plast:1,cj:1},
+'Mazda CX-5':{L:106,yR:15.9,yB:31,yN:34.5,yD:28,yS:44.5,hood:28,ws:16,bk:8,deck:2,wb:.595,of:.19,wr:8.6,head:'slim',tail:'wrap',plast:1,cj:1,kick:2},
+'Subaru Forester':{L:108,yR:14.7,yB:30.5,yN:34,yD:27,yS:44,hood:26,ws:15,bk:5,deck:2,wb:.575,of:.19,wr:8.8,head:'big',tail:'vert',plast:1,rack:1},
+'Seat Arona':{L:96,yR:18.9,yB:31.5,yN:35.5,yD:29,yS:45,hood:24,ws:16,bk:8,deck:2,wb:.62,of:.18,wr:8,head:'slim',tail:'wrap',plast:1,blk:1},
+'Skoda Kodiaq':{L:110,yR:15.9,yB:30.5,yN:34,yD:27.5,yS:44.5,hood:27,ws:15,bk:5,deck:2,wb:.595,of:.19,wr:8.8,head:'slim',tail:'wrap',plast:1,rack:1,cj:1},
+'Opel Mokka':{L:97,yR:19.4,yB:31.5,yN:35.5,yD:29.5,yS:45,hood:25,ws:17,bk:10,deck:2,wb:.615,of:.18,wr:8.2,head:'slim',tail:'bar',plast:1,blk:1},
+'Volkswagen Amarok':{L:122,yR:12.4,yB:29.5,yN:31.5,yD:29.5,yS:43,hood:30,ws:13,bk:2,deck:40,wb:.59,of:.16,wr:9.2,head:'big',tail:'vert',plast:1,flare:1,santo:1,doors:4},
+'Chevrolet Montana':{L:110,yR:16.6,yB:31,yN:34.5,yD:31,yS:44.5,hood:26,ws:16,bk:2,deck:34,wb:.595,of:.17,wr:8.4,head:'split',tail:'vert',plast:1,doors:4},
+'Chevrolet Silverado':{L:126,yR:10,yB:28,yN:30,yD:28,yS:42,hood:32,ws:13,bk:2,deck:44,wb:.64,of:.15,wr:9.6,head:'split',tail:'vert',cj:1,doors:4},
+'Ford F-150':{L:126,yR:9.3,yB:28,yN:29.5,yD:28,yS:42,hood:33,ws:12,bk:2,deck:44,wb:.625,of:.15,wr:9.8,head:'big',tail:'vert',doors:4,cj:1},
+'Ford Maverick':{L:118,yR:14.5,yB:30,yN:32.5,yD:30,yS:43.5,hood:28,ws:15,bk:2,deck:38,wb:.605,of:.17,wr:8.8,head:'big',tail:'vert',plast:1,doors:4}
 };
 let V4_UID=0;
 function v4Perfil(P){ const f=P.xF, t=P.xT, ws0=f-P.hood, ws1=ws0-P.ws, re=ws1-P.roof, bk1=re-P.bk;
@@ -456,7 +506,7 @@ function v4Vidro(P){ const ws0=P.xF-P.hood, ws1=ws0-P.ws, re=ws1-P.roof, bk1=re-
   const cp=P.cp||0, x2=re+.6+cp; xd+=cp*1.3; const xk=xd+(xA-xd)*.28;
   return {d:P.kick?`M${xA} ${yb}L${ws1+1.2} ${yt}H${x2}L${xd} ${Math.min(yq,yb)-P.kick}L${xk} ${yb}Z`:`M${xA} ${yb}L${ws1+1.2} ${yt}H${x2}L${xd} ${yq}${yq<yb?`V${yb}`:''}Z`,xA,x1:ws1+1.2,x2,xd,yb,yt}; }
 function car4SVG(r,cor,w=56){ r=typeof r==='string'?VEIC4[r]:r; if(!r) return '';
-  const F=VEIC4_FORMA[r.forma]||VEIC4_FORMA.hatch, P=Object.assign({},F,r.o||{},(!r.classico&&V4_MOD[r.marca+' '+r.modelo])||{}), uid='v4'+(++V4_UID);
+  const F=VEIC4_FORMA[r.forma]||VEIC4_FORMA.hatch, MD=(!r.classico&&V4_MOD[r.marca+' '+r.modelo])||null, P=Object.assign({},F,r.o||{},MD||{}), uid='v4'+(++V4_UID); if(MD&&MD.roof==null) P.roof=null;
   const c=VEIC4_COR[cor]||(/^#/.test(cor||'')?cor:VEIC4_COR[Object.keys(VEIC4_COR)[hashS(r.id)%8]]);
   if(P.box&&r.forma!=='box'){ P.ws=Math.min(P.ws,10); if(/hatch/.test(r.forma)){ P.bk=2; P.yD=P.yR+7; P.deck=1; } }
   if(P.roof==null) P.roof=Math.max(8,P.L-P.hood-P.ws-P.bk-P.deck); P.xF=64+P.L/2; P.xT=64-P.L/2; const yG=55, wc=yG-P.wr;
