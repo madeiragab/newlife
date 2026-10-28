@@ -45,7 +45,7 @@ V.career=(o=>function(){ const res=o.apply(this,arguments), m=S.me, r=regime(); 
 // todo ano: sanções, medo que passa, revoltas, golpes internos e atentados
 yearMoney=(o=>function(){ const x=o.apply(this,arguments); try{ const m=S.me, r=regime(); if(r&&m.alive&&!m.prison){ r.anos++;
   r.medo-=R.int(2,6); r.leal-=R.int(1,5); regFix(r);
-  if(r.pres>=50){ const perda=Math.round(Math.max(0,m.money)*r.pres/1000); if(perda>0){ m.money-=perda; log(`Sanções internacionais congelaram ${fmt(perda)} das minhas contas no exterior.`,'bad'); } }
+  if(r.pres>=50&&(typeof nlTemSancionador!=="function"||nlTemSancionador())){ const perda=Math.round(Math.max(0,m.money)*r.pres/1000); if(perda>0){ m.money-=perda; log(`Sanções internacionais congelaram ${fmt(perda)} das minhas contas no exterior.`,'bad'); } }
   if(m.office.appr<30&&r.medo<40&&R.chance(.4)) queue('regime_revolta',{});
   else if(r.leal<30&&R.chance(.35)) queue('rev_contragolpe',{});
   else if(R.chance(.08+r.pres/700)) queue('regime_atentado',{}); } }catch(e){} return x; })(yearMoney);
