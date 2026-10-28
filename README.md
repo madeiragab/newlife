@@ -38,6 +38,10 @@
   <img src="docs/img/bichos-nome.png" width="200" alt="Escolher o nome do bicho">
 </p>
 
+<p align="center">
+  <img src="docs/img/itens.png" width="620" alt="Mais de 400 itens desenhados">
+</p>
+
 ---
 
 ## Sumário

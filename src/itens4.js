@@ -59,10 +59,12 @@ const ITENS4=[
 ];
 const ITENS4_CAT={Eletrônicos:'Eletrônicos e tecnologia',Casa:'Móveis e eletrodomésticos',Esportes:'Esportes e hobbies',Música:'Instrumentos musicais',Luxo:'Luxo, relógios e joias',Arte:'Arte e colecionáveis',Infantil:'Infantil e educação',Ferramentas:'Ferramentas e equipamentos'};
 const item4=id=>ITENS4.find(x=>x.id===id);
+// preço no país onde moro: eletrônicos, luxo e instrumentos seguem o custo de importados; o resto segue o custo de vida local
+function i4Preco(x){ let k=1; try{ const pais=S.me.country, imp=['Eletrônicos','Luxo','Música'].includes(x.cat); k=imp?.5+.5*mercadoIndice(pais,'veiculos'):mercadoCusto(); }catch(e){} return Math.max(10,Math.round(x.v*Math.max(.4,Math.min(2.5,k||1))/10)*10); }
 // loja: os itens desenhados entram por categoria, antes do catálogo antigo
 V.shop=(o=>function(){ const r=o.apply(this,arguments); try{ const it=[];
-  for(const [c,n] of Object.entries(ITENS4_CAT)){ it.push({sec:n}); ITENS4.filter(x=>x.cat===c).forEach(x=>it.push({ic:x.d(),l:x.t,s:`dura uns ${x.dur} anos`,r:fmt(x.v),on:()=>minorPay(x.v,()=>{ const s=buy('item',{n:x.t,v:x.v,h:x.h,tal:x.tal,ic:x.d()},false); const a=S.me.assets.at(-1); if(a&&a.n===x.t) a.i4=x.id; if(x.sm) st('smarts',x.sm); return s; },'Compra')})); }
+  for(const [c,n] of Object.entries(ITENS4_CAT)){ it.push({sec:n}); ITENS4.filter(x=>x.cat===c).forEach(x=>{ const pv=i4Preco(x); it.push({ic:x.d(),l:x.t,s:`dura uns ${x.dur} anos`,r:fmt(pv),on:()=>minorPay(pv,()=>{ const s=buy('item',{n:x.t,v:pv,h:x.h,tal:x.tal,ic:x.d()},false); const a=S.me.assets.at(-1); if(a&&a.n===x.t) a.i4=x.id; if(x.sm) st('smarts',x.sm); return s; },'Compra')}); }); }
   r.items=it.concat(r.items); }catch(e){} return r; })(V.shop);
 function itens4SelfTest(){ const f=[], ids=new Set();
   ITENS4.forEach(x=>{ if(ids.has(x.id)) f.push('id repetido '+x.id); ids.add(x.id); const s=x.d(); if(!/^<svg/.test(s)||s.length<150) f.push('desenho '+x.id); if(!ITENS4_CAT[x.cat]) f.push('categoria '+x.id); });
-  if(ITENS4.length<40) f.push('poucos itens '+ITENS4.length); if(f.length) throw Error('Itens 3.5 · '+f.slice(0,5).join(' | ')); return {ok:true}; }
+  if(ITENS4.length<400) f.push('poucos itens '+ITENS4.length); if(f.length) throw Error('Itens 3.5 · '+f.slice(0,5).join(' | ')); return {ok:true}; }
