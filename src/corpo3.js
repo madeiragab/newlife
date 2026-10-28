@@ -720,7 +720,12 @@ if(tipo==='musculoso'&&a>=14&&!F) for(const s of [-1,1]) ana(`M${f(X(s*wMco*.55)
   const H=(u,v)=>f(cx+u*s)+','+f(t+v*hp), fz=(d,cor,w=1.3)=>`<path d="${d}" fill="${cor}" stroke="${cor[0]==='#'?esc(cor,.42):'rgba(0,0,0,.4)'}" stroke-width="${w}" stroke-linejoin="round"/>`;
   const el=(v,rx,ry,cor,u=0)=>`<ellipse cx="${f(cx+u*s)}" cy="${f(t+v*hp)}" rx="${f(rx*s)}" ry="${f(ry*hp)}" fill="${cor}" stroke="${esc(cor,.42)}" stroke-width="1.3"/>`;
   const cc=c.corChapeu;
-  if(c.sardas) { let d=''; for(let i=0;i<14;i++){ const k=i%2?1:-1, u=.35+((i*37)%10)/22, v=-.02+((i*53)%10)/120; d+=`<circle cx="${f(cx+k*u*s)}" cy="${f(ny+v*hp-.03*hp)}" r=".7"/>`; } R.push(`<g fill="${esc(pele,.35)}" opacity=".7">${d}</g>`); }
+  // sardas: pontinhos de tamanhos diferentes no nariz e no alto das bochechas, num marrom quente e suave
+  if(c.sardas) { let d=''; const y0=ey+ew*.62, y1=ny+hp*.012;
+   for(let i=0;i<34;i++){ const hr=k=>{ const v=Math.sin(i*12.9898+k*78.233)*43758.5453; return v-Math.floor(v); }, r1=hr(1), r2=hr(2), r3=hr(3);
+    const u=(r1*2-1), x=cx+u*ex*1.3, y=y0+(y1-y0)*r2*.85-hp*.02*u*u;
+    d+=`<circle cx="${f(x)}" cy="${f(y)}" r="${f(hp*(.005+.006*r3))}" opacity="${f(.35+.35*r3)}"/>`; }
+   R.push(`<g fill="${mix(pele,'#8E4A24',.42)}">${d}</g>`); }
   if(c.maquiagem) for(const k of [-1,1]) R.push(`<ellipse cx="${f(cx+k*ex*1.04)}" cy="${f(ey-ew*.62)}" rx="${f(ew*1.05)}" ry="${f(ew*.42)}" fill="${c.maquiagem}" opacity=".3"/>`);
   if(AC.has('piercingNariz')) R.push(`<circle cx="${f(cx+nw*.55)}" cy="${f(ny-.5)}" r="1.1" fill="#D8D8D8" stroke="#888" stroke-width=".4"/>`);
   if(AC.has('mascara')){ const mc=ac('mascara',c.corMascara)||'#A8D8EA'; R.push(`<path d="M${f(cx-1.0*s)},${f(t+.55*hp)} L${f(cx-.84*s)},${f(t+.68*hp)} M${f(cx+1.0*s)},${f(t+.55*hp)} L${f(cx+.84*s)},${f(t+.68*hp)}" stroke="#E8EEF2" stroke-width="1"/>`,fz(`M${H(-.86,.66)} Q${H(0,.58)} ${H(.86,.66)} L${H(.78,.96)} Q${H(0,1.07)} ${H(-.78,.96)}Z`,mc,1),`<path d="M${H(-.75,.76)} Q${H(0,.72)} ${H(.75,.76)} M${H(-.72,.86)} Q${H(0,.84)} ${H(.72,.86)}" stroke="${esc(mc,.2)}" stroke-width=".8" fill="none"/>`); }
