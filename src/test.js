@@ -73,6 +73,7 @@ function selfTest(){
   T('ritmo dos eventos',ritmoSelfTest);
   T('provador',provadorSelfTest);
   T('poder coerente',poderSelfTest);
+  T('genética',geneticaSelfTest);
   T('família coerente',familia2SelfTest);
   T('eventos cumprem o que dizem',coerenciaSelfTest);
   T('correções 2.08',ajustes208SelfTest);

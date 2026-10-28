@@ -618,10 +618,11 @@ function showStart(tela='inicio'){
   <label class="f">Dificuldade<select class="in" id="fDiff"><option value="normal">Normal</option><option value="facil">Fácil</option><option value="dificil">Difícil</option></select></label>
   <p class="form-hint">A família onde você nasce é sempre sorteada: pode ser pobre, rica ou até da realeza.</p>
   ${godUnlocked()?'<label class="f god-choice"><input type="checkbox" id="fGod"> Abrir o Modo Deus ao nascer</label>':''}
+  ${godUnlocked()?'<label class="f god-choice"><input type="checkbox" id="fApar"> Abrir o alterador de aparência ao nascer</label>':''}
   <button class="btn" id="stCustom">Começar esta vida</button></div><div class="start-or">ou deixe tudo com a sorte</div><button class="btn alt" id="stRand">Vida completamente aleatória</button></div>`;
  $('#stHome').onclick=()=>showStart();
  const go=(o,god)=>{
-  const start=()=>{newLife(o);$('#start').hidden=true;MQ.length=0;render.jump=true;render();pump();if(god)UI.open(V.god);};
+  const start=()=>{newLife(o);$('#start').hidden=true;MQ.length=0;render.jump=true;render();pump();const apar=$('#fApar')?.checked;if(god)UI.open(V.god);if(apar&&typeof pv3Abrir==='function')pv3Abrir('pele','genes');};
   if(S?.me?.alive)confirmBox('Começar uma nova vida?','A vida salva de '+S.me.first+' será substituída. Você pode cancelar e continuar de onde parou.','Começar nova vida',start);else start();
  };
  $('#stRand').onclick=()=>go({royal:R.chance(.01)});
