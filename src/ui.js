@@ -459,7 +459,7 @@ V.activities=()=>{
   G(18,{l:'Diversão',s:'Balada, cassino, loteria, corrida de cavalos',on:()=>UI.push(V.fun)});
   G(18,{l:'Viagens',s:'Férias pelo mundo',on:()=>UI.push(V.trips)});
   G(8,{l:'Crimes',s:'Do furto ao assalto a banco',tone:'bad',on:()=>UI.push(V.crimes)});
-  G(18,{l:'Bichos de estimação',s:'Abrigo, criador, exóticos',on:()=>UI.push(V.pets)});
+  G(5,{l:'Bichos de estimação',s:'Abrigo, criador, exóticos',on:()=>UI.push(V.pets)});
   G(13,{l:'Redes sociais',s:m.social?`${m.social.f.toLocaleString('pt-BR')} seguidores`:'Criar perfil',on:()=>UI.push(V.social)});
   if(!m.lic) G(18,{l:'Autoescola',s:'Prova de placas · $1.500',on:()=>drivingTest()});
   G(25,{l:'Adotar uma criança',s:'Processo de $20.000',on:()=>confirmBox('Adoção','Iniciar um processo de adoção por $20.000?','Adotar',()=>act(adoptChild,'Adoção'))});

@@ -76,6 +76,8 @@ function selfTest(){
   T('genética',geneticaSelfTest);
   T('sons e trilhas',sons200SelfTest);
   T('bichos desenhados',bichosSelfTest);
+  T('pré-carregamento',preload4SelfTest);
+  T('abrigo e eventos de bichos',()=>{ pets4SelfTest(); const n=Object.values(EVENTS).filter(e=>/who b_/.test(e.cond||'')).length; if(n<300) throw Error('poucos eventos de bichos: '+n); return {ok:true}; });
   T('família coerente',familia2SelfTest);
   T('eventos cumprem o que dizem',coerenciaSelfTest);
   T('correções 2.08',ajustes208SelfTest);

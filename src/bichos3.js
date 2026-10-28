@@ -66,8 +66,8 @@ const BX_RACA={
  Poodle:{cores:['branco','preto','creme','chocolate','cinza','caramelo'],pads:['liso'],ear:'cai',tail:'pompom',fofo:2},Pug:{cores:['creme','areia','preto'],pads:['mascara','liso'],ear:'semi',tail:'enrolada',L:34,H:22,leg:11,sn:[3,10]},
  'Shih tzu':{cores:['branco','dourado','preto','creme','cinza'],pads:['malhado','liso','mascara','peito'],ear:'cai',tail:'enrolada',L:34,H:20,leg:8,sn:[3,8],saia:1},'Husky siberiano':{cores:['cinza','grafite','preto','ruivo','branco','areia'],pads:['peito','mascara'],ear:'pont',tail:'fofa',husky:1},
  'Pastor-alemão':{cores:['caramelo','ruivo','dourado','areia'],pads:['sela'],ear:'pont',tail:'fofa',L:50,leg:20,sn:[13,8]},Dachshund:{cores:['chocolate','ruivo','preto','caramelo'],pads:['liso','tricolor','peito','manchas'],ear:'cai',tail:'chicote',L:52,H:18,leg:8,sn:[12,7]},
- Chihuahua:{cores:['creme','caramelo','preto','chocolate','branco','areia'],pads:['liso','peito','malhado','tricolor'],ear:'morcego',tail:'chicote',L:30,H:17,leg:13,hr:12,sn:[5,6]},'Border collie':{cores:['preto','chocolate','cinza','ruivo'],pads:['peito','malhado','tricolor'],ear:'semi',tail:'fofa'},
- Rottweiler:{cores:['preto'],pads:['tricolor','peito'],ear:'cai',tail:'curta',L:50,H:28,leg:19},Yorkshire:{cores:['grafite','cinza','azulado'],pads:['tricolor'],ear:'pont',tail:'curta',L:30,H:16,leg:8,saia:1},
+ Chihuahua:{cores:['creme','caramelo','preto','chocolate','branco','areia'],pads:['liso','peito','malhado','tricolor'],ear:'morcego',tail:'chicote',L:30,H:17,leg:13,hr:14.5,sn:[4,6],olhoG:1.4},'Border collie':{cores:['preto','chocolate','cinza','ruivo'],pads:['peito','malhado','tricolor'],ear:'semi',tail:'fofa'},
+ Rottweiler:{cores:['preto'],pads:['rott'],ear:'semi',tail:'curta',L:52,H:30,leg:19,hr:14.5,sn:[8,12]},Yorkshire:{cores:['grafite','cinza','azulado'],pads:['tricolor'],ear:'pont',tail:'curta',L:30,H:16,leg:8,saia:1},
  'Spitz alemão':{cores:['laranja','creme','branco','preto','dourado'],pads:['liso','peito'],ear:'pont',tail:'enrolada',L:32,H:22,leg:9,sn:[5,6],fofo:2},Beagle:{cores:['caramelo','chocolate'],pads:['tricolor','malhado'],ear:'cai',tail:'chicote'},
  Pitbull:{cores:['cinza','caramelo','branco','preto','chocolate','azulado'],pads:['liso','peito','malhado'],ear:'semi',tail:'chicote',H:26,sn:[9,10]},
  'Vira-lata':{},Siamês:{cores:['creme','branco'],pads:['pontas'],olhos:[2]},Persa:{cores:['branco','cinza','creme','laranja','preto','azulado'],pads:['liso','peito','malhado'],fofo:2,sn:[2,6],tail:'fofa'},
@@ -109,7 +109,7 @@ ageUp=(o=>function(){ const r=o.apply(this,arguments); try{ const m=S&&S.me; if(
 
 // ícone redondo (lista de pessoas, cabeçalho) e loja
 const faceSVG_bx=faceSVG;
-faceSVG=function(p,size=44,over){ if(p&&(p.rel==='pet'||p.species)&&BX_SP[bxRaiz(p.species)]){ const sv=bichoSVG(p,{w:size*1.5}); if(sv){ const h=hashS(bxRaiz(p.species)+(p.breed||''))%360;
+faceSVG=function(p,size=44,over){ if(p&&(p.rel==='pet'||p.species)&&BX_SP[bxRaiz(p.species)]){ if(size>=80){ const big=bichoSVG(p,{w:150}); if(big) return `<div class="bicho-modal">${big}</div>`; } const sv=bichoSVG(p,{w:size*1.5}); if(sv){ const h=hashS(bxRaiz(p.species)+(p.breed||''))%360;
    return `<svg class="face bicho-face" viewBox="0 0 100 100" width="${size}" height="${size}" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="hsl(${h} 60% 88%)"/><svg x="4" y="6" width="92" height="92" viewBox="0 0 100 100">${sv.replace(/^<svg[^>]*>|<\/svg>$/g,'')}</svg></svg>`; } }
   return faceSVG_bx.apply(this,arguments); };
 const petIcon_bx=petIcon;

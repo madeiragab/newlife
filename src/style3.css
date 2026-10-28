@@ -298,3 +298,12 @@ img.face.bustinho{border-radius:12px}
 .bicho-grande svg{display:block;max-width:44vw;height:auto}
 @media (prefers-color-scheme:dark){ :root:not([data-theme="light"]) .bicho-grande{background:#2A3036} }
 :root[data-theme="dark"] .bicho-grande{background:#2A3036}
+/* 3.4: abrigo e nome do bicho */
+.bicho-modal{display:flex;justify-content:center;padding:0 0 26px}
+.bicho-modal svg{filter:drop-shadow(0 6px 10px rgba(0,0,0,.12))}
+.abr4{display:flex;gap:12px;align-items:center}
+.abr4-fig{flex:0 0 96px;width:96px;height:96px;border-radius:18px;background:radial-gradient(circle at 50% 40%,#fff8ec,#f1e6d6);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.abr4-fig svg{width:96px;height:96px}
+.abr4 p{margin:4px 0 0;opacity:.75;font-size:.9em}
+.abr4-tag{display:inline-block;padding:1px 8px;border-radius:99px;background:linear-gradient(90deg,#7c3aed,#db2777);color:#fff;font-size:.75em;font-weight:700}
+.abr4.raro{box-shadow:0 0 0 2px #a855f7 inset}

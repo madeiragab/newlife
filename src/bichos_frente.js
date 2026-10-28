@@ -60,7 +60,7 @@ function bxfMamifero(def,f,lk,p){ const G=BXF_G, cx=50, rc=lk.rc||{}, [c1,c2,c3]
     if(fofo) for(let i=0;i<9;i++){ const a=Math.PI*(.85+i*.16); A(bxC(cx+Math.cos(a)*bw*.46,G-bh*.5+Math.sin(a)*bh*.42,fofo>1?4.4:3.4)); }
     if(rc.saia) A(bxP(`M${cx-bw*.46} ${G-bh*.5} Q${cx-bw*.55} ${G-2} ${cx-bw*.3} ${G-1.5} L${cx+bw*.3} ${G-1.5} Q${cx+bw*.55} ${G-2} ${cx+bw*.46} ${G-bh*.5}Z`));
   } else if(f.pose==='stand'){
-    const leg=f.leg, by=G-leg-bh*.36, nk=f.neck; hy=by-bh*.42-nk-hh*.28;
+    const leg=f.leg*(lk.legK||1), by=G-leg-bh*.36, nk=f.neck; hy=by-bh*.42-nk-hh*.28;
     [-1,1].forEach(s=>{ const x=cx+s*bw*.24; back.push(bxP(`M${x-lw*.45} ${by} L${x-lw*.42} ${G-4} L${x+lw*.42} ${G-4} L${x+lw*.45} ${by}Z`,` fill="${bxD(c1,.3)}" stroke="${ow}" stroke-width="1.2"`)+(def.hoof?bxP(`M${x-lw*.45} ${G-7} h${lw*.9} v3 h-${lw*.9}Z`,` fill="#2A221E"`):'')); });
     if(def.porco) back.push(bxfTail(lk,def,cx+bw*.42,by-bh*.1,c1,c1,c2,ow,rd));
     A(bxE(cx,by,bw*.5,bh*.5)); A(bxE(cx,by-bh*.18,bw*.4,bh*.42));
@@ -105,7 +105,8 @@ function bxfMamifero(def,f,lk,p){ const G=BXF_G, cx=50, rc=lk.rc||{}, [c1,c2,c3]
   if(f.tufo) [-1,1].forEach(s=>A(bxP(`M${hx+s*hw*.38} ${hy-hh*.05} L${hx+s*hw*.62} ${hy+hh*.22} L${hx+s*hw*.44} ${hy+hh*.2} L${hx+s*hw*.58} ${hy+hh*.38} L${hx+s*hw*.3} ${hy+hh*.36}Z`)));
   // focinho
   const my=hy+hh*(f.nose==='cavalo'?.3:.2), mc=['peito','malhado','tricolor','meias','pontas','listra','topete','sela'].includes(pad)?c2:mixHex(c1,c2,.35);
-  if(f.nose!=='gato'&&f.nose!=='roedor') A(bxE(hx,my,mw*.5,mh*.5),pad==='mascara'||pad==='pontas'?c3:mc);
+  const ROTT='#A65A24';
+  if(f.nose!=='gato'&&f.nose!=='roedor') A(bxE(hx,my,mw*.5,mh*.5),pad==='rott'?ROTT:pad==='mascara'||pad==='pontas'?c3:mc);
   else A(bxE(hx,my,mw*.5,mh*.5),mixHex(c1,c2,.55));
   hangs.forEach(s=>A(s,pad==='tricolor'||pad==='malhado'&&rd()<.5?c3:ec));
   // ----- padrões -----
@@ -118,6 +119,7 @@ function bxfMamifero(def,f,lk,p){ const G=BXF_G, cx=50, rc=lk.rc||{}, [c1,c2,c3]
   if(pad==='manchas') for(let i=0;i<16;i++){ const big=rd()<.4; E(cx+(rd()-.5)*bw*1.05,bodyY+(rd()-.55)*bh*.95,big?2.6:1.5,big?2.1:1.3,c3); }
   if(pad==='manchas') for(let i=0;i<6;i++) E(hx+(rd()-.5)*hw*.7,hy-hh*.25+(rd()-.5)*hh*.2,1.1,1,c3);
   if(pad==='sela'){ E(cx-bw*.46,bodyY-bh*.1,bw*.2,bh*.44,c3); E(cx+bw*.46,bodyY-bh*.1,bw*.2,bh*.44,c3); E(hx,hy-hh*.42,hw*.36,hh*.22,c3); E(hx,my+mh*.1,mw*.32,mh*.35,c3); }
+  if(pad==='rott'){ [-1,1].forEach(s=>{ E(hx+s*hw*.2,hy-hh*.2,2.6,1.9,ROTT); E(hx+s*hw*.3,hy+hh*.2,hw*.12,hh*.14,ROTT); P(bxP(`M${cx+s*1.2} ${bodyY-bh*.32} L${cx+s*bw*.2} ${bodyY-bh*.42} L${cx+s*bw*.12} ${bodyY-bh*.05}Z`,` fill="${ROTT}"`)); E(cx+s*bw*.18,G-3.5,lw*.75,5,ROTT); E(cx+s*bw*.5,G-2,bw*.14,3,ROTT); }); }
   if(pad==='mascara'){ E(hx-hw*.2,hy-hh*.05,hw*.18,hh*.18,c3); E(hx+hw*.2,hy-hh*.05,hw*.18,hh*.18,c3); }
   if(pad==='pontas'){ E(hx,hy+hh*.12,hw*.3,hh*.34,c3); E(cx-bw*.18,G-4,lw,7,c3); E(cx+bw*.18,G-4,lw,7,c3); E(cx-bw*.5,G-2,bw*.14,3.4,c3); E(cx+bw*.5,G-2,bw*.14,3.4,c3); }
   if(pad==='meias'||pad==='estrela'){ [-1,1].forEach(s=>{ E(cx+s*bw*.18,G-3,lw*.7,4.4,c2); E(cx+s*bw*.3,G-3,lw*.7,4,c2); E(cx+s*bw*.5,G-2,bw*.14,3,c2); }); }
@@ -135,6 +137,9 @@ function bxfMamifero(def,f,lk,p){ const G=BXF_G, cx=50, rc=lk.rc||{}, [c1,c2,c3]
   if(mk.sobr) [-1,1].forEach(s=>E(hx+s*hw*.2,hy-hh*.22,2,1.4,pad==='tricolor'?c1:mixHex(c1,c2,.6)));
   if(mk.orelhaE) E(hx+(lk.seed%2?-1:1)*hw*.34,hy-hh*.36,hw*.2,hh*.22,mkc);
   if(mk.queixo) E(hx,hy+hh*.42,mw*.32,mh*.25,c2);
+  if(mk.velho){ const gr=mixHex(c1,'#ECEAE6',.72); E(hx,my,mw*.56,mh*.56,gr); E(hx,hy+hh*.42,mw*.4,mh*.32,gr); [-1,1].forEach(s=>{ E(hx+s*hw*.22,hy-hh*.2,3.2,1.6,gr); E(hx+s*hw*.24,hy+hh*.02,hw*.13,hh*.1,mixHex(c1,'#ECEAE6',.4)); });
+    const rv=bxRng(lk.seed+7);
+    for(let i=0;i<9;i++) P(bxP(`M${(hx+(rv()-.5)*hw*.8).toFixed(1)} ${(hy-hh*(.1+rv()*.35)).toFixed(1)} l${(rv()-.5).toFixed(2)} 2.2`,` stroke="${gr}" stroke-width=".7" stroke-linecap="round"`)); E(cx,bodyY-bh*.15,bw*.16,bh*.2,mixHex(c1,'#ECEAE6',.35)); }
   if(mk.bochecha) [-1,1].forEach(s=>E(hx+s*hw*.3,hy+hh*.16,hw*.12,hh*.12,mixHex(c1,c2,.5)));
   // ----- detalhes por cima -----
   const det=[];
@@ -147,9 +152,10 @@ function bxfMamifero(def,f,lk,p){ const G=BXF_G, cx=50, rc=lk.rc||{}, [c1,c2,c3]
   if(!rc.sphynx&&!def.porco){ det.push(bxfPelo(hx,hy,hw*.5,hh*.5,pelo,14,rd,Math.PI*.1,Math.PI*.9,1.8)); if(f.pose!=='blob') det.push(bxfPelo(cx,bodyY+bh*.05,bw*.48,bh*.4,pelo,16,rd,Math.PI*.2,Math.PI*.8,2));
     det.push(`<path d="${Array.from({length:5},(_,i)=>`M${(cx-6+i*3).toFixed(1)} ${(bodyY-bh*.2+(i%2)*3).toFixed(1)} l1.2 2.4 l1.2 -2.4`).join('')}" fill="none" stroke="${bxL(c2,.3)}" stroke-width=".6" opacity=".6"/>`); }
   // olhos
-  const eY=hy-hh*(f.nose==='cavalo'?.18:.06), eX=hw*(f.nose==='cavalo'?.38:f.pose==='blob'?.27:.22), er=Math.max(2,hw*(f.pose==='blob'?.075:.085))*(lk.es||1);
+  const eY=hy-hh*(f.nose==='cavalo'?.18:.06), eX=hw*(f.nose==='cavalo'?.38:f.pose==='blob'?.27:.22), er=Math.max(2,hw*(f.pose==='blob'?.075:.085))*(lk.es||1)*(rc.olhoG||1);
   const pup=rc.sphynx?'v':f.pup;
   [-1,1].forEach(s=>det.push(bxfOlho(hx+s*eX,eY,er,lk.olho,pup,s)));
+  if(mk.velho) [-1,1].forEach(s=>det.push(bxC(hx+s*eX,eY,er*.8,` fill="#DDE6EE" opacity=".32"`)+bxP(`M${hx+s*eX-er} ${eY-er*.55} q${er} ${-er*.25} ${er*2} 0`,` fill="none" stroke="${bxD(c1,.4)}" stroke-width="${(er*.5).toFixed(2)}" stroke-linecap="round"`)));
   det.push(bxP(`M${hx-eX-er} ${eY-er*1.25} q${er} ${-er*.6} ${er*2} ${-er*.1} M${hx+eX+er} ${eY-er*1.25} q${-er} ${-er*.6} ${-er*2} ${-er*.1}`,` fill="none" stroke="${bxD(c1,.35)}" stroke-width=".8" opacity=".7"`));
   // nariz e boca
   const nY=my-mh*.28, nw={cao:mw*.24,felino:mw*.18,gato:mw*.2,roedor:mw*.16,lhama:mw*.2,cavalo:mw*.32,capivara:mw*.3,porco:mw*.42,macaco:mw*.2,ourico:mw*.18}[f.nose]||3;
@@ -336,8 +342,18 @@ function bxfAracnideo(def,lk){ const G=BXF_G, cx=50, [c1,c2,c3]=lk.c, rd=bxRng(l
   return o.join(''); }
 
 // ---------- desenho final ----------
-function bichoSVG(p,{w=120,cls='bicho3'}={}){ const sp=bxRaiz(p&&p.species), def=BX_SP[sp], lk=bxLook(p); if(!def||!lk) return '';
+// fase da vida pela fração da expectativa da espécie: filhote tem cabeça e olhos grandes, idoso fica grisalho
+function bxFase(p){ const sp=p&&PET_SPECIES.find(x=>x.s===p.species||bxRaiz(x.s)===bxRaiz(p.species)), vida=sp&&sp.life?(sp.life[0]+sp.life[1])/2:(p&&p.life)||12, a=+(p&&p.age)||0, f=a/Math.max(1,vida);
+  return a<1||f<.08?'filhote':f<.2?'jovem':f>.7?'idoso':'adulto'; }
+// porte: raças pequenas e grandes mudam o tamanho; bichos sem raça têm porte sorteado
+function bxPorte(p,def,lk){ const rc=lk.rc||{}; if(rc.L||rc.H) return Math.max(.8,Math.min(1.2,Math.sqrt((rc.L||def.L)*(rc.H||def.H)/(def.L*def.H))));
+  return def.t==='q'&&/^Cachorro/.test(p&&p.species||'')?[.78,.9,1,1.1][lk.seed%4]:1; }
+function bichoSVG(p,{w=120,cls='bicho3'}={}){ const sp=bxRaiz(p&&p.species), def=BX_SP[sp], lk0=bxLook(p); if(!def||!lk0) return '';
+  const fase=bxFase(p), lk=Object.assign({},lk0,{marcas:lk0.pad==='rott'?{}:Object.assign({},lk0.marcas)});
+  if(fase==='filhote') Object.assign(lk,{hs:(lk.hs||1)*1.2,es:(lk.es||1)*1.3,ms:(lk.ms||1)*.75,earS:(lk.earS||1)*1.06,gord:lk.gord*(def.hoof?.82:.94),legK:def.hoof?1.75:1,pelo:Math.max(lk.pelo||0,def.t==='q'?1:0)});
+  else if(fase==='jovem') Object.assign(lk,{hs:(lk.hs||1)*1.08,es:(lk.es||1)*1.12});
+  else if(fase==='idoso'){ Object.assign(lk,{es:(lk.es||1)*.9,gord:lk.gord*1.07,earS:(lk.earS||1)*.94,hs:(lk.hs||1)*.97}); lk.marcas.velho=1; }
   let s; try{ const f=BXF[sp]; s=def.t==='q'?bxfMamifero(def,f,lk,p):def.t==='a'?bxfAve(def,lk):def.t==='f'?bxfPeixe(def,lk):def.t==='o'?bxfPolvo(def,lk):def.t==='r'?bxfReptil(def,lk):def.t==='s'?bxfCobra(def,lk):bxfAracnideo(def,lk); }catch(e){ console.error(e); return ''; }
-  const tam=(p&&p.age<1?.8:p&&p.age<2?.9:1)*lk.tam, agua=def.t==='f'||def.t==='o';
+  const tam=(fase==='filhote'?.74:fase==='jovem'?.86:fase==='idoso'?.97:1)*lk.tam*bxPorte(p,def,lk0), agua=def.t==='f'||def.t==='o';
   const chao=agua?`<rect x="0" y="0" width="100" height="100" rx="14" fill="#BFE3F4"/><path d="M0 86 Q25 80 50 86 T100 86 V100 H0Z" fill="#E6D4A2"/>`:`<ellipse cx="50" cy="${BXF_G+.6}" rx="34" ry="3.4" fill="#000" opacity=".14"/>`;
   return `<svg class="${cls}" viewBox="0 0 100 100" width="${w}" height="${w}" aria-hidden="true">${chao}<g transform="translate(50 ${BXF_G}) scale(${tam.toFixed(3)}) translate(-50 -${BXF_G})">${s}</g></svg>`; }
