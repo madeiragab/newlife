@@ -4,8 +4,14 @@
 // a guarda é decidida, madrasta e padrasto aparecem nas Relações e o filho deles vira meio-irmão.
 // Também ganham efeito real os textos de mudança de cidade, troca de empresa, carro e casa herdada.
 
+// fonte única: separados só se um dos dois está com outra pessoa ou se os dois registros dizem "sem par".
+// Registro faltando ou preenchido só de um lado (save antigo ou parcial) conta como juntos e é completado.
 function paisJuntos(){ const mae=people('mae')[0], pai=people('pai')[0]; if(!mae||!pai||S.flags.divorced) return false;
-  return !mae.vida||!mae.vida.par||mae.vida.par===pai.id; }
+  const pm=mae.vida&&mae.vida.par, pp=pai.vida&&pai.vida.par;
+  if((pm&&pm!==pai.id)||(pp&&pp!==mae.id)) return false;
+  if(mae.vida&&pai.vida&&!pm&&!pp) return false;
+  if(mae.vida&&!pm) mae.vida.par=pai.id; if(pai.vida&&!pp) pai.vida.par=mae.id;
+  return true; }
 function paisSeparar(){ const mae=people('mae')[0], pai=people('pai')[0]; if(!mae||!pai) return;
   S.flags.divorced=1; if(mae.vida&&mae.vida.par===pai.id) mae.vida.par=null; if(pai.vida&&pai.vida.par===mae.id) pai.vida.par=null;
   if(S.me&&S.me.alive&&S.me.age<18&&!S.flags.guarda&&!S.pending.some(e=>e.id==='guarda_pais')) S.pending.push({id:'guarda_pais',d:{}}); }
@@ -15,7 +21,7 @@ const paiOuMae=p=>p.rel==='mae'?'minha mãe':'meu pai';
 // sincroniza o que o sistema de pessoas decidiu sozinho com a família que o jogador vê
 function familiaSync(){ const m=S.me; if(!m||!m.alive||S.scen) return;
   const mae=people('mae')[0], pai=people('pai')[0];
-  if(mae&&pai&&!S.flags.divorced&&mae.vida&&mae.vida.par!==pai.id){ paisSeparar(); log('Meus pais se separaram.','bad'); st('happy',m.age<18?-10:-3); }
+  if(mae&&pai&&!S.flags.divorced&&!paisJuntos()){ paisSeparar(); log('Meus pais se separaram.','bad'); st('happy',m.age<18?-10:-3); }
   for(const p of [mae,pai].filter(Boolean)){ const q=p.vida&&p.vida.par&&P(p.vida.par);
     if(q&&q.alive&&q.id!==(p===mae?pai:mae)?.id&&q.id!==m.id&&['conhecido'].includes(q.rel)){
       q.rel='padrasto'; q.bond=R.int(30,60); q.padDe=p.id; npcVida(q);
@@ -98,6 +104,11 @@ function familia2SelfTest(){ const s0=S,ns=window.NO_SAVE; window.NO_SAVE=true; 
     ok(S.pending.some(e=>e.id==='guarda_pais'),'guarda não foi decidida'); ok(!EVENTS.pais_brigam.when(m),'briga na sala com os pais separados');
     ok(!CHAINS.briga_pais.o.when(m)&&!CHAINS.irmao_novo.o.when(m),'brigas ou irmão novo com os pais separados');
     EVENTS.guarda_pais.pick('mae'); ok(S.flags.guarda==='mae','guarda não foi gravada');
+    // save antigo ou parcial: registro vazio de um lado (ou dos dois sem vida) não separa ninguém
+    S.flags.divorced=0; S.flags.guarda=0; mae.vida.par=null; pai.vida.par=mae.id; S.pending=[]; familiaSync();
+    ok(!S.flags.divorced&&paisJuntos()&&mae.vida.par===pai.id,'registro incompleto da mãe separou os pais');
+    const vm=mae.vida, vp=pai.vida; delete mae.vida; delete pai.vida; familiaSync(); ok(!S.flags.divorced,'pais sem registro foram separados');
+    mae.vida=vm; pai.vida=vp; mae.vida.par=null; pai.vida.par=null; familiaSync(); EVENTS.guarda_pais.pick('mae');
     // novo par da mãe vira padrasto, e o filho deles, meio-irmão
     const q=mkPerson({rel:'conhecido',gender:'M',age:36}); S.people.push(q); npcUnir(mae,q); S.pending=[]; familiaSync();
     ok(q.rel==='padrasto'&&relLabel(q)==='Padrasto','novo par da mãe não virou padrasto: '+q.rel);
