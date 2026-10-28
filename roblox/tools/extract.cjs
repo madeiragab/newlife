@@ -194,22 +194,31 @@ function main() {
   if (g.errors.length) console.warn('avisos ao carregar o jogo:', g.errors.join('; '));
   const countries = g.run('COUNTRIES.map(c=>c.id)');
   FILL_KEYS = new Set(Object.keys(g.run('FILL')));
-  const out = [], why = {}, cortes = {}, used = new Set();
+  const out = [], why = {}, cortes = {}, cortesEscolha = {}, used = new Set();
   const skip = (map, k) => { map[k] = (map[k] || 0) + 1; };
 
   for (const pk of g.packs) {
     const gr = pk.gr;
     for (const e of pk.list) {
-      const [title, text, choices, op = {}] = e;
+      const [title, text, choices0, op = {}] = e;
       const o = Object.assign({}, gr, op);
       const id = evId(o, title, text, used);
       if (gr.scen || o.scen) { skip(why, 'modo fictício'); continue; }
       if (o.jail) { skip(why, 'prisão'); continue; }
       const bad = Object.keys(o).find(k => !OPT_OK.has(k)); if (bad) { skip(why, 'opção:' + bad); continue; }
       if (o.who && !WHO_OK.has(o.who)) { skip(why, 'who:' + o.who); continue; }
-      const textos = [title].concat(Array.isArray(text) ? text : [text]).concat(choices);
-      const proib = textos.map(textoProibido).find(Boolean) || choices.flatMap(choiceTokens).map(efeitoProibido).find(Boolean);
-      if (proib) { skip(cortes, proib.trim()); continue; }
+      // título ou texto proibido derruba o evento; escolha proibida sai sozinha, se sobrarem ao menos duas
+      const base = [title].concat(Array.isArray(text) ? text : [text]);
+      const proibBase = base.map(textoProibido).find(Boolean);
+      if (proibBase) { skip(cortes, proibBase.trim()); continue; }
+      const proibCh = c => textoProibido(c) || choiceTokens(c).map(efeitoProibido).find(Boolean);
+      const choices = choices0.filter(c => !proibCh(c));
+      if (choices.length < choices0.length) {
+        const p = proibCh(choices0.find(c => proibCh(c))).trim();
+        if (choices.length < Math.min(2, choices0.length)) { skip(cortes, p); continue; }
+        skip(cortesEscolha, p);
+      }
+      const textos = base.concat(choices);
       const ph = textos.join(' ').match(/\{(\w*)\}/g) || [];
       const phBad = ph.map(x => x.slice(1, -1)).find(k => !PLACEHOLDERS.has(k) && !FILL_KEYS.has(k));
       if (phBad !== undefined) { skip(why, 'texto:{' + phBad + '}'); continue; }
@@ -275,9 +284,12 @@ function main() {
     `Eventos no formato compacto: ${total}`,
     `Convertidos: ${out.length}`,
     `Cortados pelas regras do Roblox: ${Object.values(cortes).reduce((a, b) => a + b, 0)}`,
+    `Escolhas cortadas (o evento ficou): ${Object.values(cortesEscolha).reduce((a, b) => a + b, 0)}`,
     `Fora por depender de sistemas que o Roblox ainda não tem: ${Object.values(why).reduce((a, b) => a + b, 0)}`,
     '', 'Cortes (palavra ou efeito que derrubou o evento):',
     ...Object.entries(cortes).sort((a, b) => b[1] - a[1]).map(([k, n]) => `  ${n}\t${k}`),
+    '', 'Escolhas cortadas (palavra ou efeito):',
+    ...Object.entries(cortesEscolha).sort((a, b) => b[1] - a[1]).map(([k, n]) => `  ${n}	${k}`),
     '', 'Ainda não suportado:',
     ...Object.entries(why).sort((a, b) => b[1] - a[1]).map(([k, n]) => `  ${n}\t${k}`),
   ];

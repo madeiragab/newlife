@@ -2,13 +2,14 @@
 // As regras do Roblox proíbem conteúdo sexual (ainda mais com menores), drogas ilícitas, tabaco,
 // apostas, suicídio e violência detalhada. O jogo do site e dos apps continua igual:
 // estes cortes valem apenas para o que o conversor manda para roblox/.
-// Um evento sai inteiro se o título, o texto ou qualquer escolha bater numa destas expressões
-// (sem diferenciar maiúsculas nem acentos) ou se usar um dos efeitos proibidos.
+// Um evento sai inteiro se o título ou o texto bater numa destas expressões (sem diferenciar maiúsculas
+// nem acentos). Uma escolha que bate ou usa um efeito proibido sai sozinha; se sobrar menos de duas, sai o evento.
+// Termos ambíguos ficam com contexto (cogumelo só no sentido de droga), para não cortar cozinha e fantasia.
 
 const PALAVRAS = [
   // drogas
   'droga', 'maconha', 'baseado', 'cocain', 'crack', 'heroina', 'ecstasy', 'lsd', 'traficante', 'trafico', 'trafica',
-  'boca de fumo', 'cheirar', 'chapad', 'metanfetamina', 'anfetamina', 'overdose', 'seringa', 'entorpecente', 'cogumelo',
+  'boca de fumo', 'cheirar', 'chapad', 'metanfetamina', 'anfetamina', 'overdose', 'seringa', 'entorpecente', 'cogumelo alucin', 'cogumelos alucin', 'cogumelo magic', 'cogumelos magic',
   'lanca-perfume', 'aviaozinho',
   // tabaco
   'cigarro', 'fumar', 'fumei', 'fumou', 'vape', 'narguil', 'tabaco', 'charuto',
