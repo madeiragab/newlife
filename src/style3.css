@@ -273,3 +273,4 @@ img.face.bustinho{border-radius:12px}
  .pv3-ok{padding:6px 12px 6px 6px}
 }
 .pv3-fig.perto~.pv3-chao{display:none}
+.pv3-alt{display:grid;place-items:center;border-radius:12px;background:color-mix(in srgb,var(--brand) 14%,var(--surface));color:var(--brand);font-weight:800;font-size:15px;box-shadow:none}
