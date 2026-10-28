@@ -1,7 +1,15 @@
 // ===== 3.5: catálogo de itens desenhados (primeiros 40) =====
 // IDs permanentes (não mudar): o save guarda o id e o desenho sai daqui.
 const I4L='#2A2238';
-const i4=(b,s='')=>`<svg viewBox="0 0 64 64" width="44" height="44" aria-hidden="true" class="item4"><ellipse cx="32" cy="58" rx="22" ry="3" fill="#000" opacity=".12"/><g stroke="${I4L}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">${b}</g>${s}</svg>`;
+// acabamento igual ao dos bichos e personagens: cada cor ganha degradê de luz, contorno escuro da própria cor e brilho
+let I4_UID=0;
+const i4Hex=c=>{ c=String(c); return /^#[0-9a-f]{3}$/i.test(c)?'#'+c.slice(1).split('').map(x=>x+x).join(''):c; };
+function i4(b,s=''){ const id='i4g'+(++I4_UID), gs={}; let n=0;
+  const corpo=b.replace(/fill="(#[0-9A-Fa-f]{3,6})"/g,(m0,c)=>{ c=i4Hex(c); if(!gs[c]) gs[c]=id+'_'+(n++); return `fill="url(#${gs[c]})" stroke="${bxD(c,.55)}"`; })
+    .replace(/stroke="(#[0-9A-Fa-f]{3,6})" stroke-width="(\d+)"/g,(m0,c,w)=>`stroke="${i4Hex(c)}" stroke-width="${w}"`);
+  const defs=Object.entries(gs).map(([c,g])=>`<linearGradient id="${g}" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="${bxL(c,.32)}"/><stop offset=".55" stop-color="${c}"/><stop offset="1" stop-color="${bxD(c,.22)}"/></linearGradient>`).join('');
+  return `<svg viewBox="0 0 64 64" width="44" height="44" aria-hidden="true" class="item4"><defs>${defs}<radialGradient id="${id}_sh" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient><radialGradient id="${id}_gl" cx=".3" cy=".22" r=".55"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>`+
+    `<ellipse cx="32" cy="57.5" rx="24" ry="4" fill="url(#${id}_sh)"/><g stroke="#3A2E4A" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round">${corpo}</g>${s}<rect x="4" y="4" width="56" height="50" rx="14" fill="url(#${id}_gl)" pointer-events="none" style="mix-blend-mode:soft-light"/></svg>`; }
 const I4R=(x,y,w,h,c,r=3)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${c}"/>`;
 const I4C=(x,y,r,c)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${c}"/>`;
 const I4P=(d,c='none')=>`<path d="${d}" fill="${c}"/>`;
