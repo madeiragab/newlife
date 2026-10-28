@@ -606,17 +606,55 @@ function v4Vidro(P){ const ws0=P.xF-P.hood, ws1=ws0-P.ws, re=ws1-P.roof, bk1=re-
   const yq=Math.min(yb,P.yD-1); let xd=re-.8-(P.bk)*Math.min(1,(yq-P.yR)/Math.max(1,P.yD-P.yR));
   const cp=P.cp||0, x2=re+.6+cp; xd+=cp*1.3; const xk=xd+(xA-xd)*.28;
   return {d:P.kick?`M${xA} ${yb}L${ws1+1.2} ${yt}H${x2}L${xd} ${Math.min(yq,yb)-P.kick}L${xk} ${yb}Z`:`M${xA} ${yb}L${ws1+1.2} ${yt}H${x2}L${xd} ${yq}${yq<yb?`V${yb}`:''}Z`,xA,x1:ws1+1.2,x2,xd,yb,yt}; }
+// ---------- desenhos à mão (contorno, vidros e detalhes tirados de foto de lado do modelo real) ----------
+const v4Arco=(x,wc,R,y)=>{ const dx=Math.sqrt(R*R-(y-wc)*(y-wc)).toFixed(2); return `L${(x-dx).toFixed(2)} ${y}A${R} ${R} 0 1 1 ${(x+ +dx).toFixed(2)} ${y}`; };
+const V4_DESENHO={
+  'Hyundai HB20':{ p:{L:91,xF:110,xT:19,wfX:92.5,wbX:34,wr:7.9,yS:47.1,yB:33.4,yR:21,yD:33.5,yN:39},
+    corpo:`M108.5 51L110.5 49L111 44.5Q111.2 41.4 110 40.5L107 38.8Q98 36 87 34.6Q80 27.6 73 23.2Q70.5 21 66 21L48 21.6Q36 23.2 27 25.5L24.5 26.2L25.5 27.2L21 33.5L19.6 35.5L19.2 40L19 45Q19 50 21.5 51`+v4Arco(34,47.1,9.4,51)+v4Arco(92.5,47.1,9.4,51)+`L108.5 51Z`,
+    det:(c,esc,cl,vid,uid)=>`<path d="M84.5 33.8L72.5 24.6Q71 23.4 68 23.4L47 23.8Q42 24.3 39.5 27L37 29.6L41.5 31.5Z" fill="url(#${uid}_v)" stroke="#1A2129" stroke-width=".7" stroke-linejoin="round"/>`+
+      `<path d="M61.8 23.5H64L62.6 32.6H60.4Z" fill="#1F2329"/><path d="M43.6 24L42.6 31.6" stroke="#1F2329" stroke-width="1.3"/><path d="M25.4 27.4L22.6 32.2L23.8 32.1L26.6 27.6Z" fill="${vid}"/>`+
+      `<path d="M101 39Q70 35.8 30 33.2" stroke="${cl}" stroke-width=".9" fill="none"/><path d="M101 39.6Q70 36.5 30 34" stroke="${esc}" stroke-width=".5" fill="none" opacity=".5"/><path d="M85 45.2Q65 44 42.5 42.4" stroke="${esc}" stroke-width=".6" fill="none" opacity=".5"/>`+
+      `<path d="M86.2 34.6Q87.8 42 85.6 50.6M61.5 32.8L61 50.6M41.6 31.7Q42.6 40 45 44" stroke="${esc}" stroke-width=".7" fill="none" opacity=".75"/>`+
+      `<rect x="70" y="36.2" width="4" height="1.3" rx=".6" fill="${cl}" stroke="${esc}" stroke-width=".4"/><rect x="46.6" y="34.9" width="4" height="1.3" rx=".6" fill="${cl}" stroke="${esc}" stroke-width=".4"/>`+
+      `<path d="M84.6 34l-1-3.4h-4.2l-.4 2.6z" fill="${c}" stroke="${esc}" stroke-width=".5"/>`+
+      `<path d="M110.3 40.6L96 37.2Q97 38.6 100 39.4L109.6 42.2Z" fill="#FFF4C8" stroke="${esc}" stroke-width=".5"/><path d="M110.8 43.4L111 49L108.8 50L107.6 44.2Z" fill="#1F2329"/>`+
+      `<path d="M19.6 34.2L30 33.4Q30.6 34.4 29.4 35.2L19.4 36.6Z" fill="#D33A2C" stroke="#7A1C16" stroke-width=".4"/><path d="M19.2 46H24" stroke="#1F2329" stroke-width="1.2"/>` },
+  'Volkswagen Voyage':{ p:{L:98.6,xF:113.6,xT:15,wfX:95,wbX:37.5,wr:7.2,yS:47.8,yB:34,yR:21.2,yD:31,yN:40,rim:'calota'},
+    corpo:`M111 51L113 49L113.6 44L113.2 40.6L111 38.4Q100 36.6 89 35.2Q80 27.2 73 23.4Q70.5 21.3 66 21.2L52 21.4Q46 21.8 43 23L32.5 30.4Q25 30.6 18 31Q15.2 31.4 15.2 33.5L15 40L14.8 45Q14.8 50.4 17.5 51`+v4Arco(37.5,47.8,8.6,51)+v4Arco(95,47.8,8.6,51)+`L111 51Z`,
+    det:(c,esc,cl,vid,uid)=>`<path d="M87.2 34.6L74 24.8Q72.4 23.5 69.5 23.4H51.5Q46.2 24 43.6 26.4L40.2 32.2Q40 33.3 41.5 33.4Z" fill="url(#${uid}_v)" stroke="#1A2129" stroke-width=".7" stroke-linejoin="round"/>`+
+      `<path d="M60.2 23.4H62.4L61.6 34.1H59.4Z" fill="#1F2329"/><path d="M42.8 23.6L33 30.3L34.6 30.2L43.4 24.8Z" fill="${vid}"/>`+
+      `<path d="M103 38.6Q65 36.4 17 34.4" stroke="${cl}" stroke-width=".9" fill="none"/><path d="M103 39.2Q65 37 17 35" stroke="${esc}" stroke-width=".5" fill="none" opacity=".5"/><path d="M88 45.6Q66 45 46.5 44.8" stroke="${esc}" stroke-width=".6" fill="none" opacity=".45"/>`+
+      `<path d="M88.2 35.2Q89.6 42 87.8 50.6M61.1 34.2V50.6M40.8 33.6Q41.6 43 46.4 47.4M33.4 30.6Q33 31.6 31 31.8" stroke="${esc}" stroke-width=".7" fill="none" opacity=".75"/>`+
+      `<rect x="70.5" y="36.6" width="4" height="1.3" rx=".6" fill="${cl}" stroke="${esc}" stroke-width=".4"/><rect x="47" y="36.1" width="4" height="1.3" rx=".6" fill="${cl}" stroke="${esc}" stroke-width=".4"/>`+
+      `<path d="M87.2 34.8l-1-3.4h-4.2l-.4 2.6z" fill="${c}" stroke="${esc}" stroke-width=".5"/>`+
+      `<path d="M113.4 40.4L104.5 38.9L104.2 41.6Q108 42.3 113.2 42.6Z" fill="#FFF4C8" stroke="${esc}" stroke-width=".5"/><path d="M113.4 44.6L113.6 47.6L111.8 47.9L111.6 44.8Z" fill="#1F2329"/>`+
+      `<path d="M15.4 32.4L25.5 32.2L24.2 35.8L15.3 36.4Z" fill="#D33A2C" stroke="#7A1C16" stroke-width=".4"/><path d="M15 46.4H20" stroke="#1F2329" stroke-width="1.1"/>` },
+  'Fiat Uno Mille':{ se:r=>r.modelo==='Uno Mille'||/Mille/.test(r.versao), p:{L:87,xF:108,xT:21,wfX:92,wbX:37,wr:6.5,yS:48.5,yB:34.8,yR:21.6,yD:31,yN:38.4,rim:'calota',chrome:false},
+    corpo:`M105.5 51L107.6 50L108 44L107.6 39.8L106.4 38.4L89.5 35L75 22.8Q74.2 21.6 72.8 21.6L32 22.2Q26 22.6 24.6 23.6L22 33L21.2 38L21 45Q21 50.4 22.5 51`+v4Arco(37,48.5,7.9,51)+v4Arco(92,48.5,7.9,51)+`L105.5 51Z`,
+    det:(c,esc,cl,vid,uid)=>`<path d="M88.4 34.8L75.6 24L40 24.2Q38.4 24.4 38.2 25.6L37.4 34.7Z" fill="url(#${uid}_v)" stroke="#1A2129" stroke-width=".7" stroke-linejoin="round"/>`+
+      `<path d="M54.6 23.9H57.4L57.2 34.7H54.4Z" fill="#1F2329"/><path d="M75 22.8Q74.2 21.6 72.8 21.6H33" stroke="${cl}" stroke-width=".6" fill="none"/>`+
+      `<path d="M89.5 35.2Q90.6 42 89.4 50.8M56 34.8V50.8" stroke="${esc}" stroke-width=".7" fill="none" opacity=".75"/><path d="M106.4 38.6L89.8 35.4" stroke="${esc}" stroke-width=".5" opacity=".5"/>`+
+      `<path d="M21.6 41H107.8V42.8H21.4Z" fill="#1F2329"/><path d="M21.8 41.3H107.6" stroke="#4A4F57" stroke-width=".3"/>`+
+      `<rect x="57.8" y="36.6" width="3.6" height="1.2" rx=".4" fill="#1F2329"/><circle cx="30" cy="37" r="1.3" fill="none" stroke="${esc}" stroke-width=".5"/>`+
+      `<path d="M88.6 35.2l-1.2-3h-3l-.2 2.4z" fill="#1F2329"/>`+
+      `<path d="M108 44.2L108.4 49.8Q108 51 105.6 51.2H100.8V47.8L104 47.2L104 44.4Z" fill="#1F2329"/><path d="M20.8 44.2L20.9 50.2Q21.4 51.1 23.4 51.2H29.4V47.8L25.6 47.2L25.4 44.4Z" fill="#1F2329"/>`+
+      `<path d="M107.8 38.6V41.4H105.4V38.9Z" fill="#FFF4C8" stroke="${esc}" stroke-width=".4"/><path d="M105.4 38.9L103.6 39.2V41.4H105.4Z" fill="#F2A23A" stroke="${esc}" stroke-width=".4"/>`+
+      `<path d="M22.4 32.4H25V40.6H21.4Z" fill="#D33A2C" stroke="#7A1C16" stroke-width=".4"/><path d="M21.8 36.6H25V38.4H21.6Z" fill="#F2A23A"/>` }
+};
+V4_DESENHO['Fiat Uno']=V4_DESENHO['Fiat Uno Mille'];
+function v4Desenho(r){ const d=V4_DESENHO[r.marca+' '+r.modelo]; return d&&(!d.se||d.se(r))?d:null; }
 function car4SVG(r,cor,w=56){ r=typeof r==='string'?VEIC4[r]:r; if(!r) return '';
-  const F=VEIC4_FORMA[r.forma]||VEIC4_FORMA.hatch, MD=(!r.classico&&V4_MOD[r.marca+' '+r.modelo])||null, P=Object.assign({},F,r.o||{},MD||{}), uid='v4'+(++V4_UID); if(MD&&MD.roof==null) P.roof=null;
+  const F=VEIC4_FORMA[r.forma]||VEIC4_FORMA.hatch, MD=(!r.classico&&V4_MOD[r.marca+' '+r.modelo])||null, P=Object.assign({},F,r.o||{},MD||{}), uid='v4'+(++V4_UID), DS=v4Desenho(r); if(MD&&MD.roof==null) P.roof=null;
   const c=VEIC4_COR[cor]||(/^#/.test(cor||'')?cor:VEIC4_COR[Object.keys(VEIC4_COR)[hashS(r.id)%8]]);
   if(P.box&&r.forma!=='box'){ P.ws=Math.min(P.ws,10); if(/hatch/.test(r.forma)){ P.bk=2; P.yD=P.yR+7; P.deck=1; } }
-  if(P.roof==null) P.roof=Math.max(8,P.L-P.hood-P.ws-P.bk-P.deck); P.xF=64+P.L/2; P.xT=64-P.L/2; const yG=55, wc=yG-P.wr;
+  if(P.roof==null) P.roof=Math.max(8,P.L-P.hood-P.ws-P.bk-P.deck); P.xF=64+P.L/2; P.xT=64-P.L/2; const yG=55, wc=yG-(DS?DS.p.wr:P.wr);
   P.wfX=P.xF-Math.max(P.wr+5,P.L*.17); P.wbX=P.xT+Math.max(P.wr+5,P.L*(P.bed||P.van?.2:.18));
   if(r.forma==='super'||r.forma==='p911'){ P.wfX=P.xF-P.L*.16; P.wbX=P.xT+P.L*.19; }
-  if(P.wb){ P.wfX=P.xF-P.L*P.of; P.wbX=P.wfX-P.L*P.wb; } if(P.blk&&!P.top) P.top='#1F2329';
-  const esc=bxD(c,.45), cl=bxL(c,.35), vid='#26323F', cromo=P.chrome||r.classico;
+  if(P.wb){ P.wfX=P.xF-P.L*P.of; P.wbX=P.wfX-P.L*P.wb; } if(P.blk&&!P.top) P.top='#1F2329'; if(DS) Object.assign(P,DS.p);
+  const esc=bxD(c,.45), cl=bxL(c,.35), vid='#26323F', cromo=P.chrome??r.classico;
   let corpo='', det='';
-  if(r.forma==='fusca'){ const f=P.xF,t=P.xT; corpo=`M${f-2} ${P.yS}Q${f+2} ${P.yS} ${f+1} ${P.yS-6}Q${f} ${P.yS-14} ${f-14} ${P.yS-17}Q${f-24} ${P.yR-1} ${64} ${P.yR}Q${t+18} ${P.yR} ${t+6} ${P.yS-16}Q${t-1} ${P.yS-8} ${t+1} ${P.yS}`+
+  if(DS){ corpo=DS.corpo; det=DS.det(c,esc,cl,vid,uid); }
+  else if(r.forma==='fusca'){ const f=P.xF,t=P.xT; corpo=`M${f-2} ${P.yS}Q${f+2} ${P.yS} ${f+1} ${P.yS-6}Q${f} ${P.yS-14} ${f-14} ${P.yS-17}Q${f-24} ${P.yR-1} ${64} ${P.yR}Q${t+18} ${P.yR} ${t+6} ${P.yS-16}Q${t-1} ${P.yS-8} ${t+1} ${P.yS}`+
       `L${P.wbX-P.wr-1.8} ${P.yS}A${P.wr+1.8} ${P.wr+1.8} 0 0 1 ${P.wbX+P.wr+1.8} ${P.yS}L${P.wfX-P.wr-1.8} ${P.yS}A${P.wr+1.8} ${P.wr+1.8} 0 0 1 ${P.wfX+P.wr+1.8} ${P.yS}Z`;
     det+=`<path d="M${f-16} ${P.yR+9}Q${f-22} ${P.yR+2} ${64} ${P.yR+2.6}Q${t+20} ${P.yR+3} ${t+14} ${P.yR+10}Z" fill="${vid}"/><path d="M64 ${P.yR+2.6}V${P.yR+10}" stroke="${c}" stroke-width="2"/>`;
     det+=`<circle cx="${f-4}" cy="${P.yS-10.5}" r="2.2" fill="#FFF4C8" stroke="${esc}" stroke-width=".6"/>`; }
@@ -629,7 +667,7 @@ function car4SVG(r,cor,w=56){ r=typeof r==='string'?VEIC4[r]:r; if(!r) return ''
       `L${P.wbX-P.wr-1.4} ${P.yS}L${P.wbX-P.wr+1} ${P.yS-P.wr-1}H${P.wbX+P.wr-1}L${P.wbX+P.wr+1.4} ${P.yS}L${P.wfX-P.wr-1.4} ${P.yS}L${P.wfX-P.wr+1} ${P.yS-P.wr-1}H${P.wfX+P.wr-1}L${P.wfX+P.wr+1.4} ${P.yS}Z`;
     det+=`<path d="M${f-14} ${P.yS-12.5}L${64-4} ${P.yR+3}L${64-24} ${P.yR+8.5}V${P.yS-12.5}Z" fill="${vid}"/><path d="M${64-14} ${P.yR+6}V${P.yS-12}" stroke="${c}" stroke-width="1.6"/><path d="M${f-1} ${P.yS-9.4}H${f-14}" stroke="#E9F4FF" stroke-width="1"/>`; }
   else corpo=v4Perfil(P);
-  const conv=r.forma==='fusca'||r.forma==='kombi'||r.forma==='cyber';
+  const conv=DS||r.forma==='fusca'||r.forma==='kombi'||r.forma==='cyber';
   if(!conv){ const g=v4Vidro(P), ws0=P.xF-P.hood, re=ws0-P.ws-P.roof, bk1=re-P.bk;
     if(P.open){ det+=`<path d="M${g.xA} ${g.yb}L${g.x1+1} ${P.yR+1}" stroke="#2A2F36" stroke-width="1.4"/><path d="M${g.x1-1} ${P.yB-.8}Q${(g.x1+re)/2} ${P.yB-4.5} ${re-2} ${P.yB-.8}" fill="#2A2F36"/>`; }
     else { det+=`<path d="${g.d}" fill="url(#${uid}_v)" stroke="#1A2129" stroke-width=".7" stroke-linejoin="round"/>`;
@@ -671,7 +709,7 @@ function car4SVG(r,cor,w=56){ r=typeof r==='string'?VEIC4[r]:r; if(!r) return ''
   if(r.forma==='fusca'){ for(const x of [P.wbX,P.wfX]) det+=`<path d="M${x-P.wr-4} ${P.yS}Q${x-P.wr-3} ${P.yS-P.wr*1.9} ${x} ${P.yS-P.wr*2}Q${x+P.wr+3} ${P.yS-P.wr*1.9} ${x+P.wr+4} ${P.yS}Z" fill="url(#${uid}_c)" stroke="${esc}" stroke-width=".8"/>`; det+=`<path d="M${P.wbX+P.wr+4} ${P.yS-1}H${P.wfX-P.wr-4}" stroke="#2A2D33" stroke-width="2"/>`; }
   if(r.modelo==='Defender') det+=`<path d="M${P.xF-P.hood-P.ws-6} ${P.yR+.6}h4M${P.xF-P.hood-P.ws-14} ${P.yR+.6}h4" stroke="#5E7389" stroke-width="1.2"/>`;
   if(/^(Tesla|Lucid|Porsche|Kia|Hyundai)$/.test(r.marca)&&r.cat==='Elétricos') det+=`<path d="M${P.xT} ${P.yD+2.2}h5" stroke="#D33A2C" stroke-width="1.2"/>`;
-  const saia=`<path d="M${P.xT+2} ${P.yS-1.2}H${P.xF-2}" stroke="${cromo?'#D9DEE4':bxD(c,.6)}" stroke-width="${cromo?1.4:1.8}" opacity=".9"/>`;
+  const saia=DS?'':`<path d="M${P.xT+2} ${P.yS-1.2}H${P.xF-2}" stroke="${cromo?'#D9DEE4':bxD(c,.6)}" stroke-width="${cromo?1.4:1.8}" opacity=".9"/>`;
   const aro=r.cat==='Esportivos'||r.cat==='Luxo e executivos'||r.cat==='Elétricos'?5:cromo?0:(P.bed||r.forma==='box'?6:5);
   const caixa=x=>`<path d="M${x-P.wr-1.6} ${P.yS}A${P.wr+1.6} ${P.wr+1.6} 0 0 1 ${x+P.wr+1.6} ${P.yS}Z" fill="#121417"/>`;
   const roda=x=>{ let s=`<circle cx="${x}" cy="${wc}" r="${P.wr}" fill="#1B1E23"/><circle cx="${x}" cy="${wc}" r="${P.wr*.66}" fill="url(#${uid}_a)" stroke="#5B616A" stroke-width=".5"/>`;
