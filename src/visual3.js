@@ -15,28 +15,35 @@ const V3_BATOM={batom:'#B5172E',rosa:'#E26D8F',completa:'#A4133C'};
 const V3_ESPECIAL={ator:'Executivo',musico:'Rock',atleta:'futebol',modelo:'Festa',militar:'soldado',crime:'Street',comedia:'Casual',escritor:'Vintage',artista:'Boho',streamer:'Street',dj:'Festa',camelo:'Verão'};
 // títulos de emprego das outras pessoas (texto) para o id do uniforme
 const V3_TITULO={}; for(const j of JOBS) for(const t of j.l) for(const x of t.split('|')) V3_TITULO[x]=j.id;
-const v3h=(id,s)=>hashS(String(id)+':'+s);
+// sorteios estáveis por pessoa: usam uma semente aleatória guardada no visual (o id se repete entre vidas, então
+// a mãe de toda vida nova saía com a mesma roupa, corte e corpo); a mistura final espalha bem os bits
+function v3Semente(p){ const L=ensureLook(p); if(L.sd==null) L.sd=Math.floor(Math.random()*2147483647); return L.sd; }
+const v3h=(id,s)=>{ let h=hashS(String(id)+':'+s)^0x9E3779B9; h=Math.imul(h^(h>>>16),0x85EBCA6B); h=Math.imul(h^(h>>>13),0xC2B2AE35); return (h^(h>>>16))>>>0; };
 const v3pick=(a,id,s)=>a[v3h(id,s)%a.length];
-function v3Tipo(p){ const L=p.look||{}; if(L.tipo) return L.tipo; if(p.age<4) return 'medio'; const h=v3h(p.id??7,'tipo')%100; return h<16?'magro':h<30?'gordo':h<40&&p.age>=15&&p.age<60?'musculoso':'medio'; }
+function v3Tipo(p){ const L=p.look||{}; if(L.tipo) return L.tipo; if(p.age<4) return 'medio'; const h=v3h(v3Semente(p),'tipo')%100; return h<16?'magro':h<30?'gordo':h<40&&p.age>=15&&p.age<60?'musculoso':'medio'; }
 const V3_ESTILOS_DIA={crianca:['Casual','Esportivo','Verão','Street'],jovem:['Casual','Esportivo','Street','Rock','Verão','Boho','Preppy','Romântico','Gótico'],adulto:['Casual','Casual','Social','Esportivo','Inverno','Verão','Vintage','Country','Boho','Preppy','Romântico'],idoso:['Casual','Social','Inverno','Vintage','Country']};
-function v3RoupaPadrao(p){ const F=p.gender==='F', a=p.age??30, fase=a<13?'crianca':a<26?'jovem':a<62?'adulto':'idoso', est=v3pick(V3_ESTILOS_DIA[fase],p.id??7,'est');
-  const lista=ROUPAS[F?'F':'M'].filter(r=>r.estilo===est); return lista.length?v3pick(lista,p.id??7,'roupa'):ROUPAS[F?'F':'M'][0]; }
+function v3RoupaPadrao(p){ const F=p.gender==='F', a=p.age??30, fase=a<13?'crianca':a<26?'jovem':a<62?'adulto':'idoso', sd=v3Semente(p), est=v3pick(V3_ESTILOS_DIA[fase],sd,'est');
+  const lista=ROUPAS[F?'F':'M'].filter(r=>r.estilo===est); return lista.length?v3pick(lista,sd,'roupa'):ROUPAS[F?'F':'M'][0]; }
 function v3Uniforme(p){ if(p===S?.me){ const m=p; if(m.prison) return 'preso'; if(m.office) return m.office.id; if(m.royal&&!m.royal.abd&&m.royal.reign) return 'rei'; if(m.royal&&!m.royal.abd) return 'principe';
   if(m.job&&m.job.spc) return V3_ESPECIAL[m.job.spc]||null; if(m.job) return m.job.id; if(m.biz) return 'emp'; if(m.age>=6&&m.age<18&&m.edu&&m.edu.cur&&!['uni','post'].includes(m.edu.cur.type)) return 'estudante'; return null; }
   if(p.prison) return 'preso'; return typeof p.job==='string'&&V3_TITULO[p.job]||null; }
 // monta a ficha completa de desenho de uma pessoa
 function v3Ficha(p,over,o={}){
-  const L=Object.assign({},ensureLook(p),over||{}), ge=p.genes||{}, a=p.age??30, F=p.gender==='F', id=p.id??7, me=p===S?.me;
-  const c={sexo:F?'F':'M',idade:a,tipo:v3Tipo(Object.assign({},p,{look:L}))};
+  const L=Object.assign({},ensureLook(p),over||{}), ge=p.genes||{}, a=p.age??30, F=p.gender==='F', id=v3Semente(p), me=p===S?.me;
+  // adulto muda de desenho a cada 2 anos: o rosto quase não muda de um ano pro outro e assim as imagens prontas são reaproveitadas
+  const c={sexo:F?'F':'M',idade:a<18?a:a-a%2,tipo:v3Tipo(Object.assign({},p,{look:L}))};
   let pele=SKINS[ge.skin??2]; if(me&&S.scen&&S.scen.inf) pele=mixHex(pele,'#86A86A',.45); c.pele=pele;
   c.olhos=EYE_HEX[ge.eyes]||'#6A4A2A'; if(ge.freckles) c.sardas=true;
   const natural=HAIR_HEX[ge.hair]||'#4A2E1E'; c.corCabelo=L.dye||natural; if(L.dye) c.tinta=true; if(L.pontas) c.corPontas=L.pontas;
   // cabelo: o corte novo escolhido no salão tem prioridade; senão, o corte antigo vira um parecido do catálogo
   let cab=L.cab3||v3pick(V3_CAB[L.hair]||V3_CAB[F?'longo':'curto'],id,'cab');
   if(!F&&!L.cab3&&a>=50&&v3h(id,'calvo')%4===0) cab=a>=62?'calvo':'entradas';
+  // boa parte das mulheres mais velhas usa o cabelo mais curto ou preso
+  if(F&&!L.cab3&&a>=58&&['longo','longoMeio','muitoLongo','franjaLonga','cortina','boxBraids','cacheadoLongo','ondulado','trancaLado','trancas','chiquinhas','coquesDuplos','raboFranja'].includes(cab)&&v3h(id,'idosa')%10<7) cab=v3pick(['medio','chanel','coqueBaixo','medio','joaozinho','cacheadoMedio'],id,'cabIdosa');
   if(typeof hasCancer==='function'&&hasCancer(p)&&a>=2) cab='careca';
   else if(p.hairBack&&S&&S.year<p.hairBack&&cab!=='careca') cab='raspado';
   if(a<2) cab=a<1?'careca':'curto'; c.cabelo=cab;
+  if(!L.dye) c.grisalho=v3h(id,'gris')%17-8; // uns ficam grisalhos antes, outros depois
   if(!F&&a>=16&&L.beard&&L.beard!=='none') c.barba=V3_BARBA[L.beard]||'por fazer';
   if(L.makeup&&L.makeup!=='none'&&a>=12){ if(V3_BATOM[L.makeup]) c.batom=V3_BATOM[L.makeup]; if(L.makeup==='delineado'||L.makeup==='completa') c.maquiagem='#6B4E71'; }
   // roupa: uniforme quando faz sentido, senão o look escolhido, senão um look do dia a dia que combina com a idade
@@ -60,6 +67,8 @@ function v3Ficha(p,over,o={}){
   // humor vira expressão
   const humor=me?p.happy:(p.bond??60); c.expr=o.expr||(humor>=62?'sorriso':humor<28?'triste':'leve');
   if(o.recorte) c.recorte=o.recorte;
+  // bebês não usam acessórios
+  if(a<3){ c.acess=[]; delete c.batom; delete c.maquiagem; }
   return c;
 }
 function m3Royal(p){ return p===S?.me&&p.royal&&!p.royal.abd&&p.royal.reign&&!p.prison; }

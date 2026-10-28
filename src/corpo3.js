@@ -64,7 +64,7 @@ const CABELOS={
  cacheadoCurto:{fr:'cachos',tr:'nuca',tex:'cachos',n:'Cacheado curto'}, afroCurto:{fr:'afro',tr:'afroP',n:'Afro curto'},
  blackPower:{fr:'afro',tr:'afroG',n:'Black power'}, nago:{fr:'nago',tr:'nuca',n:'Nagô'},
  dreadsCurtos:{fr:'nago',tr:'dreads',comp:1.45,n:'Dreads curtos'}, dreadsLongos:{fr:'nago',tr:'dreads',comp:2.5,n:'Dreads longos'},
- mullet:{fr:'curto',tr:'mullet',n:'Mullet'}, surfista:{fr:'meio',tr:'chanel',tex:'ondas',n:'Surfista'}, roqueiro:{fr:'meio',tr:'longo',n:'Roqueiro'},
+ mullet:{fr:'curto',tr:'mullet',n:'Mullet'}, surfista:{fr:'meio',tr:'chanel',tex:'ondas',n:'Surfista'}, roqueiro:{fr:'meio',tr:'ombro',n:'Roqueiro'},
  emo:{fr:'emo',tr:'chanel',n:'Emo'}, joaozinho:{fr:'franjaLado',tr:'nuca',n:'Joãozinho'},
  longo:{fr:'franjaLado',tr:'longo',n:'Longo liso'}, longoMeio:{fr:'meio',tr:'longo',n:'Longo repartido'}, muitoLongo:{fr:'meio',tr:'muitoLongo',n:'Muito longo'},
  franjaLonga:{fr:'franjaReta',tr:'longo',n:'Longo com franja'}, cortina:{fr:'cortina',tr:'longo',n:'Franja cortina'},
@@ -90,6 +90,8 @@ window.corpoSVG=function(c){
  const vamp=c.criatura==='vampiro', lobo=c.criatura==='lobisomem'&&(c.forma==='lobo'||c.transformado===true);
  const a=c.idade??30, F=c.sexo==='F', pele=vamp?mix(c.pele||'#E8B48F','#E9E6EC',.5):lobo?(c.corPelo||mix(c.corCabelo||'#4A3A2C','#6B5B4B',.35)):(c.pele||'#E8B48F'), tipo=lobo?'musculoso':(c.tipo||'medio');
  const bebe=a<3, crianca=a<11, velho=a>=65;
+ // envelhecimento gradual: rg(de,ate) vai de 0 a 1 entre essas idades; grisalho começa por volta dos 40 (c.grisalho adianta ou atrasa)
+ const rg=(de,ate)=>Math.max(0,Math.min(1,(a-de)/(ate-de))), gris=c.tinta?0:Math.pow(Math.max(0,Math.min(1,(a+(c.grisalho||0)-38)/40)),1.3);
  const G=bebe?'bebe':crianca?'crianca':F?'F':'M', fem=G==='F', kid=bebe||crianca;
  const HW={bebe:.47,crianca:.43,F:.36,M:.39}[G];
  const CAB=lobo?null:c.cabelo===undefined?(bebe?'curto':F?(crianca?'rabo':'longo'):'curto'):c.cabelo;
@@ -111,24 +113,25 @@ window.corpoSVG=function(c){
  const [wPes,wOmb,wDel,wAx,wPei,wCin,wQua,wCox,wMco,wJoe,wPan,wTor]=Lw.map(v=>v*hp);
  const X=v=>cx+v;
  // braços soltos ao lado do corpo, levemente afastados, desenhados por cima do tronco
- const brW=(tipo==='gordo'?(F?1.45:1.28):tipo==='musculoso'?(F?1.32:1.2):tipo==='magro'?.85:1)*(bebe?1.2:crianca?.95:F?.7:1)*hp;
+ const brW=(tipo==='gordo'?(F?1.45:1.28):tipo==='musculoso'?(F?1.32:1.2):tipo==='magro'?.85:1)*(bebe?.62:crianca?.95:F?.7:1)*hp;
  const lado=s=>{ // s=-1 esquerda, 1 direita
   const P=(x,y)=>[cx+s*x,y];
   // proporções de desenho de figura (cânone de 7,5 cabeças): ombro 1/3 de cabeça abaixo do queixo, cotovelo na cintura,
   // punho na virilha, ponta dos dedos no meio da coxa
-  const ya=F&&a>=12?1.25:1.28, J=[wDel-.24*brW, Y(ya+.17)], th1=(bebe?20:tipo==='gordo'?16:11)*Math.PI/180, th2=(bebe?22:tipo==='gordo'?11:7)*Math.PI/180;
+  const ya=F&&a>=12?1.25:1.28, J=[wDel-.24*brW, Y(ya+.17)], th1=(bebe?14:tipo==='gordo'?16:11)*Math.PI/180, th2=(bebe?22:tipo==='gordo'?11:7)*Math.PI/180;
   const d1=[Math.sin(th1),Math.cos(th1)], n1=[Math.cos(th1),-Math.sin(th1)], d2=[Math.sin(th2),Math.cos(th2)], n2=[Math.cos(th2),-Math.sin(th2)];
-  const up=1.45*ls*hp, fo=1.2*ls*hp, mao=.75*ls*hp*(bebe?.9:F?.9:1);
+  const up=1.45*ls*hp, fo=1.2*ls*hp, mao=.75*ls*hp*(bebe?.85:F?.9:1);
   const E=[J[0]+d1[0]*up,J[1]+d1[1]*up], W=[E[0]+d2[0]*fo,E[1]+d2[1]*fo];
   const at=(o,d,n,al,lw)=>[o[0]+d[0]*al+n[0]*lw,o[1]+d[1]*al+n[1]*lw];
   // ----- tronco e pernas (sem os braços)
   const pts=[];
   // ponta do ombro: na mulher é uma curva redonda (um quarto de círculo), no homem o canto do deltoide
-  const ombro=F&&a>=12?[P(wDel-.22*hp,Y(ya)),P(wDel-.07*hp,Y(ya+.06)),P(wDel,Y(ya+.22))]:[P(wOmb-.14*hp,Y(ya)),P(wOmb-.01*hp,Y(ya+.05)),P(wDel,Y(ya+.2))];
+  const ombro=kid?[P(wOmb*.8,Y(ya)),P(wOmb*.96,Y(ya+.08)),P(wDel,Y(ya+.26))]:F&&a>=12?[P(wDel-.22*hp,Y(ya)),P(wDel-.07*hp,Y(ya+.06)),P(wDel,Y(ya+.22))]:[P(wOmb-.14*hp,Y(ya)),P(wOmb-.01*hp,Y(ya+.05)),P(wDel,Y(ya+.2))];
   const yT=F||kid?1.2:1.15; // onde o pescoço vira trapézio
   const yN=F||kid?1.06:1.0, nx=Math.min(wPes*.98,HW*hp*(tipo==='gordo'&&a>=12?1.08:1)*.72);
   // mulher: pescoço longo e linha do ombro quase reta; homem: trapézio em diagonal
   if(F&&a>=12) pts.push(P(nx,Y(.86)),P(wPes,Y(1.05)),P(wPes+.06*hp,Y(1.2)),P((wPes+wOmb)/2,Y(1.22)));
+  else if(kid) pts.push(P(nx,Y(.86)),P(wPes,Y(1.0)),P(wPes+.08*hp,Y(1.1)));
   else pts.push(...((tipo==='gordo'||tipo==='musculoso')&&!kid?[P(nx,Y(.86)),P(wPes+.03*hp,Y(.99)),P(wPes+.13*hp,Y(1.1)),P(wPes+.28*hp,Y(1.18))]:[P(nx,Y(.86)),P(wPes,Y(1.0)),P(wPes+.015*hp,Y(1.07)),P(wPes+.1*hp,Y(1.14)),P(wPes+.28*hp,Y(1.2))]),P((wPes+.28*hp+wOmb-.14*hp)/2,Y((1.2+ya)/2+.01)));
   pts.push(...ombro,P(wDel*.95,Y(ya+.42)));
   pts.push(P(wAx,Y(1.95)),P(wPei,Y(2.25)));
@@ -182,7 +185,8 @@ window.corpoSVG=function(c){
  const silh=suave(contorno);
  // braço: preenchimento fechado; contorno só da parte visível (sem a emenda no ombro)
  const bracoD=L=>suave(L.braco.concat(L.fecho));
- const bracoLinha=L=>suave(L.braco,false);
+ // na criança o braço encosta no tronco: a linha de dentro para na axila, sem riscar o peito até o ombro
+ const bracoLinha=L=>suave(kid?L.braco.slice(0,-2):L.braco,false);
  const O=[];
  const vb=c.recorte==="busto"?`${f(cx-hp*1.35)} ${f(topo-hp*.75)} ${f(hp*2.7)} ${f(hp*3.0)}`:c.recorte==="retrato"?`${f(cx-hp*1.02)} ${f(topo-hp*.5)} ${f(hp*2.04)} ${f(hp*2.04)}`:c.recorte==="rosto"?`${f(cx-hp*.8)} ${f(topo-hp*.3)} ${f(hp*1.6)} ${f(hp*1.6)}`:"0 0 240 400";
  O.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${vb}" class="corpo">`);
@@ -220,10 +224,10 @@ if(tipo==='musculoso'&&a>=14&&!F) for(const s of [-1,1]) ana(`M${f(X(s*wMco*.55)
  // ===== braços por cima
  for(const L of [Le,Ld]){ const cid=L===Le?`be${id}`:`bd${id}`;
   O.push(`<path d="${bracoD(L)}" fill="${pele}"/>`);
-  O.push(`<g clip-path="url(#${cid})"><path d="${bracoLinha(L)}" fill="none" stroke="${sombra}" stroke-width="6" opacity=".35" filter="url(#b${id})"/>${tipo!=='musculoso'||bebe?'':`<path d="${suave(L.delt,false)}" fill="none" stroke="${sombra}" stroke-width="${tipo==='musculoso'?1.2:1}" opacity="${tipo==='musculoso'?.6:.38}" stroke-linecap="round"/>`}${lobo?peloCorpo(false):''}${tatuagem(L)}${manga(L)}</g>`);
+  O.push(`<g clip-path="url(#${cid})"><path d="${bracoLinha(L)}" fill="none" stroke="${sombra}" stroke-width="6" opacity="${kid?.16:.35}" filter="url(#b${id})"/>${tipo!=='musculoso'||bebe?'':`<path d="${suave(L.delt,false)}" fill="none" stroke="${sombra}" stroke-width="${tipo==='musculoso'?1.2:1}" opacity="${tipo==='musculoso'?.6:.38}" stroke-linecap="round"/>`}${lobo?peloCorpo(false):''}${tatuagem(L)}${manga(L)}</g>`);
   const nb=L.braco.length-L.nDentro+1;
   O.push(`<path d="${suave(L.braco.slice(0,nb),false)}" fill="none" stroke="${linha}" stroke-width="${kid||F?1.15:1.35}" stroke-linejoin="round" stroke-linecap="round"/>`);
-  O.push(`<path d="${suave(L.braco.slice(nb-1),false)}" fill="none" stroke="${linha}" stroke-width="1" opacity=".55" stroke-linejoin="round" stroke-linecap="round"/>`); } O.push(sobreBracos(),garras(),cabeca());
+  O.push(`<path d="${suave(L.braco.slice(nb-1,kid?-2:undefined),false)}" fill="none" stroke="${linha}" stroke-width="1" opacity=".55" stroke-linejoin="round" stroke-linecap="round"/>`); } O.push(sobreBracos(),garras(),cabeca());
  O.push(acessorios());
  O.push(`<defs>${defsX.join('')}</defs></svg>`);
  return O.join('');
@@ -534,10 +538,14 @@ if(tipo==='musculoso'&&a>=14&&!F) for(const s of [-1,1]) ana(`M${f(X(s*wMco*.55)
     let d=''; for(const [t,l] of [[.62,.35],[.78,.45],[.92,.5],[1,.45]]){ const q=B(t); d+=`M${P2(q)} q${f(s*ew*.08)},${f(-eh*l*.5)} ${f(s*ew*.26*l*2)},${f(-eh*l)} `; }
     R.push(`<path d="${d}" stroke="${tinta}" stroke-width=".8" fill="none" stroke-linecap="round"/>`); }
    // dobra da pálpebra
-   if(!bebe) R.push(`<path d="M${f(I[0]+s*ew*.25)},${f(ey-eh*1.15)} C${f(x-s*ew*.3)},${f(ey-eh*(velho?1.55:1.75))} ${f(x+s*ew*.4)},${f(ey-eh*(velho?1.55:1.75))} ${f(O[0]-s*ew*.05)},${f(O[1]-eh*.75)}" fill="none" stroke="${sombra}" stroke-width=".8" opacity="${kid?.3:.5}"/>`);
-   if(velho) R.push(`<path d="M${f(O[0]+s*2)},${f(O[1])} l${f(s*3.5)},-1.8 M${f(O[0]+s*2)},${f(O[1]+2.5)} l${f(s*3.5)},1.8 M${f(x-ew*.6)},${f(ey+eh*1.6)} Q${f(x)},${f(ey+eh*2.2)} ${f(x+ew*.6)},${f(ey+eh*1.5)}" stroke="${sombra}" stroke-width=".8" fill="none" opacity="${fem?.5:.75}"/>`);
+   if(!bebe) R.push(`<path d="M${f(I[0]+s*ew*.25)},${f(ey-eh*1.15)} C${f(x-s*ew*.3)},${f(ey-eh*(1.75-.3*rg(55,85)))} ${f(x+s*ew*.4)},${f(ey-eh*(1.75-.3*rg(55,85)))} ${f(O[0]-s*ew*.05)},${f(O[1]-eh*.75)}" fill="none" stroke="${sombra}" stroke-width=".8" opacity="${kid?.3:.5}"/>`);
+   // pés de galinha (a partir dos 38), bolsas sob os olhos (45) e pálpebra caída (65)
+   const pg=rg(36,66), bo=rg(44,78);
+   if(pg) R.push(`<path d="M${f(O[0]+s*2)},${f(O[1])} l${f(s*3.5)},-1.8 M${f(O[0]+s*2)},${f(O[1]+2.5)} l${f(s*3.5)},1.8${a>=58?` M${f(O[0]+s*1.6)},${f(O[1]+1.2)} l${f(s*4.2)},0`:''}" stroke="${sombra}" stroke-width=".8" fill="none" opacity="${f(pg*(fem?.65:.75))}"/>`);
+   if(bo) R.push(`<path d="M${f(x-ew*.65)},${f(ey+eh*1.55)} Q${f(x)},${f(ey+eh*(2.1+.4*rg(60,85)))} ${f(x+ew*.65)},${f(ey+eh*1.45)}" stroke="${sombra}" stroke-width=".8" fill="none" opacity="${f(bo*(fem?.5:.7))}"/>`);
+   if(a>=65) R.push(`<path d="M${f(x-s*ew*.2)},${f(ey-eh*1.25)} Q${f(x+s*ew*.6)},${f(ey-eh*.95)} ${f(O[0]+s*ew*.15)},${f(O[1]-eh*.1)}" stroke="${sombra}" stroke-width="1" fill="none" opacity="${f(rg(65,90)*.6)}"/>`);
    // sobrancelhas: fina e arqueada (mulher), grossa e reta (homem), fininha e clara (criança)
-   const cs=velho?mix(corS,'#cccccc',.7):fem?mix(corS,pele,.28):kid?mix(corS,pele,.45):mix(corS,pele,.12);
+   const cs=mix(fem?mix(corS,pele,.28):kid?mix(corS,pele,.45):mix(corS,pele,.12),'#D6D3CE',gris*.8);
    if(fem){ const by=ey-ew*1.2-2.5; const it=[x-s*ew*.95,by+.6], at=[x+s*ew*.4,by-1.5], tt=[x+s*ew*1.25,by+.9], ab=[x+s*ew*.4,by-.3], ib=[x-s*ew*.95,by+1.7];
     R.push(`<path d="M${P2(ib)} L${P2(it)} Q${f(x-s*ew*.1)},${f(by-1.2)} ${P2(at)} L${P2(tt)} L${P2(ab)} Q${f(x-s*ew*.1)},${f(by+1.6)} ${P2(ib)}Z" fill="${cs}" stroke="${cs}" stroke-width=".5" stroke-linejoin="round"/>`); }
    else if(G==='M'){ const by=ey-ew*1.05-2.5; const it=[x-s*ew*1.05,by+.2], at=[x+s*ew*.4,by-.9], tt=[x+s*ew*1.22,by+.9], ab=[x+s*ew*.4,by+.8], ib=[x-s*ew*1.05,by+2.0];
@@ -552,7 +560,7 @@ if(tipo==='musculoso'&&a>=14&&!F) for(const s of [-1,1]) ana(`M${f(X(s*wMco*.55)
   R.push(`<ellipse cx="${f(cx-nw*.42)}" cy="${f(ny+.3)}" rx="${f(nw*.2)}" ry="${f(nw*.11)}" fill="${esc(pele,.45)}" opacity="${G==='M'?1:.6}"/><ellipse cx="${f(cx+nw*.42)}" cy="${f(ny+.3)}" rx="${f(nw*.2)}" ry="${f(nw*.11)}" fill="${esc(pele,.45)}" opacity="${G==='M'?1:.6}"/><ellipse cx="${cx}" cy="${f(ny-hp*.035)}" rx="${f(nw*.38)}" ry="${f(nw*.28)}" fill="#fff" opacity=".22"/>`);
   // ===== boca: um pouco mais larga que um olho; lábio de baixo mais cheio e mais claro que o de cima
   const my=cy0+hp*{bebe:.85,crianca:.83,F:.815,M:.82}[G], mw=ew*{bebe:.8,crianca:.95,F:1.18,M:1.22}[G], expr=c.expr||'leve';
-  const labio=vamp&&!c.batom?mix(pele,'#6A0D1C',.6):c.batom||(fem?mix(pele,'#C25B6B',.52):kid?mix(pele,'#CC6670',.38):mix(pele,'#9C5550',.28));
+  const labio=vamp&&!c.batom?mix(pele,'#6A0D1C',.6):c.batom||mix(fem?mix(pele,'#C25B6B',.52):kid?mix(pele,'#CC6670',.38):mix(pele,'#9C5550',.28),pele,rg(55,90)*.4);
   const uh=mw*(fem?.3:kid?.22:.2), lh=mw*(fem?.36:kid?.28:.26);
   const sorri=expr==='sorriso', cv=sorri?mw*.3:expr==='triste'?-mw*.12:mw*.03, ca=sorri?-1.6:expr==='triste'?1.4:0;
   const Lc=[cx-mw,my+ca], Rc=[cx+mw,my+ca], Mm=[cx,my+cv];
@@ -569,13 +577,23 @@ if(tipo==='musculoso'&&a>=14&&!F) for(const s of [-1,1]) ana(`M${f(X(s*wMco*.55)
   R.push(`<path d="M${f(cx-mw*.45)},${f(my+lb+lh*2.7)} Q${cx},${f(my+lb+lh*3.1)} ${f(cx+mw*.45)},${f(my+lb+lh*2.7)}" stroke="${sombra}" stroke-width="1.2" fill="none" opacity=".25"/>`);
   if(vamp){ for(const s of [-1,1]) R.push(`<ellipse cx="${f(cx+s*ex)}" cy="${f(ey+eh*1.5)}" rx="${f(ew*.85)}" ry="${f(eh*.55)}" fill="#5B3B6B" opacity=".18" filter="url(#b${id})"/>`);
    for(const s of [-1,1]) R.push(`<path d="M${f(cx+s*mw*.48)},${f(my-.4)} L${f(cx+s*mw*.36)},${f(my+mw*.42)} L${f(cx+s*mw*.26)},${f(my-.4)}Z" fill="#FBF8F2" stroke="#B9AFA2" stroke-width=".5"/>`); }
-  if(velho) R.push(`<path d="M${f(cx-nw*1.5)},${f(ny+1)} Q${f(cx-mw*1.4)},${f(my-2)} ${f(cx-mw*1.25)},${f(my+mw*.5)} M${f(cx+nw*1.5)},${f(ny+1)} Q${f(cx+mw*1.4)},${f(my-2)} ${f(cx+mw*1.25)},${f(my+mw*.5)} M${f(cx-hw*.5)},${f(topo+hp*.22)} q${f(hw*.5)},-3 ${f(hw)},0 M${f(cx-hw*.4)},${f(topo+hp*.28)} q${f(hw*.4)},-2 ${f(hw*.8)},0" stroke="${sombra}" stroke-width="1" fill="none" opacity="${fem?.55:.85}"/>`);
+  // rugas que vão aparecendo com a idade: bigode chinês, testa, marionete, papada e manchas
+  { const op=fem?.72:.85, ru=[], li=(d,o,w=1)=>o>0&&ru.push(`<path d="${d}" stroke="${sombra}" stroke-width="${w}" fill="none" opacity="${f(o*op)}"/>`);
+   li(`M${f(cx-nw*1.5)},${f(ny+1)} Q${f(cx-mw*1.4)},${f(my-2)} ${f(cx-mw*1.25)},${f(my+mw*.5)} M${f(cx+nw*1.5)},${f(ny+1)} Q${f(cx+mw*1.4)},${f(my-2)} ${f(cx+mw*1.25)},${f(my+mw*.5)}`,rg(38,68));
+   li(`M${f(cx-hw*.5)},${f(topo+hp*.22)} q${f(hw*.5)},-3 ${f(hw)},0`,rg(45,70));
+   li(`M${f(cx-hw*.4)},${f(topo+hp*.28)} q${f(hw*.4)},-2 ${f(hw*.8)},0`,rg(52,76));
+   li(`M${f(cx-hw*.55)},${f(topo+hp*.16)} q${f(hw*.55)},-3 ${f(hw*1.1)},0`,rg(62,85),.8);
+   li(`M${f(cx-mw*1.15)},${f(my+mw*.4)} q${f(-mw*.15)},${f(mw*.5)} ${f(-mw*.05)},${f(mw*.95)} M${f(cx+mw*1.15)},${f(my+mw*.4)} q${f(mw*.15)},${f(mw*.5)} ${f(mw*.05)},${f(mw*.95)}`,rg(56,82));
+   li(`M${f(cx-hw*.82)},${f(cy0+.82*hp)} Q${f(cx-hw*.7)},${f(cy0+.97*hp)} ${f(cx-hw*.45)},${f(cy0+1.0*hp)} M${f(cx+hw*.82)},${f(cy0+.82*hp)} Q${f(cx+hw*.7)},${f(cy0+.97*hp)} ${f(cx+hw*.45)},${f(cy0+1.0*hp)}`,rg(62,88),1.1);
+   li(`M${f(cx-hw*.3)},${f(cy0+1.12*hp)} Q${cx},${f(cy0+1.18*hp)} ${f(cx+hw*.3)},${f(cy0+1.12*hp)}`,rg(64,88),.9);
+   if(a>=68) ru.push(`<g fill="${esc(pele,.22)}" opacity="${f(rg(68,90)*.55)}"><circle cx="${f(cx+hw*.55)}" cy="${f(topo+hp*.3)}" r="1.3"/><circle cx="${f(cx-hw*.62)}" cy="${f(ny+hp*.04)}" r="1.1"/><circle cx="${f(cx+hw*.35)}" cy="${f(topo+hp*.18)}" r=".9"/></g>`);
+   R.push(ru.join('')); }
   if(tipo==='gordo'&&a>=14) R.push(`<path d="M${f(cx-hw*.42)},${f(cy0+1.03*hp)} Q${cx},${f(cy0+1.13*hp)} ${f(cx+hw*.42)},${f(cy0+1.03*hp)}" stroke="${sombra}" stroke-width="1" fill="none" opacity=".45"/>`);
   // bochechas
-  const op={bebe:.3,crianca:.28,F:.22,M:.06}[G];
+  const op={bebe:.3,crianca:.28,F:.22,M:.06}[G]*(1-.6*rg(50,80));
   for(const s of [-1,1]) R.push(`<ellipse cx="${f(cx+s*hw*.56)}" cy="${f(ny-hp*.01)}" rx="${f(hw*.22)}" ry="${f(hw*.13)}" fill="#E56B6F" opacity="${op}" filter="url(#b${id})"/>`);
   // barba
-  if(!F&&a>=17&&c.barba){ const cor=velho?'#D9D6D2':esc(c.corCabelo||'#3B2416',.05), bb=c.barba;
+  if(!F&&a>=17&&c.barba){ const cor=mix(esc(c.corCabelo||'#3B2416',.05),'#D9D6D2',Math.min(1,1.2*(c.tinta?Math.pow(rg(38,78),1.3):gris))), bb=c.barba;
    const bigode=`<path d="M${f(cx-mw*1.15)},${f(my+.5)} Q${f(cx-mw*.5)},${f(my-mw*.55)} ${cx},${f(my-mw*.35)} Q${f(cx+mw*.5)},${f(my-mw*.55)} ${f(cx+mw*1.15)},${f(my+.5)} Q${cx},${f(my-mw*.15)} ${f(cx-mw*1.15)},${f(my+.5)}Z" fill="${cor}"/>`;
    if(bb==='por fazer') R.push(`<path d="${suave([[cx-hw*.97,cy0+.6*hp],[cx-hw*.8,cy0+.85*hp],[cx-hw*.35,cy0+.99*hp],[cx,cy0+1.01*hp],[cx+hw*.35,cy0+.99*hp],[cx+hw*.8,cy0+.85*hp],[cx+hw*.97,cy0+.6*hp],[cx+mw*1.3,my-1],[cx,ny+3],[cx-mw*1.3,my-1]])}" fill="${cor}" opacity=".22"/>`);
    else if(bb==='bigode') R.push(bigode);
@@ -585,7 +603,7 @@ if(tipo==='musculoso'&&a>=14&&!F) for(const s of [-1,1]) ana(`M${f(X(s*wMco*.55)
   return R.join(''); }
 
  // ===== cabelo: estilo = frente (franja/linha do cabelo) + trás (comprimento/volume) + extras (coque, rabo, tranças...)
- function corCab(){ const cc=c.corCabelo||'#3B2416'; if(c.tinta) return cc; return a>=75?'#E6E3DE':a>=62?mix(cc,'#D2CEC8',.7):a>=50?mix(cc,'#B8B3AD',.3):cc; }
+ function corCab(){ const cc=c.corCabelo||'#3B2416'; return gris?mix(cc,'#DEDBD6',gris):cc; }
  function specCab(){ if(!CAB||AC.has('capuz')) return null; const sp=typeof CAB==='object'?CAB:(CABELOS[CAB]||CABELOS.curto);
   const s=Object.assign({fr:'curto',tr:null},sp); s.x=(sp.x||[]).slice();
   if(AC.has('toucaCirurgica')) return {fr:'careca',tr:null,x:[]};
@@ -593,11 +611,11 @@ if(tipo==='musculoso'&&a>=14&&!F) for(const s of [-1,1]) ana(`M${f(X(s*wMco*.55)
    s.x=s.x.filter(k=>!['coqueAlto','coqueSamurai','coquesDuplos','puff','raboAlto','laco','tiara','flor'].includes(k));
   }
   return s; }
- function ondula(pts,amp,sub){ const out=[], n=pts.length; let alt=1;
-  for(let i=0;i<n;i++){ const p=pts[i], q=pts[(i+1)%n]; out.push(p); const dx=q[0]-p[0], dy=q[1]-p[1], L=Math.hypot(dx,dy)||1;
+ function ondula(pts,amp,sub,aberto){ const out=[], n=pts.length; let alt=1;
+  for(let i=0;i<n;i++){ if(aberto&&i===n-1){ out.push(pts[i]); break; } const p=pts[i], q=pts[(i+1)%n]; out.push(p); const dx=q[0]-p[0], dy=q[1]-p[1], L=Math.hypot(dx,dy)||1;
    for(let k=1;k<=sub;k++){ const t2=k/(sub+1); alt=-alt; out.push([p[0]+dx*t2+dy/L*amp*alt,p[1]+dy*t2-dx/L*amp*alt]); } }
   return out; }
- function tex(pts,s){ return s.tex==='cachos'?ondula(pts,.07*hp,2):s.tex==='ondas'?ondula(pts,.045*hp,1):pts; }
+ function tex(pts,s,aberto){ return s.tex==='cachos'?ondula(pts,.07*hp,2,aberto):s.tex==='ondas'?ondula(pts,.045*hp,1,aberto):pts; }
  function caixaCab(){ const hw=HW*hp, t=topo, s=HS, B={top:t-.13*hp,half:1.12*hw,cobreOrelha:false,rabo:null,chiq:null,coque:null};
   if(!s||bebe||['careca','raspado','calvo','militar'].includes(s.fr)&&!s.tr){ B.top=t-.03*hp; B.half=1.02*hw; return B; }
   const lg=['chanel','ombro','medio','longo','muitoLongo'].includes(s.tr);
@@ -664,14 +682,14 @@ if(tipo==='musculoso'&&a>=14&&!F) for(const s of [-1,1]) ana(`M${f(X(s*wMco*.55)
    case 'cachos': { R.push(capa(ondula(outer(.14,lg?ba:.55,1.15).concat(lg?[H(.95,ba-.3),H(.85,.32),H(.4,.26),H(-.2,.3),H(-.7,.3),H(-.95,ba-.3)]:[H(.95,.4),H(.6,.26),H(0,.28),H(-.6,.26),H(-.95,.4)]),.06*hp,1)));
     let d=''; for(let i=0;i<22;i++){ const u=-.85+1.7*(i%11)/10, v=(i<11?.0:.15)+Math.abs(u)*.12; d+=`M${f(cx+u*hw)},${f(t+v*hp)} a1.8,1.8 0 1,1 3,0 `; } R.push(`<path d="${d}" stroke="${esc(cor,.35)}" stroke-width=".9" fill="none"/>`); break; }
    case 'afro': R.push(`<path d="${suave([H(-1.05,.42),H(-.9,.16),H(0,.1),H(.9,.16),H(1.05,.42),H(1.3,.1),H(0,-.3),H(-1.3,.1)])}" fill="${cor}"/>`); { let d=''; for(let i=0;i<40;i++){ const ang=Math.PI*(1.05+.9*(i%10)/9), rr=hw*(.9+.55*Math.floor(i/10)/3); d+=`M${f(cx+Math.cos(ang)*rr)},${f(t+.4*hp+Math.sin(ang)*rr*.95)} a2,2 0 1,1 3,0 `; } R.push(`<path d="${d}" stroke="${cla(cor,.15)}" stroke-width=".9" fill="none" opacity=".7"/>`); } break;
-   case 'nago': R.push(capa(outer(.05,lg?ba:.46,1.06).concat([H(.9,.34),H(.5,.2),H(0,.17),H(-.5,.2),H(-.9,.34)])),`<path d="${[-.6,-.3,0,.3,.6].map(u=>`M${f(cx+u*hw)},${f(t+(.18+Math.abs(u)*.1)*hp)} Q${f(cx+u*hw*.9)},${f(t-.02*hp)} ${f(cx+u*hw*.55)},${f(t-.1*hp)}`).join(' ')}" stroke="${esc(cor,.5)}" stroke-width="1.6" fill="none" stroke-dasharray="1.6 1.2"/>`); break;
+   case 'nago': R.push(capa(outer(.05,lg?ba:.46,1.06).concat([H(.9,.34),H(.5,.2),H(0,.17),H(-.5,.2),H(-.9,.34)])),`<path d="${[-.6,-.3,0,.3,.6].map(u=>`M${f(cx+u*hw)},${f(t+(.18+Math.abs(u)*.1)*hp)} Q${f(cx+u*hw*.9)},${f(t-.02*hp)} ${f(cx+u*hw*.55)},${f(t-.1*hp)}`).join(' ')}" stroke="${esc(cor,.5)}" stroke-width="1.3" fill="none" stroke-dasharray="2.2 1" opacity=".75"/>`); break;
    case 'puxado': R.push(capa(outer(.08,lg?ba:.5).concat([H(.95,lg?.7:.45),H(.85,.3),H(.5,.17),H(0,.13),H(-.5,.17),H(-.85,.3),H(-.95,lg?.7:.45)])),linhas([-.6,-.3,0,.3,.6].map(u=>`M${f(cx+u*hw)},${f(t+(.15+Math.abs(u)*.1)*hp)} Q${f(cx+u*hw*.95)},${f(t)} ${f(cx+u*hw*.7)},${f(t-.08*hp)}`).join(' ')),brilho(.02)); break;
    case 'franjaReta': R.push(capa(outer(.1).concat([H(.93,ba-.28),H(.9,.33),H(.4,.35),H(-.4,.35),H(-.9,.33),H(-.93,ba-.28)])),fios(11,t+.02*hp,t+.33*hp,hw*.85),brilho()); break;
    case 'meio': case 'cortina': { const inn=s.fr==='meio'?[H(.93,ba-.25),H(.85,.5),H(.55,.22),H(0,.08),H(-.55,.22),H(-.85,.5),H(-.93,ba-.25)]:[H(.93,ba-.25),H(.88,.55),H(.6,.37),H(.25,.29),H(0,.12),H(-.25,.29),H(-.6,.37),H(-.88,.55),H(-.93,ba-.25)];
-    R.push(capa(tex(outer(.1),s).concat(inn)),linhas([.2,.45,.7].map(k=>`M${f(cx-1)},${f(t+.06*hp)} Q${f(cx-hw*k*.6)},${f(t+.0*hp)} ${f(cx-hw*(.5+k*.5))},${f(t+(.3+k*.2)*hp)} M${f(cx+1)},${f(t+.06*hp)} Q${f(cx+hw*k*.6)},${f(t+.0*hp)} ${f(cx+hw*(.5+k*.5))},${f(t+(.3+k*.2)*hp)}`).join(' ')),brilho(.04)); break; }
+    R.push(capa(tex(outer(.1),s,true).concat(inn)),linhas([.2,.45,.7].map(k=>`M${f(cx-1)},${f(t+.06*hp)} Q${f(cx-hw*k*.6)},${f(t+.0*hp)} ${f(cx-hw*(.5+k*.5))},${f(t+(.3+k*.2)*hp)} M${f(cx+1)},${f(t+.06*hp)} Q${f(cx+hw*k*.6)},${f(t+.0*hp)} ${f(cx+hw*(.5+k*.5))},${f(t+(.3+k*.2)*hp)}`).join(' ')),brilho(.04)); break; }
    case 'emo': R.push(capa(outer(.12).concat([H(.97,.85),H(.88,.66),H(.5,.62),H(.1,.46),H(-.3,.26),H(-.55,.12),H(-.85,.3),H(-.93,lg?ba-.25:.42)])),linhas([0,1,2,3].map(i=>`M${f(cx-hw*(.55-i*.05))},${f(t+.1*hp)} Q${f(cx+hw*.1)},${f(t+(.2+i*.06)*hp)} ${f(cx+hw*(.7-i*.1))},${f(t+(.6-i*.05)*hp)}`).join(' ')),brilho()); break;
    default: { // franjaLado (franja de lado, repartida à direita)
-    const pr=[cx+hw*.42,t+.1*hp]; R.push(capa(tex([H(-1.1,ba),H(-1.16,.35),H(-.75,-.08),H(.15,-.13),H(.95,0),H(1.16,.38),H(1.1,ba)],s).concat([H(.93,lg?.72:.4),H(.9,.38),pr,H(.05,.26),H(-.5,.4),H(-.85,.55),H(-.93,lg?.8:.45)])));
+    const pr=[cx+hw*.42,t+.1*hp]; R.push(capa(tex([H(-1.1,ba),H(-1.16,.35),H(-.75,-.08),H(.15,-.13),H(.95,0),H(1.16,.38),H(1.1,ba)],s,true).concat([H(.93,lg?.72:.4),H(.9,.38),pr,H(.05,.26),H(-.5,.4),H(-.85,.55),H(-.93,lg?.8:.45)])));
     let d=''; for(let i=0;i<5;i++){ const k=i/4; d+=`M${f(pr[0]-i*1.5)},${f(pr[1]+i*.6)} Q${f(cx-hw*(.1+.3*k))},${f(t+(.02+.08*k)*hp)} ${f(cx-hw*(.6+.35*k))},${f(t+(.3+.25*k)*hp)} `; }
     R.push(linhas(d+`M${f(pr[0]+2)},${f(pr[1])} Q${f(cx+hw*.85)},${f(t+.08*hp)} ${f(cx+hw*.98)},${f(t+.5*hp)}`),brilho()); } }
   // mechas da frente caindo sobre os ombros

@@ -166,12 +166,19 @@ function render(){
   $('#hMoney').style.color=''; $('#hMoney').classList.toggle('neg',m.money<0);
   $('#avatar').innerHTML=faceSVG(m,46);
   
-  const html=S.log.map(y=>`<section class="yr ph${y.age<13?0:y.age<18?1:y.age<40?2:y.age<65?3:4}"><h3><span>${y.age} ${y.age===1?'ano':'anos'}</span><span>${y.year}</span></h3>${y.lines.map(l=>typeof l==='string'?`<p>${esc(l)}</p>`:`<p class="${l.c}">${esc(l.t)}</p>`).join('')||'<p class="s" style="color:var(--muted)">Um ano tranquilo.</p>'}</section>`).join('');
+  const secs=S.log.map(y=>`<section class="yr ph${y.age<13?0:y.age<18?1:y.age<40?2:y.age<65?3:4}"><h3><span>${y.age} ${y.age===1?'ano':'anos'}</span><span>${y.year}</span></h3>${y.lines.map(l=>typeof l==='string'?`<p>${esc(l)}</p>`:`<p class="${l.c}">${esc(l.t)}</p>`).join('')||'<p class="s" style="color:var(--muted)">Um ano tranquilo.</p>'}</section>`);
   const lg=$('#log'); const atBottom=lg.scrollTop+lg.clientHeight>=lg.scrollHeight-40;
-  lg.innerHTML=html; if(atBottom||render.jump){ lg.scrollTop=lg.scrollHeight; render.jump=false; }
+  logPatch(lg,secs); if(atBottom||render.jump){ lg.scrollTop=lg.scrollHeight; render.jump=false; }
   const st=[['😊','Felicidade',m.happy],['❤️','Saúde',m.health],['🧠','Inteligência',m.smarts],['✨','Aparência',m.looks]];
   $('#stats').innerHTML=st.map(([e,l,v])=>`<div class="st"><span class="se">${e}</span><b>${l}</b><div class="bar"><i style="width:${v}%;background:${grad(v)}"></i></div><span>${v}%</span></div>`).join('');
 }
+// troca só os anos do diário que mudaram (antes a vida inteira era redesenhada a cada clique)
+function logPatch(lg,secs){ const ant=lg._secs, els=lg._els;
+  if(!ant||!els||els.length!==ant.length||els.some(e=>e.parentNode!==lg)||lg.children.length!==els.length){ lg.innerHTML=secs.join(''); lg._secs=secs; lg._els=[...lg.children]; return; }
+  let i=0; const n=Math.min(ant.length,secs.length); while(i<n&&ant[i]===secs[i]) i++;
+  for(let k=els.length-1;k>=i;k--) els[k].remove(); els.length=i;
+  if(i<secs.length){ lg.insertAdjacentHTML('beforeend',secs.slice(i).join('')); for(let k=i;k<secs.length;k++) els.push(lg.children[k]); }
+  lg._secs=secs; }
 function doAge(){ if(!S||!S.me.alive||S.pending.length||MQ.length||modalOpen) return; UI.close(); try{ ageUp(); }catch(e){ showErr(e); } render.jump=true; after(); }
 
 // ---------- views ----------
