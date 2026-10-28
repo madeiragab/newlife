@@ -79,6 +79,47 @@ function pv3Aplicar(){ const L=v3Look(), o=PV3.over, c=pv3Conta();
   if('cab3' in o||'dye' in o) st('looks',R.int(-2,4));
   const n=c.l.length; return n===1?'Saí do provador com o visual novo.':`Saí do provador com ${n} mudanças no visual.`; }
 
+// cenário do provador: parede com lambri, janela com luz, espelho, planta, cortinas, luzinhas e tapete
+const PV3_CENA=`<svg class="pv3-cena" viewBox="0 0 800 600" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+<defs>
+ <linearGradient id="pvParede" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pv-p1)"/><stop offset="1" stop-color="var(--pv-p2)"/></linearGradient>
+ <radialGradient id="pvLuz" cx=".5" cy=".42" r=".5"><stop offset="0" stop-color="var(--pv-luz)" stop-opacity=".75"/><stop offset="1" stop-color="var(--pv-luz)" stop-opacity="0"/></radialGradient>
+ <linearGradient id="pvChao" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pv-c1)"/><stop offset="1" stop-color="var(--pv-c2)"/></linearGradient>
+ <linearGradient id="pvCeu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--pv-ceu1)"/><stop offset="1" stop-color="var(--pv-ceu2)"/></linearGradient>
+ <linearGradient id="pvVidro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".7"/><stop offset=".45" stop-color="#fff" stop-opacity=".12"/><stop offset=".6" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity=".08"/></linearGradient>
+ <linearGradient id="pvOuro" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3D58A"/><stop offset=".5" stop-color="#C99A3E"/><stop offset="1" stop-color="#E8C46E"/></linearGradient>
+ <linearGradient id="pvCortina" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="var(--pv-k2)"/><stop offset=".25" stop-color="var(--pv-k1)"/><stop offset=".5" stop-color="var(--pv-k2)"/><stop offset=".75" stop-color="var(--pv-k1)"/><stop offset="1" stop-color="var(--pv-k2)"/></linearGradient>
+ <radialGradient id="pvTapete" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="var(--pv-t1)"/><stop offset=".7" stop-color="var(--pv-t2)"/><stop offset="1" stop-color="var(--pv-t3)"/></radialGradient>
+ <linearGradient id="pvRaio" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFF6D8" stop-opacity=".55"/><stop offset="1" stop-color="#FFF6D8" stop-opacity="0"/></linearGradient>
+</defs>
+<rect width="800" height="600" fill="url(#pvParede)"/>
+<g fill="var(--pv-desenho)" opacity=".5">${Array.from({length:60},(_,i)=>`<circle cx="${(i%10)*84+(Math.floor(i/10)%2?42:0)+10}" cy="${Math.floor(i/10)*64+20}" r="3"/>`).join('')}</g>
+<rect y="355" width="800" height="135" fill="var(--pv-lambri)"/>
+<g fill="none" stroke="var(--pv-moldura)" stroke-width="3">${[30,190,350,510,670].map(x=>`<rect x="${x}" y="375" width="120" height="95" rx="6"/>`).join('')}</g>
+<rect y="350" width="800" height="9" fill="var(--pv-moldura)"/>
+<g transform="translate(70 70)"><path d="M0 230V90A75 75 0 0 1 150 90V230Z" fill="url(#pvCeu)"/>
+ <circle cx="110" cy="70" r="16" fill="#FFF3C4" opacity=".9"/><path d="M20 180q30-25 60-6t70-10V230H0Z" fill="var(--pv-morro)" opacity=".6"/>
+ <path d="M75 15V230M0 120H150" stroke="#fff" stroke-width="6"/><path d="M0 230V90A75 75 0 0 1 150 90V230Z" fill="none" stroke="#fff" stroke-width="10"/>
+ <rect x="-14" y="226" width="178" height="12" rx="4" fill="#fff"/></g>
+<path d="M90 300L420 600H230L60 300Z" fill="url(#pvRaio)" opacity=".7"/>
+<rect width="800" height="600" fill="url(#pvLuz)"/>
+<g transform="translate(560 120)"><path d="M0 330V70A60 60 0 0 1 120 70V330Z" fill="url(#pvOuro)"/><path d="M10 322V72A50 50 0 0 1 110 72V322Z" fill="var(--pv-espelho)"/>
+ <path d="M10 322V72A50 50 0 0 1 110 72V322Z" fill="url(#pvVidro)"/><path d="M30 120l40-40M30 160l60-60" stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".5"/>
+ <path d="M8 330l-8 28h120l-8-28Z" fill="#B8863A"/></g>
+<g transform="translate(700 330)"><path d="M-22 120h44l-6 70h-32Z" fill="#E9E3D8"/><path d="M-22 120h44v10h-44Z" fill="#D2C8B8"/>
+ <g fill="var(--pv-folha)">${[[-50,-70,-35],[40,-80,30],[-20,-130,-10],[25,-150,15],[-60,-10,-50],[55,-20,45],[0,-90,0],[-35,-160,-20]].map(([x,y,r])=>`<ellipse cx="${x}" cy="${y}" rx="22" ry="46" transform="rotate(${r} ${x} ${y})"/>`).join('')}</g>
+ <g stroke="var(--pv-caule)" stroke-width="3" fill="none"><path d="M0 120Q-10 40-50-70M0 120Q10 30 40-80M0 120Q-5 0-20-130M0 120Q8-20 25-150M0 120Q-20 60-60-10M0 120Q20 50 55-20"/></g></g>
+<path d="M0 0H80Q60 200 85 430Q70 520 95 600H0Z" fill="url(#pvCortina)"/><path d="M800 0H720Q740 200 715 430Q730 520 705 600H800Z" fill="url(#pvCortina)"/>
+<rect x="0" y="0" width="800" height="16" fill="var(--pv-k2)"/><circle cx="80" cy="420" r="9" fill="url(#pvOuro)"/><circle cx="720" cy="420" r="9" fill="url(#pvOuro)"/>
+<path d="M60 30Q230 95 400 40T740 30" fill="none" stroke="var(--pv-fio)" stroke-width="2"/>
+${[[110,52],[170,70],[230,78],[290,72],[350,55],[450,50],[510,64],[570,70],[630,58],[690,42]].map(([x,y],i)=>`<g class="pv3-luzinha" style="--i:${i}"><circle cx="${x}" cy="${y+8}" r="13" fill="#FFE8A3" opacity=".35"/><circle cx="${x}" cy="${y+8}" r="6" fill="#FFF1C2"/></g>`).join('')}
+<path d="M0 490H800V600H0Z" fill="url(#pvChao)"/>
+<g stroke="var(--pv-tabua)" stroke-width="2" opacity=".55">${[515,545,580].map(y=>`<path d="M0 ${y}H800"/>`).join('')}${Array.from({length:9},(_,i)=>`<path d="M${i*95+(i%2?40:0)} ${i%2?515:545}v${i%2?30:35}"/>`).join('')}</g>
+<ellipse cx="400" cy="545" rx="210" ry="42" fill="url(#pvTapete)"/>
+<ellipse cx="400" cy="545" rx="170" ry="32" fill="none" stroke="var(--pv-t3)" stroke-width="3" stroke-dasharray="8 7" opacity=".7"/>
+<ellipse cx="400" cy="545" rx="110" ry="20" fill="none" stroke="#fff" stroke-width="2" opacity=".35"/>
+<ellipse cx="400" cy="548" rx="75" ry="12" fill="#000" opacity=".18"/>
+</svg>`;
 function pv3Abrir(aba,modo){ if(!S||!S.me||!S.me.alive) return; ensureLook(S.me);
   PV3={aba:aba||(modo==='genes'?'pele':'roupas'),cat:null,over:{},gen:{},modo,sexo:S.me.gender==='F'?'F':'M'};
   let w=document.getElementById('provador3'); if(!w){ w=document.createElement('div'); w.id='provador3'; document.body.appendChild(w); }
@@ -100,9 +141,8 @@ function pv3Draw(){ const w=document.getElementById('provador3'); if(!w||!PV3) r
     <button class="pv3-ok" data-a="ok" ${conta.l.length?'':'disabled'}><span>✔</span>${PV3.modo==='genes'?'Criar':conta.l.length&&conta.total?fmt(conta.total):'Pronto'}</button></header>
    <div class="pv3-meio">
     <aside class="pv3-cats">${cats.map(c=>`<button data-cat="${esc(c.id)}" class="${c.id===PV3.cat?'on':''}" ${c.dis?`disabled title="A partir dos ${c.min} anos"`:''}>${esc(c.l)}${c.dis?` <small>${c.min}+</small>`:''}</button>`).join('')}</aside>
-    <section class="pv3-palco"><div class="pv3-espelho" aria-hidden="true"></div><div class="pv3-cortina" aria-hidden="true"></div>
+    <section class="pv3-palco">${PV3_CENA}
      ${figuraSVG(pes,{cls:'pv3-fig'+(busto?' perto':''),over:look,bg:''})}
-     <div class="pv3-chao" aria-hidden="true"></div>
      ${conta.l.length?`<button class="pv3-desfaz" data-a="desfaz">↩ Desfazer tudo</button>`:''}</section>
     <section class="pv3-opcoes"><h3>${esc(cat?cat.l:'')} <small>${itens.length}</small></h3>
      ${PV3.aba==='roupas'?`<button class="pv3-sexo" data-a="sexo">${PV3.sexo==='F'?'Ver roupas masculinas':'Ver roupas femininas'}</button>`:''}
