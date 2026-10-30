@@ -22,6 +22,27 @@
   <img src="docs/img/tema-escuro.png" width="230" alt="Tema escuro">
 </p>
 
+<p align="center">
+  <img src="docs/img/bichos-splash.png" width="200" alt="Tela de carregamento">
+  <img src="docs/img/bichos-atualiza.png" width="200" alt="Tela de atualização">
+  <img src="docs/img/bichos-evento.png" width="200" alt="Evento com o desenho do bicho">
+</p>
+
+<p align="center">
+  <img src="docs/img/bichos-fases.png" width="420" alt="Bichos de filhote a idoso, por raça e porte">
+</p>
+
+<p align="center">
+  <img src="docs/img/bichos-cri.png" width="200" alt="Criador: filhote, jovem, adulto e idoso">
+  <img src="docs/img/bichos-abrigo.png" width="200" alt="Abrigo de animais">
+  <img src="docs/img/bichos-nome.png" width="200" alt="Escolher o nome do bicho">
+</p>
+
+<p align="center">
+  <img src="docs/img/itens.png" width="620" alt="Mais de 400 itens desenhados">
+  <img src="docs/img/armas.png" width="620" alt="80 armas desenhadas">
+</p>
+
 ---
 
 ## Sumário

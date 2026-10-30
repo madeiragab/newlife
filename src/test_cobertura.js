@@ -90,6 +90,7 @@ function coberturaEventosSelfTest(limiteMs=60000){
   candidatos.push([40,null,0,m=>{m.money=5e6;openBiz(BIZ_SECTORS.slice().sort((a,b)=>b.cost-a.cost)[0],'Teste');if(m.biz){m.biz.value=Math.max(m.biz.value,500000);if(m.biz.capital!=null){m.biz.capital=400000;m.biz.caixa=100000;}}}]);
   for(const tipo of ['post','uni'])for(const yr of [0,1,3])candidatos.push([26,null,0,m=>{const c=tipo==='post'?POSTS[0]:COURSES[0];m.edu.cur={type:tipo,id:c.id,n:c.n,len:yr+1,yr,grade:70,pub:true,cost:0};m.edu.deg.push('uni:'+COURSES[0].id);}]);
   candidatos.push([40,null,0,m=>{m.c.divorces=1;S.people.push(mkPerson({rel:'ex',age:40,bond:30}),mkPerson({rel:'filho',age:10,bond:70}));}]);
+  for(const sp of [...new Set(PET_SPECIES.map(x=>bxRaiz(x.s)))])candidatos.push([30,null,0,m=>{addPet(sp);}]);
   for(const sp of ['Hamster','Chinchila','Ouriço','Furão','Cachorro','Gato'])candidatos.push([30,null,0,m=>{const p=addPet(sp);if(p&&p.life)p.age=Math.max(0,p.life-1);}]);
   for(const yr of [2030,2028])for(const age of [10,16,25,40])candidatos.push([age,null,0,m=>{S.year=yr;m.born=yr-age;if(age>=18){m.job=null;takeJob({id:age===40?'poli':JOBS.find(j=>!j.pt&&!j.spc&&!jobReqs(j).length).id,co:'Teste',size:'média',mul:1});}if(age<18)m.edu.cur={type:age<15?'fund':'medio',n:'Escola',len:3,yr:1,grade:70};}]);
   for(const [pais,yr] of [['ES',2030],['PT',2030],['US',2028],['US',2026],['MX',2026]])candidatos.push([30,pais,0,m=>{S.year=yr;m.born=yr-30;try{buy('casa',houseListings()[0],false);}catch(e){}}]);

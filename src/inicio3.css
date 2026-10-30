@@ -37,3 +37,49 @@
 #splash .sp-tip.troca{animation:dica3 .35s ease}
 @keyframes dica3{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.hero3-bolhas i,.hero3-marca,.hero3-gente span,#splashArt svg{animation:none}}
+/* ===== 3.1: ícones, animações e versão de computador ===== */
+.home-icon svg{width:30px;height:30px;color:var(--link)}
+.home-primary .home-icon svg{color:#fff}
+#stCont .home-icon svg{color:var(--link)}
+.hero3{background-size:220% 220%;animation:heroCor 14s ease-in-out infinite}
+@keyframes heroCor{0%,100%{background-position:0% 40%}50%{background-position:100% 60%}}
+.hero3-estrelas i{position:absolute;left:var(--x);top:var(--y);width:calc(8px * var(--s));height:calc(8px * var(--s));background:#fff;clip-path:polygon(50% 0,62% 38%,100% 50%,62% 62%,50% 100%,38% 62%,0 50%,38% 38%);opacity:0;animation:estrela31 3.6s ease-in-out infinite;animation-delay:var(--d)}
+@keyframes estrela31{0%,100%{opacity:0;transform:scale(.4) rotate(0)}50%{opacity:.95;transform:scale(1) rotate(45deg)}}
+.entra31>*{animation:entra31 .55s cubic-bezier(.2,.9,.3,1.2) both}
+.entra31>*:nth-child(2){animation-delay:.08s}.entra31>*:nth-child(3){animation-delay:.16s}.entra31>*:nth-child(4){animation-delay:.24s}
+.entra31 .home-action{animation:entra31 .5s cubic-bezier(.2,.9,.3,1.2) both}
+.entra31 .home-action:nth-child(1){animation-delay:.2s}.entra31 .home-action:nth-child(2){animation-delay:.28s}.entra31 .home-action:nth-child(3){animation-delay:.36s}
+@keyframes entra31{from{opacity:0;transform:translateY(16px) scale(.98)}to{opacity:1;transform:none}}
+#start .home-action{position:relative;overflow:hidden;transition:transform .22s cubic-bezier(.2,.9,.3,1.3),box-shadow .22s,border-color .2s}
+#start .home-action::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.22) 50%,transparent 70%);transform:translateX(-120%);pointer-events:none}
+#start .home-primary::after{animation:brilho31 4.5s ease-in-out infinite 1.2s}
+@keyframes brilho31{0%,70%{transform:translateX(-120%)}100%{transform:translateX(120%)}}
+#start .home-action .home-icon{transition:transform .3s cubic-bezier(.2,.9,.3,1.5)}
+@media (hover:hover){
+ #start .home-action:not(:disabled):hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(40,30,90,.22)}
+ #start .home-action:not(:disabled):hover::after{transition:transform .6s ease;transform:translateX(120%)}
+ #start .home-action:not(:disabled):hover .home-icon{transform:scale(1.12) rotate(-6deg)}
+}
+#start .home-action:not(:disabled):active{transform:scale(.97)}
+/* computador: duas colunas */
+@media (min-width:900px){
+ #start .full-in.home-screen{max-width:1120px;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);grid-template-rows:1fr auto auto 1fr auto;column-gap:48px;row-gap:22px;padding:40px 40px 24px;align-content:center}
+ #start .hero3{grid-column:1;grid-row:1/6;margin:0;border-radius:40px;padding:60px 32px;display:flex;flex-direction:column;justify-content:center;min-height:min(640px,86vh)}
+ #start .hero3::after{border-radius:0 0 40px 40px}
+ #start .hero3 .logo{font-size:76px}
+ #start .hero3 .tag{font-size:19px}
+ #start .hero3-marca{width:132px;height:132px}
+ #start .hero3-gente{margin-top:34px}
+ #start .hero3-gente span img{width:84px;height:84px}
+ #start .hero3-gente span:nth-child(3) img{width:96px;height:96px}
+ #start .home-intro{grid-column:2;grid-row:2;text-align:left}
+ #start .home-intro h1{font-size:32px;line-height:1.2}
+ #start .home-intro p{font-size:16px}
+ #start .home-actions{grid-column:2;grid-row:3;gap:14px}
+ #start .home-action{min-height:96px;padding:20px 22px}
+ #start .home-action b{font-size:20px}
+ #start .home-icon{width:56px;height:56px}
+ #start .home-icon svg{width:36px;height:36px}
+ #start .home-version{grid-column:2;grid-row:5;text-align:left}
+}
+@media (prefers-reduced-motion:reduce){.hero3,.hero3-estrelas i,.entra31>*,.entra31 .home-action,#start .home-primary::after{animation:none}}

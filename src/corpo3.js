@@ -180,6 +180,8 @@ window.corpoSVG=function(c){
  // na transformação a camisa rasga e some, a calça vira bermuda esfarrapada e os pés ficam descalços
  if(lobo){ camadas.length=0; saias.length=0; if(baixo){ baixo.tipo='bermuda'; baixo.rasgado=true; delete baixo.listraLado; } RP.sapato={tipo:'descalco'}; RP.capa=null; }
  const HS=specCab(), CB=caixaCab();
+ // chapéu de aba fica assentado na cabeça: o cabelo acima da aba some (fica dentro da copa), em vez de o chapéu flutuar no topo do volume
+ const ABA=['chapeuPalha','chapeuPraia','cowboy','cartola','fedora','bucket'].includes(chapeu), abaClip=g=>ABA&&g?`<clipPath id="ab${id}"><rect x="-2000" y="${f(topo+.13*hp)}" width="4000" height="4000"/></clipPath><g clip-path="url(#ab${id})">${g}</g>`:g;
  let gradCab=null; if(c.corPontas&&HS){ gradCab=`url(#gc${id})`; defsX.push(`<linearGradient id="gc${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${f(topo+.6*hp)}" x2="0" y2="${f(Y(2.6))}"><stop offset="0" stop-color="${corCab()}"/><stop offset=".4" stop-color="${corCab()}"/><stop offset="1" stop-color="${c.corPontas}"/></linearGradient>`); }
  const contorno=Le.pts.concat(Ld.pts.slice(0,-1).reverse());
  const silh=suave(contorno);
@@ -193,7 +195,7 @@ window.corpoSVG=function(c){
  O.push(`<defs><clipPath id="c${id}"><path d="${silh}"/></clipPath><clipPath id="be${id}"><path d="${bracoD(Le)}"/></clipPath><clipPath id="bd${id}"><path d="${bracoD(Ld)}"/></clipPath><filter id="b${id}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.6"/></filter>`
   +`<radialGradient id="r${id}" cx=".5" cy=".4" r=".65"><stop offset="0" stop-color="${cla(pele,.06)}"/><stop offset=".75" stop-color="${pele}"/><stop offset="1" stop-color="${esc(pele,.05)}"/></radialGradient></defs>`);
  O.push(`<ellipse cx="${cx}" cy="${f(chao+1)}" rx="${f(wQua+16)}" ry="4.5" fill="rgba(0,0,0,.12)"/>`);
- O.push(acessTras(),cabeloTras());
+ O.push(acessTras(),abaClip(cabeloTras()));
  // ===== tronco e pernas
  O.push(`<path d="${silh}" fill="${pele}"/>`);
  const dentro=[];
@@ -599,7 +601,7 @@ if(tipo==='musculoso'&&a>=14&&!F) for(const s of [-1,1]) ana(`M${f(X(s*wMco*.55)
    else if(bb==='bigode') R.push(bigode);
    else if(bb==='cavanhaque') R.push(bigode,`<path d="${suave([[cx-mw*.95,my+mw*.2],[cx-mw*.7,cy0+.98*hp],[cx,cy0+1.05*hp],[cx+mw*.7,cy0+.98*hp],[cx+mw*.95,my+mw*.2],[cx+mw*.5,my+mw*.5],[cx,my+mw*.62],[cx-mw*.5,my+mw*.5]])}" fill="${cor}" stroke="${esc(cor,.3)}" stroke-width=".8"/>`);
    else { const lq=bb==='lenhador'?1.34:1.14; R.push(`<path d="${suave([[cx-hw*.98,cy0+.55*hp],[cx-hw*.85,cy0+.9*hp],[cx-hw*.4,cy0+(lq-.04)*hp],[cx,cy0+lq*hp],[cx+hw*.4,cy0+(lq-.04)*hp],[cx+hw*.85,cy0+.9*hp],[cx+hw*.98,cy0+.55*hp],[cx+mw*1.2,my+mw*.45],[cx,my+mw*.6],[cx-mw*1.2,my+mw*.45]])}" fill="${cor}" stroke="${esc(cor,.3)}" stroke-width="1"/>`,bigode); } }
-  R.push(cabeloFrente(hw));
+  R.push(abaClip(cabeloFrente(hw)).replace(`id="ab${id}"`,`id="ab2${id}"`).replace(`url(#ab${id})`,`url(#ab2${id})`));
   return R.join(''); }
 
  // ===== cabelo: estilo = frente (franja/linha do cabelo) + trás (comprimento/volume) + extras (coque, rabo, tranças...)
@@ -720,7 +722,12 @@ if(tipo==='musculoso'&&a>=14&&!F) for(const s of [-1,1]) ana(`M${f(X(s*wMco*.55)
   const H=(u,v)=>f(cx+u*s)+','+f(t+v*hp), fz=(d,cor,w=1.3)=>`<path d="${d}" fill="${cor}" stroke="${cor[0]==='#'?esc(cor,.42):'rgba(0,0,0,.4)'}" stroke-width="${w}" stroke-linejoin="round"/>`;
   const el=(v,rx,ry,cor,u=0)=>`<ellipse cx="${f(cx+u*s)}" cy="${f(t+v*hp)}" rx="${f(rx*s)}" ry="${f(ry*hp)}" fill="${cor}" stroke="${esc(cor,.42)}" stroke-width="1.3"/>`;
   const cc=c.corChapeu;
-  if(c.sardas) { let d=''; for(let i=0;i<14;i++){ const k=i%2?1:-1, u=.35+((i*37)%10)/22, v=-.02+((i*53)%10)/120; d+=`<circle cx="${f(cx+k*u*s)}" cy="${f(ny+v*hp-.03*hp)}" r=".7"/>`; } R.push(`<g fill="${esc(pele,.35)}" opacity=".7">${d}</g>`); }
+  // sardas: pontinhos de tamanhos diferentes no nariz e no alto das bochechas, num marrom quente e suave
+  if(c.sardas) { let d=''; const y0=ey+ew*.62, y1=ny+hp*.012;
+   for(let i=0;i<34;i++){ const hr=k=>{ const v=Math.sin(i*12.9898+k*78.233)*43758.5453; return v-Math.floor(v); }, r1=hr(1), r2=hr(2), r3=hr(3);
+    const u=(r1*2-1), x=cx+u*ex*1.3, y=y0+(y1-y0)*r2*.85-hp*.02*u*u;
+    d+=`<circle cx="${f(x)}" cy="${f(y)}" r="${f(hp*(.005+.006*r3))}" opacity="${f(.35+.35*r3)}"/>`; }
+   R.push(`<g fill="${mix(pele,'#8E4A24',.42)}">${d}</g>`); }
   if(c.maquiagem) for(const k of [-1,1]) R.push(`<ellipse cx="${f(cx+k*ex*1.04)}" cy="${f(ey-ew*.62)}" rx="${f(ew*1.05)}" ry="${f(ew*.42)}" fill="${c.maquiagem}" opacity=".3"/>`);
   if(AC.has('piercingNariz')) R.push(`<circle cx="${f(cx+nw*.55)}" cy="${f(ny-.5)}" r="1.1" fill="#D8D8D8" stroke="#888" stroke-width=".4"/>`);
   if(AC.has('mascara')){ const mc=ac('mascara',c.corMascara)||'#A8D8EA'; R.push(`<path d="M${f(cx-1.0*s)},${f(t+.55*hp)} L${f(cx-.84*s)},${f(t+.68*hp)} M${f(cx+1.0*s)},${f(t+.55*hp)} L${f(cx+.84*s)},${f(t+.68*hp)}" stroke="#E8EEF2" stroke-width="1"/>`,fz(`M${H(-.86,.66)} Q${H(0,.58)} ${H(.86,.66)} L${H(.78,.96)} Q${H(0,1.07)} ${H(-.78,.96)}Z`,mc,1),`<path d="M${H(-.75,.76)} Q${H(0,.72)} ${H(.75,.76)} M${H(-.72,.86)} Q${H(0,.84)} ${H(.72,.86)}" stroke="${esc(mc,.2)}" stroke-width=".8" fill="none"/>`); }
@@ -785,7 +792,7 @@ if(tipo==='musculoso'&&a>=14&&!F) for(const s of [-1,1]) ana(`M${f(X(s*wMco*.55)
   if(RH.length){ const ay=t+.3*hp, sxE=Math.max(1,CB.half/(1.12*s)), syE=Math.max(1,(ay-CB.top)/(ay-(t-.13*hp))), n3=v=>v.toFixed(3);
    const env=!chapeu||['bone','boneTras','gorro','boina','capaceteObra','capaceteBombeiro','capaceteMilitar','toucaCozinha','toucaCirurgica'].includes(chapeu);
    const est=!chapeu||['gorro','toucaCozinha','toucaCirurgica'].includes(chapeu), kx=est?1:.72, ky=est?1:.88;
-   const tr=env?`translate(${f(cx)},${f(ay)}) scale(${n3(1+(sxE-1)*kx)},${n3(1+(syE-1)*ky)}) translate(${f(-cx)},${f(-ay)})`:`translate(${f(cx)},${f(ay+Math.min(0,CB.top-(t-.13*hp))*.85)}) scale(${n3(1+(sxE-1)*.6)}) translate(${f(-cx)},${f(-ay)})`;
+   const tr=env?`translate(${f(cx)},${f(ay)}) scale(${n3(1+(sxE-1)*kx)},${n3(1+(syE-1)*ky)}) translate(${f(-cx)},${f(-ay)})`:`translate(${f(cx)},${f(ay+Math.min(0,CB.top-(t-.13*hp))*(ABA?0:.85))}) scale(${n3(1+(sxE-1)*(ABA?.35:.6))}) translate(${f(-cx)},${f(-ay)})`;
    R.push(`<g transform="${tr}">${RH.join('')}</g>`); }
   // enfeites de cabelo: seguem o contorno do cabelo (elipse da caixa) e vão para o rabo, coque ou chiquinhas quando existem
   const cyE=t+.38*hp, ry=cyE-CB.top, hw2=CB.half*.97, bd=g=>{const r=g*Math.PI/180;return [cx+hw2*Math.cos(r),cyE-ry*.95*Math.sin(r)];};

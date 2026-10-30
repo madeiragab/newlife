@@ -70,7 +70,7 @@ function pv3Conta(){ const L=v3Look(), o=PV3.over, l=[];
   return {l,total:l.reduce((s,x)=>s+x.p,0)}; }
 
 function pv3Aplicar(){ const L=v3Look(), o=PV3.over, c=pv3Conta();
-  if(PV3.modo==='genes'){ Object.assign(S.me.genes,PV3.gen); if('tipo' in o) L.tipo=o.tipo; if(PV3.gen.glasses===false) L.glasses='none'; return 'Criei a minha aparência do jeito que eu queria.'; }
+  if(PV3.modo==='genes'){ S.me.genes.hAntes=S.me.genes.h; Object.assign(S.me.genes,PV3.gen); if(typeof genRefazerFamilia==='function') genRefazerFamilia(); delete S.me.genes.hAntes; if('tipo' in o) L.tipo=o.tipo; if(PV3.gen.glasses===false) L.glasses='none'; return 'Criei a minha aparência do jeito que eu queria.'; }
   for(const k of ['tipo','cab3','dye','beard','makeup','roupa3']) if(k in o) L[k]=o[k];
   if(o.dye===null) L.pontas=null;
   if(o.roupa3) L.semUni=true;
@@ -142,7 +142,7 @@ function pv3Draw(){ const w=document.getElementById('provador3'); if(!w||!PV3) r
    <div class="pv3-meio">
     <aside class="pv3-cats">${cats.map(c=>`<button data-cat="${esc(c.id)}" class="${c.id===PV3.cat?'on':''}" ${c.dis?`disabled title="A partir dos ${c.min} anos"`:''}>${esc(c.l)}${c.dis?` <small>${c.min}+</small>`:''}</button>`).join('')}</aside>
     <section class="pv3-palco">${PV3_CENA}
-     ${figuraSVG(pes,{cls:'pv3-fig'+(busto?' perto':''),over:look,bg:''})}
+     ${figuraSVG(pes,{cls:'pv3-fig',over:look,bg:''})}${busto?`<div class="pv3-retrato" aria-hidden="true"><img src="${v3Img(v3Ficha(pes,look,{recorte:'retrato'}),'')}" alt=""></div>`:''}
      ${conta.l.length?`<button class="pv3-desfaz" data-a="desfaz">↩ Desfazer tudo</button>`:''}</section>
     <section class="pv3-opcoes"><h3>${esc(cat?cat.l:'')} <small>${itens.length}</small></h3>
      ${PV3.aba==='roupas'?`<button class="pv3-sexo" data-a="sexo">${PV3.sexo==='F'?'Ver roupas masculinas':'Ver roupas femininas'}</button>`:''}
