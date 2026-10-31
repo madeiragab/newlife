@@ -7,7 +7,8 @@ chain('gremio',{k:'Escola',min:13,max:17,gap:[1,1],when:m=>!!m.edu.cur},{
  d:['A derrota','Perdi a eleição, mas aprendi a falar em público.',['Fiscalizar a chapa eleita|k+3 sm+2|Virei a oposição mais chata da escola.','Seguir a vida|h+2|Ano que vem tem mais.']],
  e:['Experiência','A experiência do grêmio me fez gostar de liderar.',['Pensar em política no futuro|f+1 sm+2|Quem sabe um dia.','Guardar como uma boa lembrança|h+4|Foi divertido.']],
 });
-chain('vestibular',{k:'Estudos',min:16,max:19,gap:[1,1],when:m=>!!m.edu.cur&&m.edu.cur.type==='medio'},{
+// a história do vestibular para quando a pessoa já entrou na faculdade ou num curso técnico
+chain('vestibular',{k:'Estudos',min:16,max:19,gap:[1,1],when:m=>!!m.edu.cur&&m.edu.cur.type==='medio',ate:m=>!(m.edu.cur&&m.edu.cur.type!=='medio')&&!m.edu.deg.some(d=>/^(uni|tec|post):/.test(d))},{
  a:['O ano do vestibular','Último ano da escola. Todo mundo só fala de vestibular.',['Fazer cursinho|$-3000 sm+4 >b|Aula de manhã, de tarde e simulado no sábado.','Estudar sozinh{o} pela internet|sm+3 >b|Disciplina é tudo.','Não estudar|h+4 >c|Vou ver como é.']],
  b:['A pressão','A pressão está me deixando sem dormir.',['Manter o ritmo|sm+3 hl-3 >d|Café e flashcards.','Diminuir um pouco|h+4 sm+1 >d|Saúde mental também conta ponto.','Ter uma crise de choro|h-6 >d|Minha mãe me abraçou e disse que eu ia conseguir.']],
  c:['A realidade','Um simulado mostrou que eu estou muito atrás.',['Correr atrás|sm+4 >d|Três meses de foco total.','Pensar em outro caminho|>e|Talvez um curso técnico.']],
