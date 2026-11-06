@@ -101,10 +101,12 @@ function jobReqs(d){
   return miss;
 }
 function hireChance(d){ const m=S.me; return clamp(55+(m.smarts-(d.sm||40))*.6+(m.looks-50)*.2-m.rec.conv*18-(m.add.alcool>60?15:0)+(m.fame/5),5,95)/100; }
+function interviewChance(d,answer){ return Math.max(.05,Math.min(.95,hireChance(d)+[.25,0,-.3][answer])); }
 function takeJob(o,bonus){
   const m=S.me,d=JOBS.find(x=>x.id===o.id);
   if(m.job&&!d.pt) endJob(); if(m.job&&d.pt) endJob();
   m.job={id:d.id,lvl:0,perf:55,yrs:0,lvlYrs:0,co:o.co,size:o.size||'média',mul:o.mul*(bonus||1)};
+  if(Array.isArray(m.yr.openings)) m.yr.openings=m.yr.openings.filter(v=>v.id!==o.id||v.co!==o.co);
   if(d.id==='medi'||d.id==='ciru') m.c.wasDoctor=1;
   for(let i=0,n=R.int(2,4);i<n;i++) S.people.push(mkPerson({rel:'colegaT',age:clamp(m.age+R.int(-10,15),16,70),bond:R.int(25,55)}));
   const boss=mkPerson({rel:'chefe',age:clamp(m.age+R.int(3,25),25,75),bond:R.int(35,60)}); S.people.push(boss);
@@ -281,7 +283,7 @@ function interact(p,k,extra){
   const nm=p.first, a=p.gender==='F'?'a':'o';
   switch(k){
     case 'tempo': if(tired) return `${nm} já passou bastante tempo comigo este ano.`; p.bond=clamp(p.bond+R.int(3,12)); st('happy',R.int(1,5)); return p.rel==='pet'?R.pick([`Brinquei com ${nm} no quintal.`,`${nm} e eu tiramos uma soneca juntos no sofá.`,`Joguei a bolinha para ${nm} até cansar.`,`Fiz carinho em ${nm} a tarde toda.`]):`Passei a tarde com ${nm} ${R.pick(['vendo filme','tomando café','jogando videogame','no parque','cozinhando','conversando sobre a vida','num jogo de futebol','no shopping'])}.`;
-    case 'conversa': if(tired) return `${nm} não quer conversar agora.`; p.bond=clamp(p.bond+R.int(1,6)); return `Conversei com ${nm} sobre ${R.pick(m.age<12?['brincadeiras','histórias','desenhos','música','a família']:['política','futebol','a vida dos vizinhos','o futuro','filmes','o clima','memórias de infância','religião','dinheiro','fofocas da família'])}.`+(R.chance(.12)?' Acabou em discussão.':'');
+    case 'conversa': if(tired) return `${nm} não quer conversar agora.`; p.bond=clamp(p.bond+R.int(1,6)); st('happy',2); return `Conversei com ${nm} sobre ${R.pick(m.age<12?['brincadeiras','histórias','desenhos','música','a família']:['política','futebol','a vida dos vizinhos','o futuro','filmes','o clima','memórias de infância','religião','dinheiro','fofocas da família'])}.`+(R.chance(.12)?' Acabou em discussão.':'');
     case 'elogio': p.bond=clamp(p.bond+(tired?0:R.int(2,7))); return R.pick([`Elogiei o estilo de ${nm}.`,`Disse para ${nm} que ${p.gender==='F'?'ela':'ele'} é incrível.`,`Elogiei a comida de ${nm}.`]);
     case 'presente': { const [c,b]=extra; if(!canPay(c)) return 'Não tenho dinheiro para isso.'; m.money-=c; p.bond=clamp(p.bond+b+R.int(-2,4)); cnt('gifts'); const it=R.pick(c<100?['um chocolate','um cartão','uma flor','um chaveiro']:c<1000?['um perfume','um livro','uma camisa','um fone de ouvido']:['um relógio','uma joia','uma viagem de fim de semana','um celular novo']); return `Dei ${it} para ${nm}. ${p.bond>80?`${nm} amou!`:''}`; }
     case 'pedir': { if(tired) return `${nm} disse que já me deu o suficiente este ano.`; const ok=R.chance(p.bond/130)&&p.money>50; if(!ok){ p.bond=clamp(p.bond-3); return `${nm} disse que não.`; } const v=Math.min(p.money,Math.round(R.int(10,m.age<18?200:3000)*(1+p.money/200000))); p.money-=v; m.money+=v; return `${nm} me deu ${fmt(v)}.`; }
@@ -289,7 +291,7 @@ function interact(p,k,extra){
     case 'insulto': p.bond=clamp(p.bond-R.int(8,18)); m.karma=clamp(m.karma-2); return `Chamei ${nm} de ${R.pick(['burr'+a,'fracassad'+a,'chat'+a,'mala sem alça','cara de pastel','ridícul'+a])}. ${R.chance(p.craze/150)?`${nm} me deu um tapa.`:''}`;
     case 'discutir': p.bond=clamp(p.bond-R.int(4,12)); return `Discuti com ${nm} sobre ${R.pick(m.age<12?['brinquedos','as regras da brincadeira','a hora de dormir']:['dinheiro','política','a louça','o passado','ciúmes','a família'])}. ${R.chance(.5)?'Ganhei a discussão.':'Perdi a discussão.'}`;
     case 'briga': { cnt('fights'); m.karma=clamp(m.karma-3); p.bond=clamp(p.bond-25); if(R.chance(.35+m.fight/160)){ p.health=clamp(p.health-15); if(m.age>=16&&R.chance(.15)) arrest('lesão corporal',0,2); return `Parti pra cima de ${nm} e venci a briga.`; } st('health',-R.int(5,15)); return `Parti pra cima de ${nm} e apanhei.`; }
-    case 'abraco': p.bond=clamp(p.bond+(tired?0:R.int(2,6))); return `Dei um abraço apertado em ${nm}.`;
+    case 'abraco': p.bond=clamp(p.bond+(tired?0:R.int(2,6))); if(!tired) st('happy',2); return `Dei um abraço apertado em ${nm}.`;
     case 'piada': if(R.chance(.6)){ p.bond=clamp(p.bond+R.int(1,5)); return `${nm} riu muito da minha piada.`; } p.bond=clamp(p.bond-2); return `${nm} não achou graça nenhuma.`;
     case 'pegadinha': if(R.chance(.5)){ p.bond=clamp(p.bond+3); return `${nm} caiu na pegadinha e riu.`; } p.bond=clamp(p.bond-8); return `${nm} ficou furios${a} com a pegadinha.`;
     case 'amizade': if(R.chance(Math.min(.95,.08+frOf(p)/100*.9))){ p.fr=clamp(frOf(p)+8); p.rel='amigo'; p.bond=clamp(p.bond+10); return `Agora ${nm} é ${p.gender==='F'?'minha amiga':'meu amigo'}!`; } p.bond=clamp(p.bond-3); return `${nm} não deu muita bola.`;

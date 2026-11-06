@@ -267,7 +267,7 @@ function yearStats(){
   if(a>=32) st('looks',-(a>60?R.int(1,3):a>45?R.int(0,2):R.int(0,1))); if(a>=13&&a<=18) st('looks',R.int(-2,3));
   if(a>=30) st('health',-(a>80?R.int(1,4):a>65?R.int(0,3):a>45?R.int(0,2):R.int(0,1)));
   if(a<55&&!m.dis.some(d=>DISEASES[d.id].dmg>=8)&&m.add.alcool<40&&m.add.cigarro<40) st('health',R.int(0,a<30?3:2));
-  let target=58+(m.money>1e5?6:m.money<0?-12:0)+(partners().length?6:0)+(m.job||m.edu.cur||m.ret?4:a>=18?-10:0)-(m.prison?28:0)-(m.dis.length*3)+(m.karma-50)/10;
+  let target=58+(m.money>1e5?6:m.money<0?-12:0)+(partners().length?6:0)+(m.job||m.edu.cur||m.ret?4:a>=18?-10:0)-(m.prison?28:0)-(m.dis.length*3)+(m.karma-50)/10+apoioSocial();
   m.happy=clamp(m.happy+(target-m.happy)*.2+R.int(-6,6));
   const ad=m.add;
   if(ad.alcool>40){ st('health',-R.int(1,4)); st('smarts',-1); if(ad.alcool>75&&R.chance(.05)&&!m.dis.find(d=>d.id==='cirrose')) addDisease('cirrose'); }
@@ -275,6 +275,16 @@ function yearStats(){
   if(ad.jogo>50&&m.money>0){ const loss=Math.round(m.money*R.f()*.15); m.money-=loss; if(loss>500) log(`Perdi ${fmt(loss)} em apostas escondidas.`,'bad'); }
   ['alcool','cigarro','jogo'].forEach(k=>{ if(ad[k]>0&&ad[k]<30) ad[k]=Math.max(0,ad[k]-R.int(2,6)); });
   if(m.karma>50) m.karma=clamp(m.karma-1); else if(m.karma<50) m.karma=clamp(m.karma+1);
+}
+// Perdas naturais pesam pela proximidade, sem multiplicar o luto por toda a lista de conhecidos.
+function lutoNatural(p){
+  const m=S.me, close=['mae','pai','filho','conjuge','irmao','adot','namoro','noivo'].includes(p.rel);
+  const bond=clamp(p.bond??0), peso=p.rel==='pet'?10:close?Math.round(10+bond*.15):bond>=50?Math.round(bond*.08):0;
+  const perda=Math.min(peso,Math.max(0,30-(m.yr.lutoNatural||0)));
+  m.yr.lutoNatural=(m.yr.lutoNatural||0)+perda; st('happy',-perda);
+}
+function apoioSocial(){
+  return Math.min(6,S.people.filter(p=>p.alive&&p.rel!=='inimigo'&&p.bond>=50&&p.vida?.contato!=null&&p.vida.contato>=S.year-1).length*2);
 }
 function yearPeople(){
   const m=S.me;
@@ -287,11 +297,11 @@ function yearPeople(){
   }
   for(const p of S.people.filter(p=>p.alive)){
     p.age++; p.yrs++;
-    if(p.rel==='pet'){ if(p.age>=p.life){ if(petRetirar(p,'morto','de velhice',true))st('happy',-10); } continue; }
+    if(p.rel==='pet'){ if(p.age>=p.life){ if(petRetirar(p,'morto','de velhice',true))lutoNatural(p); } continue; }
     if(p.age>=40) p.health=clamp(p.health-R.int(0,p.age>70?5:2));
     const dp=deathP(p.age,p.health)*.85+(p.age<40?.0006:0);
     if(R.chance(dp)){ p.alive=false; const why=R.pick(p.age>70?['de causas naturais','dormindo','de infarto','de AVC','de pneumonia','de câncer']:['num acidente de carro','de infarto','de câncer','num acidente de trabalho','de AVC']);
-      log(`${relLabel(p)} ${fullName(p)} morreu ${why}, aos ${p.age} anos.`,'bad'); const close=['mae','pai','filho','conjuge','irmao','adot','namoro','noivo'].includes(p.rel); st('happy',close?-25:-8);
+      log(`${relLabel(p)} ${fullName(p)} morreu ${why}, aos ${p.age} anos.`,'bad'); lutoNatural(p);
       if(['mae','pai','avo'].includes(p.rel)&&p.money>1000&&R.chance(p.rel==='avo'?.35:.9)){ /* herança dividida como na vida real: metade fica com o cônjuge vivo e o resto entre os filhos */ const viuvo=p.rel!=='avo'&&parents().some(q=>q!==p&&q.alive), irmaos=people('irmao').filter(q=>q.alive).length; const share=Math.round(p.money*(p.rel==='avo'?R.f()*.15:(viuvo?.5:1)/(1+irmaos))); m.money+=share; log(`Recebi uma herança de ${fmt(share)}.`,'good'); }
       if(p.rel==='conjuge') cnt('widow');
       continue; }

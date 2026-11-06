@@ -295,7 +295,7 @@ V.postList=()=>({title:'Pós-graduação',items:POSTS.map(p=>{ const ok=p.req===
 
 const INTERVIEW=[
  ['Por que você quer trabalhar aqui?',['Admiro a empresa e quero crescer junto com vocês.','Preciso pagar as contas.','Minha mãe mandou eu vir.']],
- ['Qual é o seu maior defeito?',['Às vezes sou perfeccionista demais, mas estou trabalhando nisso.','Chego atrasad{o} de vez em quando.','Não tenho defeitos.']],
+ ['Qual é o seu maior defeito?',['Às vezes reviso demais; agora defino prazos para entregar sem atrasar.','Chego atrasad{o} de vez em quando.','Não tenho defeitos.']],
  ['Onde você se vê em cinco anos?',['Liderando projetos aqui dentro.','Não sei, sinceramente.','Na sua cadeira.']],
  ['Como você lida com pressão?',['Organizo prioridades e mantenho a calma.','Choro no banheiro e volto.','Jogo a culpa em alguém.']],
  ['Conte sobre um conflito que resolveu.',['Mediei uma briga na equipe e entregamos no prazo.','Evito conflitos a todo custo.','Resolvi na base do grito.']],
@@ -306,15 +306,15 @@ V.jobs=()=>{
   const m=S.me;
   if(m.age<13) return {title:'Vagas',items:[{html:'<div class="card"><p>Ainda sou muito novo para trabalhar.</p></div>'}]};
   const list=openings();
-  return {title:m.age<18?'Meio período':'Vagas de emprego',items:[{ic:'📚',l:'Guia de carreiras',s:'Todas as profissões e quem sobe para quem',on:()=>UI.push(V.careerBook)}].concat(list.map(o=>{ const d=JOBS.find(x=>x.id===o.id),miss=jobReqs(d); return {l:g(d.l[0],m.gender),s:`${o.co} (${o.size||'média'}) · ${fmt(d.sal*o.mul)}/ano${d.edu?' · '+eduName(d.edu):''}`,r:miss.length?'Não atendo':'',tone:miss.length?'bad':'',on:()=>{
+  return {title:m.job?'Procurar outro emprego':m.age<18?'Meio período':'Vagas de emprego',items:[...(m.job?[{html:`<div class="card"><p>Já trabalho como ${esc(jobTitle(m.job))}${m.job.co?' na '+esc(m.job.co):''}. Só saio do emprego atual se aceitar uma nova vaga.</p></div>`}]:[]),{ic:'📚',l:'Guia de carreiras',s:'Todas as profissões e quem sobe para quem',on:()=>UI.push(V.careerBook)}].concat(list.map(o=>{ const d=JOBS.find(x=>x.id===o.id),miss=jobReqs(d); return {l:g(d.l[0],m.gender),s:`${o.co} (${o.size||'média'}) · ${fmt(d.sal*o.mul)}/ano${d.edu?' · '+eduName(d.edu):''}`,r:miss.length?'Não atendo':'',tone:miss.length?'bad':'',on:()=>{
     if(miss.length) return msg('Requisitos',miss.join('\n'));
     if(m.job&&m.job.id===o.id&&m.job.co===o.co) return msg('Vaga','Eu já trabalho aqui.');
     { const no=workPermission('trabalhar'); if(no) return msg('Pais',no); }
     const q=R.pick(INTERVIEW); const opts=R.shuffle(q[1].map((t,i)=>({t:t.replace('{o}',oa()),i})));
     modal({k:'Entrevista · '+o.co,t:q[0],ch:opts.map(a=>({l:a.t,fn:()=>{
-      const p=hireChance(d)+[.15,0,-.3][a.i];
+      const p=interviewChance(d,a.i);
       if(R.chance(p)){ takeJob(o); UI.close(); modal({t:'Contratad'+oa()+'!',x:`Comecei como ${jobTitle(m.job).toLowerCase()} na ${o.co}.`}); }
-      else { m.yr.openings=m.yr.openings.filter(x=>x!==o); modal({t:'Não foi dessa vez',x:R.pick(['Eles escolheram outro candidato.','Disseram que vão ligar.','O recrutador bocejou durante a entrevista.'])}); }
+      else { m.yr.openings=m.yr.openings.filter(x=>x!==o); modal({t:'Não foi dessa vez',x:[ 'Minha resposta foi bem recebida, mas escolheram outro candidato. Uma boa entrevista ajuda, mas não garante a vaga.', 'Minha resposta poderia mostrar melhor como vou contribuir para a empresa. Desta vez, escolheram outra pessoa.', 'Minha resposta prejudicou a entrevista. Vou tentar responder com mais responsabilidade na próxima.' ][a.i]+(m.job?' Continuo no meu emprego atual.':' Posso tentar outra vaga.')}); }
     }}))});
   }}; }))};
 };

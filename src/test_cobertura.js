@@ -64,6 +64,8 @@ function coberturaEventosSelfTest(limiteMs=60000){
    S.people.push(mkPerson({rel:'amigo',age,bond:60}),mkPerson({rel:'ex',age,bond:30}),mkPerson({rel:'irmao',age:age+2,bond:60}));for(const p of parents())p.age=age+30;
    try{mod(m);}catch(e){}if(typeof grpAuto==='function')try{grpAuto();}catch(e){}S.pending=[];return JSON.stringify(S);};
   const candidatos=[];
+  // Vício no trabalho precisa de emprego e dependência juntos; não depender do sorteio com limite de tempo.
+  for(const vicio of ['alcool','cigarro','jogo'])candidatos.push([35,'BR',0,m=>{m.edu.deg.push('medio');takeJob({id:'aux',co:'Teste',size:'média',mul:1});m.add[vicio]=70;}]);
   for(const age of [16,25,35,50,68])for(const j of JOBS)candidatos.push([age,null,0,m=>{m.job=null;takeJob({id:j.id,co:'Teste',size:'média',mul:1});m.job.lvl=R.int(0,2);m.job.perf=60;m.job.yrs=4;}]);
   for(const age of [25,40])for(const k of Object.keys(SPECIAL))candidatos.push([age,null,0,m=>{m.job={spc:k,lvl:1,perf:60,yrs:4};}]);
   // ator com cada especialização (eventos próprios de ação, terror, dublagem, ficção científica e novela)

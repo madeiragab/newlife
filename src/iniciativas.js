@@ -63,7 +63,7 @@ function npcConversaResolver(k,d){const p=P(d.pid);if(!p?.alive)return 'Essa con
  return 'Reservei um tempo para '+p.first+'. A iniciativa dessa conversa veio de '+(p.gender==='F'?'ela':'ele')+'.';
 }
 EVENTS.npc_conversa={show:d=>{const p=P(d.pid),a=NPC_ASSUNTOS[d.tipo]||NPC_ASSUNTOS.convite;return {k:'Pessoas próximas',t:a[0],x:(p?.first||'Uma pessoa próxima')+' '+a[1],ch:[['Ouvir e aceitar a conversa','ouvir'],['Explicar e adiar','adiar'],['Ignorar','ignorar']]};},pick:npcConversaResolver};
-interact=(o=>function(p,k){const b=p?.bond,r=o.apply(this,arguments);if(p?.alive&&p.bond>b)npcContato(p);return r;})(interact);
+interact=(o=>function(p,k){const b=p?.bond,r=o.apply(this,arguments);if(p?.alive&&(p.bond>b||(['tempo','conversa','abraco'].includes(k)&&p.yr?.[k]<=2)))npcContato(p);return r;})(interact);
 polyNamorar=(o=>function(p){const r=o.apply(this,arguments);if(p&&partners().includes(p)){const v=npcVida(p),q=v.par&&P(v.par);if(q){npcVida(q).par=null;v.par=null;npcMarco(p,'separacao',p.first+' encerrou a união anterior com '+q.first+'.');}npcContato(p);}return r;})(polyNamorar);
 
 // Pequenos negócios usam o mesmo cálculo operacional das empresas do protagonista.

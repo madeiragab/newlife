@@ -3,6 +3,47 @@ function selfTest(){
   const originalRandom=R.f;let seed=20261017;R.f=()=>{seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296;};
   const errs={},lives=[]; let years=0,events=0,actions=0;
   const T=(name,fn)=>{ window.__T=name; (window.__TR=window.__TR||[]).push(name); if(window.__TR.length>30) window.__TR.shift(); try{ actions++; if(actions%5000===0&&window.nlTestNotify)window.nlTestNotify(JSON.stringify({teste:name,acoes:actions})); const r=fn(); if(S&&S.me&&!isFinite(S.me.money)){ const k='NaN após '+name; errs[k]=(errs[k]||0)+1; S.me.money=0; } return r; }catch(e){ const k=name+': '+e.message; errs[k]=(errs[k]||0)+1; if(errs[k]===1) errs[k+' @']=(e.stack||'').split('\n').slice(1,3).join(' | '); } };
+  T('bem-estar e entrevistas',()=>{
+    const s0=S,meta=JSON.stringify(META),snaps=SNAPS,rf=R.f,modal0=modal,close0=UI.close;
+    const ok=(v,t)=>{if(!v)throw Error(t);};
+    try{
+      newLife({country:'BR'}); S.me.age=75; S.me.happy=70; S.me.dis=[]; S.people=[];
+      for(let i=0;i<40;i++) lutoNatural({rel:'conhecido',bond:20});
+      ok(S.me.happy===70,'conhecidos distantes derrubaram felicidade');
+      lutoNatural({rel:'conjuge',bond:100}); ok(S.me.happy===45,'luto próximo perdeu seu peso');
+      for(let i=0;i<10;i++) lutoNatural({rel:'amigo',bond:90});
+      ok(S.me.happy===40,'luto anual acumulou sem limite');
+      S.me.yr={}; lutoNatural({rel:'irmao',bond:100}); ok(S.me.happy===15,'luto não renovou no novo ano');
+      const p=mkPerson({rel:'amigo',age:74,bond:100}); S.people=[p]; S.me.happy=30;
+      interact(p,'conversa'); interact(p,'abraco'); ok(S.me.happy===34,'companhia não melhorou felicidade');
+      ok(apoioSocial()===2,'contato no vínculo máximo não foi registrado');
+      interact(p,'conversa'); interact(p,'abraco'); const feliz=S.me.happy;
+      for(let i=0;i<5;i++){interact(p,'conversa');interact(p,'abraco');}
+      ok(S.me.happy===feliz,'repetição ilimitada de felicidade');
+      S.year++; ok(apoioSocial()===2,'apoio não sobreviveu à virada do ano');
+      S=JSON.parse(JSON.stringify(S)); ok(apoioSocial()===2,'apoio perdido no save');
+      S.year++; ok(apoioSocial()===0,'contato antigo virou bônus permanente');
+      newLife({country:'BR'}); S.me.age=30; S.me.edu.cur=null; S.me.edu.deg=['medio']; S.me.smarts=50; S.me.looks=50; S.me.fame=0; S.me.rec.conv=0;
+      const d=JOBS.find(x=>x.id==='aux');
+      const good=interviewChance(d,0),neutral=interviewChance(d,1),bad=interviewChance(d,2);
+      ok(good>neutral&&neutral>bad&&good>=.75&&good<=.95&&bad>=.05,'pesos das respostas');
+      S.me.smarts=100; S.me.fame=100; ok(interviewChance(d,0)<=.95,'contratação garantida por chance acima de 100%');
+      S.me.smarts=50; S.me.fame=0; const o={id:d.id,co:'Empresa teste',size:'média',mul:1};
+      S.me.yr.openings=[o]; S.me.yr.vagasPais=S.me.country; S.me.yr.macroVagas=[o];
+      let dialog; modal=x=>{dialog=x;}; UI.close=()=>{};
+      const item=V.jobs().items.find(x=>x.s?.includes(o.co)); ok(item,'vaga sumiu'); item.on();
+      const best=dialog.ch.find(x=>INTERVIEW.some(q=>q[1][0].replace('{o}',oa())===x.l)); ok(best,'resposta boa ausente');
+      R.f=()=>.5; best.fn(); ok(S.me.job?.co===o.co,'boa entrevista não contratou');
+      ok(!openings().some(x=>x.co===o.co),'vaga aceita reapareceu');
+      S=JSON.parse(JSON.stringify(S)); ok(S.me.job?.co===o.co,'save perdeu emprego');
+      ok(V.jobs().title==='Procurar outro emprego','empregado aparece como desempregado');
+      const next={...o,co:'Outra empresa'}; S.me.yr.openings=[next];
+      V.jobs().items.find(x=>x.s?.includes(next.co)).on();
+      const worst=dialog.ch.find(x=>INTERVIEW.some(q=>q[1][2].replace('{o}',oa())===x.l));
+      R.f=()=>.99; worst.fn(); ok(S.me.job.co===o.co,'rejeição apagou emprego atual');
+      ok(dialog.x.includes('Continuo no meu emprego atual'),'feedback de rejeição confuso');
+    }finally{S=s0;META=JSON.parse(meta);SNAPS=snaps;R.f=rf;modal=modal0;UI.close=close0;}
+  });
   T('paranormal profissional',()=>{
     const assert=(ok,msg)=>{ if(!ok) throw Error(msg); };
     newLife({}); S.me.age=25; S.me.money=100000; S.me.health=100; S.me.prison=null; S.scen=null;
