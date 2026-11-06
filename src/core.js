@@ -172,7 +172,7 @@ function occupation(){
   const m=S.me;
   if(!m.alive) return m.cause;
   if(m.prison) return m.prison.juv?(m.gender==='F'?'Internada':'Internado'):(m.gender==='F'?'Detenta':'Detento');
-  if(m.office) return g(OFFICES.find(o=>o.id===m.office.id).n,m.gender);
+  if(m.office) return g(OFFICES.find(o=>o.id===m.office.id).n,m.gender)+(m.edu.cur?' · estudante':'');
   if(m.royal&&!m.royal.abd&&(!m.job||m.royal.reign)) return royalTitle();
   if(m.biz&&!m.job) return 'Dono'+(m.gender==='F'?'a':'')+' da '+m.biz.n;
   if(m.job) return jobTitle(m.job)+(m.edu.cur?' · estudante':'');
