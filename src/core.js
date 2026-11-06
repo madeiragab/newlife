@@ -268,7 +268,7 @@ function yearStats(){
   if(a>=30) st('health',-(a>80?R.int(1,4):a>65?R.int(0,3):a>45?R.int(0,2):R.int(0,1)));
   if(a<55&&!m.dis.some(d=>DISEASES[d.id].dmg>=8)&&m.add.alcool<40&&m.add.cigarro<40) st('health',R.int(0,a<30?3:2));
   let target=58+(m.money>1e5?6:m.money<0?-12:0)+(partners().length?6:0)+(m.job||m.edu.cur||m.ret?4:a>=18?-10:0)-(m.prison?28:0)-(m.dis.length*3)+(m.karma-50)/10+apoioSocial();
-  m.happy=clamp(m.happy+(target-m.happy)*.2+R.int(-6,6));
+  m.happy=clamp(m.happy+(target-m.happy)*(m.happy>target&&m.rotinaBem?.ano===S.year&&(m.rotinaBem.saude||m.rotinaBem.felicidade) ? .08 : .2)+R.int(-6,6));
   const ad=m.add;
   if(ad.alcool>40){ st('health',-R.int(1,4)); st('smarts',-1); if(ad.alcool>75&&R.chance(.05)&&!m.dis.find(d=>d.id==='cirrose')) addDisease('cirrose'); }
   if(ad.cigarro>40){ st('health',-R.int(1,3)); st('looks',-1); }

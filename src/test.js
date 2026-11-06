@@ -3,6 +3,7 @@ function selfTest(){
   const originalRandom=R.f;let seed=20261017;R.f=()=>{seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296;};
   const errs={},lives=[]; let years=0,events=0,actions=0;
   const T=(name,fn)=>{ window.__T=name; (window.__TR=window.__TR||[]).push(name); if(window.__TR.length>30) window.__TR.shift(); try{ actions++; if(actions%5000===0&&window.nlTestNotify)window.nlTestNotify(JSON.stringify({teste:name,acoes:actions})); const r=fn(); if(S&&S.me&&!isFinite(S.me.money)){ const k='NaN após '+name; errs[k]=(errs[k]||0)+1; S.me.money=0; } return r; }catch(e){ const k=name+': '+e.message; errs[k]=(errs[k]||0)+1; if(errs[k]===1) errs[k+' @']=(e.stack||'').split('\n').slice(1,3).join(' | '); } };
+  T('melhorias 3.8',melhorias38SelfTest);
   T('bem-estar e entrevistas',()=>{
     const s0=S,meta=JSON.stringify(META),snaps=SNAPS,rf=R.f,modal0=modal,close0=UI.close;
     const ok=(v,t)=>{if(!v)throw Error(t);};
@@ -254,14 +255,14 @@ function selfTest(){
   // aventuras (modos fictícios): cada modo jogado até o fim várias vezes, e cada evento de aventura varrido
   const adv=[]; for(const id of Object.keys(SCEN)){ let win=0,days=0,n=0;
     for(let k=0;k<8;k++){ T('advLife',()=>{ newLife({}); const m=S.me; while(m.alive&&m.age<22){ S.pending=[]; ageUp(); } m.alive=true; m.prison=null; S.pending=[]; MQ.length=0; scStart(id); if(id==='isekai') S.scen.cls=R.pick(Object.keys(CLASSES)); });
-      const before=(S.me.c.scenWin||0); let g=0;
-      while(S.scen&&g++<(id==="isekai"?160:id==="heroi"?110:80)){ T('advDay:'+id,()=>{ scNextDay(); }); let e2=0; while(S.scen&&S.pending.length&&e2++<12){ const e=S.pending.shift(); if(!evValid(e)) continue; const ev=EVENTS[e.id]; events++; T('advEv:'+id+':'+e.id,()=>{ const sh=ev.show(e.d); if(sh.ch.length<2) errs['só 1 escolha: '+e.id]=1; const c=R.pick(sh.ch); const r=ev.pick(c[1],e.d); chk(e.id,[sh.t,sh.x,c[0],r]); }); T('advCheck',scCheck); }
+      const before=(S.me.c.scenWin||0); let g=0,diasPartida=0;
+      while(S.scen&&g++<(id==="isekai"?160:id==="heroi"?110:80)){ T('advDay:'+id,()=>{ if(S.scen)diasPartida=Math.max(diasPartida,(S.scen.dia||0)+1); scNextDay(); if(S.scen)diasPartida=Math.max(diasPartida,S.scen.dia||0); }); let e2=0; while(S.scen&&S.pending.length&&e2++<12){ const e=S.pending.shift(); if(!evValid(e)) continue; const ev=EVENTS[e.id]; events++; T('advEv:'+id+':'+e.id,()=>{ const sh=ev.show(e.d); if(sh.ch.length<2) errs['só 1 escolha: '+e.id]=1; const c=R.pick(sh.ch); const r=ev.pick(c[1],e.d); chk(e.id,[sh.t,sh.x,c[0],r]); }); T('advCheck',scCheck); }
         if(S.scen) T('advAct:'+id,scenRandomDay); if(S.scen) T('advCheck',scCheck); if(S.scen) T('advViews:'+id,()=>{ [V.scLocal,V.scActs,V.scCrew,V.scItems,V.scMe].concat(id==='isekai'?[V.iskMe,V.iskMagic,V.iskVila]:id==='zumbi'?[V.zMe,V.zScav,V.zExp,V.zCraft,V.zFac,V.zBase]:[]).forEach(v=>{ const r=v(); if(r) r.items.map(rowHtml).join(''); }); crew().forEach(c=>{ const r=V.scMember(c); if(r) r.items.map(rowHtml).join(''); }); renderScen(); }); }
-      if(S.scen){ if(!['zumbi','heroi'].includes(id)) errs['aventura não terminou: '+id]=1; else days+=S.scen.dia; S.scen=null; } n++; days+=(S.log[S.log.length-1].lines.map(l=>typeof l==='string'?l:l.t).join(' ').match(/: (\d+) (dia|sol)/)||[0,0])[1]*1; if((S.me.c.scenWin||0)>before) win++; MQ.length=0; }
+      if(S.scen){ if(!['zumbi','heroi'].includes(id)) errs['aventura não terminou: '+id]=1; S.scen=null; } n++; days+=diasPartida; if((S.me.c.scenWin||0)>before) win++; MQ.length=0; }
     T('advSweep:'+id,()=>{ newLife({}); S.me.age=25; scStart(id); if(id==='isekai'){ S.scen.cls='mago'; iskEnsure(S.scen); S.scen.ouro=3000; S.scen.lvl=6; vilaFound('Teste'); } if(id==='zumbi'){ zEnsure(S.scen); zFoundBase('Teste'); } for(let i=0;i<4;i++){ scNextDay(); } S.pending=[]; const snap=JSON.stringify(S); let nev=0;
       for(const [eid,ev] of Object.entries(EVENTS)){ if(ev.scen!==id||!ev.w) continue; nev++; T('advVarre:'+eid,()=>{ S=JSON.parse(snap); if(ev.when&&!ev.when(S.me)){ S.scen.crew.length||mkCrew(); } const d=ev.prep?ev.prep(S.me):{}; if(d==null) return; const sh=ev.show(d); if(sh.ch.length<2) errs['só 1 escolha: '+eid+' ('+sh.t+')']=1; for(const c of sh.ch){ S=JSON.parse(snap); const r=ev.pick(c[1],d); chk(eid,[sh.t,sh.x,c[0],r]); } swept++; }); }
       S=JSON.parse(snap); S.scen=null; adv.push(`${id}: ${nev} eventos`); });
-    adv.push(`${id}: ${win}/${n} vitórias, média ${(days/n).toFixed(1)} dias`); }
+    adv.push(id==='zumbi'?`${id}: sobrevivência média ${(days/n).toFixed(1)} dias (${n} partidas, modo infinito)`:`${id}: ${win}/${n} vitórias, média ${(days/n).toFixed(1)} dias`); }
   lives.unshift('AVENTURAS: '+adv.join(' · '));
   // vida normal: seita, polícia, golpe de Estado, paranormal e as reações ao desistir
   const sweepNow=tag=>{ const snap=JSON.stringify(S); let n=0; for(const [id,ev] of Object.entries(EVENTS)){ if(ev.scen||!ev.w||!ev.prep) continue; S=JSON.parse(snap); let ok=false; try{ ok=!ev.when||ev.when(S.me); }catch(e){} if(!ok) continue; const d=ev.prep(S.me); if(d==null) continue; n++;
