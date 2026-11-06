@@ -63,7 +63,14 @@ function coberturaEventosSelfTest(limiteMs=60000){
    if(age>=20){const c=mkPerson({rel:'conjuge',gender:m.gender==='M'?'F':'M',age,bond:60});c.yrs=6;S.people.push(c);if(age>=40)S.people.push(mkPerson({rel:'filho',age:age-22,bond:70,parentId:c.id}),mkPerson({rel:'neto',age:5,bond:80}));if(age>=26)S.people.push(mkPerson({rel:'filho',age:Math.max(1,age-26),bond:70,parentId:c.id}));}
    S.people.push(mkPerson({rel:'amigo',age,bond:60}),mkPerson({rel:'ex',age,bond:30}),mkPerson({rel:'irmao',age:age+2,bond:60}));for(const p of parents())p.age=age+30;
    try{mod(m);}catch(e){}if(typeof grpAuto==='function')try{grpAuto();}catch(e){}S.pending=[];return JSON.stringify(S);};
-  const candidatos=[];
+  seed(3800); // cenários raros não dependem da velocidade da fase aleatória
+  const candidatos=[
+   [35,'BR',0,m=>{m.prison={left:5,total:8,served:3,behav:20,crime:'furto',juv:false};}],
+   [30,'GB',1,m=>{m.royal.abd=false;S.people.push(mkPerson({rel:'noivo',age:30,bond:90}));}],
+   [70,'BR',0,m=>{m.c.widow=1;S.people=S.people.filter(p=>!['namoro','noivo','conjuge'].includes(p.rel));}],
+   [35,'BR',0,m=>{m.c.fugitive=1;m.prison=null;}],
+   [30,'BR',0,m=>{const p=addPet('Cabra');if(p)p.gender='F';}]
+  ];
   // Vício no trabalho precisa de emprego e dependência juntos; não depender do sorteio com limite de tempo.
   for(const vicio of ['alcool','cigarro','jogo'])candidatos.push([35,'BR',0,m=>{m.edu.deg.push('medio');takeJob({id:'aux',co:'Teste',size:'média',mul:1});m.add[vicio]=70;}]);
   for(const age of [16,25,35,50,68])for(const j of JOBS)candidatos.push([age,null,0,m=>{m.job=null;takeJob({id:j.id,co:'Teste',size:'média',mul:1});m.job.lvl=R.int(0,2);m.job.perf=60;m.job.yrs=4;}]);
