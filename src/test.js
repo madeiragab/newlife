@@ -114,6 +114,7 @@ function selfTest(){
   T('provas de cada nível',provasSelfTest);
   T('vida de criatura',criaturasSelfTest);
   T('sistemas conversando',conexoesSelfTest);
+  T('combinações entre sistemas',combinacoesSelfTest);
   T('idade certa',idade2SelfTest);
   T('ritmo dos eventos',ritmoSelfTest);
   T('provador',provadorSelfTest);

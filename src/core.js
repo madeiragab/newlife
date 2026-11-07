@@ -104,7 +104,7 @@ const sibName=()=>{ const s=S&&people('irmao')[0]; return s?s.first:null; };
 const friendName=()=>{ const s=S&&R.pick(people('amigo','colega','colegaT').concat(people('irmao'))); return s?s.first:null; };
 const REL_LABEL={mae:'Mãe',pai:'Pai',irmao:'Irmão|Irmã',avo:'Avô|Avó',filho:'Filho|Filha',neto:'Neto|Neta',amigo:'Amigo|Amiga',
   colega:'Colega de classe',colegaT:'Colega de trabalho',namoro:'Namorado|Namorada',noivo:'Noivo|Noiva',conjuge:'Marido|Esposa',ex:'Ex',
-  pet:'',inimigo:'Desafeto',chefe:'Chefe',adot:'Filho adotivo|Filha adotiva'};
+  pet:'',inimigo:'Desafeto',chefe:'Chefe',adot:'Filho adotivo|Filha adotiva',padrasto:'Padrasto|Madrasta',ex_amigo:'Amigo antigo|Amiga antiga',conhecido:'Conhecido|Conhecida',colegaT:'Colega de trabalho'};
 let relLabel=p=>p.rel==='pet'?g(p.species,p.gender):g(REL_LABEL[p.rel]||p.rel,p.gender);
 const partners=(test=()=>true)=>people('namoro','noivo','conjuge').filter(test);
 const pickPartner=(test)=>R.pick(partners(test))||null;

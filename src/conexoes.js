@@ -344,7 +344,7 @@ function conexoesSelfTest(){ const s0=S,ns=window.NO_SAVE,nn=window.NO_NEWS,meta
       for(const [l,k] of sh.ch){ ok(!BAD.test(l),id+' opção: '+l); S=JSON.parse(base); let r; try{ r=ev.pick(k,JSON.parse(JSON.stringify(d))); }catch(e){ erros.push(id+'/'+k+': '+e.message); } ok(!BAD.test(String(r)),id+'/'+k+': '+r); } S=JSON.parse(base); }
     // ligação que ficou na fila depois que a situação mudou: não quebra e some
     for(const [id,o] of Object.entries(CX)){ if(o.scen) continue; newLife({country:'BR'}); let m=S.me; m.age=30; m.money=1e6; S.guerra=null; try{ o.setup(m); }catch(e){ continue; } m=S.me; const ev=EVENTS['cx_'+id], d=ev.prep(); if(d==null) continue;
-      m.biz=null; m.job=null; m.seita=null; m.office=null; m.criatura=null; m.royal=null; S.guerra=null; m.c.exHeroi=0; m.para=null; m.cri=null;
+      m.biz=null; m.job=null; m.seita=null; m.office=null; m.criatura=null; m.royal=null; S.guerra=null; m.c.exHeroi=0; m.para=null; m.cri=null; m.edu.cur=null; partners().forEach(p=>p.rel='ex');
       try{ const sh=ev.show(d); ok(sh&&!BAD.test(sh.x),id+': tela depois da mudança: '+(sh&&sh.x)); ok(!evValid({id:'cx_'+id,d}),id+': continua válida depois da mudança'); ev.pick(sh.ch[0][1],d); }catch(e){ erros.push(id+' depois da mudança: '+e.message); } }
     // o gancho do ano não passa de duas ligações por ano
     newLife({country:'BR'}); const m=S.me; m.age=35; m.prison=null; m.money=1e6; novoBiz(m,'Teste','Construtora',900000); m.job={spc:'crime',lvl:4,perf:60,yrs:3,co:'Facção'}; seitaFundar('igreja','Teste'); m.seita.fieis=900;

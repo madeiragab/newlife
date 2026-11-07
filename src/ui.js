@@ -363,7 +363,7 @@ V.relations=()=>{
   const groups=[['Família',['mae','pai','padrasto','irmao','avo']],['Amor',['namoro','noivo','conjuge']],['Filhos e netos',['filho','adot','neto']],['Amigos',['amigo']],['Desafetos',['inimigo']],['Bichos',['pet']],['Ex',['ex']]];
   const it=[{face:faceSVG(S.me,42),l:'Eu: '+S.me.first+' '+S.me.last,s:'Visual, genética, talentos e vícios',on:()=>UI.push(V.me)}];
   for(const [t,rels] of groups){ const ps=people(...rels); if(ps.length){ it.push({sec:t}); ps.forEach(p=>it.push(personRow(p))); } }
-  const dead=S.people.filter(p=>!p.alive&&['mae','pai','irmao','avo','filho','conjuge','adot'].includes(p.rel));
+  const ORD_SAUD=['conjuge','noivo','namoro','mae','pai','padrasto','filho','adot','irmao','avo','neto','sobrinho','ex','amigo','ex_amigo'];const dead=S.people.filter(p=>!p.alive&&ORD_SAUD.includes(p.rel)).sort((a,b)=>ORD_SAUD.indexOf(a.rel)-ORD_SAUD.indexOf(b.rel));
   if(dead.length){ it.push({sec:'Saudades'}); dead.forEach(p=>it.push({face:faceSVG(p,42),l:fullName(p),s:relLabel(p)+' · falecido'.replace('falecido',p.gender==='F'?'falecida':'falecido'),dis:true})); }
   if(!it.length) it.push({html:'<div class="card"><p>Ninguém por aqui.</p></div>'});
   return {title:'Relações',items:it};
