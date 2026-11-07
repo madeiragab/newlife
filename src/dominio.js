@@ -453,7 +453,7 @@ function dominioSelfTest(){ const s0=S,ns=window.NO_SAVE,nn=window.NO_NEWS,snaps
     IMP_SEL='PT'; V.impPais().items.forEach(x=>ok(!BAD.test(String(x.l||'')+String(x.s||'')),'tela país: '+x.l));
     S.guerra=null; imp().p={PT:3,AO:4,AR:3,MX:3,ES:3}; m.yr={}; S.pending=[]; impProclamar(); ok(S.pending.some(e=>e.id==='imp_proclamar'),'proclamar não abriu'); todas('imp_proclamar',{}); m=S.me;
     todas('imp_revolta',{p:'PT'}); todas('imp_sancoes',EVENTS.imp_sancoes.prep()); S.guerra=null; todas('imp_ultimato',{l:'US',alvo:'PT'}); S.guerra=null; m=S.me;
-    S.guerra=null; const G=impGuerraCoalizao('US'); ok(G&&G.b.includes('AO')&&!G.a.includes('AO'),'domínios não lutam do meu lado'); guerraFim('a'); ok(impNv('AO')<4||impNv('PT')<3||impNv('AR')<3,'derrota não mexeu no império');
+    S.guerra=null; const G=impGuerraCoalizao('US'); ok(G&&G.b.includes('AO')&&!G.a.includes('AO'),'domínios não lutam do meu lado'); const antesDerrota=Object.values(imp().p).reduce((a,b)=>a+b,0),rfDerrota=R.f; try{R.f=()=>.5;guerraFim('a');}finally{R.f=rfDerrota;} ok(Object.values(imp().p).reduce((a,b)=>a+b,0)<antesDerrota,'derrota não mexeu no império');
     EVENTS.imp_proclamar.pick('dinastia',{}); ok(S.me.office.dit&&imp().dinastia,'império hereditário não virou regime');
     for(const c of COUNTRIES) if(c.id!==m.country) imp().p[c.id]=4; S.pending=[]; imp().coroaFila=0; impChecarMundo(); ok(S.pending.some(e=>e.id==='imp_coroacao'),'coroação não disparou'); todas('imp_coroacao',{}); EVENTS.imp_coroacao.pick('rei',{}); ok(S.me.c.reiMundo,'não virou rei do mundo');
     todas('imp_mundo_ano',{i:0}); todas('imp_mundo_ano',{i:3}); m=S.me;
