@@ -246,6 +246,7 @@ const diff=()=>DIFF[(S.flags&&S.flags.diff)||'normal'];
 function ageUp(){
   const m=S.me; if(!m.alive||S.pending.length) return;
   snap();
+  if(typeof fin39Comecar==='function')fin39Comecar(S.year+1);
   const py=m.yr||{}, ld=typeof loadNow==='function'?loadNow(m):0;
   m.age++; S.year++; m.yr={}; S.people.forEach(p=>p.yr={});
   S.log.push({age:m.age,year:S.year,lines:[]});
@@ -420,7 +421,7 @@ function yearMoney(){
   if(m.job){ gross+=jobSalary(m.job); }
   if(m.office) gross+=OFFICES.find(o=>o.id===m.office.id).sal;
   if(m.ret) gross+=m.ret.pension;
-  net=Math.round((gross-tax(gross))*diff().$); m.money+=net; if(typeof origemEntrada==='function')origemEntrada(net,'legitima','Salário, mandato e aposentadoria líquidos');
+  net=Math.round((gross-tax(gross))*diff().$); m.money+=net; if(typeof fin39Mov==='function')fin39Mov('entrada','Salário, mandato e aposentadoria',net); if(typeof origemEntrada==='function')origemEntrada(net,'legitima','Salário, mandato e aposentadoria líquidos');
   if(m.social&&m.social.f>20000){ const sp=Math.round(m.social.f*R.f()*.08*(typeof opiniaoReceita==='function'?opiniaoReceita():1)); m.money+=sp; if(sp>2000&&R.chance(.45)) log(R.pick([`Ganhei ${fmt(sp)} com publicidade nas redes.`,`Fechei parceria com uma marca de ${R.pick(['tênis','cosméticos','energético','celular','roupas'])} e ganhei ${fmt(sp)}.`,`Meus posts patrocinados renderam ${fmt(sp)} este ano.`]),'good'); }
   if(m.age<18&&S.flags.cls!=='pobre'&&parents().length&&m.age>=8){ const a={media:300,rica:2000,milionaria:12000,realeza:50000}[S.flags.cls]||0; m.money+=a; }
   if(m.age>=18){
@@ -436,13 +437,13 @@ function yearMoney(){
     // morando com os pais e sem dinheiro: eles bancam o básico (sem dívida), mas o relacionamento sofre um pouco
     const ps=parents().filter(p=>p.money>0).sort((a,b)=>b.money-a.money);
     if(atHome&&m.money<cost&&ps.length){ ps[0].money-=cost; ps.forEach(p=>p.bond=clamp(p.bond-1)); if(R.chance(.3)) log(R.pick(['Meus pais bancaram minhas despesas mais um ano.','Meus pais pagaram minhas contas e jogaram na cara no almoço de domingo.'])); cost=0; }
-    m.money-=cost; m.c.lastCost=cost;
+    m.money-=cost; if(typeof fin39Mov==='function')fin39Mov('saida','Moradia, alimentação e dependentes',cost); m.c.lastCost=cost;
     if(cost&&R.chance(.25)) log(atHome?`Gastei ${fmt(cost)} com celular, transporte e comida.`:`Gastei ${fmt(cost)} com aluguel, comida e contas este ano.`);
     // sem dinheiro: a dívida cresce com juros e a vida pesa
     if(m.money<0){ const j=Math.round(-m.money*.12); m.money-=j; if(j>300&&R.chance(.4)) log(`Paguei ${fmt(j)} só de juros da dívida.`,'bad'); }
     if(m.money<=0&&!(atHome&&ps.length)){ st('happy',-R.int(2,5)); st('looks',-R.int(0,2)); if(R.chance(.35)) log(R.pick(['Sem dinheiro, até o mercado virou um sufoco.','Contas atrasadas. Ando com vergonha de atender o telefone.','O dinheiro não fecha o mês.']),'warn'); }
   }
-  for(const l of m.loans.slice()){ const p=Math.min(l.bal,l.pay); if(m.edu.cur&&l.n==='Financiamento estudantil') continue; m.money-=p; l.bal-=p; if(l.bal<=0){ m.loans.splice(m.loans.indexOf(l),1); log(`Quitei: ${l.n.toLowerCase()}.`,'good'); } }
+  for(const l of m.loans.slice()){ const p=Math.min(l.bal,l.pay); if(m.edu.cur&&l.n==='Financiamento estudantil') continue; m.money-=p; if(typeof fin39Mov==='function')fin39Mov('saida',l.n,p); l.bal-=p; if(l.bal<=0){ m.loans.splice(m.loans.indexOf(l),1); log(`Quitei: ${l.n.toLowerCase()}.`,'good'); } }
   const iv=m.inv;
   if(iv.poup) iv.poup=Math.round(iv.poup*1.04);
   if(iv.acoes){ const r=R.norm(.065,.18); iv.acoes=Math.max(0,Math.round(iv.acoes*(1+r))); if(Math.abs(r)>.2) log(`Minhas ações ${r>0?'subiram':'caíram'} ${Math.round(Math.abs(r)*100)}% este ano.`,r>0?'good':'bad'); }

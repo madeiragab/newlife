@@ -16,6 +16,8 @@ import time
 import urllib.request
 
 import webview
+import webbrowser
+import urllib.parse
 
 SITE = "https://madeiragab.github.io/newlife/"
 
@@ -55,6 +57,19 @@ class Api:
     def __init__(self, folder):
         self.folder = folder
         os.makedirs(folder, exist_ok=True)
+
+    def feedback_email(self, uri):
+        try:
+            if not isinstance(uri, str) or len(uri) > 16000:
+                return False
+            parsed = urllib.parse.urlsplit(uri)
+            if parsed.scheme != "mailto" or parsed.path != "gabrielmadeira1504@gmail.com":
+                return False
+            if set(urllib.parse.parse_qs(parsed.query)) - {"subject", "body"}:
+                return False
+            return bool(webbrowser.open(uri))
+        except Exception:
+            return False
 
     def _path(self, key):
         return os.path.join(self.folder, re.sub(r"[^A-Za-z0-9._-]", "_", key) + ".json")

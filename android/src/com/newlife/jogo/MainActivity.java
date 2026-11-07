@@ -1,6 +1,10 @@
 package com.newlife.jogo;
 
 import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.webkit.WebResourceRequest;
+import android.widget.Toast;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -52,8 +56,21 @@ public class MainActivity extends Activity {
         s.setTextZoom(100);
         s.setMediaPlaybackRequiresUserGesture(false); // a música da tela de atualização toca sozinha
         web.setWebViewClient(new WebViewClient() {
+            private boolean externalEmail(String url) {
+                if (url == null || !url.startsWith("mailto:")) return false;
+                try { startActivity(new Intent(Intent.ACTION_SENDTO, Uri.parse(url))); }
+                catch (android.content.ActivityNotFoundException ex) {
+                    Toast.makeText(MainActivity.this, "Nenhum app de e-mail encontrado. Use Copiar meu texto no feedback.", Toast.LENGTH_LONG).show();
+                }
+                return true;
+            }
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) { return externalEmail(url); }
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) { return externalEmail(request.getUrl().toString()); }
             @Override
             public void onPageFinished(WebView v, String url) {
+                v.evaluateJavascript("window.NL_MAILTO39=true;", null);
                 // só procura atualização depois que o jogo carregou: assim a rodinha de progresso aparece
                 if (!checked) { checked = true; checkUpdate(); }
             }
