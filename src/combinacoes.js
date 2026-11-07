@@ -151,3 +151,13 @@ function prisaoEventosSelfTest(){ const s0=S,ns=window.NO_SAVE; window.NO_SAVE=t
     const fora=Object.entries(EVENTS).filter(([id,e])=>!e.jail&&!e.scen&&e.w).map(([id])=>id).filter(id=>prisaoEventoOk(id)); if(fora.length>40) erros.push('filtro deixa passar demais: '+fora.slice(0,8).join(','));
   }catch(e){ erros.push('erro: '+e.message); } finally{ S=s0; window.NO_SAVE=ns; }
   if(erros.length) throw Error('Prisão · '+erros.join(' | ')); return {ok:true}; }
+
+// ---------- dentro de uma aventura (zumbi, ilha, isekai, herói, Marte), nada da vida comum que ficou na fila ----------
+const VIDA_COMUM=/^(churrasco|ferias|conquista_familia|esc_|car_|vida_cotidiana|carro_quebrou|contas_mes|familia_|rel_|aposentadoria_|brincar|festa_danca|formatura|hobby_torneio|npc_|pedir_pais|reencontro_velho|historia_neto|crise40|amantes|carteira|divida|cad_|cx_|biz_evento|gravidez_teen|beb_saida|copa_|olimp_|fut_|lut_|pol_|reeleicao|seita_|par_descobre|caso_descoberto|poly_)/;
+evValid=(o=>function(e){ const ok=o.apply(this,arguments); if(!ok||!e||!S.scen) return ok; const ev=EVENTS[e.id]; if(ev&&ev.scen) return ev.scen===S.scen.id; return !(VIDA_COMUM.test(e.id)||(ev&&ev.raw&&!ev.scen)); })(evValid);
+function aventuraEventosSelfTest(){ const s0=S,ns=window.NO_SAVE; window.NO_SAVE=true; const erros=[];
+  try{ for(const id of Object.keys(SCEN)){ newLife({country:'BR'}); S.me.age=25; scStart(id); if(S.scen&&S.scen.id==='isekai'&&!S.scen.cls) S.scen.cls=Object.keys(CLASSES)[0]; UI.close();
+      for(const v of ['churrasco','ferias','vida_cotidiana','carro_quebrou']) if(EVENTS[v]&&evValid({id:v,d:{}})) erros.push(v+' dentro de '+id);
+      const prop=Object.entries(EVENTS).filter(([,e])=>e.scen===id); if(prop.length&&!prop.some(([k])=>{ try{ return evValid({id:k,d:{}}); }catch(e){ return false; } })) erros.push('nenhum evento de '+id+' passou'); }
+  }catch(e){ erros.push('erro: '+e.message); } finally{ S=s0; window.NO_SAVE=ns; }
+  if(erros.length) throw Error('Aventuras · '+erros.join(' | ')); return {ok:true}; }
