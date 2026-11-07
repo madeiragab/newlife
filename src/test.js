@@ -115,6 +115,7 @@ function selfTest(){
   T('vida de criatura',criaturasSelfTest);
   T('sistemas conversando',conexoesSelfTest);
   T('combinações entre sistemas',combinacoesSelfTest);
+  T('só eventos de prisão na prisão',prisaoEventosSelfTest);
   T('idade certa',idade2SelfTest);
   T('ritmo dos eventos',ritmoSelfTest);
   T('provador',provadorSelfTest);

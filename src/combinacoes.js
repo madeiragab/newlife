@@ -139,3 +139,15 @@ function combinacoesSelfTest(){ const s0=S,ns=window.NO_SAVE; window.NO_SAVE=tru
     ok(V.relations().items.some(it=>it.sec==='Saudades'),'cônjuge falecido fora das saudades');
   }catch(e){ erros.push('erro: '+e.message); } finally{ S=s0; window.NO_SAVE=ns; }
   if(erros.length) throw Error('Combinações · '+erros.join(' | ')); return {ok:true}; }
+
+// ---------- na prisão, só acontece o que é da prisão ----------
+// eventos que já estavam na fila (churrasco, casamento da família, jardim, escola, trabalho…) somem enquanto estou pres{o}
+const PRISAO_OK=new Set(['julgamento','recaptura','justica_resposta','guarda','investigacao','zumbi_mordida']);
+const prisaoEventoOk=id=>{ const ev=EVENTS[id]; if(!ev) return false; if(ev.jail||PRISAO_OK.has(id)) return true; if(String(id).startsWith('cad_')){ const ch=typeof CHAINS!=='undefined'&&CHAINS[String(id).replace(/^cad_/,'').replace(/_[a-z]$/,'')]; return !!(ch&&ch.o&&ch.o.jail); } return /pris|cela|cadeia|presid|penit|fuga/i.test(id); };
+evValid=(o=>function(e){ const ok=o.apply(this,arguments); if(!ok||!e) return ok; const m=S.me; if(!m||!m.prison||S.scen) return ok; return prisaoEventoOk(e.id); })(evValid);
+function prisaoEventosSelfTest(){ const s0=S,ns=window.NO_SAVE; window.NO_SAVE=true; const erros=[];
+  try{ newLife({country:'BR'}); S.me.age=30; S.me.prison={left:3,total:3,served:0,behav:50,crime:'teste'};
+    for(const id of ['churrasco','ferias','conquista_familia','esc_feira','vida_cotidiana','carro_quebrou']) if(EVENTS[id]&&evValid({id,d:{}})) erros.push(id+' dentro da prisão');
+    const fora=Object.entries(EVENTS).filter(([id,e])=>!e.jail&&!e.scen&&e.w).map(([id])=>id).filter(id=>prisaoEventoOk(id)); if(fora.length>40) erros.push('filtro deixa passar demais: '+fora.slice(0,8).join(','));
+  }catch(e){ erros.push('erro: '+e.message); } finally{ S=s0; window.NO_SAVE=ns; }
+  if(erros.length) throw Error('Prisão · '+erros.join(' | ')); return {ok:true}; }
