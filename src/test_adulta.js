@@ -17,7 +17,7 @@ function adultaSelfTest(){ const s0=S,rf=R.f,ns=window.NO_SAVE,nn=window.NO_NEWS
     S.year++; const d0=m.money; for(const f of NL_GANCHOS_ANO) f(); ok(m.money>d0,'economia das assinaturas não chegou no ano seguinte'); S.year--;
     m.hobbies={}; ok(!EVENTS.hobby_torneio.when(m)&&EVENTS.hobby_torneio.prep(m)==null,'iniciante convidado para competição'); ok(/só para mestres/.test(EVENTS.hobby_torneio.pick('vai',{k:'xadrez'})),'competição aceitou iniciante');
     // check-up descobre doença escondida
-    m.dis=[{id:Object.keys(DISEASES).find(k=>DISEASES[k].chronic)||Object.keys(DISEASES)[0],y:1,ctrl:false,k:false}]; const r1=checkup(); ok(m.dis[0].k&&/acharam|encontraram/.test(r1),'check-up não achou a doença: '+r1+' '+JSON.stringify(m.dis));
+    m.dis=[{id:Object.keys(DISEASES).find(k=>DISEASES[k].chronic)||Object.keys(DISEASES)[0],y:1,ctrl:false,k:false}]; const rc0=R.chance; R.chance=()=>true; let r1; try{ r1=checkup(); }finally{ R.chance=rc0; } ok(m.dis[0].k&&/acharam|encontraram/.test(r1),'check-up não achou a doença: '+r1+' '+JSON.stringify(m.dis));
     V.vidaAdulta().items.forEach(it=>ok(!BAD.test(String(it.l||'')+String(it.s||'')+String(it.html||'')),'tela adulta: '+(it.l||'')));
     // velhice: lista de desejos, netos e memórias
     vida(70); const ds=desejos(m); ok(ds.length===5,'lista de desejos sem 5 itens'); m.health=90; m.escrevendo=1; m.memorias=3;
