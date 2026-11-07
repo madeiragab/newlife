@@ -49,3 +49,9 @@ cx({id:'rico_parentes',k:'Família',t:'💸 Parente pedindo dinheiro',p:.3,cd:5,
   ch:[['Emprestar','emprestar',(m,d)=>{ const p=P(d.pid), v=R.int(20000,100000); m.money-=v; if(p){ p.money=(p.money||0)+v; p.bond=clamp(p.bond+10); } return R.chance(.4)?`Emprestei ${fmt(v)}. O negócio deu certo e já estão me pagando.`:`Emprestei ${fmt(v)}. Nunca mais vi o dinheiro.`; }],
     ['Ajudar a fazer um plano antes','plano',(m,d)=>{ const p=P(d.pid); if(p) p.bond=clamp(p.bond+4); st('smarts',1); return 'Sentamos uma tarde inteira com planilhas. Desistiu da ideia, mas agradeceu.'; }],
     ['Negar','negar',(m,d)=>{ const p=P(d.pid); if(p) p.bond=clamp(p.bond-12); return 'Ficou sem falar comigo no Natal.'; }]]});
+
+// ---------- "a situação mudou": evento da vida cotidiana que perdeu o sentido some da fila em vez de aparecer ----------
+evValid=(o=>function(e){ const ok=o.apply(this,arguments); if(!ok||!e||e.id!=='vida_cotidiana') return ok; const d=e.d||{};
+  if(typeof COTIDIANO_IDADE_TIPOS!=='undefined'&&COTIDIANO_IDADE_TIPOS.includes(d.tipo)) return d.ano===S.year&&cotidianoIdadeValido(d);
+  const p=d.pid&&P(d.pid), a=d.aid&&S.me.assets.find(x=>x.id===d.aid);
+  return !(d.pid&&!(p&&p.alive)||d.aid&&!a); })(evValid);
