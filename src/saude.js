@@ -48,7 +48,7 @@ treat=(o=>function(where,dis){ const m=S.me, def=DISEASES[dis.id];
   if(where==='posto'&&R.chance(.15)) return R.pick(['A fila do posto dobrava o quarteirão. Voltei para casa sem ser atendid'+oa()+'.','Não tinha médico no posto hoje.']);
   const dg=diagnose(dis,where); if(dis.k===false) return dg;
   const nome=dn(def.n);
-  if(def.ctrl){ if(R.chance(T.cu)){ dis.ctrl=true; st('health',2); return `${dg} ${nome[0].toUpperCase()+nome.slice(1)} agora está sob controle com remédios.`.trim(); } return `${dg} O remédio que me passaram não fez efeito.`.trim(); }
+  if(def.ctrl){ if(R.chance(T.cu)){ if(!dis.ctrl) st('health',2); dis.ctrl=true; return `${dg} ${nome[0].toUpperCase()+nome.slice(1)} agora está sob controle com remédios.`.trim(); } return `${dg} O remédio que me passaram não fez efeito.`.trim(); }
   if(def.cure==='none') return `${dg} Não existe cura para ${nome}. Os médicos só aliviaram os sintomas.`.trim();
   let p=where==='hosp'?(def.hosp||def.doc||0)+.05:(def.doc||0)*T.cu;
   if(R.chance(p)){ m.dis=m.dis.filter(x=>x!==dis); st('happy',8); st('health',R.int(3,8)); return `${dg} Fui ${m.gender==='F'?'curada':'curado'} de ${nome}!`.trim(); }

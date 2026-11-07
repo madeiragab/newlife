@@ -91,6 +91,7 @@ scVar=(o=>function(k){ const sc=S.scen; if(sc&&sc.id==='zumbi'){ if(k==='base') 
 // ---------- o dia a dia ----------
 function zFoundBase(nome){ const sc=S.scen, l=sc.loc; const bonus=/Fazenda/.test(l.n)?{horta:1,poco:1}:/militar/.test(l.n)?{muro:2}:/Delegacia/.test(l.n)?{muro:1}:/Hospital/.test(l.n)?{enfermaria:1}:/Shopping|Supermercado/.test(l.n)?{deposito:1}:/Escola/.test(l.n)?{alojamento:1}:{};
   sc.zb={nome,lugar:l.n,ic:l.ic,pop:0,moral:60,com:10,agua:10,racao:1,portas:1,b:Object.assign(Object.fromEntries(Object.keys(ZB).map(k=>[k,0])),bonus),dia:sc.dia}; sc.stay=1;
+  z41Marco(sc,`Fundamos a base ${nome}`);
   scLog(`Montamos a base "${nome}" em ${l.n.toLowerCase()}.`,'good'); cnt('zbase'); }
 function zSurroundings(sc){ const keys=Object.keys(Z_POI); const thr=Math.min(4,R.wpick([[0,2],[1,4],[2,3],[3,2],[4,1]])+Math.floor(sc.ruido/45));
   return {n:`Arredores de ${sc.zb.nome}`,ic:'🏚️',thr,pois:R.shuffle(keys).slice(0,3).map(k=>({k,done:0}))}; }
@@ -154,12 +155,12 @@ function zScav(kind){ const sc=S.scen; zEnsure(sc); const a=zAt(sc), thr=sc.loc.
   const T={comida:['comida',['lata','miojo','biscoito','sardinha','arroz','pessego','barra']],agua:['água',['agua','agua','cantil']],remedio:['remédios',['analg','curativo','antib','kit']],
     gas:['combustível',['gas','gas']],armas:['armas e munição',['muni','muni','faca','taco','facao','pistola']],mat:['materiais',['sucata','sucata','sucata','corda','pilha']]}[kind];
   if(R.chance(.05+thr*.05-a.fur*.006)){ const f=scFight(thr,'Um bando de zumbis'); if(!f.ok) return `Procurando ${T[0]}, fui cercad${oa()}. ${f.t}`; }
-  const n=rnd(1,2)+(a.fur>=12?1:0)+(R.chance(.3)?1:0), got=[]; for(let i=0;i<n;i++) if(R.chance(.7)) got.push(R.pick(T[1])); zNoise(1); zXP(5);
+  const n=rnd(1,2)+(a.fur>=12?1:0)+(R.chance(.3)?1:0), got=[]; const chance=z41Suprimentos(sc,kind); for(let i=0;i<n;i++) if(R.chance(chance)) got.push(R.pick(T[1])); zNoise(1); zXP(5);
   return got.length?`Procurei ${T[0]} pela vizinhança.`+lootText(got):`Procurei ${T[0]} o dia todo. Já tinham levado tudo.`; }
 function zExpedition(k){ const sc=S.scen; zEnsure(sc); const e=ZEXP[k], a=zAt(sc), car=sc.veh.length&&countCat('gas')>0; if(car) takeItem('gas');
   const thr=Math.min(5,e[3]+Math.floor(sc.dia/35)); let t=`${e[1]} Expedição: ${e[0].toLowerCase()}. `;
   if(R.chance(.15+thr*.1-a.fur*.008)){ const f=scFight(thr,'A expedição'); if(!f.ok) return t+f.t; t+='Teve briga, mas voltamos inteiros. '; }
-  const n=rnd(3,5)+(car?2:0)+(a.fur>=12?1:0), got=[]; for(let i=0;i<n;i++) got.push(R.pick(e[2]));
+  const n=Math.max(2,rnd(3,5)+(car?2:0)+(a.fur>=12?1:0)-z41Etapa(sc.dia).escassez), got=[]; for(let i=0;i<n;i++) got.push(R.pick(e[2]));
   if(e[4]==='surv'&&R.chance(.25)){ if(sc.zb&&R.chance(.6)){ sc.zb.pop++; t+='Uma família escondida veio morar na base. '; } else { const c=mkCrew(); t+=`${c.first} se juntou ao grupo. `; } }
   if(e[4]==='veh'&&R.chance(.25)){ const kk=R.pick(['sedan','van','picape','kombi','jipe']); sc.veh.push({k:kk,hp:rnd(30,70)}); t+=`Consertamos ${VEH[kk][0].toLowerCase()} no ferro-velho! `; }
   zNoise(car?6:2); zXP(12); return t+lootText(got).trim(); }

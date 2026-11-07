@@ -392,6 +392,7 @@ function scNextDay(){ const sc=S.scen; if(!sc) return; const d=SM(), m=S.me;
   if(sc.dia>=(d.maxDays||60)&&S.scen) { const w=d.capWin?d.capWin(sc):true; scenEnd(w,w?'Os dias viraram semanas, as semanas viraram rotina. Um dia, simplesmente acabou.':'O tempo passou e a missão ficou pela metade. Voltei para casa com a sensação de que faltou alguma coisa.'); return; }
   scEvents(1+(R.chance(.55)?1:0)); }
 function scCheck(){ const sc=S.scen; if(!sc||sc.v!==SC_V) return; const d=SM();
+  if(sc.id==='zumbi') sc.winNow=0;
   if(sc.winNow){ scenEnd(true,{zumbi:'Chegamos. Acabou.',ilha:'O barco chegou de verdade. Me enrolaram num cobertor e me deram um sanduíche. Acabou.',isekai:'A luz da deusa me envolveu. Acabou.',heroi:'A cidade está em paz. Acabou.',marte:'A nave decolou rumo à Terra. Acabou.'}[sc.id]); return; }
   // não existe acordar: morrer num mundo alternativo é morrer de verdade
   if(sc.hl<=0){ const cause={zumbi:'no apocalipse zumbi, cercad{o} por mortos-vivos',ilha:'numa ilha deserta, depois de um naufrágio',isekai:'em Eldoria, longe do próprio mundo',heroi:'em combate, como super-herói',marte:'em Marte, a 225 milhões de quilômetros de casa'}[sc.id]||'longe de casa'; S.scen=null; S.pending=S.pending.filter(e=>!(EVENTS[e.id]&&EVENTS[e.id].scen)); die(cause.replace(/\{o\}/g,oa())); UI.close(); }

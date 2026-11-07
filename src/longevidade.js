@@ -4,13 +4,19 @@ const saudeAlvo=a=>a<30?92:a<45?89:a<55?86:a<65?82:a<75?77:a<85?69:a<95?58:46;
 function saudeAlvoDe(m){ const graves=m.dis.filter(d=>DISEASES[d.id]&&DISEASES[d.id].fatal&&!d.ctrl).length, cronicas=m.dis.filter(d=>DISEASES[d.id]&&DISEASES[d.id].chronic&&!d.ctrl&&DISEASES[d.id].dmg>=5).length;
   const vicio=(m.add.alcool>40?10:0)+(m.add.cigarro>40?8:0)+Math.min(15,Math.max(0,...Object.values(m.drogas||{}))/5);
   return saudeAlvo(m.age)-graves*14-cronicas*3-vicio-(m.prison?8:0)+((m.hobbies&&(m.hobbies.corrida||m.hobbies.ciclismo))?3:0); }
-yearStats=(o=>function(){ const r=o.apply(this,arguments), m=S.me; if(!m||!m.alive||S.scen) return r; const alvo=saudeAlvoDe(m); if(m.health<alvo) st('health',Math.max(1,Math.round((alvo-m.health)*.45))); return r; })(yearStats);
+yearStats=(o=>function(){ const r=o.apply(this,arguments), m=S.me; if(!m||!m.alive||S.scen) return r; const alvo=saudeAlvoDe(m); if(m.health<alvo) bem41Medir('Recuperação natural do organismo',()=>st('health',Math.max(1,Math.round((alvo-m.health)*.45)))); return r; })(yearStats);
 // doença crônica tratada e controlada quase não desgasta; sem tratamento, desgasta no ritmo normal
 yearHealth=(o=>function(){ const m=S.me; const ctrl=m.dis.filter(d=>d.ctrl&&DISEASES[d.id]&&DISEASES[d.id].chronic); const h0=m.health; const r=o.apply(this,arguments);
   if(ctrl.length&&m.health<h0){ const devolve=Math.min(h0-m.health,ctrl.reduce((s,d)=>s+DISEASES[d.id].dmg*.45*.25*.8,0)); if(devolve>0) st('health',Math.round(devolve)); }
   return r; })(yearHealth);
 // tratar uma doença grave, mesmo sem curar, segura a doença: menos desgaste e menos risco de morte no ano seguinte
-treat=(o=>function(where,dis){ const r=o.apply(this,arguments); if(dis&&(where==='hosp'||where==='doc')){ dis.trat=S.year; if(dis.id==='cardiaca'&&S.me.dis.includes(dis)) dis.ctrl=true; } return r; })(treat);
+treat=(o=>function(where,dis){ const m=S.me, profissional=where==='hosp'||where==='doc', pago=profissional&&canPay(TIERS[where].c), tinha=m.dis.includes(dis); const r=o.apply(this,arguments);
+  if(pago&&tinha&&dis.k!==false){
+    if(m.dis.includes(dis)){ dis.trat=S.year; if(dis.id==='cardiaca') dis.ctrl=true; }
+    else m.recuperacao41=Math.max(m.recuperacao41||0,S.year+2);
+  }
+  return r;
+})(treat);
 const tratado=d=>d.ctrl||(d.trat!=null&&d.trat>=S.year-2);
 yearHealth=(o=>function(){ const m=S.me; const tr=m.dis.filter(d=>tratado(d)&&DISEASES[d.id]&&!DISEASES[d.id].chronic); const h0=m.health; const r=o.apply(this,arguments);
   if(tr.length&&m.health<h0){ const devolve=Math.min(h0-m.health,tr.reduce((s,d)=>s+DISEASES[d.id].dmg*.7,0)); if(devolve>0) st('health',Math.round(devolve)); } return r; })(yearHealth);

@@ -6,15 +6,8 @@ function rotina38(py){
 }
 endOfYear=(o=>function(py,ld){S.me.rotinaBem={ano:S.year,...rotina38(py)};return o.apply(this,arguments);})(endOfYear);
 saudeAlvoDe=(o=>function(m){const r=m.rotinaBem;return Math.min(98,o(m)+(r?.ano===S.year?r.saude*2:0));})(saudeAlvoDe);
-yearHealth=(o=>function(){const r=o.apply(this,arguments),m=S.me,b=m.rotinaBem;if(m.alive&&!S.scen&&b?.ano===S.year){st('health',b.saude);st('happy',b.felicidade);if(b.saude||b.felicidade)log(`Minha rotina de cuidados ajudou neste ano: saúde +${b.saude}, felicidade +${b.felicidade}.`,'good');}return r;})(yearHealth);
-let BAL38=null;
-function balan38(fn,nome){return function(){const m=S?.me,h=m?.health,f=m?.happy,r=fn.apply(this,arguments);if(BAL38&&S.me===m){const dh=m.health-h,df=m.happy-f;if(dh||df)BAL38.push(`${nome}: saúde ${dh>=0?'+':''}${dh}, felicidade ${df>=0?'+':''}${df}`);}return r;};}
-yearStats=balan38(yearStats,'Passagem do ano e envelhecimento');
-yearHealth=balan38(yearHealth,'Doenças e cuidados');
-yearPeople=balan38(yearPeople,'Família e relações');
-applyLoad=balan38(applyLoad,'Cansaço');
-ageUp=(o=>function(){const m=S?.me,a=m?.age;BAL38=[];try{const r=o.apply(this,arguments);if(m&&m===S.me&&m.age>a){m.balancoBem={ano:S.year,itens:BAL38.slice()};if(BAL38.length)log('Balanço do bem-estar · '+BAL38.join(' · '));}return r;}finally{BAL38=null;}})(ageUp);
-V.me=(o=>function(){const r=o.apply(this,arguments),b=S.me.balancoBem;if(r&&b?.itens?.length)r.items.push({html:'<div class="card"><b>Último balanço de saúde e felicidade</b><p>'+b.itens.map(esc).join('<br>')+'</p><p>Atividades físicas e de descanso ajudam neste ano e na próxima virada. Doenças podem exigir tratamento.</p></div>'});return r;})(V.me);
+yearHealth=(o=>function(){const r=o.apply(this,arguments),m=S.me,b=m.rotinaBem;if(m.alive&&!S.scen&&b?.ano===S.year){bem41Medir('Rotina de exercícios e descanso',()=>{st('health',b.saude);st('happy',b.felicidade);});if(b.saude||b.felicidade)log(`Minha rotina de cuidados ajudou neste ano: saúde +${b.saude}, felicidade +${b.felicidade}.`,'good');}return r;})(yearHealth);
+V.me=(o=>function(){const r=o.apply(this,arguments),b=S.me.balancoBem;if(r&&!S.me.resumo41&&b?.itens?.length)r.items.push({html:'<div class="card"><b>Último balanço de saúde e felicidade</b><p>'+b.itens.map(esc).join('<br>')+'</p><p>Atividades físicas e de descanso ajudam neste ano e na próxima virada. Doenças podem exigir tratamento.</p></div>'});return r;})(V.me);
 
 const BUSCA38={q:'',max:0,ordem:'preco',pagina:0,comparar:[],pais:''};
 function carros38Filtrar(pais,q='',max=0,ordem='preco'){
