@@ -3,6 +3,7 @@ function selfTest(){
   const originalRandom=R.f;let seed=20261017;R.f=()=>{seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296;};
   const errs={},lives=[]; let years=0,events=0,actions=0;
   const T=(name,fn)=>{ window.__T=name; (window.__TR=window.__TR||[]).push(name); if(window.__TR.length>30) window.__TR.shift(); try{ actions++; if(actions%5000===0&&window.nlTestNotify)window.nlTestNotify(JSON.stringify({teste:name,acoes:actions})); const r=fn(); if(S&&S.me&&!isFinite(S.me.money)){ const k='NaN após '+name; errs[k]=(errs[k]||0)+1; S.me.money=0; } return r; }catch(e){ const k=name+': '+e.message; errs[k]=(errs[k]||0)+1; if(errs[k]===1) errs[k+' @']=(e.stack||'').split('\n').slice(1,3).join(' | '); } };
+  T('histórias dinâmicas 4.0',vida40SelfTest);
   T('vida e feedback 3.9',vida39SelfTest);
   T('melhorias 3.8',melhorias38SelfTest);
   T('bem-estar e entrevistas',()=>{

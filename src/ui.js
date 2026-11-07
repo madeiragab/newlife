@@ -311,10 +311,11 @@ V.jobs=()=>{
     if(m.job&&m.job.id===o.id&&m.job.co===o.co) return msg('Vaga','Eu já trabalho aqui.');
     { const no=workPermission('trabalhar'); if(no) return msg('Pais',no); }
     const q=R.pick(INTERVIEW); const opts=R.shuffle(q[1].map((t,i)=>({t:t.replace('{o}',oa()),i})));
-    modal({k:'Entrevista · '+o.co,t:q[0],ch:opts.map(a=>({l:a.t,fn:()=>{
+    modal({k:'Entrevista · '+o.co,t:q[0],x:h40TextoCurriculo(d),ch:opts.map(a=>({l:a.t,fn:()=>{
+      const requisitosAgora=jobReqs(d);if(requisitosAgora.length)return msg('Requisitos',requisitosAgora.join('\n'));
       const p=interviewChance(d,a.i);
       if(R.chance(p)){ takeJob(o); UI.close(); modal({t:'Contratad'+oa()+'!',x:`Comecei como ${jobTitle(m.job).toLowerCase()} na ${o.co}.`}); }
-      else { m.yr.openings=m.yr.openings.filter(x=>x!==o); modal({t:'Não foi dessa vez',x:[ 'Minha resposta foi bem recebida, mas escolheram outro candidato. Uma boa entrevista ajuda, mas não garante a vaga.', 'Minha resposta poderia mostrar melhor como vou contribuir para a empresa. Desta vez, escolheram outra pessoa.', 'Minha resposta prejudicou a entrevista. Vou tentar responder com mais responsabilidade na próxima.' ][a.i]+(m.job?' Continuo no meu emprego atual.':' Posso tentar outra vaga.')}); }
+      else { m.yr.openings=m.yr.openings.filter(x=>x!==o); modal({t:'Não foi dessa vez',x:h40TextoCurriculo(d)+'\n\n'+[ 'Minha resposta foi bem recebida, mas escolheram outro candidato. Uma boa entrevista ajuda, mas não garante a vaga.', 'Minha resposta poderia mostrar melhor como vou contribuir para a empresa. Desta vez, escolheram outra pessoa.', 'Minha resposta prejudicou a entrevista. Vou tentar responder com mais responsabilidade na próxima.' ][a.i]+(m.job?' Continuo no meu emprego atual.':' Posso tentar outra vaga.')}); }
     }}))});
   }}; }))};
 };
