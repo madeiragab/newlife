@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2611071903'</script>
+<title>NewLife</title><script>window.NL_VER='2611071925'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -10746,8 +10746,8 @@ function cadReg(id,sid,st){ const [title,text,choices,so={}]=st;
   EVENTS[cadEv(id,sid)]={title,w:0,cad:id,cd:0,
     when:m=>{ const c=cadState().on[id]; if(!c||c.s!==sid) return false; try{ return !so.when||so.when(m,c.d); }catch(e){ cadFalha(e,'Condição da história '+id);return false; } },
     prep:m=>{ const c=cadState().on[id]; return c?Object.assign({},c.d):null; },
-    show:d=>{ const o=CHAINS[id].o; cadPerson(d); return {k:o.k||'História',t:tp(title,d),x:tp(Array.isArray(text)?text[(d.xi||0)%text.length]:text,d)+cadContextoTexto(d)+(d.ultimaDecisao?'\n\nAntes: '+tp(d.ultimaDecisao,d)+'.':''),ch:choices.map((c,i)=>[tp(c.split('|')[0],d),String(i)])}; },
-    pick:(key,d)=>cadPick(id,sid,choices[+key],d)};
+    show:d=>{ const o=CHAINS[id].o; cadPerson(d); return {k:o.k||'História',t:tp(title,d),x:tp(Array.isArray(text)?text[(d.xi||0)%text.length]:text,d)+cadContextoTexto(d)+(d.ultimaDecisao?'\n\nAntes: '+tp(d.ultimaDecisao,d)+'.':''),ch:(()=>{ const ch=choices.map((c,i)=>[tp(c.split('|')[0],d),String(i)]); if(choices.length&&choices.every(c=>{const v=cadCusto(c,d);return v>0&&!canPay(v);})) ch.push(['Deixar para lá (não tenho dinheiro)','x']); return ch; })()}; },
+    pick:(key,d)=>{ if(key==='x'){ const st=cadState(); delete st.on[id]; st.done[id]=(st.done[id]||0)+1; return 'Sem dinheiro, deixei essa ideia de lado.'; } return cadPick(id,sid,choices[+key],d); }};
 }
 // separa os efeitos próprios das cadeias (>etapa, vira:, +cad:) dos efeitos normais do pack
 function cadSplit(fx){ const own=[], rest=[]; String(fx||'').trim().split(/\s+/).filter(Boolean).forEach(t=>(/^(>|vira:|\+cad:|emprego:|casar$|noivar$|bebe$|separar$|pbond[+-]\d+$|caso[+-]$|curar$|morder$|fome[+-]\d+$|virar:\w+$|mem:\w+(?::\w+)?$|morre$|mudarcidade$|aposentar$|diploma$|paisseparam$|casa:(fin|vista)$|empregonovo$|adotar$|imovel:[\wÀ-ú]+$|vender:[\wÀ-ú]+$|carro:[\wÀ-ú]+:\d+$|trancar$|retomar$)/.test(t)?own:rest).push(t)); return {own,rest:rest.join(' ')}; }
@@ -10771,7 +10771,7 @@ function cadPick(id,sid,choice,dPend){ const st=cadState(), c=st.on[id], m=S.me;
   const lembrancas=m.histDecisoes||(m.histDecisoes=[]);lembrancas.push({id,etapa:sid,escolha:d.decisoes[sid],ok,ano:S.year});if(lembrancas.length>60)lembrancas.shift();
   const b0=cadSplit(base), br=cadSplit(ok?fx1:(fx2||''));
   { const custo=[b0.rest,br.rest].join(' ').split(/\s+/).reduce((t,x)=>{const mm=x.match(/^\$-(\d+|v2|v)$/);return t+(mm?(mm[1]==='v'?d.v:mm[1]==='v2'?d.v2:+mm[1]):0);},0);
-    if(custo>0&&!canPay(custo)){ if(c){ c.due=m.age+1; } return `Isso custaria ${fmt(custo)} e eu não tenho agora. Fica para quando der.`; } }
+    if(custo>0&&!canPay(custo)){ if(c){ c.semDin=(c.semDin||0)+1; if(c.semDin>=2){ delete st.on[id]; st.done[id]=(st.done[id]||0)+1; return `Isso custaria ${fmt(custo)}. Sem dinheiro de novo, desisti de vez.`; } c.due=m.age+R.int(2,4); } return `Isso custaria ${fmt(custo)} e eu não tenho agora. Fica para quando der.`; } }
   const out=[]; let next=null, delay=null, para=false;
   b0.own.concat(br.own).forEach(t=>{ let mm;
     if(mm=t.match(/^>(\w+)(?:@(\d+)(?:-(\d+))?)?$/)){ next=mm[1]; if(mm[2]!=null) delay=mm[3]!=null?R.int(+mm[2],+mm[3]):+mm[2]; }
@@ -10851,6 +10851,9 @@ function cadAudit(){ const errs=[]; let steps=0;
       (ch3||[]).forEach(c=>{ (c.match(/\+cad:(\w+)/g)||[]).forEach(t=>{ if(!CHAINS[t.slice(5)]) errs.push(`${id}.${sid}: história ${t.slice(5)} não existe`); }); (c.match(/(?:^|[\s|])>(\w+)/g)||[]).forEach(t=>{ t=t.replace(/^[\s|]+/,''); const x=t.slice(1); if(x!=='fim'&&!ss[x]) errs.push(`${id}.${sid}: etapa ${x} não existe`); reach.add(x); }); }); }
     Object.keys(ss).forEach(sid=>{ if(!reach.has(sid)) errs.push(`${id}.${sid}: etapa inalcançável`); }); }
   return {errs,steps,chains:Object.keys(CHAINS).length}; }
+
+// custo em dinheiro da parte garantida de uma escolha (antes do teste de sorte)
+function cadCusto(choice,d){ const f=(choice.split('|')[1]||'').split(/\s+/); const qi=f.findIndex(t=>t.startsWith('?')); return (qi>=0?f.slice(0,qi):f).reduce((t,x)=>{const mm=x.match(/^\$-(\d+|v2|v)$/);return t+(mm?(mm[1]==='v'?(d.v||0):mm[1]==='v2'?(d.v2||0):+mm[1]):0);},0); }
 
 // ===== Histórias em cadeia: infância =====
 chain('cao_rua',{k:'Infância',min:6,max:12,gap:[1,2]},{
