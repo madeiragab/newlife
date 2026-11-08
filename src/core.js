@@ -75,7 +75,7 @@ function childOf(a,b,gender){
     will:mix(a.will??50,b.will??50,15), fert:mix(a.fert??60,b.fert??60,15), craze:mix(a.craze??50,b.craze??50,18),
     genes:{hair,eyes,h,from:{hair:fh,eyes:fe,h:Math.abs(adj(a)-h)<Math.abs(adj(b)-h)?a.first:b.first},
       skin:Math.max(0,Math.min(SKINS.length-1,Math.round(((ga.skin??2)+(gb.skin??2))/2+R.norm(0,.6)))),
-      style:R.chance(.5)?(R.chance(.5)?ga.style??0:gb.style??0):R.int(0,5), glasses:R.chance((ga.glasses||gb.glasses)?.35:.1), freckles:R.chance((ga.freckles||gb.freckles)?.4:.06), eyeShape:R.chance(.5)?(ga.eyeShape??0):(gb.eyeShape??0)} };
+      style:R.chance(.5)?(R.chance(.5)?ga.style??0:gb.style??0):R.int(0,5), glasses:R.chance((ga.glasses||gb.glasses)?.35:.1), freckles:R.chance((ga.freckles||gb.freckles)?.4:.06), eyeShape:R.chance(.5)?(ga.eyeShape??0):(gb.eyeShape??0),gemeos:(ga.gemeos&&R.f()<.5)||(gb.gemeos&&R.f()<.5)||R.f()<.02?1:0} };
 }
 const fmtH=h=>(h/100).toFixed(2).replace('.',',')+' m';
 // genes.h é a altura adulta; a altura de hoje segue a curva de crescimento (fração da altura adulta por idade) e encolhe um pouco na velhice
@@ -290,9 +290,9 @@ function yearPeople(){
   const m=S.me;
   // nascimentos pendentes
   for(const b of S.births.splice(0)){
-    const par=P(b.with); const twins=R.chance(.03)?2:1;
+    const par=P(b.with); const twins=partoQtd(m,par); if(twins>1){ const mae=m.gender==='F'?m:par; if(mae&&mae.genes) mae.genes.gemeos=1; }
     const other=par||mkPerson({rel:'tmp',gender:m.gender==='F'?'M':'F',age:m.age});
-    for(let i=0;i<twins;i++){ const k=uniqFirst(mkPerson({rel:'filho',age:0,last:m.last,bond:R.int(80,100),parentId:par?par.id:null,from:[m,other]})); S.people.push(k); log(`${k.gender==='F'?'Minha filha':'Meu filho'} ${k.first} nasceu!${twins>1?' (gêmeos!)':''}`,'good'); cnt('kids'); }
+    for(let i=0;i<twins;i++){ const k=uniqFirst(mkPerson({rel:'filho',age:0,last:m.last,bond:R.int(80,100),parentId:par?par.id:null,from:[m,other]})); S.people.push(k); log(`${k.gender==='F'?'Minha filha':'Meu filho'} ${k.first} nasceu!${twins>1?` (${PARTO_NOME[twins]}!)`:''}`,'good'); if(twins>1) k.parto=twins; cnt('kids'); }
     st('happy',12);
   }
   for(const p of S.people.filter(p=>p.alive)){

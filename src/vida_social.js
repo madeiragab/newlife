@@ -108,7 +108,7 @@ EVENTS.festa_danca={when:m=>!m.prison,
     const certo=DANCA_MUSICA[d.mus[d.r]][1]===k, ok=d.ok+(certo?1:0); const t=certo?R.pick(['Arrasei nesse passo.','Combinou certinho com a música.']):R.pick(['Pisei no pé de alguém.','Não era bem esse ritmo, mas rimos.']);
     if(d.r<2){ queue('festa_danca',Object.assign({},d,{r:d.r+1,ok})); return t; }
     const p=P(d.pid); if(!p) return t; p.bond=clamp(p.bond+ok*4+2); st('happy',4+ok*2); m.talent.dance=clamp((m.talent.dance||0)+1); let fim=` Dançamos ${ok===3?'perfeitamente':ok>=2?'muito bem':'do nosso jeito'}.`;
-    const pode=!d.kid&&m.age>=13&&p.age>=(m.age<18?12:18)&&Math.abs(p.age-m.age)<=(m.age<18?3:12)&&!partners().includes(p)&&!['irmao','primo','tio'].includes(p.rel)&&!partners().length;
+    const pode=!d.kid&&m.age>=13&&p.age>=(m.age<18?12:18)&&Math.abs(p.age-m.age)<=(m.age<18?3:12)&&!partners().includes(p)&&!['irmao','primo','primo2','tio','tioavo','sobrinho','bisavo','ancestral'].includes(p.rel)&&!partners().length;
     if(pode&&ok>=2&&R.chance(.35+ok*.12+m.looks/400)){ p.rel='namoro'; p.yrs=0; p.bond=clamp(p.bond+10); log(`Comecei a namorar ${fullName(p)} depois de uma dança na festa.`,'good'); fim+=` No fim da noite, ${p.first} me beijou. Estamos namorando!`; }
     else if(partners().includes(p)) fim+=' Como no começo do namoro.';
     return t+fim; }};

@@ -146,7 +146,7 @@ function pv3Draw(){ const w=document.getElementById('provador3'); if(!w||!PV3) r
      ${conta.l.length?`<button class="pv3-desfaz" data-a="desfaz">↩ Desfazer tudo</button>`:''}</section>
     <section class="pv3-opcoes"><h3>${esc(cat?cat.l:'')} <small>${itens.length}</small></h3>
      ${PV3.aba==='roupas'?`<button class="pv3-sexo" data-a="sexo">${PV3.sexo==='F'?'Ver roupas masculinas':'Ver roupas femininas'}</button>`:''}
-     <div class="pv3-grade">${itens.map((i,n)=>{ const on=pv3Usando(i); return `<button class="pv3-item${on?' on':''}" data-i="${n}" ${i.dis?'disabled':''} title="${esc(i.n)}">${thumb(i)}<b>${esc(i.n)}</b><small>${on?'✔':i.p?fmt(i.p):'Grátis'}</small></button>`; }).join('')}</div></section>
+     <div class="pv3-grade">${itens.map((i,n)=>{ const on=pv3Usando(i); return `<button class="pv3-item${on?' on':''}" data-i="${n}" ${i.dis?'disabled':''} title="${esc(i.desc||i.n)}" aria-pressed="${on}" aria-label="${esc(i.n+(i.desc?': '+i.desc:'')+', '+(on?'em uso':i.p?fmt(i.p):'grátis'))}">${thumb(i)}<b>${esc(i.n)}</b><small>${on?'✔':i.p?fmt(i.p):'Grátis'}</small></button>`; }).join('')}</div></section>
    </div></div>`;
   w.onclick=e=>{ const b=e.target.closest('button'); if(!b||b.disabled) return; vibrar(10);
     if(b.dataset.aba){ PV3.aba=b.dataset.aba; PV3.cat=null; return pv3Draw(); }

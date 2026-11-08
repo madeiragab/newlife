@@ -30,7 +30,7 @@ function geracaoPessoas(k,old,keep,passado){const ids=new Set(keep.map(p=>p.id))
  if(p.id===par&&p.alive){p.rel='conjuge';p.bond=clamp(p.bond);p.polyCom=[];}
  else if(p.parentIds?.includes(k.id))p.rel='filho';
  else if(prev.rel==='neto'&&!ids.has(p.id))p.rel='sobrinho';
- else if(!ids.has(p.id)&&prev.rel!=='pet'){p.rel=prev.rel==='conjuge'&&(p.enteados||[]).includes(k.id)?'padrasto':'conhecido';p.bond=Math.min(45,p.bond);}
+ else if(!ids.has(p.id)&&prev.rel!=='pet'){const par2={irmao:'tio',sobrinho:'primo',tio:'tioavo',primo:'primo2',avo:'bisavo',bisavo:'ancestral',ancestral:'ancestral',padrasto:'avo'}[prev.rel];p.rel=par2||(prev.rel==='conjuge'&&(p.enteados||[]).includes(k.id)?'padrasto':'conhecido');p.bond=Math.min(par2?70:45,p.bond);}
  if(!ids.has(p.id)){keep.push(p);ids.add(p.id);}
  }
  for(const p of keep.filter(p=>p.rel==='conjuge')){npcVida(p).par=k.id;p.polyCom=keep.filter(q=>q.rel==='conjuge'&&q.id!==p.id).map(q=>q.id);}
@@ -46,4 +46,4 @@ V.person=(o=>function(p){const r=o(p);if(r&&p.vinculos)for(const [id,v] of Objec
 continueAs=(o=>function(k){if(!k?.alive||S.me.alive||!kids().includes(k))return false;return o.apply(this,arguments);})(continueAs);
 
 function geracaoRecalcular(s){const mapa=new Map(s.people.concat(s.me).map(p=>[p.id,p]));const ascendentes=id=>{let fila=[id],res=new Map();for(let nivel=1;nivel<=5&&fila.length;nivel++){const prox=[];for(const n of fila)for(const pid of mapa.get(n)?.parentIds||[])if(!res.has(pid)){res.set(pid,nivel);prox.push(pid);}fila=prox;}return res;};const ancestrais=ascendentes(s.me.id),pais=s.me.parentIds||[];for(const p of s.people){if(p.rel==='pet')continue;const grau=ancestrais.get(p.id);if(grau){p.rel=grau===1?(p.gender==='F'?'mae':'pai'):grau===2?'avo':grau===3?'bisavo':'ancestral';continue;}const desc=ascendentes(p.id).get(s.me.id);if(desc){p.rel=desc===1?'filho':desc===2?'neto':'descendente';continue;}const pp=p.parentIds||[];if(pp.some(id=>pais.includes(id))){p.rel='irmao';continue;}if(pp.some(id=>(mapa.get(id)?.parentIds||[]).some(x=>pais.includes(x))))p.rel='sobrinho';else if(pais.some(id=>(mapa.get(id)?.parentIds||[]).some(x=>pp.includes(x))))p.rel='tio';}}
-Object.assign(REL_LABEL,{bisavo:'Bisavô|Bisavó',ancestral:'Antepassado|Antepassada',descendente:'Descendente',tio:'Tio|Tia'});
+Object.assign(REL_LABEL,{bisavo:'Bisavô|Bisavó',ancestral:'Antepassado|Antepassada',descendente:'Descendente',tio:'Tio|Tia',tioavo:'Tio-avô|Tia-avó',primo:'Primo|Prima',primo2:'Primo de segundo grau|Prima de segundo grau'});
