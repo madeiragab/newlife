@@ -75,7 +75,7 @@ function childOf(a,b,gender){
     will:mix(a.will??50,b.will??50,15), fert:mix(a.fert??60,b.fert??60,15), craze:mix(a.craze??50,b.craze??50,18),
     genes:{hair,eyes,h,from:{hair:fh,eyes:fe,h:Math.abs(adj(a)-h)<Math.abs(adj(b)-h)?a.first:b.first},
       skin:Math.max(0,Math.min(SKINS.length-1,Math.round(((ga.skin??2)+(gb.skin??2))/2+R.norm(0,.6)))),
-      style:R.chance(.5)?(R.chance(.5)?ga.style??0:gb.style??0):R.int(0,5), glasses:R.chance((ga.glasses||gb.glasses)?.35:.1), freckles:R.chance((ga.freckles||gb.freckles)?.4:.06), eyeShape:R.chance(.5)?(ga.eyeShape??0):(gb.eyeShape??0),gemeos:(ga.gemeos&&R.f()<.5)||(gb.gemeos&&R.f()<.5)||R.f()<.02?1:0} };
+      style:R.chance(.5)?(R.chance(.5)?ga.style??0:gb.style??0):R.int(0,5), glasses:R.chance((ga.glasses||gb.glasses)?.35:.1), freckles:R.chance((ga.freckles||gb.freckles)?.4:.06), eyeShape:R.chance(.5)?(ga.eyeShape??0):(gb.eyeShape??0),gemeos:(ga.gemeos&&R.f()<.5)||(gb.gemeos&&R.f()<.5)||R.f()<.002?1:0} };
 }
 const fmtH=h=>(h/100).toFixed(2).replace('.',',')+' m';
 // genes.h é a altura adulta; a altura de hoje segue a curva de crescimento (fração da altura adulta por idade) e encolhe um pouco na velhice
