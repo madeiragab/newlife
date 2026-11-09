@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>NewLife</title><script>window.NL_VER='2611071928'</script>
+<title>NewLife</title><script>window.NL_VER='2611090047'</script>
 <script>window.DESKTOP=1</script>
 <style>
 @font-face {
@@ -1762,7 +1762,7 @@ function childOf(a,b,gender){
     will:mix(a.will??50,b.will??50,15), fert:mix(a.fert??60,b.fert??60,15), craze:mix(a.craze??50,b.craze??50,18),
     genes:{hair,eyes,h,from:{hair:fh,eyes:fe,h:Math.abs(adj(a)-h)<Math.abs(adj(b)-h)?a.first:b.first},
       skin:Math.max(0,Math.min(SKINS.length-1,Math.round(((ga.skin??2)+(gb.skin??2))/2+R.norm(0,.6)))),
-      style:R.chance(.5)?(R.chance(.5)?ga.style??0:gb.style??0):R.int(0,5), glasses:R.chance((ga.glasses||gb.glasses)?.35:.1), freckles:R.chance((ga.freckles||gb.freckles)?.4:.06), eyeShape:R.chance(.5)?(ga.eyeShape??0):(gb.eyeShape??0)} };
+      style:R.chance(.5)?(R.chance(.5)?ga.style??0:gb.style??0):R.int(0,5), glasses:R.chance((ga.glasses||gb.glasses)?.35:.1), freckles:R.chance((ga.freckles||gb.freckles)?.4:.06), eyeShape:R.chance(.5)?(ga.eyeShape??0):(gb.eyeShape??0),gemeos:(ga.gemeos&&R.f()<.5)||(gb.gemeos&&R.f()<.5)||R.f()<.002?1:0} };
 }
 const fmtH=h=>(h/100).toFixed(2).replace('.',',')+' m';
 // genes.h é a altura adulta; a altura de hoje segue a curva de crescimento (fração da altura adulta por idade) e encolhe um pouco na velhice
@@ -1977,9 +1977,9 @@ function yearPeople(){
   const m=S.me;
   // nascimentos pendentes
   for(const b of S.births.splice(0)){
-    const par=P(b.with); const twins=R.chance(.03)?2:1;
+    const par=P(b.with); const twins=partoQtd(m,par); if(twins>1){ const mae=m.gender==='F'?m:par; if(mae&&mae.genes) mae.genes.gemeos=1; }
     const other=par||mkPerson({rel:'tmp',gender:m.gender==='F'?'M':'F',age:m.age});
-    for(let i=0;i<twins;i++){ const k=uniqFirst(mkPerson({rel:'filho',age:0,last:m.last,bond:R.int(80,100),parentId:par?par.id:null,from:[m,other]})); S.people.push(k); log(`${k.gender==='F'?'Minha filha':'Meu filho'} ${k.first} nasceu!${twins>1?' (gêmeos!)':''}`,'good'); cnt('kids'); }
+    for(let i=0;i<twins;i++){ const k=uniqFirst(mkPerson({rel:'filho',age:0,last:m.last,bond:R.int(80,100),parentId:par?par.id:null,from:[m,other]})); S.people.push(k); log(`${k.gender==='F'?'Minha filha':'Meu filho'} ${k.first} nasceu!${twins>1?` (${PARTO_NOME[twins]}!)`:''}`,'good'); if(twins>1) k.parto=twins; cnt('kids'); }
     st('happy',12);
   }
   for(const p of S.people.filter(p=>p.alive)){
@@ -6352,10 +6352,10 @@ V.invest=()=>{ const m=S.me; const row=(k,l,s)=>[{html:`<div class="card">${kv(l
 // ---------- relações ----------
 function personRow(p){ return {face:faceSVG(p,42),l:fullName(p),s:`${relLabel(p)} · ${p.age} ${p.age===1?'ano':'anos'}`,bars:relBars(p),on:()=>UI.push(()=>V.person(p))}; }
 V.relations=()=>{
-  const groups=[['Família',['mae','pai','padrasto','irmao','avo']],['Amor',['namoro','noivo','conjuge']],['Filhos e netos',['filho','adot','neto']],['Amigos',['amigo']],['Desafetos',['inimigo']],['Bichos',['pet']],['Ex',['ex']]];
+  const groups=[['Família',['mae','pai','padrasto','irmao','avo','bisavo','ancestral','tio','tioavo','primo','primo2','sobrinho']],['Amor',['namoro','noivo','conjuge']],['Filhos e netos',['filho','adot','neto']],['Amigos',['amigo']],['Desafetos',['inimigo']],['Bichos',['pet']],['Ex',['ex']]];
   const it=[{face:faceSVG(S.me,42),l:'Eu: '+S.me.first+' '+S.me.last,s:'Visual, genética, talentos e vícios',on:()=>UI.push(V.me)}];
   for(const [t,rels] of groups){ const ps=people(...rels); if(ps.length){ it.push({sec:t}); ps.forEach(p=>it.push(personRow(p))); } }
-  const ORD_SAUD=['conjuge','noivo','namoro','mae','pai','padrasto','filho','adot','irmao','avo','neto','sobrinho','ex','amigo','ex_amigo'];const dead=S.people.filter(p=>!p.alive&&ORD_SAUD.includes(p.rel)).sort((a,b)=>ORD_SAUD.indexOf(a.rel)-ORD_SAUD.indexOf(b.rel));
+  const ORD_SAUD=['conjuge','noivo','namoro','mae','pai','padrasto','filho','adot','irmao','avo','bisavo','ancestral','neto','tio','tioavo','primo','primo2','sobrinho','ex','amigo','ex_amigo'];const dead=S.people.filter(p=>!p.alive&&ORD_SAUD.includes(p.rel)).sort((a,b)=>ORD_SAUD.indexOf(a.rel)-ORD_SAUD.indexOf(b.rel));
   if(dead.length){ it.push({sec:'Saudades'}); dead.forEach(p=>it.push({face:faceSVG(p,42),l:fullName(p),s:relLabel(p)+' · falecido'.replace('falecido',p.gender==='F'?'falecida':'falecido'),dis:true})); }
   if(!it.length) it.push({html:'<div class="card"><p>Ninguém por aqui.</p></div>'});
   return {title:'Relações',items:it};
@@ -11695,7 +11695,7 @@ chain('avos_historias',{k:'Família',min:8,max:30,gap:[1,2],who:'avo'},{
  c:['O álbum','{p} mostrou um álbum de fotos que eu nunca tinha visto.',['Escanear todas as fotos|k+3 h+5 >d@2-5|Mandei para a família inteira.','Ouvir a história de cada foto|h+8 >d@2-5|Uma tarde inteira de memórias.']],
  d:['A falta','{p} partiu. A receita do bolo ficou comigo.',['Fazer o bolo no aniversário {dele}|morre h-4 k+3|Ficou quase igual. Quase.','Ouvir as gravações|morre h-6|A voz {dele} ainda está aqui.']],
 });
-chain('gemeos',{k:'Família',min:22,max:45,who:'partnerFertile',when:m=>kids().length===0,gap:[1,1]},{
+chain('gemeos',{k:'Família',min:22,max:45,who:'partnerFertile',when:m=>kids().length===0&&(R.f()<.03||/teste/.test(location.hash)),gap:[1,1]},{
  a:['O ultrassom','No ultrassom, o médico ficou em silêncio e depois sorriu: "Tem dois aqui".',['Rir de nervoso|h+10 bond+8 >b|Dois berços, dois carrinhos, duas vezes tudo.','Desmaiar|h+8 >b|Acordei com {p} me abanando.']],
  b:['A preparação','Preparar a casa para gêmeos exige um exército.',['Pedir ajuda à família|k+3 >c|Minha mãe se mudou para casa por um mês.','Fazer tudo sozinhos|hl-4 bond+5 >c|Nós dois contra o mundo.']],
  c:['O nascimento','Nasceram dois bebês saudáveis!',['Segurar os dois de uma vez|bebe bebe h+25 bond+15 >d@1|Dois chorando, um coração explodindo.','Chorar mais que os bebês|bebe bebe h+22 >d@1|Ninguém estava preparado para tanta emoção.']],
@@ -16716,6 +16716,7 @@ appIconSVG=function(px=1024){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'4.3',d:'08/11/2026',t:'Para todo mundo jogar',itens:['Cada look tem descrição em texto, anunciada pelo leitor de tela.','Novo menu Acessibilidade: tamanho do texto, fonte de leitura fácil, alto contraste, botões maiores, menos animações, ler a situação e descrever o visual.','Gêmeos, trigêmeos, quadrigêmeos e quíntuplos bem raros, com predisposição hereditária.','Ao continuar como filho, os parentes seguem na família: tios, primos, bisavós e tios-avós.']},
  {v:'4.2',d:'07/11/2026',t:'Tudo conversa',itens:['Vampiro não envelhece e lobisomem envelhece devagar.','Na prisão só aparecem eventos da prisão; nas aventuras, só os da aventura.','Cônjuges e outras pessoas próximas que morreram aparecem em Saudades.','Luto, doença e bebê novo afetam estudo, trabalho e mandato.','Órfãos ganham um tutor, e criaturas podem fazer faculdade e campanha.','Eventos que perderam o sentido somem em vez de mostrar "a situação mudou".']},
  {v:'4.1',d:'07/11/2026',t:'O peso de cada ano',itens:['Resumo anual com mudanças na saúde, felicidade, trabalho e família.','Atividades, convívio e tratamentos têm efeitos diferentes na recuperação.','Filhos adultos ligam, convidam para visitas, pedem conselho e podem retomar o contato.','O modo zumbi continua até a morte, com escassez variável, novos grupos e um registro das escolhas e do recorde.']},
  {v:'4.0',d:'07/11/2026',t:'Escolhas que deixam história',itens:['Entrevistas consideram experiência relacionada, formação e certificações; o currículo explica os fatores. Requisitos obrigatórios continuam valendo.','Filhos reagem à presença e à criação ao longo dos anos. Promessas exigem convivência real, sem serem substituídas por presentes.','Projetos pessoais, mentoria e memórias com netos criam objetivos a partir dos 60 anos, com progresso registrado.','Histórias concluídas podem oferecer continuações anos depois, quando a situação atual permite.','Minha história em andamento reúne compromissos, resultados e capítulos encerrados quando a vida muda. Tudo fica salvo com a partida.']},
@@ -17623,7 +17624,7 @@ function geracaoPessoas(k,old,keep,passado){const ids=new Set(keep.map(p=>p.id))
  if(p.id===par&&p.alive){p.rel='conjuge';p.bond=clamp(p.bond);p.polyCom=[];}
  else if(p.parentIds?.includes(k.id))p.rel='filho';
  else if(prev.rel==='neto'&&!ids.has(p.id))p.rel='sobrinho';
- else if(!ids.has(p.id)&&prev.rel!=='pet'){p.rel=prev.rel==='conjuge'&&(p.enteados||[]).includes(k.id)?'padrasto':'conhecido';p.bond=Math.min(45,p.bond);}
+ else if(!ids.has(p.id)&&prev.rel!=='pet'){const par2={irmao:'tio',sobrinho:'primo',tio:'tioavo',primo:'primo2',avo:'bisavo',bisavo:'ancestral',ancestral:'ancestral',padrasto:'avo'}[prev.rel];p.rel=par2||(prev.rel==='conjuge'&&(p.enteados||[]).includes(k.id)?'padrasto':'conhecido');p.bond=Math.min(par2?70:45,p.bond);}
  if(!ids.has(p.id)){keep.push(p);ids.add(p.id);}
  }
  for(const p of keep.filter(p=>p.rel==='conjuge')){npcVida(p).par=k.id;p.polyCom=keep.filter(q=>q.rel==='conjuge'&&q.id!==p.id).map(q=>q.id);}
@@ -17639,7 +17640,7 @@ V.person=(o=>function(p){const r=o(p);if(r&&p.vinculos)for(const [id,v] of Objec
 continueAs=(o=>function(k){if(!k?.alive||S.me.alive||!kids().includes(k))return false;return o.apply(this,arguments);})(continueAs);
 
 function geracaoRecalcular(s){const mapa=new Map(s.people.concat(s.me).map(p=>[p.id,p]));const ascendentes=id=>{let fila=[id],res=new Map();for(let nivel=1;nivel<=5&&fila.length;nivel++){const prox=[];for(const n of fila)for(const pid of mapa.get(n)?.parentIds||[])if(!res.has(pid)){res.set(pid,nivel);prox.push(pid);}fila=prox;}return res;};const ancestrais=ascendentes(s.me.id),pais=s.me.parentIds||[];for(const p of s.people){if(p.rel==='pet')continue;const grau=ancestrais.get(p.id);if(grau){p.rel=grau===1?(p.gender==='F'?'mae':'pai'):grau===2?'avo':grau===3?'bisavo':'ancestral';continue;}const desc=ascendentes(p.id).get(s.me.id);if(desc){p.rel=desc===1?'filho':desc===2?'neto':'descendente';continue;}const pp=p.parentIds||[];if(pp.some(id=>pais.includes(id))){p.rel='irmao';continue;}if(pp.some(id=>(mapa.get(id)?.parentIds||[]).some(x=>pais.includes(x))))p.rel='sobrinho';else if(pais.some(id=>(mapa.get(id)?.parentIds||[]).some(x=>pp.includes(x))))p.rel='tio';}}
-Object.assign(REL_LABEL,{bisavo:'Bisavô|Bisavó',ancestral:'Antepassado|Antepassada',descendente:'Descendente',tio:'Tio|Tia'});
+Object.assign(REL_LABEL,{bisavo:'Bisavô|Bisavó',ancestral:'Antepassado|Antepassada',descendente:'Descendente',tio:'Tio|Tia',tioavo:'Tio-avô|Tia-avó',primo:'Primo|Prima',primo2:'Primo de segundo grau|Prima de segundo grau'});
 
 // Manchetes deixam efeitos temporários; absolvição e confiança também repercutem.
 function opiniao(){return S.me.opiniao||(S.me.opiniao={efeitos:[],ano:null});}
@@ -20336,7 +20337,7 @@ EVENTS.festa_danca={when:m=>!m.prison,
     const certo=DANCA_MUSICA[d.mus[d.r]][1]===k, ok=d.ok+(certo?1:0); const t=certo?R.pick(['Arrasei nesse passo.','Combinou certinho com a música.']):R.pick(['Pisei no pé de alguém.','Não era bem esse ritmo, mas rimos.']);
     if(d.r<2){ queue('festa_danca',Object.assign({},d,{r:d.r+1,ok})); return t; }
     const p=P(d.pid); if(!p) return t; p.bond=clamp(p.bond+ok*4+2); st('happy',4+ok*2); m.talent.dance=clamp((m.talent.dance||0)+1); let fim=` Dançamos ${ok===3?'perfeitamente':ok>=2?'muito bem':'do nosso jeito'}.`;
-    const pode=!d.kid&&m.age>=13&&p.age>=(m.age<18?12:18)&&Math.abs(p.age-m.age)<=(m.age<18?3:12)&&!partners().includes(p)&&!['irmao','primo','tio'].includes(p.rel)&&!partners().length;
+    const pode=!d.kid&&m.age>=13&&p.age>=(m.age<18?12:18)&&Math.abs(p.age-m.age)<=(m.age<18?3:12)&&!partners().includes(p)&&!['irmao','primo','primo2','tio','tioavo','sobrinho','bisavo','ancestral'].includes(p.rel)&&!partners().length;
     if(pode&&ok>=2&&R.chance(.35+ok*.12+m.looks/400)){ p.rel='namoro'; p.yrs=0; p.bond=clamp(p.bond+10); log(`Comecei a namorar ${fullName(p)} depois de uma dança na festa.`,'good'); fim+=` No fim da noite, ${p.first} me beijou. Estamos namorando!`; }
     else if(partners().includes(p)) fim+=' Como no começo do namoro.';
     return t+fim; }};
@@ -24041,7 +24042,7 @@ function pv3Draw(){ const w=document.getElementById('provador3'); if(!w||!PV3) r
      ${conta.l.length?`<button class="pv3-desfaz" data-a="desfaz">↩ Desfazer tudo</button>`:''}</section>
     <section class="pv3-opcoes"><h3>${esc(cat?cat.l:'')} <small>${itens.length}</small></h3>
      ${PV3.aba==='roupas'?`<button class="pv3-sexo" data-a="sexo">${PV3.sexo==='F'?'Ver roupas masculinas':'Ver roupas femininas'}</button>`:''}
-     <div class="pv3-grade">${itens.map((i,n)=>{ const on=pv3Usando(i); return `<button class="pv3-item${on?' on':''}" data-i="${n}" ${i.dis?'disabled':''} title="${esc(i.n)}">${thumb(i)}<b>${esc(i.n)}</b><small>${on?'✔':i.p?fmt(i.p):'Grátis'}</small></button>`; }).join('')}</div></section>
+     <div class="pv3-grade">${itens.map((i,n)=>{ const on=pv3Usando(i); return `<button class="pv3-item${on?' on':''}" data-i="${n}" ${i.dis?'disabled':''} title="${esc(i.desc||i.n)}" aria-pressed="${on}" aria-label="${esc(a11yItemLabel(i,on))}">${thumb(i)}<b>${esc(i.n)}</b><small>${on?'✔':i.p?fmt(i.p):'Grátis'}</small></button>`; }).join('')}</div></section>
    </div></div>`;
   w.onclick=e=>{ const b=e.target.closest('button'); if(!b||b.disabled) return; vibrar(10);
     if(b.dataset.aba){ PV3.aba=b.dataset.aba; PV3.cat=null; return pv3Draw(); }
@@ -27214,6 +27215,96 @@ evValid=(o=>function(e){ const ok=o.apply(this,arguments); if(!ok||!e||e.id!=='v
   const p=d.pid&&P(d.pid), a=d.aid&&S.me.assets.find(x=>x.id===d.aid);
   return !(d.pid&&!(p&&p.alive)||d.aid&&!a); })(evValid);
 
+// ===== 4.3: descrição dos looks, gestações múltiplas e opções de acessibilidade =====
+// ---------- gestações múltiplas: a predisposição fica em genes.gemeos e passa de geração em geração ----------
+function partoQtd(m,par){ const mae=m.gender==='F'?m:(par&&par.gender==='F'?par:null); const gene=!!(mae&&mae.genes&&mae.genes.gemeos); let f=gene?4:1; if(mae&&mae.age>=35) f*=1.3;
+  const x=R.f(); return x<.000002*f?5:x<.00002*f?4:x<.0003*f?3:x<.004*f?2:1; }
+const PARTO_NOME={2:'gêmeos',3:'trigêmeos',4:'quadrigêmeos',5:'quíntuplos'};
+relLabel=(o=>p=>{ const t=o(p); return p&&p.parto&&['filho','irmao'].includes(p.rel)?`${t} · ${PARTO_NOME[p.parto]}`:t; })(relLabel);
+V.me=(o=>function(){ const r=o.apply(this,arguments); if(r&&r.items&&S.me.genes&&S.me.genes.gemeos) r.items.push({ic:false,l:'Gestação múltipla na família',s:'Tenho mais chance de ter gêmeos ou mais, e posso passar isso aos meus filhos'}); return r; })(V.me);
+
+// ---------- descrição em texto das roupas ----------
+const ROUPA_NOMES={longa:['camiseta de manga longa','f'],camiseta:['camiseta','f'],camisetaV:['camiseta gola V','f'],camisaCurta:['camisa de manga curta','f'],camisa:['camisa','f'],camisaAberta:['camisa aberta','f'],camisaTime:['camisa de time','f'],blazer:['blazer','m'],golaAlta:['blusa de gola alta','f'],jaquetaCouro:['jaqueta de couro','f'],jaqueta:['jaqueta','f'],sobretudo:['sobretudo','m'],bata:['bata','f'],polo:['camisa polo','f'],regata:['regata','f'],pijama:['pijama','m'],moletom:['moletom','m'],moletomZiper:['moletom com zíper','m'],cardigan:['cardigã','m'],listras:['blusa','f'],sueter:['suéter','m'],blusa:['blusa','f'],croppedRegata:['cropped regata','m'],alcinha:['blusa de alcinha','f'],macacao:['macacão','m'],tomara:['blusa tomara que caia','f'],cropped:['cropped','m'],topEsporte:['top esportivo','m'],
+ jeans:['calça jeans','f'],bermuda:['bermuda','f'],calca:['calça','f'],short:['short','m'],jogger:['calça jogger','f'],cargo:['calça cargo','f'],legging:['legging','f'],saia:['saia','f'],shortinho:['shortinho','m'],
+ chinelo:['chinelo','m'],tenis:['tênis','m'],social:['sapato social','m'],sandalia:['sandália','f'],coturno:['coturno','m'],botaCano:['bota de cano alto','f'],sapatilha:['sapatilha','f'],botaNeve:['bota de neve','f'],bota:['bota','f'],salto:['salto alto','m']};
+const ROUPA_CORES=[['#FFFFFF','branco','branca'],['#F4F4F2','branco','branca'],['#1B1B1F','preto','preta'],['#6C757D','cinza','cinza'],['#ADB5BD','cinza-claro','cinza-claro'],['#E9E4D8','bege','bege'],['#C9A27E','caramelo','caramelo'],['#8B5E3C','marrom','marrom'],['#6B705C','verde-oliva','verde-oliva'],['#E63946','vermelho','vermelha'],['#5C2A3A','vinho','vinho'],['#F4A261','laranja','laranja'],['#FB5607','laranja','laranja'],['#E9C46A','amarelo','amarela'],['#FFF1B5','amarelo-claro','amarelo-claro'],['#C0A062','dourado','dourada'],['#2A9D8F','verde-água','verde-água'],['#06D6A0','verde','verde'],['#283618','verde-escuro','verde-escuro'],['#D8F3DC','verde-claro','verde-claro'],['#3A86FF','azul','azul'],['#1B263B','azul-marinho','azul-marinho'],['#3B5B8C','azul','azul'],['#5B7DB1','azul','azul'],['#7A9CC6','azul-claro','azul-claro'],['#1F3354','azul-escuro','azul-escuro'],['#BDE0FE','azul-claro','azul-claro'],['#7B2CBF','roxo','roxa'],['#CDB4DB','lilás','lilás'],['#FFC8DD','rosa-claro','rosa-claro'],['#EF476F','rosa','rosa']];
+function corNome(hex,gen){ if(!/^#[0-9a-f]{6}$/i.test(hex||'')) return ''; const v=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)), a=v(hex); let best=null,bd=1e9; for(const c of ROUPA_CORES){ const b=v(c[0]), d=(a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2; if(d<bd){ bd=d; best=c; } } return best[gen==='f'?2:1]; }
+const ROUPA_PADRAO={listrasV:['com listras verticais'],xadrez:['xadrez'],tropical:['com estampa tropical'],geometrico:['com estampa geométrica'],quadriculado:['quadriculado','quadriculada'],listras:['listrado','listrada'],estrelas:['com estrelas'],trico:['de tricô'],bolinhas:['de bolinhas'],camuflado:['camuflado','camuflada'],floral:['com flores'],listrasFinas:['com listras finas'],coracoes:['com corações'],paete:['de paetê']};
+const ROUPA_ESTAMPA={raio:'raio',faixa:'faixa',estrela:'estrela',caveira:'caveira',logo:'logotipo',coracao:'coração',circulo:'círculo'};
+const ROUPA_NOMES_EN={longa:'long-sleeve T-shirt',camiseta:'T-shirt',camisetaV:'V-neck T-shirt',camisaCurta:'short-sleeve shirt',camisa:'shirt',camisaAberta:'open shirt',camisaTime:'team jersey',blazer:'blazer',golaAlta:'turtleneck',jaquetaCouro:'leather jacket',jaqueta:'jacket',sobretudo:'overcoat',bata:'tunic',polo:'polo shirt',regata:'tank top',pijama:'pajamas',moletom:'sweatshirt',moletomZiper:'zip-up hoodie',cardigan:'cardigan',listras:'top',sueter:'sweater',blusa:'blouse',croppedRegata:'cropped tank top',alcinha:'camisole',macacao:'jumpsuit',tomara:'strapless top',cropped:'crop top',topEsporte:'sports bra',
+ jeans:'jeans',bermuda:'long shorts',calca:'pants',short:'shorts',jogger:'joggers',cargo:'cargo pants',legging:'leggings',saia:'skirt',shortinho:'short shorts',
+ chinelo:'flip-flops',tenis:'sneakers',social:'dress shoes',sandalia:'sandals',coturno:'combat boots',botaCano:'knee-high boots',sapatilha:'flats',botaNeve:'snow boots',bota:'boots',salto:'high heels'};
+const COR_EN={branco:'white',preto:'black',cinza:'gray','cinza-claro':'light gray',bege:'beige',caramelo:'caramel',marrom:'brown','verde-oliva':'olive green',vermelho:'red',vinho:'burgundy',laranja:'orange',amarelo:'yellow','amarelo-claro':'light yellow',dourado:'gold','verde-água':'teal',verde:'green','verde-escuro':'dark green','verde-claro':'light green',azul:'blue','azul-marinho':'navy blue','azul-claro':'light blue','azul-escuro':'dark blue',roxo:'purple','lilás':'lilac','rosa-claro':'light pink',rosa:'pink'};
+const PADRAO_EN={listrasV:'vertical-striped',xadrez:'plaid',tropical:'tropical-print',geometrico:'geometric-print',quadriculado:'checkered',listras:'striped',estrelas:'star-print',trico:'knit',bolinhas:'polka-dot',camuflado:'camouflage',floral:'floral',listrasFinas:'pinstriped',coracoes:'heart-print',paete:'sequined'};
+const ESTAMPA_EN={raio:'lightning bolt',faixa:'stripe',estrela:'star',caveira:'skull',logo:'logo',coracao:'heart',circulo:'circle'};
+const ESTILO_EN={Boho:'Boho',Casual:'Casual',Country:'Country',Esportivo:'Sporty',Executivo:'Business',Festa:'Party','Gótico':'Goth',Inverno:'Winter','Macacão':'Jumpsuit',Pijama:'Pajamas',Praia:'Beach',Preppy:'Preppy',Rock:'Rock','Romântico':'Romantic',Social:'Formal',Street:'Street','Verão':'Summer',Vintage:'Vintage'};
+const estiloTxt=e=>LANG==='en'?(ESTILO_EN[e]||e):e;
+const corEn=h=>COR_EN[corNome(h,'m')]||'';
+function pecaDescEn(o,nome){ return [corEn(o.cor),PADRAO_EN[o.padrao],nome,o.estampa?`with a ${ESTAMPA_EN[o.estampa]||o.estampa} print`:''].filter(Boolean).join(' '); }
+function roupaDescEn(q){ const l=[];
+  if(q.vestido){ const v=q.vestido; l.push(pecaDescEn(v,v.comp>=6.5?'long dress':v.comp<=4.8?'short dress':'dress')); }
+  for(const k of ['sob','top','jardineira','baixo','sapato']){ const o=q[k]; if(!o) continue; if(k==='jardineira'){ l.push(pecaDescEn(o,'overalls')); continue; } if(o.tipo==='descalco'){ l.push('bare feet'); continue; } l.push(pecaDescEn(o,ROUPA_NOMES_EN[o.tipo]||'garment')); }
+  if(q.gravata) l.push([corEn(q.gravata.cor),'tie'].filter(Boolean).join(' ')); if(q.borboleta) l.push('bow tie'); if(q.lenco) l.push('scarf'); if(q.cinto) l.push('belt'); if(q.suspensorio) l.push('suspenders'); if(q.meiaCalca) l.push('tights');
+  const s=l.length>1?l.slice(0,-1).join(', ')+' and '+l[l.length-1]:(l[0]||''); return s?s[0].toUpperCase()+s.slice(1):''; }
+function a11yItemLabel(i,on){ const en=LANG==='en', n=en?(i.k==='roupa3'?String(i.n).replace(/^(.+) (\d+)$/,(_,e,d)=>`${estiloTxt(e)} ${d}`):tr(i.n)):i.n; return n+(i.desc?': '+i.desc:'')+', '+(on?(en?'in use':'em uso'):i.p?fmt(i.p):(en?'free':'grátis')); }
+function pecaDesc(o,nome,gen){ const pd=ROUPA_PADRAO[o.padrao], padrao=pd?(gen==='f'&&pd[1]?pd[1]:pd[0]):'';
+  return [nome,corNome(o.cor,gen),padrao,o.estampa?`com estampa de ${ROUPA_ESTAMPA[o.estampa]||o.estampa}`:''].filter(Boolean).join(' '); }
+function roupaDesc(r){ const q=r&&r.roupa; if(!q) return ''; if(LANG==='en') return roupaDescEn(q); const l=[];
+  if(q.vestido){ const v=q.vestido; l.push(pecaDesc(v,v.comp>=6.5?'vestido longo':v.comp<=4.8?'vestido curto':'vestido','m')); }
+  for(const k of ['sob','top','jardineira','baixo','sapato']){ const o=q[k]; if(!o) continue; if(k==='jardineira'){ l.push(pecaDesc(o,'jardineira','f')); continue; } if(o.tipo==='descalco'){ l.push('pés descalços'); continue; } const n=ROUPA_NOMES[o.tipo]; l.push(n?pecaDesc(o,n[0],n[1]):pecaDesc(o,String(o.tipo||'peça'),'f')); }
+  if(q.gravata) l.push(['gravata',corNome(q.gravata.cor,'f')].filter(Boolean).join(' ')); if(q.borboleta) l.push('gravata-borboleta'); if(q.lenco) l.push('lenço'); if(q.cinto) l.push('cinto'); if(q.suspensorio) l.push('suspensório'); if(q.meiaCalca) l.push('meia-calça');
+  const s=l.length>1?l.slice(0,-1).join(', ')+' e '+l[l.length-1]:(l[0]||''); return s?s[0].toUpperCase()+s.slice(1):''; }
+v3RoupaRow=(o=>function(r){ const x=o(r); x.s=`${estiloTxt(r.estilo)}: ${roupaDesc(r)}`; return x; })(v3RoupaRow);
+pv3Itens=(o=>function(){ const it=o.apply(this,arguments), pele=['muito clara','clara','clara média','morena clara','morena','morena escura','negra']; for(const i of it){ if(i.k==='roupa3'){ const r=ROUPAS[PV3.sexo].find(x=>x.id===i.v); if(r) i.desc=roupaDesc(r); } if(i.k==='g:skin') i.desc=LANG==='en'?['Very fair','Fair','Light medium','Light tan','Tan','Dark tan','Dark'][i.v]+' skin':'Pele '+pele[i.v]; } return it; })(pv3Itens);
+
+// ---------- opções de acessibilidade ----------
+const A11Y_TAM=[100,115,130,150];
+const a11y=()=>{ if(!META.a11y) META.a11y={}; return META.a11y; };
+function a11yAplicar(){ const a=a11y(), c=document.documentElement.classList; document.body.style.zoom=(a.tam||100)===100?'':String(a.tam/100); c.toggle('a11y-contraste',!!a.contraste); c.toggle('a11y-calmo',!!a.calmo); c.toggle('a11y-fonte',!!a.fonte); c.toggle('a11y-botoes',!!a.botoes); }
+applyTheme=(o=>function(){ const r=o.apply(this,arguments); a11yAplicar(); return r; })(applyTheme);
+(()=>{ const st=document.createElement('style'); st.textContent=`
+html.a11y-contraste,html.a11y-contraste[data-theme]{--bg:#000;--surface:#000;--surface2:#111;--ink:#FFF;--muted:#FFF;--line:#FFF;--link:#FFE600;--brand:#FFE600;--brand2:#FFE600;--btn:#FFE600;--good:#5CFF8A;--bad:#FF8A8A;--warn:#FFD24D;--glass:#000;--glass-line:#FFF;--brand-grad:#000}
+.a11y-contraste .btn:not(.alt){color:#000!important}.a11y-contraste .row,.a11y-contraste .btn{border:2px solid #FFF!important}
+:focus-visible{outline:3px solid var(--link);outline-offset:2px}
+.a11y-calmo *,.a11y-calmo *::before,.a11y-calmo *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+.a11y-fonte body,.a11y-fonte button,.a11y-fonte input,.a11y-fonte textarea{font-family:Verdana,Arial,sans-serif!important;letter-spacing:.03em;line-height:1.6}
+.a11y-botoes .row,.a11y-botoes .btn{min-height:64px}`; document.head.appendChild(st); })();
+// emojis e desenhos não são lidos; o diálogo anuncia título e texto ao abrir
+pump=(o=>function(){ const r=o.apply(this,arguments), d=document.getElementById('modal'); if(d&&!document.getElementById('modalWrap').hidden){ const h=d.querySelector('h2'), t=d.querySelector('.txt'); if(h){ h.id='modalTitulo'; d.setAttribute('aria-labelledby','modalTitulo'); } if(t){ t.id='modalTexto'; d.setAttribute('aria-describedby','modalTexto'); } else d.removeAttribute('aria-describedby'); d.querySelectorAll('.mtop').forEach(x=>x.setAttribute('aria-hidden','true')); } return r; })(pump);
+function a11yOcultarIcones(raiz){ raiz.querySelectorAll('.ambient-icon,.row .ic,.row .fw').forEach(x=>x.setAttribute('aria-hidden','true')); }
+if(window.MutationObserver) new MutationObserver(ms=>{ for(const m of ms) for(const n of m.addedNodes) if(n.nodeType===1) a11yOcultarIcones(n); }).observe(document.documentElement,{childList:true,subtree:true});
+function a11ySituacao(){ const m=S.me; if(LANG==='en') return `${fullName(m)}, ${m.age} ${m.age===1?'year':'years'} old. Happiness ${Math.round(m.happy)}%, health ${Math.round(m.health)}%, smarts ${Math.round(m.smarts)}%, looks ${Math.round(m.looks)}%. Money: ${fmt(m.money)}.${m.job?' Job: '+tr(jobTitle(m.job))+'.':''}${m.prison?' I am in prison.':''}`; return `${fullName(m)}, ${m.age} ${m.age===1?'ano':'anos'}. Felicidade ${Math.round(m.happy)}%, saúde ${Math.round(m.health)}%, inteligência ${Math.round(m.smarts)}%, aparência ${Math.round(m.looks)}%. Dinheiro: ${fmt(m.money)}.${m.job?' Trabalho: '+jobTitle(m.job)+'.':''}${m.prison?' Estou na prisão.':''}`; }
+function a11yVisual(){ const m=S.me, L=ensureLook(m), r=L.roupa3&&[...ROUPAS.M,...ROUPAS.F].find(x=>x.id===L.roupa3); if(LANG==='en') return `${tr(looksLine(m))}. ${r?'I am wearing: '+roupaDesc(r)+'.':'I am wearing my everyday clothes.'}`; return `${looksLine(m)}. ${r?'Estou vestindo: '+roupaDesc(r)+'.':'Estou com as roupas do dia a dia.'}`; }
+V.acessibilidade=()=>{ const a=a11y(), sw=(l,s,k)=>({l,s,r:a[k]?'Ligado':'Desligado',on:()=>{ a[k]=!a[k]; a11yAplicar(); save(); UI.refresh(); }});
+  const it=[{sec:'Leitura'},{ic:'📏',l:'Tamanho do texto',s:'Aumenta o texto e os botões do jogo',r:(a.tam||100)+'%',on:()=>{ a.tam=A11Y_TAM[(A11Y_TAM.indexOf(a.tam||100)+1)%A11Y_TAM.length]; a11yAplicar(); save(); UI.refresh(); }},
+   sw('Fonte de leitura fácil','Letras mais simples e mais espaço entre as linhas','fonte'),sw('Alto contraste','Fundo preto, texto branco e bordas fortes','contraste'),sw('Botões maiores','Mais fáceis de acertar com o dedo','botoes'),
+   {sec:'Movimento e toque'},sw('Reduzir animações','Tira movimentos e transições da tela','calmo'),
+   {ic:'📳',l:'Vibração',r:META.vibra===false?'Desligada':'Ligada',on:()=>{ META.vibra=META.vibra===false; save(); UI.refresh(); }}];
+  const mg=V.configuracoes().items.find(x=>x.l==='Minigames da rotina'); if(mg) it.push({sec:'Jogo'},mg);
+  if(S&&S.me) it.push({sec:'Leitor de tela'},{ic:'🗣️',l:'Ler minha situação',s:'Idade, atributos e dinheiro em texto',on:()=>msg('Minha situação',a11ySituacao())},{ic:'👕',l:'Descrever meu visual',s:'Aparência e roupa em texto',on:()=>msg('Meu visual',a11yVisual())});
+  return {title:'Acessibilidade',items:it}; };
+V.menu=(o=>function(){ const r=o.apply(this,arguments), i=r.items.findIndex(x=>x&&x.l==='Enviar feedback'); r.items.splice(i>=0?i:r.items.length,0,{ic:'♿',l:'Acessibilidade',s:'Texto, contraste, animações e leitor de tela',on:()=>UI.push(V.acessibilidade)}); return r; })(V.menu);
+
+Object.assign(EN,{'Acessibilidade':'Accessibility','Texto, contraste, animações e leitor de tela':'Text, contrast, animations and screen reader','Leitura':'Reading','Tamanho do texto':'Text size','Aumenta o texto e os botões do jogo':'Makes the game text and buttons bigger','Fonte de leitura fácil':'Easy-reading font','Letras mais simples e mais espaço entre as linhas':'Simpler letters and more space between lines','Alto contraste':'High contrast','Fundo preto, texto branco e bordas fortes':'Black background, white text and strong borders','Botões maiores':'Bigger buttons','Mais fáceis de acertar com o dedo':'Easier to hit with your finger','Movimento e toque':'Motion and touch','Reduzir animações':'Reduce animations','Tira movimentos e transições da tela':'Removes motion and transitions from the screen','Vibração':'Vibration','Ligado':'On','Desligado':'Off','Ligada':'On','Desligada':'Off','Jogo':'Game','Leitor de tela':'Screen reader','Ler minha situação':'Read my situation','Idade, atributos e dinheiro em texto':'Age, stats and money as text','Descrever meu visual':'Describe my look','Aparência e roupa em texto':'Appearance and clothes as text','Minha situação':'My situation','Meu visual':'My look','Gestação múltipla na família':'Multiple births in the family','Tenho mais chance de ter gêmeos ou mais, e posso passar isso aos meus filhos':'I am more likely to have twins or more, and I can pass this on to my children',
+ 'Tio':'Uncle','Tia':'Aunt','Tio-avô':'Great-uncle','Tia-avó':'Great-aunt','Primo':'Cousin','Prima':'Cousin','Primo de segundo grau':'Second cousin','Prima de segundo grau':'Second cousin','Bisavô':'Great-grandfather','Bisavó':'Great-grandmother','Antepassado':'Ancestor','Antepassada':'Ancestor','Sobrinho':'Nephew','Sobrinha':'Niece',
+ 'Para todo mundo jogar':'A game for everyone','Cada look tem descrição em texto, anunciada pelo leitor de tela.':'Every outfit has a text description, announced by the screen reader.','Novo menu Acessibilidade: tamanho do texto, fonte de leitura fácil, alto contraste, botões maiores, menos animações, ler a situação e descrever o visual.':'New Accessibility menu: text size, easy-reading font, high contrast, bigger buttons, fewer animations, reading your situation and describing your look.','Gêmeos, trigêmeos, quadrigêmeos e quíntuplos bem raros, com predisposição hereditária.':'Very rare twins, triplets, quadruplets and quintuplets, with a hereditary predisposition.','Ao continuar como filho, os parentes seguem na família: tios, primos, bisavós e tios-avós.':'When you continue as a child, relatives stay in the family: uncles, aunts, cousins, great-grandparents and great-uncles.'});
+EN_RE.push([/^(.+) · (gêmeos|trigêmeos|quadrigêmeos|quíntuplos)$/,(_,a,b)=>`${tr(a)} · ${{'gêmeos':'twins','trigêmeos':'triplets','quadrigêmeos':'quadruplets','quíntuplos':'quintuplets'}[b]}`],
+ [/^Cabelo (.+), olhos (.+), (\d+),(\d+) m$/,(_,c,o,a,b)=>{ const H={preto:'black','castanho-escuro':'dark brown',castanho:'brown','castanho-claro':'light brown',loiro:'blond',ruivo:'red'},E={castanhos:'brown','castanho-escuros':'dark brown',pretos:'black',verdes:'green',azuis:'blue','cor de mel':'hazel',acinzentados:'gray'}; return `${H[c]||c} hair, ${E[o]||o} eyes, ${a}.${b} m`.replace(/^./,x=>x.toUpperCase()); }]);
+function acessibilidadeSelfTest(){ const erros=[], ok=(c,t)=>{ if(!c) erros.push(t); }, s0=S, rf=R.f, ns=window.NO_SAVE, meta=JSON.stringify(META); window.NO_SAVE=true;
+  try{ for(const r of [...ROUPAS.M,...ROUPAS.F]){ const d=roupaDesc(r); ok(d&&!/undefined|null/.test(d),'look sem descrição: '+r.id); for(const k of ['top','sob','baixo','sapato']){ const t=r.roupa[k]&&r.roupa[k].tipo; if(t&&t!=='descalco') ok(ROUPA_NOMES[t],'peça sem nome: '+t); } }
+    const lg=LANG; LANG='en'; try{ for(const r of [...ROUPAS.M,...ROUPAS.F]){ const d=roupaDesc(r); ok(d&&!/[ãáàâéêíóôõúç]|undefined|garment/i.test(d),'descrição em inglês: '+r.id+' '+d); } ok(tr('Cabelo castanho-claro, olhos azuis, 1,70 m')==='Light brown hair, blue eyes, 1.70 m','aparência em inglês'); ok(tr('Filha · gêmeos')==='Daughter · twins','parto em inglês'); ok(tr('Alto contraste')==='High contrast','menu em inglês'); }finally{ LANG=lg; }
+    ok(corNome('#FFFFFF','f')==='branca'&&corNome('#E63946','m')==='vermelho','cor errada');
+    newLife({country:'BR'}); const m=S.me; m.gender='F'; m.age=28; m.genes.gemeos=1; const par=mkPerson({rel:'conjuge',gender:'M',age:30}); S.people.push(par);
+    for(const [x,n] of [[.000001,5],[.00004,4],[.0005,3],[.01,2],[.5,1]]){ R.f=()=>x; ok(partoQtd(m,par)===n,`parto ${x}: ${partoQtd(m,par)} != ${n}`); } R.f=rf;
+    let seq=[.0005]; const antes=kids().length; R.f=()=>seq.length?seq.shift():rf(); S.births.push({with:par.id}); yearPeople(); R.f=rf; ok(kids().length-antes===3&&kids().filter(k=>k.parto===3).length===3,'trigêmeos não nasceram');
+    const pai={first:'A',gender:'M',genes:randGenes('M')}, mae={first:'B',gender:'F',genes:Object.assign(randGenes('F'),{gemeos:1})}; let c=0; for(let i=0;i<400;i++) if(childOf(pai,mae,'F').genes.gemeos) c++; ok(c>120&&c<300,'herança da predisposição: '+c);
+    // parentesco: a irmã vira tia, o avô vira bisavô, o sobrinho vira primo
+    newLife({country:'BR'}); const o=S.me; o.age=60; const fil=mkPerson({rel:'filho',age:30,last:o.last}), ir=mkPerson({rel:'irmao',age:58}), so=mkPerson({rel:'sobrinho',age:25}), av=mkPerson({rel:'avo',age:90}), ti=mkPerson({rel:'tio',age:80}), pr=mkPerson({rel:'primo',age:55}), am=mkPerson({rel:'amigo',age:60}); S.people.push(fil,ir,so,av,ti,pr,am); const ids=[ir,so,av,ti,pr,am].map(p=>p.id); o.alive=false; continueAs(fil);
+    const rel=ids.map(i=>P(i)&&P(i).rel).join(); ok(rel==='tio,primo,bisavo,tioavo,primo2,conhecido','parentesco: '+rel); ok(relLabel(Object.assign({},P(ids[0]),{gender:'F'}))==='Tia','rótulo de tia');
+    newLife({country:'BR'}); ok(V.menu().items.some(x=>x.l==='Acessibilidade'),'menu sem acessibilidade'); const v=V.acessibilidade(); ok(v.items.some(x=>x.l==='Alto contraste')&&a11ySituacao().includes('saúde')&&a11yVisual().length>5,'tela de acessibilidade');
+  }catch(e){ erros.push(e.message); } finally{ R.f=rf; S=s0; window.NO_SAVE=ns; const mm=JSON.parse(meta); for(const k of Object.keys(META)) if(!(k in mm)) delete META[k]; Object.assign(META,mm); }
+  return erros; }
+
 // Gerações sem roteiro: ninguém controla quando o personagem morre nem se o herdeiro sobrevive.
 // As escolhas dos eventos são sorteadas; a vida segue com ageUp() real até a terceira geração.
 function geracoesNaturaisSelfTest(){
@@ -29167,7 +29258,7 @@ function selfTest(){
   T('sistemas conversando',conexoesSelfTest);
   T('combinações entre sistemas',combinacoesSelfTest);
   T('só eventos de prisão na prisão',prisaoEventosSelfTest);
-  T('só eventos da aventura na aventura',aventuraEventosSelfTest);
+  T('acessibilidade, partos e parentesco',acessibilidadeSelfTest);T('só eventos da aventura na aventura',aventuraEventosSelfTest);
   T('idade certa',idade2SelfTest);
   T('ritmo dos eventos',ritmoSelfTest);
   T('provador',provadorSelfTest);
