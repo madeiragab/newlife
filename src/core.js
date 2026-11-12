@@ -27,7 +27,7 @@ function store(k,v){ if(window.NO_SAVE) return; const s=JSON.stringify(v);
   if(DISK.ult[k]===undefined) try{ DISK.ult[k]=localStorage.getItem(k); }catch(e){ DISK.ult[k]=null; }
   const old=DISK.ult[k]; if(old===s) return; DISK.ult[k]=s;
   try{ const agora=Date.now(); if(old&&(k===SAVE_KEY||k===META_KEY)&&agora-(DISK.bakT[k]||0)>=20000){ localStorage.setItem(k+'.bak',old); DISK.bakT[k]=agora; } }catch(e){}
-  try{ localStorage.setItem(k,s); }catch(e){ try{ localStorage.removeItem(k+'.bak'); localStorage.setItem(k,s); }catch(e2){} }   /* sem espaço: o save novo vale mais que a cópia */ if(deskApi()){ DISK.q[k]=s; if(!DISK.t) DISK.t=setTimeout(flushDisk,120); } }
+  try{ localStorage.setItem(k,s); }catch(e){ try{ localStorage.removeItem(SNAP_KEY); localStorage.setItem(k,s); }catch(e1){ try{ localStorage.removeItem(k+'.bak'); localStorage.setItem(k,s); }catch(e2){} } }   /* sem espaço: primeiro saem as fotos da máquina do tempo, depois a cópia; o save novo vale mais que as duas */ if(deskApi()){ DISK.q[k]=s; if(!DISK.t) DISK.t=setTimeout(flushDisk,120); } }
 // um save só vale se abrir e tiver o formato certo
 function saveOk(k,str){ try{ const o=JSON.parse(str); if(!o||typeof o!=='object') return false; if(k===SAVE_KEY) return !!(o.me&&o.me.first&&Array.isArray(o.people)); return true; }catch(e){ return false; } }
 function loadKey(k){ let s=null; try{ s=localStorage.getItem(k); }catch(e){ return null; }
@@ -238,8 +238,8 @@ if(typeof addEventListener==='function'){ const sai=()=>{ if(SNAP_T) storeSnaps(
 // as fotos da máquina do tempo ficam na memória e vão para o armazenamento juntas, um pouco depois (ou ao sair do jogo)
 let SNAP_T=null;
 function storeSnaps(ja){ if(window.NO_SAVE) return; clearTimeout(SNAP_T); SNAP_T=null; if(!ja){ SNAP_T=setTimeout(()=>storeSnaps(true),2500); return; } try{ localStorage.setItem(SNAP_KEY,JSON.stringify(SNAPS)); }catch(e){ SNAPS=SNAPS.slice(-2); try{ localStorage.setItem(SNAP_KEY,JSON.stringify(SNAPS)); }catch(e2){} } }
-function snap(){ SNAPS.push({age:S.me.age,year:S.year,s:JSON.stringify(S)}); if(SNAPS.length>6) SNAPS.shift(); storeSnaps(); }
-function timeTravel(i){ const sn=SNAPS[i]; if(!sn) return false; S=JSON.parse(sn.s); if(typeof fixSave==='function') fixSave(S); SNAPS=SNAPS.slice(0,i); storeSnaps(); cnt('timeTravel'); log(`Voltei no tempo para os meus ${S.me.age} anos.`,'warn'); save(); return true; }
+function snap(){ SNAPS.push({age:S.me.age,year:S.year,s:JSON.stringify(Object.assign({},S,{mundo:undefined}))});   /* o mundo é ~3/4 do save e não volta no tempo */ if(SNAPS.length>6) SNAPS.shift(); storeSnaps(); }
+function timeTravel(i){ const sn=SNAPS[i]; if(!sn) return false; const mw=S.mundo; S=JSON.parse(sn.s); if(!S.mundo) S.mundo=mw; if(typeof fixSave==='function') fixSave(S); SNAPS=SNAPS.slice(0,i); storeSnaps(); cnt('timeTravel'); log(`Voltei no tempo para os meus ${S.me.age} anos.`,'warn'); save(); return true; }
 const DIFF={facil:{d:.6,$:1.3,n:'Fácil'},normal:{d:1,$:1,n:'Normal'},dificil:{d:1.7,$:.75,n:'Difícil'}};
 const diff=()=>DIFF[(S.flags&&S.flags.diff)||'normal'];
 
