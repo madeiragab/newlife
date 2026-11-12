@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#22305E">
-<title>NewLife</title><script>window.NL_VER='2611090047'</script>
+<title>NewLife</title><script>window.NL_VER='2611121834'</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Nunito:wght@400;600;700;800&display=swap">
 <style>
 /* Layout: app de uma coluna (máx. 560px) — cabeçalho, diário rolável, barras de atributos e barra de navegação fixa embaixo. */
@@ -51,7 +51,7 @@ h1,h2,h3{font-family:var(--f-display);font-weight:600;margin:0;text-wrap:balance
 #hSub{font-size:12.5px;opacity:.78;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #hdr .cash{text-align:right}
 #hMoney{font-family:var(--f-display);font-size:18px;font-weight:600;font-variant-numeric:tabular-nums}
-#hdr .lbl{font-size:11px;opacity:.7;text-transform:uppercase;letter-spacing:.06em}
+#hdr .lbl{font-size:12px;opacity:.7;text-transform:uppercase;letter-spacing:.06em}
 .icon-btn{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:var(--brand2);color:var(--brand-ink);flex:none}
 .avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:600;font-size:16px;flex:none;color:#fff}
 
@@ -224,7 +224,7 @@ input.in,select.in{font:inherit;color:var(--ink);background:var(--surface);borde
 /* Barrinhas de amor e amizade nas relações */
 .rbars{display:flex;gap:10px;margin-top:5px}
 .rb{display:flex;align-items:center;gap:4px;flex:1;min-width:0}
-.rb b{font-size:11px;line-height:1;font-weight:400}
+.rb b{font-size:12px;line-height:1;font-weight:400}
 .rbt{flex:1;height:7px;border-radius:5px;background:var(--surface2);overflow:hidden;box-shadow:inset 0 1px 2px rgba(0,0,0,.12)}
 .rbt i{display:block;height:100%;border-radius:5px}
 /* Efeito de dano */
@@ -308,7 +308,7 @@ button.row:active{transform:scale(.985)}
 /* janelas de evento */
 .modal{border-radius:22px;padding:20px 18px 18px;box-shadow:0 20px 60px rgba(10,14,30,.35);animation:pop .22s cubic-bezier(.2,1.3,.4,1)}
 @keyframes pop{from{transform:scale(.92);opacity:0}to{transform:none;opacity:1}}
-.modal .kick{display:inline-block;background:var(--surface2);border-radius:99px;padding:3px 10px;font-size:11px;color:var(--brand)}
+.modal .kick{display:inline-block;background:var(--surface2);border-radius:99px;padding:3px 10px;font-size:12px;color:var(--brand)}
 .modal h2{font-size:22px;margin:8px 0 8px}
 .modal .txt{font-size:15.5px;line-height:1.55}
 .modal .choices{gap:9px;margin-top:16px}
@@ -346,7 +346,7 @@ button.row:active{transform:scale(.985)}
 .sheet-head{padding:14px 14px 12px;align-items:center;background:var(--surface);gap:10px}
 .sheet-heading{flex:1;min-width:0}
 .sheet-head h2{font-size:20px;line-height:1.3;white-space:normal;overflow-wrap:anywhere;outline:none}
-#sheetPath{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:11px;margin-bottom:3px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+#sheetPath{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:12px;margin-bottom:3px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
 #sheetPath button{font:inherit;color:var(--muted);padding:3px 0;flex:none}
 #sheetPath button:hover{color:var(--link);text-decoration:underline}
 #sheetTools{padding:10px 14px 0;background:var(--bg);flex-shrink:0}
@@ -355,14 +355,14 @@ button.row:active{transform:scale(.985)}
 .sheet-search input{width:100%;min-width:0;border:0;background:transparent;color:var(--ink);font:inherit;font-size:16px;outline:none;padding:11px 0}
 .sheet-search:focus-within{border-color:var(--link);box-shadow:0 0 0 2px color-mix(in srgb,var(--link) 18%,transparent)}
 #sheetClear{color:var(--muted);font-size:22px;min-width:28px;height:36px}
-#sheetAvailable{font:inherit;font-size:11px;font-weight:800;max-width:100px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:7px 10px;color:var(--muted)}
+#sheetAvailable{font:inherit;font-size:12px;font-weight:800;max-width:100px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:7px 10px;color:var(--muted)}
 #sheetAvailable[aria-pressed="true"]{background:var(--btn);color:var(--btn-ink);border-color:transparent}
 #sheetSections{display:flex;gap:6px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:thin}
-#sheetSections button{flex:none;border:1px solid var(--line);border-radius:99px;font:inherit;font-size:11px;font-weight:800;color:var(--ink);padding:7px 11px;background:var(--surface)}
-#sheetResults{font-size:11px;color:var(--muted);margin:5px 2px 0}
+#sheetSections button{flex:none;border:1px solid var(--line);border-radius:99px;font:inherit;font-size:12px;font-weight:800;color:var(--ink);padding:7px 11px;background:var(--surface)}
+#sheetResults{font-size:12px;color:var(--muted);margin:5px 2px 0}
 #sheetResults:empty{display:none}
 .sheet-body{padding:12px 14px 16px;overscroll-behavior:contain;min-height:0;flex:1}
-.sheet-body .sec{scroll-margin-top:10px;font-size:11px;letter-spacing:.06em;margin:12px 3px 2px;color:var(--muted)}
+.sheet-body .sec{scroll-margin-top:10px;font-size:12px;letter-spacing:.06em;margin:12px 3px 2px;color:var(--muted)}
 .sheet-body .sec:first-child{margin-top:2px}
 .row{padding:13px 12px;gap:10px;min-height:60px;border-radius:15px;box-shadow:0 1px 2px rgba(20,28,60,.025)}
 .row .l{font-size:14px;line-height:1.35;overflow-wrap:anywhere}
@@ -370,7 +370,7 @@ button.row:active{transform:scale(.985)}
 .row .r{max-width:32%;white-space:normal;overflow-wrap:anywhere;font-size:12px}
 .row .row-end{font-size:21px;color:var(--muted);flex:none;width:14px;text-align:center}
 .row.dis{opacity:.64}
-.row.dis .row-end{font-size:11px}
+.row.dis .row-end{font-size:12px}
 .row.bad .l{color:var(--bad)}
 button.row:hover{background:color-mix(in srgb,var(--surface) 94%,var(--link));border-color:var(--link)}
 button:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--link);outline-offset:3px}
@@ -556,7 +556,7 @@ body{background:var(--bg)}
 .ev-topo{position:relative;min-height:128px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;background:radial-gradient(circle at 18% 22%,rgba(255,255,255,.28) 0 2px,transparent 3px) 0 0/22px 22px,linear-gradient(140deg,var(--tema),color-mix(in srgb,var(--tema) 62%,#1D1838));padding:16px 16px 0;overflow:hidden}
 .ev-topo::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-38px;height:60px;background:var(--surface);border-radius:50%;z-index:2}
 .ev3.semarte .ev-topo{min-height:0;padding:14px 16px 30px;align-items:center}
-.ev3 .kick{position:absolute;top:12px;left:14px;background:rgba(255,255,255,.22);color:#fff!important;border-radius:99px;padding:4px 11px;font-size:11px;letter-spacing:.06em;backdrop-filter:blur(4px);z-index:3}
+.ev3 .kick{position:absolute;top:12px;left:14px;background:rgba(255,255,255,.22);color:#fff!important;border-radius:99px;padding:4px 11px;font-size:12px;letter-spacing:.06em;backdrop-filter:blur(4px);z-index:3}
 .ev3.semarte .kick{position:static}
 .ev-retrato{position:relative;z-index:1;margin-top:14px;animation:retratoSobe .55s var(--mola) .05s both}
 .ev-retrato img.face{width:96px;height:96px;box-shadow:0 0 0 4px rgba(255,255,255,.85),0 8px 20px rgba(0,0,0,.25);margin-bottom:24px}
@@ -625,7 +625,7 @@ img.face.bustinho{border-radius:12px}
   #palco .palco-dir,#palco.compacto .palco-dir{position:relative;left:auto;right:auto;top:auto;bottom:auto;padding:14px;gap:10px}
   #palco.compacto{height:auto} #palco.compacto .anel small{display:block} #palco.compacto #familia3{display:flex}
   #aneis,#palco.compacto #aneis{grid-template-columns:repeat(auto-fit,minmax(64px,1fr));padding:12px 8px 10px}
-  .anel svg,#palco.compacto .anel svg{width:54px;height:54px} .anel .an-e,#palco.compacto .anel .an-e{top:14px;font-size:21px} .anel small{font-size:11px}
+  .anel svg,#palco.compacto .anel svg{width:54px;height:54px} .anel .an-e,#palco.compacto .anel .an-e{top:14px;font-size:21px} .anel small{font-size:12px}
   #familia3{align-self:center}
   #nav{grid-area:nav;display:flex;flex-direction:column;align-items:stretch;gap:6px;background:var(--surface);border-radius:22px;padding:16px 10px;box-shadow:var(--shadow-sm);align-self:start}
   #nav button{flex-direction:row;justify-content:flex-start;gap:12px;font-size:14px;padding:12px 14px}
@@ -671,7 +671,7 @@ img.face.bustinho{border-radius:12px}
 .pv3-cats button{text-align:left;border:0;background:none;color:var(--ink);font:inherit;font-weight:700;font-size:14px;padding:10px 14px;margin-right:10px;border-radius:0 12px 12px 0;border-left:4px solid transparent}
 .pv3-cats button.on{background:color-mix(in srgb,var(--brand) 14%,var(--surface));border-left-color:var(--brand);color:var(--brand)}
 .pv3-cats button:disabled{opacity:.4}
-.pv3-cats small{font-size:11px;color:var(--muted)}
+.pv3-cats small{font-size:12px;color:var(--muted)}
 .pv3-palco{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;background:var(--pv-p2)}
 .pv3-fig{position:relative;z-index:1;height:84%;max-height:640px;width:auto;margin-bottom:3.5%;filter:drop-shadow(0 10px 12px rgba(60,30,20,.25));transition:transform .2s}
 .pv3-desfaz{position:absolute;left:12px;top:12px;z-index:2;border:0;border-radius:999px;padding:7px 12px;background:rgba(255,255,255,.85);color:#5A3A2E;font:inherit;font-weight:700;font-size:13px}
@@ -682,8 +682,8 @@ img.face.bustinho{border-radius:12px}
 .pv3-grade{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px;align-content:start;padding-bottom:16px}
 .pv3-item{display:flex;flex-direction:column;align-items:center;gap:3px;border:2px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);font:inherit;padding:6px 4px;min-width:0}
 .pv3-item img{width:64px;height:64px;border-radius:10px;object-fit:cover}
-.pv3-item b{font-size:11px;line-height:1.15;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pv3-item small{font-size:11px;color:var(--muted);font-weight:700}
+.pv3-item b{font-size:12px;line-height:1.15;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv3-item small{font-size:12px;color:var(--muted);font-weight:700}
 .pv3-item.on{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 10%,var(--bg))}
 .pv3-item.on small{color:var(--brand)}
 .pv3-item:disabled{opacity:.4}
@@ -1614,7 +1614,7 @@ function store(k,v){ if(window.NO_SAVE) return; const s=JSON.stringify(v);
   if(DISK.ult[k]===undefined) try{ DISK.ult[k]=localStorage.getItem(k); }catch(e){ DISK.ult[k]=null; }
   const old=DISK.ult[k]; if(old===s) return; DISK.ult[k]=s;
   try{ const agora=Date.now(); if(old&&(k===SAVE_KEY||k===META_KEY)&&agora-(DISK.bakT[k]||0)>=20000){ localStorage.setItem(k+'.bak',old); DISK.bakT[k]=agora; } }catch(e){}
-  try{ localStorage.setItem(k,s); }catch(e){ try{ localStorage.removeItem(k+'.bak'); localStorage.setItem(k,s); }catch(e2){} }   /* sem espaço: o save novo vale mais que a cópia */ if(deskApi()){ DISK.q[k]=s; if(!DISK.t) DISK.t=setTimeout(flushDisk,120); } }
+  try{ localStorage.setItem(k,s); }catch(e){ try{ localStorage.removeItem(SNAP_KEY); localStorage.setItem(k,s); }catch(e1){ try{ localStorage.removeItem(k+'.bak'); localStorage.setItem(k,s); }catch(e2){} } }   /* sem espaço: primeiro saem as fotos da máquina do tempo, depois a cópia; o save novo vale mais que as duas */ if(deskApi()){ DISK.q[k]=s; if(!DISK.t) DISK.t=setTimeout(flushDisk,120); } }
 // um save só vale se abrir e tiver o formato certo
 function saveOk(k,str){ try{ const o=JSON.parse(str); if(!o||typeof o!=='object') return false; if(k===SAVE_KEY) return !!(o.me&&o.me.first&&Array.isArray(o.people)); return true; }catch(e){ return false; } }
 function loadKey(k){ let s=null; try{ s=localStorage.getItem(k); }catch(e){ return null; }
@@ -1622,7 +1622,8 @@ function loadKey(k){ let s=null; try{ s=localStorage.getItem(k); }catch(e){ retu
   let b=null; try{ b=localStorage.getItem(k+'.bak'); }catch(e){}
   if(b&&saveOk(k,b)){ if(s) SAVE_RECOVERED=k; return JSON.parse(b); }   // principal estragado: abre o último salvamento bom
   return null; }
-function save(){ if(S) store(SAVE_KEY,S); store(META_KEY,META); }
+const SAVE_V=1; // sobe quando o formato do save mudar; fixSave converte os antigos
+function save(){ if(S){ S.saveV=SAVE_V; store(SAVE_KEY,S); } store(META_KEY,META); }
 
 // ---------- genética ----------
 // Aparência inicial coerente com o país (tom de pele, cor de cabelo e de olhos); os filhos herdam dos pais.
@@ -1825,8 +1826,8 @@ if(typeof addEventListener==='function'){ const sai=()=>{ if(SNAP_T) storeSnaps(
 // as fotos da máquina do tempo ficam na memória e vão para o armazenamento juntas, um pouco depois (ou ao sair do jogo)
 let SNAP_T=null;
 function storeSnaps(ja){ if(window.NO_SAVE) return; clearTimeout(SNAP_T); SNAP_T=null; if(!ja){ SNAP_T=setTimeout(()=>storeSnaps(true),2500); return; } try{ localStorage.setItem(SNAP_KEY,JSON.stringify(SNAPS)); }catch(e){ SNAPS=SNAPS.slice(-2); try{ localStorage.setItem(SNAP_KEY,JSON.stringify(SNAPS)); }catch(e2){} } }
-function snap(){ SNAPS.push({age:S.me.age,year:S.year,s:JSON.stringify(S)}); if(SNAPS.length>6) SNAPS.shift(); storeSnaps(); }
-function timeTravel(i){ const sn=SNAPS[i]; if(!sn) return false; S=JSON.parse(sn.s); if(typeof fixSave==='function') fixSave(S); SNAPS=SNAPS.slice(0,i); storeSnaps(); cnt('timeTravel'); log(`Voltei no tempo para os meus ${S.me.age} anos.`,'warn'); save(); return true; }
+function snap(){ SNAPS.push({age:S.me.age,year:S.year,s:JSON.stringify(Object.assign({},S,{mundo:undefined}))});   /* o mundo é ~3/4 do save e não volta no tempo */ if(SNAPS.length>6) SNAPS.shift(); storeSnaps(); }
+function timeTravel(i){ const sn=SNAPS[i]; if(!sn) return false; const mw=S.mundo; S=JSON.parse(sn.s); if(!S.mundo) S.mundo=mw; if(typeof fixSave==='function') fixSave(S); SNAPS=SNAPS.slice(0,i); storeSnaps(); cnt('timeTravel'); log(`Voltei no tempo para os meus ${S.me.age} anos.`,'warn'); save(); return true; }
 const DIFF={facil:{d:.6,$:1.3,n:'Fácil'},normal:{d:1,$:1,n:'Normal'},dificil:{d:1.7,$:.75,n:'Difícil'}};
 const diff=()=>DIFF[(S.flags&&S.flags.diff)||'normal'];
 
@@ -1923,7 +1924,7 @@ function yearHealth(){
     else if(def.id==='acne'&&m.age>22){ m.dis.splice(m.dis.indexOf(d),1); }
   }
   if(m.prison) return;
-  const mult=(1.55-m.health/100)*(m.age>60?1.6:1);
+  const mult=(1.55-m.health/100)*(m.age>60?1.3:1);
   for(const [id,def] of R.shuffle(Object.entries(DISEASES))){
     if(m.dis.find(d=>d.id===id)) continue;
     if(def.min&&m.age<def.min||def.max&&m.age>def.max||def.g&&def.g!==m.gender) continue;
@@ -2125,7 +2126,7 @@ function yearBiz(){ return empresaAno(); }
 
 // ---------- morte ----------
 /* mortalidade anual parecida com as tábuas de vida (Gompertz): ~1% aos 60, ~3% aos 70, ~7% aos 80, ~18% aos 90; a saúde multiplica o risco */
-function deathP(age,health){ if(age<1) return .002; const base=age<45?.00035:.012*Math.exp(.09*(age-60)); return Math.min(.9,base*Math.pow(1.6-health/100,2)/(age<45?1:.81)); }
+function deathP(age,health){ if(age<1) return .002; const base=age<45?.00035:.012*Math.exp(.09*(age-66)); return Math.min(.9,base*Math.pow(1.6-health/100,2)/(age<45?1:.81)); }
 function deathRoll(){ const m=S.me; let p=deathP(m.age,m.health)*diff().d; for(const d of m.dis){ if(DISEASES[d.id].fatal) p+=.012+d.y*.01; } if(m.prison) p+=.003; return R.chance(p); }
 function causeFromHealth(roll){
   const m=S.me; const fatal=m.dis.filter(d=>DISEASES[d.id].fatal);
@@ -16616,6 +16617,7 @@ appIconSVG=function(px=1024){
 // Depois de cada atualização, o jogo mostra o que mudou num popup, uma vez só.
 // Ao lançar uma versão nova: acrescente uma entrada NO TOPO de CHANGELOG.
 const CHANGELOG=[
+ {v:'4.4',d:'12/11/2026',t:'Vida mais longa',itens:['Quem cuida da saúde vive mais: menos doenças na velhice e recuperação mais rápida.','O save ocupa bem menos espaço no celular, e a cópia de segurança fica protegida quando falta espaço.','Letras pequenas ficaram um pouco maiores.']},
  {v:'4.3',d:'08/11/2026',t:'Para todo mundo jogar',itens:['Cada look tem descrição em texto, anunciada pelo leitor de tela.','Novo menu Acessibilidade: tamanho do texto, fonte de leitura fácil, alto contraste, botões maiores, menos animações, ler a situação e descrever o visual.','Gêmeos, trigêmeos, quadrigêmeos e quíntuplos bem raros, com predisposição hereditária.','Ao continuar como filho, os parentes seguem na família: tios, primos, bisavós e tios-avós.']},
  {v:'4.2',d:'07/11/2026',t:'Tudo conversa',itens:['Vampiro não envelhece e lobisomem envelhece devagar.','Na prisão só aparecem eventos da prisão; nas aventuras, só os da aventura.','Cônjuges e outras pessoas próximas que morreram aparecem em Saudades.','Luto, doença e bebê novo afetam estudo, trabalho e mandato.','Órfãos ganham um tutor, e criaturas podem fazer faculdade e campanha.','Eventos que perderam o sentido somem em vez de mostrar "a situação mudou".']},
  {v:'4.1',d:'07/11/2026',t:'O peso de cada ano',itens:['Resumo anual com mudanças na saúde, felicidade, trabalho e família.','Atividades, convívio e tratamentos têm efeitos diferentes na recuperação.','Filhos adultos ligam, convidam para visitas, pedem conselho e podem retomar o contato.','O modo zumbi continua até a morte, com escassez variável, novos grupos e um registro das escolhas e do recorde.']},
@@ -20497,7 +20499,7 @@ const saudeAlvo=a=>a<30?92:a<45?89:a<55?86:a<65?82:a<75?77:a<85?69:a<95?58:46;
 function saudeAlvoDe(m){ const graves=m.dis.filter(d=>DISEASES[d.id]&&DISEASES[d.id].fatal&&!d.ctrl).length, cronicas=m.dis.filter(d=>DISEASES[d.id]&&DISEASES[d.id].chronic&&!d.ctrl&&DISEASES[d.id].dmg>=5).length;
   const vicio=(m.add.alcool>40?10:0)+(m.add.cigarro>40?8:0)+Math.min(15,Math.max(0,...Object.values(m.drogas||{}))/5);
   return saudeAlvo(m.age)-graves*14-cronicas*3-vicio-(m.prison?8:0)+((m.hobbies&&(m.hobbies.corrida||m.hobbies.ciclismo))?3:0); }
-yearStats=(o=>function(){ const r=o.apply(this,arguments), m=S.me; if(!m||!m.alive||S.scen) return r; const alvo=saudeAlvoDe(m); if(m.health<alvo) bem41Medir('Recuperação natural do organismo',()=>st('health',Math.max(1,Math.round((alvo-m.health)*.45)))); return r; })(yearStats);
+yearStats=(o=>function(){ const r=o.apply(this,arguments), m=S.me; if(!m||!m.alive||S.scen) return r; const alvo=saudeAlvoDe(m); if(m.health<alvo) bem41Medir('Recuperação natural do organismo',()=>st('health',Math.max(1,Math.round((alvo-m.health)*.6)))); return r; })(yearStats);
 // doença crônica tratada e controlada quase não desgasta; sem tratamento, desgasta no ritmo normal
 yearHealth=(o=>function(){ const m=S.me; const ctrl=m.dis.filter(d=>d.ctrl&&DISEASES[d.id]&&DISEASES[d.id].chronic); const h0=m.health; const r=o.apply(this,arguments);
   if(ctrl.length&&m.health<h0){ const devolve=Math.min(h0-m.health,ctrl.reduce((s,d)=>s+DISEASES[d.id].dmg*.45*.25*.8,0)); if(devolve>0) st('health',Math.round(devolve)); }
@@ -29406,7 +29408,7 @@ function selfTest(){
     S=JSON.parse(snap); }
   { const K='nlteste.save'; const ok=JSON.stringify({me:{first:'X'},people:[]}); try{ localStorage.setItem(K,'{"me":{"first":"X"'); localStorage.setItem(K+'.bak',ok); }catch(e){}
     const r=(()=>{ const s0=localStorage.getItem(K); if(s0&&saveOk(SAVE_KEY,s0)) return 'principal'; const b=localStorage.getItem(K+'.bak'); return b&&saveOk(SAVE_KEY,b)?'bak':null; })();
-    chkReg('save estragado não cai na cópia',r==='bak'); chkReg('save bom reprovado',saveOk(SAVE_KEY,ok)); try{ localStorage.removeItem(K); localStorage.removeItem(K+'.bak'); }catch(e){} }
+    chkReg('save estragado não cai na cópia',r==='bak'); chkReg('save bom reprovado',saveOk(SAVE_KEY,ok)); { const sn0=SNAPS, mw=S.mundo||(S.mundo={_t:1}); SNAPS=[]; snap(); chkReg('foto da máquina do tempo com o mundo',!('mundo' in JSON.parse(SNAPS[0].s))); timeTravel(0); chkReg('máquina do tempo perdeu o mundo',S.mundo===mw); SNAPS=sn0; } try{ localStorage.removeItem(K); localStorage.removeItem(K+'.bak'); }catch(e){} }
   const calm=[];
   for(let L=0;L<30;L++){ T('calmLife',()=>newLife({})); let g=0; while(S.me.alive&&g++<130){ T('ageUp',ageUp); while(S.pending.length){ const e=S.pending.shift(); if(!evValid(e)) continue; T('ev',()=>{ const sh=EVENTS[e.id].show(e.d); EVENTS[e.id].pick(sh.ch[sh.ch.length-1][1],e.d); }); } if(S.me.alive&&S.me.age%3===0) T('calmDoc',()=>{ S.me.dis.forEach(d=>treat('hosp',d)); body('walk'); }); if(S.me.alive&&S.me.health<=0) die(causeFromHealth()); } calm.push(S.me.age); }
   lives.unshift(`VIDA CALMA (só envelhecer + médico): média ${(calm.reduce((a,b)=>a+b,0)/calm.length).toFixed(1)} · acima de 70: ${Math.round(calm.filter(a=>a>=70).length/calm.length*100)}% · acima de 90: ${Math.round(calm.filter(a=>a>=90).length/calm.length*100)}%`);
