@@ -35,7 +35,8 @@ function loadKey(k){ let s=null; try{ s=localStorage.getItem(k); }catch(e){ retu
   let b=null; try{ b=localStorage.getItem(k+'.bak'); }catch(e){}
   if(b&&saveOk(k,b)){ if(s) SAVE_RECOVERED=k; return JSON.parse(b); }   // principal estragado: abre o último salvamento bom
   return null; }
-function save(){ if(S) store(SAVE_KEY,S); store(META_KEY,META); }
+const SAVE_V=1; // sobe quando o formato do save mudar; fixSave converte os antigos
+function save(){ if(S){ S.saveV=SAVE_V; store(SAVE_KEY,S); } store(META_KEY,META); }
 
 // ---------- genética ----------
 // Aparência inicial coerente com o país (tom de pele, cor de cabelo e de olhos); os filhos herdam dos pais.
@@ -336,7 +337,7 @@ function yearHealth(){
     else if(def.id==='acne'&&m.age>22){ m.dis.splice(m.dis.indexOf(d),1); }
   }
   if(m.prison) return;
-  const mult=(1.55-m.health/100)*(m.age>60?1.6:1);
+  const mult=(1.55-m.health/100)*(m.age>60?1.3:1);
   for(const [id,def] of R.shuffle(Object.entries(DISEASES))){
     if(m.dis.find(d=>d.id===id)) continue;
     if(def.min&&m.age<def.min||def.max&&m.age>def.max||def.g&&def.g!==m.gender) continue;
@@ -538,7 +539,7 @@ function yearBiz(){ return empresaAno(); }
 
 // ---------- morte ----------
 /* mortalidade anual parecida com as tábuas de vida (Gompertz): ~1% aos 60, ~3% aos 70, ~7% aos 80, ~18% aos 90; a saúde multiplica o risco */
-function deathP(age,health){ if(age<1) return .002; const base=age<45?.00035:.012*Math.exp(.09*(age-60)); return Math.min(.9,base*Math.pow(1.6-health/100,2)/(age<45?1:.81)); }
+function deathP(age,health){ if(age<1) return .002; const base=age<45?.00035:.012*Math.exp(.09*(age-66)); return Math.min(.9,base*Math.pow(1.6-health/100,2)/(age<45?1:.81)); }
 function deathRoll(){ const m=S.me; let p=deathP(m.age,m.health)*diff().d; for(const d of m.dis){ if(DISEASES[d.id].fatal) p+=.012+d.y*.01; } if(m.prison) p+=.003; return R.chance(p); }
 function causeFromHealth(roll){
   const m=S.me; const fatal=m.dis.filter(d=>DISEASES[d.id].fatal);

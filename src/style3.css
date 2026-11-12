@@ -122,7 +122,7 @@ body{background:var(--bg)}
 .ev-topo{position:relative;min-height:128px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;background:radial-gradient(circle at 18% 22%,rgba(255,255,255,.28) 0 2px,transparent 3px) 0 0/22px 22px,linear-gradient(140deg,var(--tema),color-mix(in srgb,var(--tema) 62%,#1D1838));padding:16px 16px 0;overflow:hidden}
 .ev-topo::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-38px;height:60px;background:var(--surface);border-radius:50%;z-index:2}
 .ev3.semarte .ev-topo{min-height:0;padding:14px 16px 30px;align-items:center}
-.ev3 .kick{position:absolute;top:12px;left:14px;background:rgba(255,255,255,.22);color:#fff!important;border-radius:99px;padding:4px 11px;font-size:11px;letter-spacing:.06em;backdrop-filter:blur(4px);z-index:3}
+.ev3 .kick{position:absolute;top:12px;left:14px;background:rgba(255,255,255,.22);color:#fff!important;border-radius:99px;padding:4px 11px;font-size:12px;letter-spacing:.06em;backdrop-filter:blur(4px);z-index:3}
 .ev3.semarte .kick{position:static}
 .ev-retrato{position:relative;z-index:1;margin-top:14px;animation:retratoSobe .55s var(--mola) .05s both}
 .ev-retrato img.face{width:96px;height:96px;box-shadow:0 0 0 4px rgba(255,255,255,.85),0 8px 20px rgba(0,0,0,.25);margin-bottom:24px}
@@ -191,7 +191,7 @@ img.face.bustinho{border-radius:12px}
   #palco .palco-dir,#palco.compacto .palco-dir{position:relative;left:auto;right:auto;top:auto;bottom:auto;padding:14px;gap:10px}
   #palco.compacto{height:auto} #palco.compacto .anel small{display:block} #palco.compacto #familia3{display:flex}
   #aneis,#palco.compacto #aneis{grid-template-columns:repeat(auto-fit,minmax(64px,1fr));padding:12px 8px 10px}
-  .anel svg,#palco.compacto .anel svg{width:54px;height:54px} .anel .an-e,#palco.compacto .anel .an-e{top:14px;font-size:21px} .anel small{font-size:11px}
+  .anel svg,#palco.compacto .anel svg{width:54px;height:54px} .anel .an-e,#palco.compacto .anel .an-e{top:14px;font-size:21px} .anel small{font-size:12px}
   #familia3{align-self:center}
   #nav{grid-area:nav;display:flex;flex-direction:column;align-items:stretch;gap:6px;background:var(--surface);border-radius:22px;padding:16px 10px;box-shadow:var(--shadow-sm);align-self:start}
   #nav button{flex-direction:row;justify-content:flex-start;gap:12px;font-size:14px;padding:12px 14px}
@@ -237,7 +237,7 @@ img.face.bustinho{border-radius:12px}
 .pv3-cats button{text-align:left;border:0;background:none;color:var(--ink);font:inherit;font-weight:700;font-size:14px;padding:10px 14px;margin-right:10px;border-radius:0 12px 12px 0;border-left:4px solid transparent}
 .pv3-cats button.on{background:color-mix(in srgb,var(--brand) 14%,var(--surface));border-left-color:var(--brand);color:var(--brand)}
 .pv3-cats button:disabled{opacity:.4}
-.pv3-cats small{font-size:11px;color:var(--muted)}
+.pv3-cats small{font-size:12px;color:var(--muted)}
 .pv3-palco{position:relative;overflow:hidden;display:flex;align-items:flex-end;justify-content:center;background:var(--pv-p2)}
 .pv3-fig{position:relative;z-index:1;height:84%;max-height:640px;width:auto;margin-bottom:3.5%;filter:drop-shadow(0 10px 12px rgba(60,30,20,.25));transition:transform .2s}
 .pv3-desfaz{position:absolute;left:12px;top:12px;z-index:2;border:0;border-radius:999px;padding:7px 12px;background:rgba(255,255,255,.85);color:#5A3A2E;font:inherit;font-weight:700;font-size:13px}
@@ -248,8 +248,8 @@ img.face.bustinho{border-radius:12px}
 .pv3-grade{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px;align-content:start;padding-bottom:16px}
 .pv3-item{display:flex;flex-direction:column;align-items:center;gap:3px;border:2px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);font:inherit;padding:6px 4px;min-width:0}
 .pv3-item img{width:64px;height:64px;border-radius:10px;object-fit:cover}
-.pv3-item b{font-size:11px;line-height:1.15;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.pv3-item small{font-size:11px;color:var(--muted);font-weight:700}
+.pv3-item b{font-size:12px;line-height:1.15;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pv3-item small{font-size:12px;color:var(--muted);font-weight:700}
 .pv3-item.on{border-color:var(--brand);background:color-mix(in srgb,var(--brand) 10%,var(--bg))}
 .pv3-item.on small{color:var(--brand)}
 .pv3-item:disabled{opacity:.4}
